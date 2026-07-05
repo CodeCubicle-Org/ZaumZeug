@@ -1,0 +1,232 @@
+# Testing harnesses and the SDK
+
+| | |
+|---|---|
+| **Audience** | Harness developers · SDK contributors |
+| **Last updated** | 2026-07-05 |
+
+ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
+
+For SDK design detail, see internal `docs/architecture/10-operations-and-reference.md` §13 and `docs/architecture/03-technology-stack.md` §4.5.
+
+---
+
+## Three layers at a glance
+
+| Layer | You test | Typical tool | Runs in default CI? |
+|---|---|---|---|
+| **Unit** | Config merge, validation, export mapping | `pytest` | Yes |
+| **Integration** | `zaumzeug serve`, `zaumzeug run`, REST contract | `pytest` + `httpx` + **mock** profile | Yes |
+| **Eval** | Output quality on golden cases | `deepeval` / `zaumzeug eval` | Optional (`[eval]` extra) |
+| **Live e2e** | Real provider smoke | `pytest` + `.env` keys | No — nightly / manual only |
+
+**Principle:** Mock the **LLM and external HTTP** at boundaries. Test ZaumZeug logic (routing, yaml resolution, artifact loading) without paying for tokens or flaking on model creativity.
+
+---
+
+## Quick commands
+
+```bash
+# Preflight — no server, no LLM
+zaumzeug doctor example
+zaumzeug serve example --dry-run
+
+# SDK test suite (repo root; contributors)
+pytest tests/unit tests/integration tests/usr-harnesses -v
+
+# Optional harness regression (after pip install "zaumzeug[eval]")
+deepeval test run usr-harnesses/example/eval/
+# or
+zaumzeug eval example
+
+# Live provider smoke (maintainers; costs money)
+HARNESS_LIVE_LLM=1 pytest tests/e2e -v
+```
+
+---
+
+## Mock model (default)
+
+The **`mock`** provider in `agents-models.yaml` returns canned text from `tests/fixtures/responses/`. CI and local quick-start use this exclusively.
+
+```yaml
+# agents/<name>/agents-models.yaml (example harness)
+default_model_id: mock-researcher
+
+models:
+  mock-researcher:
+    provider: mock
+    model: mock-v1
+```
+
+`zaumzeug serve example` works without `.env`. Integration tests assert JSON **shape** and routing — not semantic answer quality.
+
+---
+
+## Where tests live
+
+### SDK contributors (repository `tests/`)
+
+```text
+tests/
+├── unit/              # schemas, merge, snapshots
+├── integration/       # serve on localhost, OpenAI REST contract
+├── usr-harnesses/     # fixture + example harness trees
+├── e2e/               # live LLM — gated by HARNESS_LIVE_LLM=1
+└── fixtures/
+    ├── responses/     # mock LLM canned replies
+    └── cassettes/     # optional VCR recordings (Phase 2+)
+```
+
+### Harness developers (`usr-harnesses/<name>/eval/`)
+
+```text
+usr-harnesses/my-harness/
+└── eval/
+    ├── test_researcher.py   # DeepEval pytest cases
+    └── metrics.py           # custom metrics (optional)
+```
+
+Install eval support once per dev machine:
+
+```bash
+pip install -e ".[dev,eval]"
+```
+
+Eval is **optional** — not required to deploy or serve in production.
+
+---
+
+## Writing SDK unit tests
+
+Focus on **contracts and errors**, not LLM prose.
+
+| Target | Example assertion |
+|---|---|
+| Config schema | Invalid yaml → field-level Pydantic error with path |
+| Model merge | Harness `models.yaml` + agent `agents-models.yaml` → expected `default_model_id` |
+| Resolution | `artifact` present → serve path loads artifact, ignores `system_prompt` |
+| Export (Phase 2+) | `dump_state()` snapshot matches golden file |
+
+Naming convention (SDK repo): `test_{story_id}_ac{n}_{slug}` — e.g. `test_e2_s01_ac1_invalid_yaml_field_errors`.
+
+Use `pytest.mark.parametrize` for edge cases (empty yaml, unknown phase keys, missing agent refs).
+
+---
+
+## Writing integration tests
+
+Integration tests start a **real** `zaumzeug serve` on an ephemeral localhost port with the **mock** profile.
+
+```python
+# Illustrative pattern — actual helpers ship with E3-S06/E3-S07
+import httpx
+
+def test_chat_completions_contract(ephemeral_serve_url):
+    r = httpx.post(
+        f"{ephemeral_serve_url}/v1/chat/completions",
+        json={"model": "mock-researcher", "messages": [{"role": "user", "content": "hi"}]},
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert "choices" in body
+    assert body["choices"][0]["message"]["role"] == "assistant"
+    assert isinstance(body["choices"][0]["message"]["content"], str)
+```
+
+Use **`respx`** to stub outbound `web_fetch` or provider HTTP without hitting the public internet.
+
+---
+
+## Writing harness eval tests (optional)
+
+DeepEval treats LLM checks like pytest tests. Start with **20–50 cases from real failures** — not a thousand synthetic prompts on day one.
+
+```python
+import pytest
+from deepeval import assert_test
+from deepeval.metrics import GEval
+from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+
+def test_researcher_stays_on_topic():
+    metric = GEval(
+        name="Relevance",
+        criteria="Answer must address the user question without unrelated topics.",
+        evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.INPUT],
+        threshold=0.7,
+    )
+    case = LLMTestCase(
+        input="Summarize ZaumZeug workflow.yaml",
+        actual_output="...",  # from zaumzeug run or captured trace
+    )
+    assert_test(case, [metric])
+```
+
+Run:
+
+```bash
+deepeval test run usr-harnesses/my-harness/eval/
+```
+
+For deploy gates, set `deploy.eval_gate` in `harness.yaml` (`skip` | `warn` | `block`) — see compile/deploy guides (Phase 2).
+
+---
+
+## Environment variables
+
+| Variable | Purpose |
+|---|---|
+| `HARNESS_LIVE_LLM=1` | Enable `tests/e2e/` and live provider smoke |
+| `HARNESS_LOG_LEVEL=DEBUG` | Verbose SDK + Haystack logs while debugging |
+| `PYTEST_OPENAI_API_KEY` | Re-record VCR cassettes (`pytest --record-mode=once`) |
+
+Never commit API keys. `.env` is gitignored.
+
+---
+
+## CI expectations
+
+Default branch CI (Win / macOS / Linux) runs:
+
+1. `python install/client_install.py --skip-venv --verify`
+2. `zaumzeug doctor`
+3. `zaumzeug serve example --dry-run`
+4. Mock-model serve smoke on ephemeral port
+5. `pytest tests/unit tests/integration tests/usr-harnesses -v`
+
+Eval regression and live e2e are **additional** tiers — nightly or on PRs that touch prompts/artifacts.
+
+---
+
+## Debugging failed tests
+
+```bash
+# Structured logs
+HARNESS_LOG_LEVEL=DEBUG zaumzeug serve example
+
+# IDE attach (debugpy ships in [dev])
+python -m debugpy --listen 5678 -m zaumzeug.cli serve example
+
+# Isolate Haystack vs config
+zaumzeug doctor example --verbose
+zaumzeug serve example --dry-run
+# escape hatch: hayhooks run ...  (low-level Haystack only)
+```
+
+---
+
+## Phase roadmap
+
+| Phase | Testing deliverables |
+|---|---|
+| **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
+| **2** | Compile `--dry-run`, export golden snapshots, trace → eval case, optional `zaumzeug eval` |
+| **3** | MCP integration tests, tool-correctness eval |
+| **4** | Production trace ratchet, `@observe` / Confident AI sync |
+
+---
+
+## Related guides
+
+- [Multi-agent workflow](multi-agent-workflow.md) — `workflow.yaml` and stage routing under test
+- [CLI reference](../reference/cli.md) — `--dry-run`, `doctor`, `eval` flags *(skeleton)*

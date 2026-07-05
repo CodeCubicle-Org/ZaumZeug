@@ -1,0 +1,176 @@
+# Epic backlog — index and implementation order
+
+| | |
+|---|---|
+| **Document** | Stories index |
+| **File** | `docs/stories/00-README.md` |
+| **Created** | 2026-07-04 |
+| **Last modified** | 2026-07-05 |
+| **Status** | Active |
+
+---
+
+## File numbering vs PRD epic IDs
+
+File numbers follow **technical build order**, not PRD epic ID order. Each file header lists both **Build order** and **Epic ID**.
+
+| Build order | File | Epic ID | Phase | PRD epic |
+|---|---|---|---|---|
+| 1 | [01-epic.md](01-epic.md) | **E2** | 1 | Configuration and validation |
+| 2 | [02-epic.md](02-epic.md) | **E3** | 1 | Runtime and local serve |
+| 3 | [03-epic.md](03-epic.md) | **E1** | 1 | Onboarding and project setup |
+| 4 | [04-epic.md](04-epic.md) | **E4** | 2 | Compile and GEPA pipeline |
+| 5 | [05-epic.md](05-epic.md) | **E6** | 2 | Evaluation and quality (optional) |
+| 6 | [06-epic.md](06-epic.md) | **E5** | 2 | Deploy packaging |
+| 7 | [07-epic.md](07-epic.md) | **E7** | 3 | Tools, MCP, and ACP |
+| 8 | [08-epic.md](08-epic.md) | **E8** | 4 | RAG and production hardening |
+
+**Why E1 is build order 3:** Install, CI (`--verify`), and `zaumzeug serve example` require config (E2), runtime (E3), and example harness templates (E3) to exist first.
+
+**Why E6 precedes E5:** `deploy.eval_gate` (E5.6) calls `zaumzeug eval` (E6.2). Core eval must exist before deploy eval gate; other deploy stories (E5.1–E5.5, E5.7–E5.9) can start after E4.
+
+---
+
+## Phase 1 build graph
+
+```text
+E2-S00  Package skeleton + pyproject.toml + CLI stub
+   ↓
+E2-S01…S03  Config load, merge, resolver
+E2-S04a…S04b  zaumzeug doctor (core + phase warnings)
+E2-S05…S07  dry-run, logging, workflow schema
+   ↓
+E3-S05  Mock model (needed before serve smoke)
+E3-S01  ModelRouter
+E3-S03  web_fetch
+E3-S00  Runtime factory (Agent builder)
+E3-S02  zaumzeug serve
+E3-S08  zaumzeug run (serial workflow; after E2-S07)
+E3-S04  Example harness templates
+E3-S06  Test infra + Phase 1 security (localhost)
+E3-S07  OpenAI REST contract tests
+   ↓
+E1-S01…S03  Install + scaffolding (copies E3 templates)
+E1-S04  zaumzeug init
+E1-S05…S06  Docs + README
+E1-S07  CI matrix (last — validates full stack)
+```
+
+---
+
+## Validation summary (2026-07-05, re-checked)
+
+Cross-checked against [PRD §8](../prd.md#8-functional-requirements-epics) and [Architecture §11](../architecture/09-sdk-module-map.md#11-sdk-modules-to-build).
+
+| Check | Result |
+|---|---|
+| All PRD features E1.1–E8.6 covered | ✅ One or more stories per feature |
+| Epics in correct delivery phases (1→4) | ✅ File phases match [PRD §10](../prd.md#10-delivery-phases-milestones) |
+| Build order (E2→E3→E1→E4→E6→E5→E7→E8) | ✅ Dependencies coherent; E6 before E5 for eval gate |
+| Within-epic story order documented | ✅ Each epic file lists implementation order |
+| Architecture §-prefixed anchors | ✅ Restored `## N.` headings in topic files; fixed Pattern A/B, §5.5, MCP/ACP slugs |
+| E6-S02 ↔ E5-S06 cross-links | ✅ Fixed `#e6-s02-zaumzeug-eval-command` anchor |
+| Internal story cross-links | ✅ Normalized to GitHub heading slugs (no `eN-sNN--` double-hyphen form) |
+| Testing tech stack + playbook | ✅ [§4.5](../architecture/03-technology-stack.md#45-test-dependencies), [§13.6](../architecture/10-operations-and-reference.md#136-testing-playbook), [testing guide](../user-docs/guides/testing.md) |
+| Story verification + AC traceability | ✅ [Story verification](#story-verification-required); AC-# labels in all stories |
+
+### Gaps closed in this review
+
+| Gap | Resolution |
+|---|---|
+| No SDK skeleton / `pyproject.toml` story | Added **E2-S00** in [01-epic.md](01-epic.md) |
+| No runtime Agent factory | Added **E3-S00** in [02-epic.md](02-epic.md) |
+| No test fixture harness / localhost security | Added **E3-S06** |
+| PRD E3 story seed (OpenAI contract) | Added **E3-S07** |
+| PRD E4 story seed (artifact rollback) | Added **E4-S07** |
+| E5 before E6 broke eval gate dependency | Swapped files: **05=E6**, **06=E5** |
+| E1 before E2/E3 broke CI/doctor/serve | Moved E1 to **03-epic.md** |
+| GEPA scope open | **Resolved:** Phase 2 = Pattern A; optional input rewrite at compile; E4-S04 deferred Phase 4+ |
+| Serial multi-agent workflow (no E9) | **E2-S07** `workflow.yaml`; **E3-S08** `zaumzeug run`; folded into E2/E3/E4/E5 |
+| Workflow diagram at compile | **E4-S08** — `docs/workflow-diagram.md` on every `zaumzeug compile` |
+| User guide: workflow + pipelines | [user-docs/guides/multi-agent-workflow.md](../user-docs/guides/multi-agent-workflow.md) |
+| Architecture split broke §N anchors | Restored `## N.` on H2 headings in `docs/architecture/` topic files; corrected Pattern/MCP slugs in stories |
+| Story `#anchor` slugs drifted from headings | Normalized 27 cross-links to GitHub auto-slugs derived from `## E*-S* — …` titles |
+| Testing tech stack + playbook | [§4.5](../architecture/03-technology-stack.md#45-test-dependencies), [§13.6](../architecture/10-operations-and-reference.md#136-testing-playbook), [user-docs/guides/testing.md](../user-docs/guides/testing.md) |
+
+### Still deferred (PRD open decisions — not missing stories)
+
+| # | Decision | Affected stories |
+|---|---|---|
+| 3 | `zaumzeug install-project` | E1-S08 |
+| 5 | A2A defer | E8-S04 |
+
+**Resolved:** **Production auth (Phase 4)** — Traefik proxy-only; no in-process SDK auth in v1 — [E8-S02](08-epic.md#e8-s02-production-auth). Product name **ZaumZeug** (PyPI `zaumzeug`, CLI `zaumzeug`) — [Architecture §3.2](../architecture/02-repository-and-layout.md#32-package-naming). **GEPA Phase 2 = Pattern A** (`dspy.GEPA` only); **optional input rewrite/clarify templates** at compile time (E4-S03/E4-S05); **`optimize_anything` / Pattern B** deferred to Phase 4+ — [E4-S04](04-epic.md#e4-s04-haystack-gepa-evaluator-wrapper-deferred). **Hayhooks self-hosted** — `zaumzeug serve|mcp` on target host (Docker via E8-S05); Haystack Enterprise Platform not in v1 scope — [Architecture §8.2](../architecture/06-runtime-and-protocols.md#82-harness-vs-raw-hayhooks).
+
+---
+
+## Story template (all epics)
+
+Each story includes:
+
+1. **Metadata** — Feature ID, persona, priority, prerequisites
+2. **User story** — As a … I want … so that …
+3. **References** — PRD, Architecture, external docs
+4. **Acceptance criteria** — checkboxes labeled **AC-1**, **AC-2**, … (stable IDs for traceability)
+5. **Implementation tasks (build)** — feature/code work only; no tests in this section
+6. **Verification (after build)** — AC → test mapping; run only after build tasks complete
+7. **Definition of done** — includes `pytest` green for this story’s test paths
+
+---
+
+## Story verification (required)
+
+Every story follows **build first, verify second**. A story is **not done** until verification passes.
+
+### Workflow
+
+1. Complete all **Implementation tasks (build)**.
+2. Add or extend **Verification** tests that prove each acceptance criterion.
+3. Run `pytest` for the paths listed in Verification; fix failures before closing the story.
+4. Wire new tests into CI when the story’s phase has a matrix (Phase 1 → [E1-S07](03-epic.md#e1-s07-cross-platform-ci-matrix); Phase 2+ → deploy/serve smoke stories as noted).
+
+### AC traceability rules
+
+| Rule | Detail |
+|---|---|
+| **AC labels** | Number acceptance criteria **AC-1**, **AC-2**, … within each story (e.g. E2-S01 AC-3). |
+| **Test naming** | Prefer `test_{story_id_lower}_ac{n}_{slug}` — e.g. `test_e2_s01_ac1_invalid_yaml_field_errors` in `tests/unit/config/test_schemas.py`. |
+| **Coverage** | Every **AC** maps to ≥1 automated test **or** an explicit **manual** row with rationale (docs-only, CI orchestration, or deferred blocker). |
+| **Verification table** | Each story’s Verification section lists `AC-n → test path::test_name` (or **manual:** checklist). |
+| **Cross-story tests** | If one test covers multiple stories, list the AC in each story and note the shared test once. |
+| **Story anchors** | Cross-links use `#eN-sNN-slug-from-heading` (GitHub auto-slug of the `## E*-S* — …` title). Do not invent descriptive slugs or `eN-sNN--` double-hyphen forms. |
+| **Feature ID** | Story metadata **Feature** (e.g. E2.1) appears in test module docstring or a `# Story: E2-S01 / E2.1` comment at top of test file. |
+
+### Manual-only exceptions (allowed when documented)
+
+- **Pure documentation** stories (e.g. E1-S05, E7-S08, E8-S02): Verification uses a **manual** checklist mapped to ACs; no pytest required unless link/content assertions are added later.
+- **CI orchestration** (E1-S07): Verification is the workflow itself; individual ACs trace to workflow steps/jobs.
+- **Deferred / blocked** stories (E1-S08, E4-S04, E8-S04): Verification section omitted until unblocked; template still applies when implemented.
+
+### Example Verification block
+
+```markdown
+### Verification (after build)
+
+| AC | Test |
+|---|---|
+| AC-1 | `tests/unit/config/test_schemas.py::test_e2_s01_ac1_invalid_yaml_field_errors` |
+| AC-2 | `tests/unit/config/test_schemas.py::test_e2_s01_ac2_phase1_minimal_valid` |
+| AC-3 | `tests/unit/config/test_schemas.py::test_e2_s01_ac3_unknown_key_phase_hint` |
+| AC-4 | `tests/unit/config/test_schemas.py::test_e2_s01_ac4_error_includes_path_and_field` |
+
+- [ ] Every AC row above has a passing test or documented manual exception
+- [ ] `pytest tests/unit/config/test_schemas.py -v` passes
+```
+
+---
+
+## Related documents
+
+- [Epic stories (individual files)](epic-stories/00-README.md) — one story per file; split stories use decimal suffixes (e.g. `05.1-story.md`)
+- [Implementation resources index](epic-stories/00-implementation-resources.md) — library docs and code sketches by technology
+- [PRD](../prd.md) — requirements and acceptance criteria source of truth
+- [Architecture](../architecture.md) — hub; topic files in [architecture/](../architecture/00-README.md); testing: [§4.5](../architecture/03-technology-stack.md#45-test-dependencies), [§13.6](../architecture/10-operations-and-reference.md#136-testing-playbook)
+- [user-docs/guides/testing.md](../user-docs/guides/testing.md) — end-user testing guide (install template)
+- [cloudflare-harness.md](../cloudflare-harness.md) — **illustrative example only** (not in ZaumZeug scope)
+- [Ideation](../ideation-stage.md) — full YAML examples until `user-docs/reference/` exists

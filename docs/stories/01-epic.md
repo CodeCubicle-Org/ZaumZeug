@@ -1,0 +1,466 @@
+# Epic E2 — Configuration and Validation
+
+| | |
+|---|---|
+| **Document** | Epic E2 user stories |
+| **File** | `docs/stories/01-epic.md` |
+| **Created** | 2026-07-04 |
+| **Last modified** | 2026-07-05 |
+| **Status** | Backlog |
+| **Build order** | **1 of 8** (implement first) |
+| **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
+
+---
+| Field | Value |
+|---|---|
+| **Phase** | 1 |
+| **Epic** | E2 |
+| **Outcome** | Multi-agent harness config: `harness.yaml`, `workflow.yaml`, `agents/<name>/`, `agents-models.yaml` load, merge, and validate |
+| **Depends on** | — (starts with E2-S00 package skeleton) |
+| **Blocks** | [E3](02-epic.md) · [E1](03-epic.md) |
+| **PRD** | [Epic E2](../prd.md#epic-e2--configuration-and-validation-phase-1) |
+| **Architecture** | [§6 Configuration](../architecture/05-configuration.md#6-configuration-architecture) · [§5.2 Runtime resolution](../architecture/04-data-flows.md#52-runtime-agent-resolution) · [§11 SDK modules #2](../architecture/09-sdk-module-map.md#11-sdk-modules-to-build) · [§13 Debug](../architecture/10-operations-and-reference.md#13-debug-and-test-architecture) |
+| **Principle** | [Fail fast — PRD §6](../prd.md#6-product-principles) |
+
+### Story implementation order (within this epic)
+
+1. **E2-S00** — Package skeleton + CLI stub *(foundation)*
+2. **E2-S01** → **E2-S02** → **E2-S03** — Schemas, merge, resolver
+3. **E2-S04a** → **E2-S04b** — `zaumzeug doctor` (core checks, then phase-aware warnings)
+4. **E2-S05** — Serve `--dry-run` *(after E3 serve stub exists)*
+5. **E2-S06** — Logging
+6. **E2-S07** — `workflow.yaml` schema (serial stages)
+
+*(Phase 2: **E2-S04c** — `doctor --deploy`; see [epic-stories/05.3-story.md](epic-stories/05.3-story.md))*
+
+---
+
+## E2-S00 — SDK package skeleton and CLI foundation
+
+| Field | Value |
+|---|---|
+| **Feature** | Foundation (PRD Phase 1 / Architecture §3, §4.4, §11) |
+| **Persona** | SDK maintainer |
+| **Priority** | P0 |
+| **Prerequisites** | None — **start here** |
+
+### User story
+
+As an **SDK maintainer**, I want a pip-installable package with a `harness` CLI entry point, so that all later epics have a repo structure and command surface to build on.
+
+### References
+
+- [Architecture §3 — Repository structure](../architecture/02-repository-and-layout.md#3-repository-structure)
+- [Architecture §3.2 — Package naming](../architecture/02-repository-and-layout.md#32-package-naming)
+- [Architecture §4.4 — pyproject.toml](../architecture/03-technology-stack.md#44-pyprojecttoml-dependency-groups-phase-1-stub)
+- [Architecture §11 — SDK modules #1 CLI](../architecture/09-sdk-module-map.md#11-sdk-modules-to-build)
+- [Architecture §2.5 — Cross-platform](../architecture/01-overview-and-principles.md#25-cross-platform-portability)
+- [Architecture §3.2 — Package naming](../architecture/02-repository-and-layout.md#32-package-naming) (**ZaumZeug** / `zaumzeug`)
+
+### Acceptance criteria
+
+- [ ] **AC-1** `pyproject.toml` exists with `name = "zaumzeug"`, `requires-python >= 3.11`, runtime deps per §4.4
+- [ ] **AC-2** `[project.optional-dependencies]` includes `dev` (`dspy-ai`, `gepa`, `pytest`, `pytest-asyncio`, `httpx`, `respx`, `debugpy`) and `eval` (`deepeval`) per [Architecture §4.5](../architecture/03-technology-stack.md#45-test-dependencies)
+- [ ] **AC-3** Entry point: `zaumzeug = "zaumzeug.cli:main"`
+- [ ] **AC-4** Package layout matches Architecture §3: `src/zaumzeug/` with `cli.py`, `config/`, `runtime/`, `compile/`, `deploy/`, `eval/`, `serve/`, `integrations/`
+- [ ] **AC-5** `zaumzeug --help` exits 0 with subcommand stubs: `init`, `doctor`, `serve`, `run`, (`compile`, `deploy`, `eval`, `mcp`, `acp` as Phase 2+ stubs OK)
+- [ ] **AC-6** Repo `.gitattributes` normalizes text line endings to `\n`
+- [ ] **AC-7** `pip install -e ".[dev]"` succeeds from repo root
+
+### Implementation tasks (build)
+
+- [ ] Create `pyproject.toml` per Architecture §4.4 illustrative fragment
+- [ ] Create `src/zaumzeug/__init__.py` and `src/zaumzeug/cli.py` with `argparse` subparsers
+- [ ] Create empty module packages: `config/`, `runtime/`, `serve/`, `compile/`, `deploy/`, `eval/`, `integrations/`
+- [ ] Add `.gitattributes` for `* text=auto eol=lf`
+
+### Verification (after build)
+
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E2-S00`.
+
+| AC | Test |
+|---|---|
+| AC-1 | `tests/unit/test_e2_s00_package.py::test_e2_s00_ac1_pyproject_metadata` |
+| AC-2 | `tests/unit/test_e2_s00_package.py::test_e2_s00_ac2_optional_extras_dev_eval` |
+| AC-3 | `tests/unit/test_e2_s00_package.py::test_e2_s00_ac3_entry_point_registered` |
+| AC-4 | `tests/unit/test_e2_s00_package.py::test_e2_s00_ac4_package_layout` |
+| AC-5 | `tests/unit/test_cli_help.py::test_e2_s00_ac5_help_lists_subcommands` |
+| AC-6 | **manual:** `.gitattributes` contains `* text=auto eol=lf` (file inspection) |
+| AC-7 | **manual:** `pip install -e ".[dev]"` from clean venv (or CI job in E1-S07) |
+
+- [ ] Every AC row above has a passing test or documented manual exception
+- [ ] `pytest tests/unit/test_e2_s00_package.py tests/unit/test_cli_help.py -v` passes
+
+### Definition of done
+
+- [ ] Editable install works — unblocks E1-S01 and all CLI stories
+- [ ] No hardcoded OS paths in skeleton code
+- [ ] Verification checklist complete; `pytest` green for automated ACs
+
+---
+
+## E2-S01 — Pydantic config schemas
+
+| Field | Value |
+|---|---|
+| **Feature** | E2.1 |
+| **Persona** | Harness developer |
+| **Priority** | P0 |
+| **Prerequisites** | [E2-S00](#e2-s00-sdk-package-skeleton-and-cli-foundation) |
+
+### User story
+
+As a **harness developer**, I want invalid YAML to fail with field-level errors, so that I can fix config without reading SDK source.
+
+### References
+
+- [PRD E2.1](../prd.md#epic-e2--configuration-and-validation-phase-1)
+- [Architecture §6.6 — Phase 1 schema](../architecture/05-configuration.md#66-phase-1-config-schema)
+- [Architecture §6.2 — Config sections](../architecture/05-configuration.md#62-config-sections)
+- [Ideation — full YAML examples](../ideation-stage.md)
+
+### Acceptance criteria
+
+- [ ] **AC-1** Invalid `harness.yaml` fails with Pydantic field-level errors
+- [ ] **AC-2** Phase 1 minimal example from §6.6 passes validation
+- [ ] **AC-3** Unknown sections/fields for current phase fail with phase hint (e.g. “`compile` is Phase 2”)
+- [ ] **AC-4** Config validation error clarity meets [PRD §11](../prd.md#11-success-metrics)
+
+### Implementation tasks (build)
+
+- [ ] Implement schemas in `src/zaumzeug/config/schemas.py`
+- [ ] Implement loader in `src/zaumzeug/config/loader.py` (read yaml, invoke schemas, resolve paths via `pathlib`)
+- [ ] Phase-gated field allowlists per epic/phase map
+
+### Verification (after build)
+
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E2-S01 / E2.1`.
+
+| AC | Test |
+|---|---|
+| AC-1 | `tests/unit/config/test_schemas.py::test_e2_s01_ac1_invalid_yaml_field_errors` |
+| AC-2 | `tests/unit/config/test_schemas.py::test_e2_s01_ac2_phase1_minimal_valid` |
+| AC-3 | `tests/unit/config/test_schemas.py::test_e2_s01_ac3_unknown_key_phase_hint` |
+| AC-4 | `tests/unit/config/test_schemas.py::test_e2_s01_ac4_error_includes_path_and_field` |
+
+- [ ] Every AC row above has a passing test or documented manual exception
+- [ ] `pytest tests/unit/config/test_schemas.py -v` passes
+
+### Definition of done
+
+- [ ] Example harness config passes
+- [ ] Error messages include file path and field name
+- [ ] Verification checklist complete; all ACs traced to tests
+
+---
+
+## E2-S02 — `models.yaml` merge
+
+| Field | Value |
+|---|---|
+| **Feature** | E2.2 |
+| **Persona** | Harness developer |
+| **Priority** | P0 |
+| **Prerequisites** | [E2-S00](#e2-s00-sdk-package-skeleton-and-cli-foundation) |
+
+### User story
+
+As a **harness developer**, I want global, harness, and per-agent model registries to deep-merge, so that each agent can use a different LLM without duplicating the full registry.
+
+### References
+
+- [PRD E2.2](../prd.md#epic-e2--configuration-and-validation-phase-1)
+- [Architecture §6.1 — Merge rules](../architecture/05-configuration.md#61-model-registry-merge)
+- [Architecture §3.3.1](../architecture/02-repository-and-layout.md#331-model-config-files-naming)
+
+### Acceptance criteria
+
+- [ ] **AC-1** Global `config/models.yaml` deep-merges with harness `models.yaml` (when present)
+- [ ] **AC-2** Per-agent `agents/<name>/agents-models.yaml` deep-merges over harness + global
+- [ ] **AC-3** Nested dicts merge recursively; child keys win
+- [ ] **AC-4** Lists in child file **replace** parent lists entirely
+- [ ] **AC-5** Each agent's `default_model_id` validated against that agent's merged registry
+
+### Implementation tasks (build)
+
+- [ ] Implement merge in `src/zaumzeug/config/models.py`
+- [ ] Support `models: models.yaml` file reference in `harness.yaml`
+
+### Verification (after build)
+
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E2-S02 / E2.2`.
+
+| AC | Test |
+|---|---|
+| AC-1 | `tests/unit/config/test_models_merge.py::test_e2_s02_ac1_global_harness_deep_merge` |
+| AC-2 | `tests/unit/config/test_models_merge.py::test_e2_s02_ac2_nested_dict_harness_wins` |
+| AC-3 | `tests/unit/config/test_models_merge.py::test_e2_s02_ac3_list_replace_not_append` |
+| AC-4 | `tests/unit/config/test_models_merge.py::test_e2_s02_ac4_same_model_id_override` |
+| AC-5 | `tests/unit/config/test_models_merge.py::test_e2_s02_ac5_missing_default_model_id_fails` |
+
+- [ ] Every AC row above has a passing test or documented manual exception
+- [ ] `pytest tests/unit/config/test_models_merge.py -v` passes
+
+### Definition of done
+
+- [ ] Merge rules covered by unit tests ([PRD story seed](../prd.md#epic-e2--configuration-and-validation-phase-1))
+- [ ] Secrets never loaded from YAML (`.env` only)
+- [ ] Verification checklist complete; all ACs traced to tests
+
+---
+
+## E2-S03 — Runtime agent resolution rules
+
+| Field | Value |
+|---|---|
+| **Feature** | E2.3 |
+| **Persona** | Harness developer |
+| **Priority** | P0 |
+| **Prerequisites** | [E2-S01](#e2-s01-pydantic-config-schemas) · [E2-S02](#e2-s02-modelsyaml-merge) |
+
+### User story
+
+As a **harness developer**, I want runtime agent resolution enforced by mode, so that compile/runtime separation is enforced.
+
+### References
+
+- [PRD E2.3](../prd.md#epic-e2--configuration-and-validation-phase-1)
+- [Architecture §5.2](../architecture/04-data-flows.md#52-runtime-agent-resolution)
+- [Architecture §2.1 — Golden rules](../architecture/01-overview-and-principles.md#21-golden-rules)
+- [PRD G2](../prd.md#3-goals)
+
+### Acceptance criteria
+
+- [ ] **AC-1** **Serve/run (per agent):** loads `artifact` > `system_prompt` > actionable error
+- [ ] **AC-2** **Compile (per agent):** requires `compile.module` in `agents/<name>/agent.yaml` (Phase 2+)
+- [ ] **AC-3** **Serve entry:** uses workflow `entry` agent for interactive `zaumzeug serve`
+- [ ] **AC-4** Error messages name missing path and suggest fix
+
+### Implementation tasks (build)
+
+- [ ] Implement resolver in `src/zaumzeug/config/resolver.py`
+- [ ] Validate artifact has `artifact-manifest.json` when artifact path set
+
+### Verification (after build)
+
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E2-S03 / E2.3`.
+
+| AC | Test |
+|---|---|
+| AC-1 | `tests/unit/config/test_resolver.py::test_e2_s03_ac1_serve_artifact_over_system_prompt` |
+| AC-1 | `tests/unit/config/test_resolver.py::test_e2_s03_ac1_serve_system_prompt_fallback` |
+| AC-1 | `tests/unit/config/test_resolver.py::test_e2_s03_ac1_serve_both_missing_actionable_error` |
+| AC-2 | `tests/unit/config/test_resolver.py::test_e2_s03_ac2_compile_requires_module` |
+| AC-3 | `tests/unit/config/test_resolver.py::test_e2_s03_ac3_serve_entry_from_workflow` |
+| AC-4 | `tests/unit/config/test_resolver.py::test_e2_s03_ac4_error_names_path_and_suggests_fix` |
+
+- [ ] Every AC row above has a passing test or documented manual exception
+- [ ] `pytest tests/unit/config/test_resolver.py -v` passes
+
+### Definition of done
+
+- [ ] Doctor and serve use same resolution logic
+- [ ] No DSPy import on serve path
+- [ ] Verification checklist complete; all ACs traced to tests
+
+---
+
+## E2-S04 — `zaumzeug doctor` *(split into sub-stories)*
+
+> **Canonical story files:** [E2-S04a — core](epic-stories/05.1-story.md) · [E2-S04b — warnings](epic-stories/05.2-story.md) · [E2-S04c — `--deploy`](epic-stories/05.3-story.md) (Phase 2)
+
+### E2-S04a — core checks
+
+| Field | Value |
+|---|---|
+| **Feature** | E2.4 (part 1) |
+| **Persona** | Harness developer · Ops |
+| **Priority** | P0 |
+| **Prerequisites** | [E2-S01](#e2-s01-pydantic-config-schemas) · [E2-S02](#e2-s02-modelsyaml-merge) · [E2-S03](#e2-s03-runtime-agent-resolution-rules) |
+
+**AC:** Python 3.11+, package import, `.env` warn, runtime path, model registry keys, port conflict warn, `--verbose`/`--json`, harness scan.
+
+**Build:** `doctor` subcommand; core check modules (pass/warn/fail).
+
+### E2-S04b — phase-aware warnings
+
+| Field | Value |
+|---|---|
+| **Feature** | E2.4 (part 2) |
+| **Prerequisites** | [E2-S04a](epic-stories/05.1-story.md) · [E2-S07](#e2-s07-workflowyaml-schema-serial) |
+
+**AC:** Eval section Phase 1 warn; MCP without `uv` warn; stale workflow-diagram warn.
+
+### E2-S04c — `--deploy` mode *(Phase 2)*
+
+| Field | Value |
+|---|---|
+| **Feature** | E2.4 (part 3) |
+| **Prerequisites** | [E2-S04a](epic-stories/05.1-story.md) · [E5-S01](../06-epic.md#e5-s01-zaumzeug-deploy-command) · [E5-S03](../06-epic.md#e5-s03-zaumzeug-serve-deploy) |
+
+**AC:** `--deploy` resolves `deploy/<name>/`; validates deploy manifest; reuses core checks.
+
+**Verification:** See [epic-stories/05.1-story.md](epic-stories/05.1-story.md) through [05.3-story.md](epic-stories/05.3-story.md) for full AC → test mapping.
+
+---
+
+## E2-S05 — `--dry-run` on serve
+
+| Field | Value |
+|---|---|
+| **Feature** | E2.5 |
+| **Persona** | Harness developer |
+| **Priority** | P1 |
+| **Prerequisites** | [E3-S02](../02-epic.md#e3-s02-zaumzeug-serve-dev-mode) · [E2-S04a](epic-stories/05.1-story.md#e2-s04a-zaumzeug-doctor-core-checks) · [E2-S01](#e2-s01-pydantic-config-schemas) |
+
+### User story
+
+As a **harness developer**, I want `zaumzeug serve --dry-run`, so that I can validate config and resolved paths without starting Hayhooks or calling an LLM.
+
+### References
+
+- [PRD E2.5](../prd.md#epic-e2--configuration-and-validation-phase-1)
+- [Architecture §8](../architecture/06-runtime-and-protocols.md#8-cli-and-runtime-layering)
+
+### Acceptance criteria
+
+- [ ] **AC-1** Validates config via same path as real serve
+- [ ] **AC-2** Prints resolved config summary (model id, artifact path, tools, port)
+- [ ] **AC-3** Does not bind port or invoke LLM
+- [ ] **AC-4** Exit 0 on success, non-zero on validation failure
+
+### Implementation tasks (build)
+
+- [ ] Add `--dry-run` flag to serve command
+- [ ] Reuse config loader + runtime resolver + doctor checks
+- [ ] Human-readable and optional `--json` output
+
+### Verification (after build)
+
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E2-S05 / E2.5`.
+
+| AC | Test |
+|---|---|
+| AC-1 | `tests/integration/test_serve_dry_run.py::test_e2_s05_ac1_same_validation_path_as_serve` |
+| AC-2 | `tests/integration/test_serve_dry_run.py::test_e2_s05_ac2_prints_resolved_summary` |
+| AC-2 | `tests/integration/test_serve_dry_run.py::test_e2_s05_ac2_json_output_shape` |
+| AC-3 | `tests/integration/test_serve_dry_run.py::test_e2_s05_ac3_no_port_bind_no_llm` |
+| AC-4 | `tests/integration/test_serve_dry_run.py::test_e2_s05_ac4_exit_zero_on_valid_config` |
+| AC-4 | `tests/integration/test_serve_dry_run.py::test_e2_s05_ac4_exit_nonzero_on_invalid_config` |
+
+- [ ] Every AC row above has a passing test or documented manual exception
+- [ ] `pytest tests/integration/test_serve_dry_run.py -v` passes
+
+### Definition of done
+
+- [ ] CI matrix runs dry-run on all OS (E1-S07)
+- [ ] target_install `--verify` uses serve dry-run (E5-S09)
+- [ ] Verification checklist complete; all ACs traced to tests
+
+---
+
+## E2-S06 — Structured logging
+
+| Field | Value |
+|---|---|
+| **Feature** | E2.6 |
+| **Persona** | Harness developer |
+| **Priority** | P2 |
+
+### User story
+
+As a **harness developer**, I want verbose logging on serve and compile, so that I can debug model routing and tool calls per request.
+
+### References
+
+- [PRD E2.6](../prd.md#epic-e2--configuration-and-validation-phase-1)
+- [Architecture §13](../architecture/10-operations-and-reference.md#13-debug-and-test-architecture)
+
+### Acceptance criteria
+
+- [ ] **AC-1** `--verbose` on serve/compile enables SDK + Haystack structured logging
+- [ ] **AC-2** `HARNESS_LOG_LEVEL=DEBUG` env var works equivalently
+- [ ] **AC-3** Logs include `model_id`, tool name, artifact path per request where applicable
+- [ ] **AC-4** No secrets logged (API keys redacted)
+
+### Implementation tasks (build)
+
+- [ ] Centralize logging config in `src/zaumzeug/logging.py`
+- [ ] Wire Haystack log level when verbose
+- [ ] Document env var in `user-docs/reference/cli.md`
+
+### Verification (after build)
+
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E2-S06 / E2.6`.
+
+| AC | Test |
+|---|---|
+| AC-1 | `tests/unit/test_logging.py::test_e2_s06_ac1_verbose_flag_sets_debug_level` |
+| AC-2 | `tests/unit/test_logging.py::test_e2_s06_ac2_harness_log_level_env_equivalent` |
+| AC-3 | `tests/unit/test_logging.py::test_e2_s06_ac3_log_record_includes_model_tool_artifact` |
+| AC-4 | `tests/unit/test_logging.py::test_e2_s06_ac4_api_keys_redacted_in_logs` |
+
+- [ ] Every AC row above has a passing test or documented manual exception
+- [ ] `pytest tests/unit/test_logging.py -v` passes
+
+### Definition of done
+
+- [ ] No secrets logged (API keys redacted)
+- [ ] Verification checklist complete; all ACs traced to tests
+
+---
+
+## E2-S07 — `workflow.yaml` schema (serial)
+
+| Field | Value |
+|---|---|
+| **Feature** | E2.7 |
+| **Persona** | Harness developer |
+| **Priority** | P0 |
+| **Prerequisites** | [E2-S01](#e2-s01-pydantic-config-schemas) |
+
+### User story
+
+As a **harness developer**, I want `workflow.yaml` validated with my agent folders, so that serial multi-agent harnesses fail fast before run or compile.
+
+### References
+
+- [PRD E2.7](../prd.md#epic-e2--configuration-and-validation-phase-1)
+- [Architecture §3.3](../architecture/02-repository-and-layout.md#33-harness-folder-layout)
+- [Architecture §6.6](../architecture/05-configuration.md#66-phase-1-config-schema)
+
+### Acceptance criteria
+
+- [ ] **AC-1** `workflow.yaml` requires `entry` and non-empty `stages` list
+- [ ] **AC-2** Each stage is exactly one of `agent: <name>` or `pipeline: <id>` (serial order)
+- [ ] **AC-3** Every `agent` ref resolves to `agents/<name>/agent.yaml`
+- [ ] **AC-4** Agent names unique within harness; folder name matches `agent.yaml` `name`
+- [ ] **AC-5** `parallelism` field fails in Phase 1 with phase hint (deferred)
+- [ ] **AC-6** `example` harness `workflow.yaml` from §6.6 passes validation
+
+### Implementation tasks (build)
+
+- [ ] Add `WorkflowConfig` schema in `src/zaumzeug/config/schemas.py`
+- [ ] Cross-validate workflow agent refs against `agents/` directory in loader
+- [ ] Wire into `zaumzeug doctor` and serve/run dry paths
+
+### Verification (after build)
+
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E2-S07 / E2.7`.
+
+| AC | Test |
+|---|---|
+| AC-1 | `tests/unit/config/test_workflow_schema.py::test_e2_s07_ac1_requires_entry_and_stages` |
+| AC-2 | `tests/unit/config/test_workflow_schema.py::test_e2_s07_ac2_agent_or_pipeline_stage` |
+| AC-3 | `tests/unit/config/test_workflow_schema.py::test_e2_s07_ac3_unknown_agent_ref_fails` |
+| AC-4 | `tests/unit/config/test_workflow_schema.py::test_e2_s07_ac4_unique_agent_names` |
+| AC-5 | `tests/unit/config/test_workflow_schema.py::test_e2_s07_ac5_parallelism_phase_hint` |
+| AC-6 | `tests/unit/config/test_workflow_schema.py::test_e2_s07_ac6_example_workflow_valid` |
+
+- [ ] Every AC row above has a passing test or documented manual exception
+- [ ] `pytest tests/unit/config/test_workflow_schema.py -v` passes
+
+### Definition of done
+
+- [ ] Doctor validates workflow for named harness
+- [ ] Verification checklist complete; all ACs traced to tests

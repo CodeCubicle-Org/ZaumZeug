@@ -1,0 +1,82 @@
+# E3-S04 — Example harness (general research agent)
+
+| | |
+|---|---|
+| **Document** | User story |
+| **File** | `docs/stories/epic-stories/14-story.md` |
+| **Created** | 2026-07-04 |
+| **Last modified** | 2026-07-05 |
+| **Story ID** | E3-S04 |
+| **Epic** | [E3 — Runtime and Local Serve](../02-epic.md) |
+| **Phase** | 1 |
+| **Epic build order** | 2 of 8 |
+| **Story sequence** | 14 of 63 (global build order) |
+| **Source** | Extracted from [`02-epic.md`](../02-epic.md) |
+| **Related** | [Stories index](../00-README.md) · [Epic E3](../../prd.md#epic-e3--runtime-and-local-serve-phase-1) · [Architecture](../../architecture.md) |
+
+---
+
+## E3-S04 — Example harness (general research agent)
+
+| Field | Value |
+|---|---|
+| **Feature** | E3.4 |
+| **Persona** | Harness developer · SDK maintainer |
+| **Priority** | P0 |
+| **Prerequisites** | [E2-S01](02-story.md#e2-s01-pydantic-config-schemas) · [E3-S03](11-story.md#e3-s03-builtin-tool-web_fetch) |
+
+### User story
+
+As a **new user**, I want a reference example harness, so that I can learn config-only agents and run CI without API keys.
+
+### References
+
+- [PRD E3.4](../../prd.md#epic-e3--runtime-and-local-serve-phase-1)
+- [Architecture §6.6](../../architecture/05-configuration.md#66-phase-1-config-schema)
+- [PRD Journey A](../../prd.md#71-journey-a--config-only-harness-phase-1)
+
+
+### Implementation resources
+
+**Config templates**
+
+- [Architecture §6.6 — full `example` harness tree](../../architecture/05-configuration.md#66-phase-1-config-schema)
+- [Ideation — reference YAML](../../ideation-stage.md)
+- Copy targets: `usr-harnesses/example/`, `install/templates/usr-harnesses/example/`
+
+### Acceptance criteria
+
+- [ ] **AC-1** `example` uses `agents/researcher/` per Architecture §6.6
+- [ ] **AC-2** Includes `workflow.yaml` with one stage (`researcher`)
+- [ ] **AC-3** `agents/researcher/agents-models.yaml` with `default_model_id: mock`
+- [ ] **AC-4** `zaumzeug serve example` works without `.env`
+- [ ] **AC-5** No RAG until Epic E8
+- [ ] **AC-6** Templates under `install/templates/usr-harnesses/example/` for E1-S03
+
+### Implementation tasks (build)
+
+- [ ] Author multi-agent template tree per Architecture §6.6 (`harness.yaml`, `workflow.yaml`, `agents/researcher/`)
+- [ ] Document in `user-docs/getting-started/first-harness.md`; link to [user-docs/guides/multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md) for workflow and pipelines (template copied by E1-S05)
+
+### Verification (after build)
+
+Per [Story verification](../00-README.md#story-verification-required). Test file header: `# Story: E3-S04 / E3.4`.
+
+| AC | Test |
+|---|---|
+| AC-1 | `tests/usr-harnesses/fixture/test_example_harness.py::test_e3_s04_ac1_researcher_agent_layout` |
+| AC-2 | `tests/usr-harnesses/fixture/test_example_harness.py::test_e3_s04_ac2_workflow_yaml_single_stage` |
+| AC-3 | `tests/usr-harnesses/fixture/test_example_harness.py::test_e3_s04_ac3_agents_models_mock_default` |
+| AC-4 | `tests/integration/test_serve.py::test_e3_s04_ac4_serve_example_without_env` |
+| AC-5 | `tests/usr-harnesses/fixture/test_example_harness.py::test_e3_s04_ac5_no_rag_sections` |
+| AC-6 | **manual:** template files exist under `install/templates/usr-harnesses/example/` |
+
+- [ ] Every AC row above has a passing test or documented manual exception
+- [ ] `pytest tests/usr-harnesses/fixture/test_example_harness.py -v` passes
+
+### Definition of done
+
+- [ ] `zaumzeug doctor example` passes after E1 install scaffolding
+- [ ] Verification checklist complete; all ACs traced to tests
+
+---

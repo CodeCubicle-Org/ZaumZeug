@@ -1,0 +1,145 @@
+# Deploy packaging
+
+**Part of:** [Architecture index](../architecture.md) · [PRD](../prd.md)
+
+---
+
+## 10. Deploy packager
+
+Requirements: **[PRD E5](../prd.md#epic-e5--deploy-packaging-phase-2)**.
+
+### 10.1 Dev vs deploy
+
+| | `usr-harnesses/<harness>/` | `deploy/<harness>/` |
+|---|---|---|
+| Purpose | Author, compile, experiment | Ship and run |
+| Edited by | Developer | **Generated** by `zaumzeug deploy` |
+| `harness.yaml`, `workflow.yaml` | Full | Stripped — runtime + serve + workflow only |
+| `agents/<agent-name>/` | Full per-agent tree | Runtime subset per agent |
+| `agents/<agent-name>/modules/`, `skills/` | Present | **Excluded** |
+| `agents/<agent-name>/artifacts/` | Working / `current` | **Pinned copy** per agent |
+| `agents/<agent-name>/agents-models.yaml` | Dev | **Included** — merged at packager |
+| `data/`, `eval/` | Present | **Excluded** |
+| `pipelines/` | Haystack YAML | **Included** — ids in `serve.expose` only (Phase 4+) |
+
+**Runtime-reference rules (packager v1):**
+
+| Asset | Copy when |
+|---|---|
+| `agents/<name>/prompts/*`, `artifacts/*` | Referenced by that agent's `agent.yaml` |
+| `agents/<name>/agents-models.yaml` | Always (required per agent) |
+| `agents/<name>/tools/*.py` | Listed in that agent's `tools.custom` |
+| `agents/<name>/hooks.py` | `hooks.enabled: true` in that agent's `agent.yaml` |
+| `pipelines/*` | Pipeline id listed in `serve.expose` |
+| `docs/workflow-diagram.md` | Generated at compile | **Included** in `deploy/<harness>/docs/` |
+| `agents/<name>/modules/`, `skills/`, `data/`, `eval/` | Dev only | **Never** |
+
+Requirements: [PRD E5.2](../prd.md#epic-e5--deploy-packaging-phase-2).
+
+### 10.2 Packager steps
+
+`zaumzeug deploy <name>`:
+
+1. Validate (`zaumzeug doctor`, resolvable runtime path).
+2. Apply **eval gate** per [§6.4](05-configuration.md#64-deploy-eval-gate).
+3. Write stripped `harness.yaml` (no `compile`/`eval`/`deploy`).
+4. Pin per-agent artifacts; copy `agents/*/agents-models.yaml`, tools, pipelines, hooks, `docs/workflow-diagram.md`.
+5. Merge harness `models.yaml`; write `manifest.json` (per-agent `artifact_run_id` map), `README.deploy.md`.
+6. Copy `target_install.py`, `target-install.sh`, `target-install.ps1` into `deploy/<name>/` (from `install/templates/` or SDK `install/`).
+
+Idempotent — overwrites `deploy/<name>/`. Future: `zaumzeug export` tarball of bundle.
+
+### 10.3 Deploy `manifest.json`
+
+Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`artifact-manifest.json`** under `artifacts/` — [§5.3](04-data-flows.md#53-artifact-layout)).
+
+```json
+{
+  "build_id": "uuid",
+  "source_git_sha": "abc123",
+  "harness_yaml_hash": "sha256...",
+  "artifact_run_id": "20260624-001",
+  "created_at": "2026-06-24T12:00:00Z"
+}
+```
+
+`target_install` preflight verifies this file plus `harness.yaml` in the bundle directory.
+
+### 10.4 Git and `.gitignore`
+
+| Policy | Recommendation |
+|---|---|
+| **Default** | `deploy/` and `usr-harnesses/*/artifacts/` in `.gitignore` |
+| **Release tags** | Optionally commit `deploy/<name>/` for audited releases |
+| **CI** | Build `deploy/` in pipeline; upload as deployment artifact |
+
+### 10.5 Production server dependencies
+
+| Component | Dev machine | Production server |
+|---|---|---|
+| Python | 3.11+ | 3.11+ |
+| `pip install zaumzeug` | Yes (editable `[dev]` ok) | Yes (**runtime** install; no `[eval]` unless ops explicitly want eval on server) |
+| DSPy, GEPA | Yes (compile) | **No** — compile on dev/CI only |
+| DeepEval | Optional (`[eval]`) | **No** (default) |
+| `usr-harnesses/<name>/` | Yes | **No** |
+| `deploy/<name>/` | Output of deploy | **Yes** — ship this folder |
+| `target_install.py` (in bundle) | N/A | **Yes** — run once on target to install runtime deps |
+| `.env` (API keys) | Yes | Yes — **never** inside bundle; create on target |
+| Haystack/Hayhooks | Via SDK | Via SDK |
+
+**Target command on server:** `zaumzeug serve <name> --deploy` (or `HARNESS_ROOT=deploy`).
+
+### 10.6 Deploy platform targets
+
+Requirements: **[PRD E5.8](../prd.md#epic-e5--deploy-packaging-phase-2)**.
+
+| Role | Windows | macOS | Linux | Notes |
+|---|---|---|---|---|
+| **Developer workstation** | Primary | Primary | Primary | Install, serve, compile, deploy CLI — CI matrix on all three (E1.7) |
+| **Production server** | Best-effort | Best-effort | **Primary** | Ops target: Linux VM, bare metal, or container |
+| **CI — Phase 1** | Smoke | Smoke | Smoke | Install, doctor, dry-run, mock-model serve |
+| **CI — Phase 2+** | Optional | Optional | **Required** | `zaumzeug deploy` → `zaumzeug serve --deploy` smoke on `ubuntu-latest` |
+
+The `deploy/<name>/` bundle is **OS-neutral** (Python 3.11+, pinned yaml/artifacts, runtime tools only). Production docs (`README.deploy.md`) must state Linux as the supported ops target and reference optional Dockerfile (E8.5). Windows/macOS production serve is not CI-gated in v1 — report issues as best-effort.
+
+### 10.7 Target runtime install script
+
+Requirements: **[PRD E5.9](../prd.md#epic-e5--deploy-packaging-phase-2)**.
+
+Runs on the **target machine** after the user copies `deploy/<name>/` — desktop PC or server. **Does not install Python**; requires Python 3.11+ already on PATH.
+
+```text
+1. Preflight
+   ├─ Detect OS: Windows | macOS | Linux
+   ├─ Require Python 3.11+
+   ├─ Resolve deploy bundle dir (--deploy-dir, default: **current working directory** — run from `deploy/<name>/` so cwd contains `harness.yaml` and `manifest.json`)
+   └─ Verify deploy `manifest.json` + `harness.yaml` present
+
+2. Virtual environment (optional)
+   ├─ Create .venv beside deploy bundle if missing (unless --skip-venv)
+   └─ Use venv python for all pip / harness calls
+
+3. Install runtime dependencies
+   ├─ pip install zaumzeug          # Haystack, Hayhooks — NOT [dev], [eval], DSPy, GEPA
+   └─ harness --version
+
+4. Validate bundle
+   ├─ zaumzeug doctor <name> --deploy
+   └─ Optional --verify: zaumzeug serve <name> --deploy --dry-run
+
+5. Environment setup
+   ├─ Copy .env.example → .env if .env missing (never overwrite)
+   └─ Print: zaumzeug serve <name> --deploy  (and HARNESS_ROOT=deploy if needed)
+```
+
+**Invocation on target:**
+
+| OS | Command |
+|---|---|
+| **Windows (PowerShell)** | `.\deploy\my_agent\target-install.ps1` |
+| **macOS / Linux** | `./deploy/my_agent/target-install.sh` |
+| **Any OS** | `python deploy/my_agent/target_install.py` |
+
+Bundled copy lives at `deploy/<name>/target_install.py` so the folder is self-describing when copied alone.
+
+---
