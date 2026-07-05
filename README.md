@@ -16,6 +16,8 @@ ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent
 
 ## Why ZaumZeug?
 
+ZaumZeug is not trying to be the most flexible agent orchestrator or the deepest provider SDK. It is a **factory for turning YAML-defined multi-agent workflows into compile-optimized, mock-testable, deployable production harnesses** — Haystack runtime, GEPA-guided improvement loops, and enforced dev/deploy boundaries.
+
 Building on Haystack, DSPy, and GEPA today means wiring compile-time optimization and runtime serving yourself — and it's easy to mix them incorrectly. ZaumZeug provides a single SDK with enforced golden rules, a CLI workflow, and a clear boundary between development and production.
 
 | Problem | ZaumZeug approach |
@@ -24,6 +26,39 @@ Building on Haystack, DSPy, and GEPA today means wiring compile-time optimizatio
 | Unclear dev vs production artifacts | `usr-harnesses/` for development, `deploy/` for shipping |
 | Model provider lock-in | Per-agent `agents-models.yaml` + stage-scoped model routing |
 | Different clients need different protocols | One Haystack core, multiple serve surfaces (REST, MCP, ACP) |
+
+### How ZaumZeug is different
+
+- **Factory, not one-off framework** — scaffold → configure → compile → deploy → serve; the unit of shipping is `deploy/<name>/`, not your dev repo
+- **Compile ≠ runtime, enforced** — DSPy/GEPA offline; Haystack `Agent` on the hot path; never both loops in one request
+- **Workflow stages, not one mega-agent** — serial stages (parallel later), each running one agent loop, chained by `workflow.yaml`
+- **Guides + sensors** — GEPA-optimized prompts (guides) and metric feedback (sensors) baked into the lifecycle
+- **Mock-first dev** — `zaumzeug doctor`, dry-run, and mock model profile for zero-API-key local dev and CI
+
+### What we do better
+
+| Area | ZaumZeug advantage |
+|---|---|
+| Compile → ship loop | DSPy/GEPA offline, Haystack online — enforced separation |
+| Production packaging | Explicit `deploy/` bundle; GEPA never on production servers |
+| Config-first multi-agent | YAML workflow + per-agent `agents-models.yaml` |
+| Ops clarity | Dev vs deploy is a product rule, not a team convention |
+
+### What others do better today
+
+| Framework | Their strength | ZaumZeug gap (for now) |
+|---|---|---|
+| [LangGraph](https://langchain.com/langgraph) | Stateful graphs, checkpointing, human-in-the-loop, branching | Serial workflows only in Phase 1 |
+| [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) / Claude Agent SDK | Provider-native tracing, guardrails, sandbox execution | Sandbox deferred; less provider magic |
+| [CrewAI](https://www.crewai.com/) | Role-based crews, rapid prototyping, large community | Less persona ergonomics; more deploy discipline |
+| [Strands Compose](https://github.com/strands-compose/sdk-python) / AgentCore | YAML multi-agent, swarm/graph modes, managed hosting | Fewer orchestration modes until Phase 3+ |
+| [Raw Haystack](https://haystack.deepset.ai/) | RAG pipelines, retrieval integrations | ZaumZeug wraps Haystack — use raw Haystack for RAG-only |
+| [Pydantic AI](https://ai.pydantic.dev/) | Typed structured outputs, test models | Pydantic for config, not agent programming model |
+| [Hermes Agent](https://github.com/NousResearch/hermes-agent) | Personal agent with memory, skills, messaging, cron | Factory for domain harnesses — not a personal assistant |
+
+> **Honest caveat:** LangGraph, OpenAI SDK, CrewAI, Strands, and Hermes have shipping code and large ecosystems. ZaumZeug is Phase 0→1 planning — comparisons above reflect architectural intent until Phase 1 ships.
+
+Full analysis: [Competitive landscape](docs/competitive-landscape.md)
 
 ---
 
@@ -121,6 +156,7 @@ zaumzeug mcp <harness>        # Serve via Model Context Protocol
 | [Epic stories](docs/stories/00-README.md) | Implementation backlog broken into epics and stories |
 | [User guides](user-docs/README.md) | How to build and run harnesses (expanded as features ship) |
 | [Dependencies](dependencies.md) | External tools, libraries, and protocols |
+| [Competitive landscape](docs/competitive-landscape.md) | How ZaumZeug compares to other harness SDKs |
 
 ---
 
