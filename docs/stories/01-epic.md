@@ -5,8 +5,8 @@
 | **Document** | Epic E2 user stories |
 | **File** | `docs/stories/01-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 (E2-S04c done) |
-| **Status** | In progress (E2-S00–S04c done) |
+| **Last modified** | 2026-07-08 (E2-S06 done) |
+| **Status** | In progress (E2-S00–S06 done) |
 | **Build order** | **1 of 8** (implement first) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -32,8 +32,8 @@
 6. **E2-S04b** — `zaumzeug doctor` (phase-aware warnings) — **Done** ([05.2-story.md](epic-stories/05.2-story.md))
 7. **E2-S04c** — `zaumzeug doctor --deploy` — **Done** ([05.3-story.md](epic-stories/05.3-story.md))
 8. **E2-S05** — Serve `--dry-run` — **Done** ([06-story.md](epic-stories/06-story.md))
-9. **E2-S06** — Logging ← **next**
-10. **E2-S07** — `workflow.yaml` schema (serial stages)
+9. **E2-S06** — Logging — **Done** ([07-story.md](epic-stories/07-story.md))
+10. **E2-S07** — `workflow.yaml` schema (serial stages) ← **next**
 
 ---
 
@@ -383,6 +383,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E2.6 |
 | **Persona** | Harness developer |
 | **Priority** | P2 |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -395,16 +396,16 @@ As a **harness developer**, I want verbose logging on serve and compile, so that
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `--verbose` on serve/compile enables SDK + Haystack structured logging
-- [ ] **AC-2** `HARNESS_LOG_LEVEL=DEBUG` env var works equivalently
-- [ ] **AC-3** Logs include `model_id`, tool name, artifact path per request where applicable
-- [ ] **AC-4** No secrets logged (API keys redacted)
+- [x] **AC-1** `--verbose` on serve/compile enables SDK + Haystack structured logging
+- [x] **AC-2** `HARNESS_LOG_LEVEL=DEBUG` env var works equivalently
+- [x] **AC-3** Logs include `model_id`, tool name, artifact path per request where applicable
+- [x] **AC-4** No secrets logged (API keys redacted)
 
 ### Implementation tasks (build)
 
-- [ ] Centralize logging config in `src/zaumzeug/logging.py`
-- [ ] Wire Haystack log level when verbose
-- [ ] Document env var in `user-docs/reference/cli.md`
+- [x] Centralize logging config in `src/zaumzeug/logging.py`
+- [x] Wire Haystack log level when verbose
+- [x] Document env var in `user-docs/reference/cli.md`
 
 ### Verification (after build)
 
@@ -417,13 +418,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-3 | `tests/unit/test_logging.py::test_e2_s06_ac3_log_record_includes_model_tool_artifact` |
 | AC-4 | `tests/unit/test_logging.py::test_e2_s06_ac4_api_keys_redacted_in_logs` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/test_logging.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/test_logging.py -v` passes
 
 ### Definition of done
 
-- [ ] No secrets logged (API keys redacted)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] No secrets logged (API keys redacted)
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

@@ -6,7 +6,7 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 |---|---|---|
 | [Getting started](getting-started/) | New developers | Install, project layout, first harness *(skeleton — expanded at install)* |
 | [Guides](guides/) | Day-to-day use | Workflow, agents, pipelines, compile, deploy |
-| [Reference](reference/) | Lookup | CLI commands, YAML fields *(skeleton — expanded as features ship)* |
+| [Reference](reference/) | Lookup | CLI commands (`reference/cli.md`), YAML fields *(expanded as features ship)* |
 
 ## Guides
 

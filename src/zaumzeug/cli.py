@@ -7,6 +7,7 @@ import sys
 from collections.abc import Callable
 
 from zaumzeug.doctor import run_doctor
+from zaumzeug.logging import configure_logging
 from zaumzeug.serve import format_dry_run, validate_serve
 from zaumzeug.serve.dry_run import dry_run_to_json
 
@@ -40,7 +41,14 @@ def _doctor_command(args: argparse.Namespace) -> int:
     return report.exit_code
 
 
+def _compile_command(args: argparse.Namespace) -> int:
+    configure_logging(verbose=args.verbose)
+    print("zaumzeug compile: not implemented yet", file=sys.stderr)
+    return 0
+
+
 def _serve_command(args: argparse.Namespace) -> int:
+    configure_logging(verbose=args.verbose)
     if args.dry_run:
         result = validate_serve(args.harness_name, deploy=args.deploy)
         if args.json:
@@ -111,13 +119,26 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="emit machine-readable JSON dry-run report",
     )
+    serve.add_argument(
+        "--verbose",
+        action="store_true",
+        help="enable SDK and Haystack debug logging",
+    )
     serve.set_defaults(_handler=_serve_command)
 
     for name in _COMMANDS:
-        if name in {"doctor", "serve"}:
+        if name in {"doctor", "serve", "compile"}:
             continue
         cmd = sub.add_parser(name, help=f"{name} command (stub)")
         cmd.set_defaults(_handler=_stub_command(name))
+
+    compile_cmd = sub.add_parser("compile", help="compile harness artifacts (stub)")
+    compile_cmd.add_argument(
+        "--verbose",
+        action="store_true",
+        help="enable SDK and Haystack debug logging",
+    )
+    compile_cmd.set_defaults(_handler=_compile_command)
 
     return parser
 

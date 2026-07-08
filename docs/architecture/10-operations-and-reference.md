@@ -31,10 +31,13 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 **Implementation (E2-S04c, 2026-07-08):** `--deploy` flag (or `HARNESS_ROOT=deploy`) validates production bundles under `deploy/<name>/`. Checks deploy `manifest.json`, pinned artifact runs (`deploy_manifest`, `deploy_artifact`), and reuses E2-S04a core checks; skips dev-only warnings. Tests: `tests/integration/test_doctor.py` (`-k e2_s04c`).
 
 **Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run [--deploy] [--json]` — `validate_serve()` in `src/zaumzeug/serve/validate.py`; prints port, entry agent, model id, runtime path, and tools; exit 1 on validation failure. No port bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
+
+**Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` sets SDK (`zaumzeug`) and Haystack loggers to DEBUG when `zaumzeug serve|compile --verbose` or `HARNESS_LOG_LEVEL=DEBUG`. `log_request()` emits structured per-request context (`model_id`, `tool`, `artifact_path`). `SecretRedactingFilter` redacts API keys and bearer tokens. CLI reference: `user-docs/reference/cli.md`. Tests: `tests/unit/test_logging.py`.
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
 | `--dry-run` on compile | Validate without GEPA/LLM (E4-S06) |
-| `HARNESS_LOG_LEVEL=DEBUG` | SDK + Haystack request logging |
+| `--verbose` on serve/compile | **Done** (E2-S06) — SDK + Haystack structured debug logging |
+| `HARNESS_LOG_LEVEL=DEBUG` | **Done** (E2-S06) — equivalent to `--verbose`; SDK + Haystack request logging |
 | `install --verify` | Doctor + optional dry-run serve |
 | Mock `models.yaml` profile | CI without API keys |
 | `tests/usr-harnesses/fixture/` | Minimal harness for SDK tests (not shipped) |
@@ -86,7 +89,7 @@ Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/
 
 | Phase | Debug/test deliverables |
 |---|---|
-| 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), mock profile, fixture harness |
+| 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile, fixture harness |
 | 2 | compile `--dry-run`, export golden tests, trace → `LLMTestCase`, optional `zaumzeug eval` |
 | 3 | MCP integration tests, tool correctness eval when DeepEval present |
 | 4 | `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
@@ -122,7 +125,7 @@ End-user walkthrough: [user-docs/guides/testing.md](../user-docs/guides/testing.
 |---|---|---|
 | *(unset)* | Default CI and local dev | `mock` profile only; `tests/e2e/` skipped |
 | `HARNESS_LIVE_LLM=1` | Nightly / pre-release / local opt-in | Enables `tests/e2e/` live provider tests |
-| `HARNESS_LOG_LEVEL=DEBUG` | Debugging failing integration test | SDK + Haystack structured logs |
+| `HARNESS_LOG_LEVEL=DEBUG` | Debugging failing integration test | SDK + Haystack structured logs (`configure_logging` in `logging.py`) |
 | `PYTEST_OPENAI_API_KEY` *(optional)* | Re-recording VCR cassettes | Real key for `pytest --record-mode=once`; filter auth headers from cassettes |
 
 #### CI tiers (maps to epics)

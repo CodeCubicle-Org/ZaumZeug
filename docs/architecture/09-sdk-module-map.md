@@ -10,7 +10,8 @@ Maps to [PRD epics](../prd.md#8-functional-requirements-epics). Implementation l
 
 | # | Component | Module | Epic | Status (2026-07-08) |
 |---|---|---|---|---|
-| 1 | CLI | `cli.py` | E1–E7 | **Partial** (E2-S00, E2-S05) — `doctor` and `serve --dry-run` implemented; other subcommands stub |
+| 1 | CLI | `cli.py` | E1–E7 | **Partial** (E2-S00, E2-S05, E2-S06) — `doctor`, `serve --dry-run`, `--verbose` on serve/compile; other subcommands stub |
+| 1a | Logging | `logging.py` | E2 | **Done** (E2-S06) — `configure_logging()`, `log_request()`, secret redaction, `HARNESS_LOG_LEVEL` |
 | 1b | Doctor | `doctor/` | E2 | **Done** (E2-S04a–S04c) — preflight checks, phase-aware warnings, `--deploy`, `--verbose`, `--json` |
 | 2 | Config loader + Pydantic schemas | `config/` | E2 | **Partial** (E2-S01–S03, S04c) — `harness.yaml`, `models.yaml` merge, agent resolver, harness root resolution |
 | 3 | ModelRouter | `runtime/model_router.py` | E3 | Planned |

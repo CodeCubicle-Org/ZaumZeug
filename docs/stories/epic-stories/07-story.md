@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/07-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-08 |
 | **Story ID** | E2-S06 |
+| **Status** | Done |
 | **Epic** | [E2 — Configuration and Validation](../01-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 1 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P2 |
 | **Prerequisites** | [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) · [E2-S00](01-story.md#e2-s00-sdk-package-skeleton-and-cli-foundation) |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -43,18 +45,24 @@ As a **harness developer**, I want verbose logging on serve and compile, so that
 - [Haystack logging](https://docs.haystack.deepset.ai/docs/logging) (wire level when `--verbose`)
 - [Architecture §13.2 — `HARNESS_LOG_LEVEL`](../../architecture/10-operations-and-reference.md#132-mechanisms)
 
+**Code**
+
+- `src/zaumzeug/logging.py` — `configure_logging()`, `log_request()`, `redact_secrets()`, `SecretRedactingFilter`
+- `src/zaumzeug/cli.py` — `--verbose` on `serve` and `compile`; calls `configure_logging()` at command entry
+- `user-docs/reference/cli.md` — `HARNESS_LOG_LEVEL` and `--verbose` documentation
+
 ### Acceptance criteria
 
-- [ ] **AC-1** `--verbose` on serve/compile enables SDK + Haystack structured logging
-- [ ] **AC-2** `HARNESS_LOG_LEVEL=DEBUG` env var works equivalently
-- [ ] **AC-3** Logs include `model_id`, tool name, artifact path per request where applicable
-- [ ] **AC-4** No secrets logged (API keys redacted)
+- [x] **AC-1** `--verbose` on serve/compile enables SDK + Haystack structured logging
+- [x] **AC-2** `HARNESS_LOG_LEVEL=DEBUG` env var works equivalently
+- [x] **AC-3** Logs include `model_id`, tool name, artifact path per request where applicable
+- [x] **AC-4** No secrets logged (API keys redacted)
 
 ### Implementation tasks (build)
 
-- [ ] Centralize logging config in `src/zaumzeug/logging.py`
-- [ ] Wire Haystack log level when verbose
-- [ ] Document env var in `user-docs/reference/cli.md`
+- [x] Centralize logging config in `src/zaumzeug/logging.py`
+- [x] Wire Haystack log level when verbose
+- [x] Document env var in `user-docs/reference/cli.md`
 
 ### Verification (after build)
 
@@ -67,12 +75,12 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-3 | `tests/unit/test_logging.py::test_e2_s06_ac3_log_record_includes_model_tool_artifact` |
 | AC-4 | `tests/unit/test_logging.py::test_e2_s06_ac4_api_keys_redacted_in_logs` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/test_logging.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/test_logging.py -v` passes
 
 ### Definition of done
 
-- [ ] No secrets logged (API keys redacted)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] No secrets logged (API keys redacted)
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---

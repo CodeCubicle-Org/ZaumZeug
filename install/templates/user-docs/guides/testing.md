@@ -177,7 +177,7 @@ For deploy gates, set `deploy.eval_gate` in `harness.yaml` (`skip` | `warn` | `b
 | Variable | Purpose |
 |---|---|
 | `HARNESS_LIVE_LLM=1` | Enable `tests/e2e/` and live provider smoke |
-| `HARNESS_LOG_LEVEL=DEBUG` | Verbose SDK + Haystack logs while debugging |
+| `HARNESS_LOG_LEVEL=DEBUG` | Verbose SDK + Haystack logs while debugging (equivalent to `serve`/`compile --verbose`) |
 | `PYTEST_OPENAI_API_KEY` | Re-record VCR cassettes (`pytest --record-mode=once`) |
 
 Never commit API keys. `.env` is gitignored.
@@ -201,8 +201,10 @@ Eval regression and live e2e are **additional** tiers — nightly or on PRs that
 ## Debugging failed tests
 
 ```bash
-# Structured logs
+# Structured logs (--verbose or env var)
 HARNESS_LOG_LEVEL=DEBUG zaumzeug serve example
+zaumzeug serve example --verbose
+zaumzeug serve example --dry-run --verbose
 
 # IDE attach (debugpy ships in [dev])
 python -m debugpy --listen 5678 -m zaumzeug.cli serve example
@@ -229,4 +231,4 @@ zaumzeug serve example --dry-run
 ## Related guides
 
 - [Multi-agent workflow](multi-agent-workflow.md) — `workflow.yaml` and stage routing under test
-- [CLI reference](../reference/cli.md) — `--dry-run`, `doctor`, `eval` flags *(skeleton)*
+- [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `--dry-run`, `doctor`, `eval` flags

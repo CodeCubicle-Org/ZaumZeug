@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 implementation in progress. Package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution (E2-S00–S03), `zaumzeug doctor` including deploy-bundle validation (E2-S04a–S04c), and `zaumzeug serve --dry-run` (E2-S05) are done; next: structured logging and workflow schema (E2-S06–S07). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 implementation in progress. Package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution (E2-S00–S03), `zaumzeug doctor` including deploy-bundle validation (E2-S04a–S04c), `zaumzeug serve --dry-run` (E2-S05), and structured logging (E2-S06) are done; next: `workflow.yaml` schema (E2-S07). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -136,6 +136,8 @@ Doctor warns (non-blocking) when: `eval` is present in Phase 1, MCP tools are co
 zaumzeug serve <harness> --dry-run    # Validate config + resolved paths (no Hayhooks, no LLM)
 zaumzeug serve <harness> --dry-run --deploy   # Same against deploy/<harness>/
 zaumzeug serve <harness> --dry-run --json     # Machine-readable summary
+zaumzeug serve <harness> --verbose    # SDK + Haystack debug logging (or HARNESS_LOG_LEVEL=DEBUG)
+zaumzeug compile <harness> --verbose  # Same logging for compile (Phase 2+)
 ```
 
 **Planned:**

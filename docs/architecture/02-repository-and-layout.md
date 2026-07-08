@@ -146,4 +146,6 @@ user-docs/
 
 Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [multi-agent-workflow.md](../user-docs/guides/multi-agent-workflow.md), [testing.md](../user-docs/guides/testing.md).
 
+**Implementation (E2-S06, 2026-07-08):** [user-docs/reference/cli.md](../user-docs/reference/cli.md) documents `HARNESS_LOG_LEVEL`, `--verbose` on serve/compile, and related CLI flags. Install template: `install/templates/user-docs/reference/cli.md`.
+
 ---
