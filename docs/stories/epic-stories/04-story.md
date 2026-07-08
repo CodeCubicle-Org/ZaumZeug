@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/04-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-08 |
 | **Story ID** | E2-S03 |
+| **Status** | Done |
 | **Epic** | [E2 — Configuration and Validation](../01-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 1 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P0 |
 | **Prerequisites** | [E2-S01](02-story.md#e2-s01-pydantic-config-schemas) · [E2-S02](03-story.md#e2-s02-modelsyaml-merge) |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -44,17 +46,22 @@ As a **harness developer**, I want runtime agent resolution enforced by mode, so
 - [Architecture §5.2 — runtime vs compile resolution](../../architecture/04-data-flows.md#52-runtime-agent-resolution)
 - [Architecture §2.1 — golden rules (no DSPy on serve)](../../architecture/01-overview-and-principles.md#21-golden-rules)
 
+**Code**
+
+- `src/zaumzeug/config/resolver.py` — `resolve_agent_serve()`, `resolve_agent_compile()`, `resolve_serve_entry()`
+- Exported from `zaumzeug.config` for doctor, serve, and compile stories
+
 ### Acceptance criteria
 
-- [ ] **AC-1** **Serve/run (per agent):** loads `artifact` > `system_prompt` > actionable error
-- [ ] **AC-2** **Compile (per agent):** requires `compile.module` in `agents/<name>/agent.yaml` (Phase 2+)
-- [ ] **AC-3** **Serve entry:** uses workflow `entry` agent for interactive `zaumzeug serve`
-- [ ] **AC-4** Error messages name missing path and suggest fix
+- [x] **AC-1** **Serve/run (per agent):** loads `artifact` > `system_prompt` > actionable error
+- [x] **AC-2** **Compile (per agent):** requires `compile.module` in `agents/<name>/agent.yaml` (Phase 2+)
+- [x] **AC-3** **Serve entry:** uses workflow `entry` agent for interactive `zaumzeug serve`
+- [x] **AC-4** Error messages name missing path and suggest fix
 
 ### Implementation tasks (build)
 
-- [ ] Implement resolver in `src/zaumzeug/config/resolver.py`
-- [ ] Validate artifact has `artifact-manifest.json` when artifact path set
+- [x] Implement resolver in `src/zaumzeug/config/resolver.py`
+- [x] Validate artifact has `artifact-manifest.json` when artifact path set
 
 ### Verification (after build)
 
@@ -69,13 +76,13 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-3 | `tests/unit/config/test_resolver.py::test_e2_s03_ac3_serve_entry_from_workflow` |
 | AC-4 | `tests/unit/config/test_resolver.py::test_e2_s03_ac4_error_names_path_and_suggests_fix` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/config/test_resolver.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/config/test_resolver.py -v` passes
 
 ### Definition of done
 
-- [ ] Doctor and serve use same resolution logic
-- [ ] No DSPy import on serve path
-- [ ] Verification checklist complete; all ACs traced to tests
+- [ ] Doctor and serve use same resolution logic *(resolver ready; close when [E2-S04a](05.1-story.md#definition-of-done) and [E3-S00](12-story.md#definition-of-done) are done)*
+- [x] No DSPy import on serve path
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---

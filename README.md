@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 implementation in progress. Package skeleton, `harness.yaml` validation, and three-tier `models.yaml` merge (E2-S00–S02) are done; next: runtime agent resolution (E2-S03). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 implementation in progress. Package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, and runtime agent resolution (E2-S00–S03) are done; next: `zaumzeug doctor` core checks (E2-S04a). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 

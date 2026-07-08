@@ -90,5 +90,6 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 - [ ] Used by `serve/runner.py` (E3-S02) — not duplicated in serve layer
 - [ ] Verification checklist complete; all ACs traced to tests
+- [ ] Reuses `zaumzeug.config.resolver` in `build_agent()`; when complete, check off [E2-S03](04-story.md#definition-of-done) DoD *serve uses same resolution logic*
 
 ---

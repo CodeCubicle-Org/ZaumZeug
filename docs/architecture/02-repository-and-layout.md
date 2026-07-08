@@ -10,7 +10,7 @@
 HarnessDevelopment/
 ├── src/zaumzeug/          # SDK internals
 │   ├── cli.py
-│   ├── config/               # Pydantic schemas, loaders (E2-S01), models merge (E2-S02)
+│   ├── config/               # Pydantic schemas, loaders (E2-S01), models merge (E2-S02), resolver (E2-S03)
 │   ├── runtime/              # Agent factory, ModelRouter, tool registry
 │   ├── compile/              # DSPy loader, GEPA runner, export contract
 │   ├── deploy/               # usr-harnesses/ → deploy/ packager

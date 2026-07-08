@@ -55,6 +55,8 @@ At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug run` (workflow
 5. Else if `agent.yaml` → `system_prompt` file exists → use as `Agent.system_prompt`.
 6. Else → fail fast with actionable error (include `harness-name` and `agent-name`).
 
+**Implementation (E2-S03, 2026-07-08):** Serve/compile resolution via `zaumzeug.config.resolve_agent_serve()`, `resolve_agent_compile()`, and `resolve_serve_entry()` (`src/zaumzeug/config/resolver.py`). When `agent.artifact` is set, `artifact-manifest.json` must exist in that directory. No DSPy import on the serve resolution path. Doctor and serve CLI wiring reuse this module in E2-S04a and E3-S02.
+
 **Interactive serve** (`zaumzeug serve <harness>`): runs the workflow's **entry** agent (or sole agent) for chat/MCP/ACP clients. **Workflow run** (`zaumzeug run <harness>`): executes the full or partial stage graph.
 
 At `zaumzeug compile <harness> --agent <agent-name>` (offline):

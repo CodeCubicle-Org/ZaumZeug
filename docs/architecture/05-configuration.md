@@ -158,6 +158,8 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E2-S02, 2026-07-08):** Per-agent model registries merge via `zaumzeug.config.load_merged_agent_models()` (`models.py`). Agent and workflow schemas land in later E2 stories.
 
+**Implementation (E2-S03, 2026-07-08):** Per-agent serve/compile resolution via `zaumzeug.config.resolver` — `artifact` > `system_prompt` > error at serve; `compile.module` required at compile; `resolve_serve_entry()` reads `workflow.yaml` `entry`. Exported from `zaumzeug.config` for doctor, serve, and compile commands.
+
 **Phase 1:** `workflow.yaml` ships with the multi-agent layout (minimum one serial stage). **`zaumzeug run`** executes serial stages (E3). **Parallel fan-out** (`parallelism: N`) is deferred post–Phase 1.
 
 **`usr-harnesses/example/harness.yaml`** (Phase 1 CI — multi-agent layout, single stage):

@@ -6,7 +6,7 @@
 | **File** | `docs/stories/01-epic.md` |
 | **Created** | 2026-07-04 |
 | **Last modified** | 2026-07-08 |
-| **Status** | In progress (E2-S00, E2-S01, E2-S02 done) |
+| **Status** | In progress (E2-S00–S03 done) |
 | **Build order** | **1 of 8** (implement first) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -27,8 +27,8 @@
 1. **E2-S00** — Package skeleton + CLI stub *(foundation)* — **Done** ([01-story.md](epic-stories/01-story.md))
 2. **E2-S01** — Pydantic config schemas — **Done** ([02-story.md](epic-stories/02-story.md))
 3. **E2-S02** — `models.yaml` merge — **Done** ([03-story.md](epic-stories/03-story.md))
-4. **E2-S03** — Runtime agent resolution rules ← **next**
-5. **E2-S04a** → **E2-S04b** — `zaumzeug doctor` (core checks, then phase-aware warnings)
+4. **E2-S03** — Runtime agent resolution rules — **Done** ([04-story.md](epic-stories/04-story.md))
+5. **E2-S04a** → **E2-S04b** — `zaumzeug doctor` (core checks, then phase-aware warnings) ← **next**
 6. **E2-S05** — Serve `--dry-run` *(after E3 serve stub exists)*
 7. **E2-S06** — Logging
 8. **E2-S07** — `workflow.yaml` schema (serial stages)
@@ -222,6 +222,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Persona** | Harness developer |
 | **Priority** | P0 |
 | **Prerequisites** | [E2-S01](#e2-s01-pydantic-config-schemas) · [E2-S02](#e2-s02-modelsyaml-merge) |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -236,15 +237,15 @@ As a **harness developer**, I want runtime agent resolution enforced by mode, so
 
 ### Acceptance criteria
 
-- [ ] **AC-1** **Serve/run (per agent):** loads `artifact` > `system_prompt` > actionable error
-- [ ] **AC-2** **Compile (per agent):** requires `compile.module` in `agents/<name>/agent.yaml` (Phase 2+)
-- [ ] **AC-3** **Serve entry:** uses workflow `entry` agent for interactive `zaumzeug serve`
-- [ ] **AC-4** Error messages name missing path and suggest fix
+- [x] **AC-1** **Serve/run (per agent):** loads `artifact` > `system_prompt` > actionable error
+- [x] **AC-2** **Compile (per agent):** requires `compile.module` in `agents/<name>/agent.yaml` (Phase 2+)
+- [x] **AC-3** **Serve entry:** uses workflow `entry` agent for interactive `zaumzeug serve`
+- [x] **AC-4** Error messages name missing path and suggest fix
 
 ### Implementation tasks (build)
 
-- [ ] Implement resolver in `src/zaumzeug/config/resolver.py`
-- [ ] Validate artifact has `artifact-manifest.json` when artifact path set
+- [x] Implement resolver in `src/zaumzeug/config/resolver.py`
+- [x] Validate artifact has `artifact-manifest.json` when artifact path set
 
 ### Verification (after build)
 
@@ -259,14 +260,14 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-3 | `tests/unit/config/test_resolver.py::test_e2_s03_ac3_serve_entry_from_workflow` |
 | AC-4 | `tests/unit/config/test_resolver.py::test_e2_s03_ac4_error_names_path_and_suggests_fix` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/config/test_resolver.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/config/test_resolver.py -v` passes
 
 ### Definition of done
 
-- [ ] Doctor and serve use same resolution logic
-- [ ] No DSPy import on serve path
-- [ ] Verification checklist complete; all ACs traced to tests
+- [ ] Doctor and serve use same resolution logic *(resolver ready; close when E2-S04a and E3-S00 are done)*
+- [x] No DSPy import on serve path
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

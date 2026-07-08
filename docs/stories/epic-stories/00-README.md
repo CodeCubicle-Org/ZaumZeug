@@ -12,7 +12,7 @@
 
 Stories numbered in **global build order**. Split stories use decimal suffixes (e.g. `05.1-story.md`). **Total: 69** story files.
 
-**Implementation progress:** [01-story.md](01-story.md) (E2-S00) **Done**; [02-story.md](02-story.md) (E2-S01) **Done**; [03-story.md](03-story.md) (E2-S02) **Done** (2026-07-08). Next: [04-story.md](04-story.md) (E2-S03).
+**Implementation progress:** [01-story.md](01-story.md) (E2-S00) **Done**; [02-story.md](02-story.md) (E2-S01) **Done**; [03-story.md](03-story.md) (E2-S02) **Done**; [04-story.md](04-story.md) (E2-S03) **Done** (2026-07-08). Next: [05.1-story.md](05.1-story.md) (E2-S04a).
 
 | File | Story | Phase | Epic |
 |---|---|---|---|
