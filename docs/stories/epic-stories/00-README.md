@@ -5,14 +5,14 @@
 | **Document** | Individual user stories (extracted from epic files) |
 | **Folder** | `docs/stories/epic-stories/` |
 | **Created** | 2026-07-05 |
-| **Last modified** | 2026-07-08 (E2-S07 done) |
+| **Last modified** | 2026-07-08 (E3-S05 done) |
 | **Related** | [Epic index](../00-README.md) · [PRD](../../prd.md) · [Implementation resources](00-implementation-resources.md) |
 
 ---
 
 Stories numbered in **global build order**. Split stories use decimal suffixes (e.g. `05.1-story.md`). **Total: 69** story files.
 
-**Implementation progress:** [01-story.md](01-story.md) (E2-S00) **Done**; [02-story.md](02-story.md) (E2-S01) **Done**; [03-story.md](03-story.md) (E2-S02) **Done**; [04-story.md](04-story.md) (E2-S03) **Done**; [05.1-story.md](05.1-story.md) (E2-S04a) **Done**; [05.2-story.md](05.2-story.md) (E2-S04b) **Done**; [05.3-story.md](05.3-story.md) (E2-S04c) **Done**; [06-story.md](06-story.md) (E2-S05) **Done** (2026-07-08); [07-story.md](07-story.md) (E2-S06) **Done** (2026-07-08); [08-story.md](08-story.md) (E2-S07) **Done** (2026-07-08). Next: [09-story.md](09-story.md) (E3-S05).
+**Implementation progress:** [01-story.md](01-story.md) (E2-S00) **Done**; [02-story.md](02-story.md) (E2-S01) **Done**; [03-story.md](03-story.md) (E2-S02) **Done**; [04-story.md](04-story.md) (E2-S03) **Done**; [05.1-story.md](05.1-story.md) (E2-S04a) **Done**; [05.2-story.md](05.2-story.md) (E2-S04b) **Done**; [05.3-story.md](05.3-story.md) (E2-S04c) **Done**; [06-story.md](06-story.md) (E2-S05) **Done** (2026-07-08); [07-story.md](07-story.md) (E2-S06) **Done** (2026-07-08); [08-story.md](08-story.md) (E2-S07) **Done** (2026-07-08); [09-story.md](09-story.md) (E3-S05) **Done** (2026-07-08). Next: [10-story.md](10-story.md) (E3-S01).
 
 | File | Story | Phase | Epic |
 |---|---|---|---|
@@ -26,7 +26,7 @@ Stories numbered in **global build order**. Split stories use decimal suffixes (
 | [06-story.md](06-story.md) | E2-S05 — `--dry-run` on serve ✅ | 1 | [E2](../01-epic.md) |
 | [07-story.md](07-story.md) | E2-S06 — Structured logging ✅ | 1 | [E2](../01-epic.md) |
 | [08-story.md](08-story.md) | E2-S07 — `workflow.yaml` schema (serial) ✅ | 1 | [E2](../01-epic.md) |
-| [09-story.md](09-story.md) | E3-S05 — Mock model profile | 1 | [E3](../02-epic.md) |
+| [09-story.md](09-story.md) | E3-S05 — Mock model profile ✅ | 1 | [E3](../02-epic.md) |
 | [10-story.md](10-story.md) | E3-S01 — ModelRouter | 1 | [E3](../02-epic.md) |
 | [11-story.md](11-story.md) | E3-S03 — Builtin tool: `web_fetch` | 1 | [E3](../02-epic.md) |
 | [12-story.md](12-story.md) | E3-S00 — Runtime factory (Haystack Agent builder) | 1 | [E3](../02-epic.md) |

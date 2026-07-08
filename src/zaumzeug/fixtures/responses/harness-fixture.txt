@@ -1,0 +1,1 @@
+Mock harness fixture response for deterministic CI and local serve smoke tests.

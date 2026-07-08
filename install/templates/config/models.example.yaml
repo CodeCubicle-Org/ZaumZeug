@@ -1,0 +1,11 @@
+# Global model registry defaults (Architecture §6.6).
+# Copied to config/models.yaml on project scaffold (E1-S03).
+#
+# Per-agent overrides live in agents/<name>/agents-models.yaml.
+
+default_model_id: mock
+
+models:
+  mock:
+    provider: mock
+    model: harness-fixture

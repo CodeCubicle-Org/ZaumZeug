@@ -46,6 +46,9 @@ zaumzeug = "zaumzeug.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+zaumzeug = ["fixtures/responses/*.txt", "fixtures/responses/*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]

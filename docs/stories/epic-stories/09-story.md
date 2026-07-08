@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/09-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-08 |
 | **Story ID** | E3-S05 |
+| **Status** | Done |
 | **Epic** | [E3 — Runtime and Local Serve](../02-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 2 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
 | **Prerequisites** | [E2-S02](03-story.md#e2-s02-modelsyaml-merge) |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -55,16 +57,16 @@ models:
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `models.yaml` defines `mock` provider per §6.6
-- [ ] **AC-2** Canned responses from `tests/fixtures/responses/`
-- [ ] **AC-3** CI matrix uses mock exclusively ([E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix))
-- [ ] **AC-4** Mock works without provider Haystack integration packages
+- [x] **AC-1** `models.yaml` defines `mock` provider per §6.6
+- [x] **AC-2** Canned responses from `tests/fixtures/responses/`
+- [x] **AC-3** CI matrix uses mock exclusively ([E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix))
+- [x] **AC-4** Mock works without provider Haystack integration packages
 
 ### Implementation tasks (build)
 
-- [ ] Implement mock `ChatGenerator` in `src/zaumzeug/runtime/model_router.py`
-- [ ] Add fixture JSON/text under `tests/fixtures/responses/` for deterministic assertions
-- [ ] Ship `mock` entry in `install/templates/config/models.example.yaml`
+- [x] Implement mock `ChatGenerator` in `src/zaumzeug/integrations/mock.py`; wire via `src/zaumzeug/runtime/model_router.py`
+- [x] Add fixture JSON/text under `tests/fixtures/responses/` for deterministic assertions
+- [x] Ship `mock` entry in `install/templates/config/models.example.yaml`
 
 ### Verification (after build)
 
@@ -74,15 +76,15 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 |---|---|
 | AC-1 | `tests/unit/runtime/test_model_router.py::test_e3_s05_ac1_mock_provider_in_registry` |
 | AC-2 | `tests/unit/runtime/test_model_router.py::test_e3_s05_ac2_returns_fixture_response` |
-| AC-3 | **shared:** traced in [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) workflow (mock-only jobs) |
+| AC-3 | `tests/unit/runtime/test_model_router.py::test_e3_s05_ac3_ci_uses_mock_exclusively` *(E1-S07 also validates workflow steps)* |
 | AC-4 | `tests/unit/runtime/test_model_router.py::test_e3_s05_ac4_no_provider_package_required` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/runtime/test_model_router.py -v -k e3_s05` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/runtime/test_model_router.py -v -k e3_s05` passes
 
 ### Definition of done
 
-- [ ] ModelRouter returns fixture response for `model_id: mock`
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] ModelRouter returns fixture response for `model_id: mock`
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---

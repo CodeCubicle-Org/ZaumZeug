@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 (E2-S06 done) |
+| **Last modified** | 2026-07-08 (E3-S05 done) |
 | **Status** | Active |
 
 ---
@@ -44,8 +44,10 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E2-S04c](epic-stories/05.3-story.md) — `zaumzeug doctor --deploy` mode | Done | 2026-07-08 |
 | [E2-S05](epic-stories/06-story.md) — `zaumzeug serve --dry-run` | Done | 2026-07-08 |
 | [E2-S06](epic-stories/07-story.md) — Structured logging | Done | 2026-07-08 |
+| [E2-S07](epic-stories/08-story.md) — `workflow.yaml` schema (serial) | Done | 2026-07-08 |
+| [E3-S05](epic-stories/09-story.md) — Mock model profile | Done | 2026-07-08 |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), and structured logging (E2-S06) are done; remaining E2/E3/E1 stories follow the [build graph](#phase-1-build-graph) below.
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), and mock model profile (E3-S05) are done; remaining E2/E3/E1 stories follow the [build graph](#phase-1-build-graph) below.
 
 ---
 
@@ -63,8 +65,8 @@ E2-S04c  zaumzeug doctor --deploy ✅
 E2-S05  zaumzeug serve --dry-run ✅
 E2-S06  structured logging ✅
 E2-S07  workflow.yaml schema ✅
+E3-S05  Mock model profile ✅
    ↓
-E3-S05  Mock model (needed before serve smoke) ← next
 E3-S01  ModelRouter
 E3-S03  web_fetch
 E3-S00  Runtime factory (Agent builder)

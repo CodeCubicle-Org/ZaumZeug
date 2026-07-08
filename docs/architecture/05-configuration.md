@@ -170,6 +170,8 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run` in `src/zaumzeug/serve/` — `validate_serve()` uses strict `load_harness()` and `load_workflow()`, `resolve_serve_entry()`, and doctor model/runtime checks; optional `--deploy` and `--json`. No Hayhooks bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
 
+**Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` in `src/zaumzeug/integrations/mock.py` returns canned text from `tests/fixtures/responses/{model}.txt` (or `.json` with a `content` field); bundled copy under `src/zaumzeug/fixtures/responses/` for pip installs. `ModelRouter` in `src/zaumzeug/runtime/model_router.py` dispatches `provider: mock` without `haystack_integrations` packages. Shipped default: `install/templates/config/models.example.yaml` (`default_model_id: mock`, `model: harness-fixture`). Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`).
+
 **Phase 1:** `workflow.yaml` ships with the multi-agent layout (minimum one serial stage). **`zaumzeug run`** executes serial stages (E3). **Parallel fan-out** (`parallelism: N`) is deferred post–Phase 1.
 
 **`usr-harnesses/example/harness.yaml`** (Phase 1 CI — multi-agent layout, single stage):
@@ -254,6 +256,8 @@ flowchart LR
 - **Cross-agent models:** `vuln-hunter` and `finding-validator` may use different providers with no client-side override — workflow handles the switch.
 - **Compile:** DSPy/GEPA use LiteLLM strings from **that agent's** merged registry.
 - **Secrets:** `.env` only; provider packages opt-in per referenced providers across all agents in the harness.
-- **Mock profile:** `mock` provider in `agents-models.yaml` for CI.
+- **Mock profile:** `provider: mock` in `agents-models.yaml` for CI and first-run serve. `MockChatGenerator` loads `{model}.txt` or `{model}.json` from `tests/fixtures/responses/` (repo dev) or `zaumzeug.fixtures.responses` (pip install). No `haystack_integrations` package required. **Done** (E3-S05).
+
+**Implementation (E3-S05, 2026-07-08):** `ModelRouter` + `MockChatGenerator` — see §6.6 implementation note. Live providers (OpenRouter, OpenAI, …) land in E3-S01.
 
 ---

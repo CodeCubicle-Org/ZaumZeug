@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers · SDK contributors |
-| **Last updated** | 2026-07-05 |
+| **Last updated** | 2026-07-08 |
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
@@ -47,19 +47,23 @@ HARNESS_LIVE_LLM=1 pytest tests/e2e -v
 
 ## Mock model (default)
 
-The **`mock`** provider in `agents-models.yaml` returns canned text from `tests/fixtures/responses/`. CI and local quick-start use this exclusively.
+The **`mock`** provider in `agents-models.yaml` returns canned text from `tests/fixtures/responses/` (or the bundled copy under `src/zaumzeug/fixtures/responses/` when installed via pip). CI and local quick-start use this exclusively — no API keys.
 
 ```yaml
-# agents/<name>/agents-models.yaml (example harness)
-default_model_id: mock-researcher
+# agents/<name>/agents-models.yaml (example harness — Architecture §6.6)
+default_model_id: mock
 
 models:
-  mock-researcher:
+  mock:
     provider: mock
-    model: mock-v1
+    model: harness-fixture   # loads tests/fixtures/responses/harness-fixture.txt
 ```
 
+Global defaults ship in `install/templates/config/models.example.yaml` (copied to `config/models.yaml` on scaffold).
+
 `zaumzeug serve example` works without `.env`. Integration tests assert JSON **shape** and routing — not semantic answer quality.
+
+Unit tests: `pytest tests/unit/runtime/test_model_router.py -v -k e3_s05`.
 
 ---
 
@@ -105,6 +109,7 @@ Focus on **contracts and errors**, not LLM prose.
 |---|---|
 | Config schema | Invalid yaml → field-level Pydantic error with path |
 | Model merge | Harness `models.yaml` + agent `agents-models.yaml` → expected `default_model_id` |
+| ModelRouter mock | `provider: mock` → fixture text from `tests/fixtures/responses/` (no API keys) |
 | Resolution | `artifact` present → serve path loads artifact, ignores `system_prompt` |
 | Export (Phase 2+) | `dump_state()` snapshot matches golden file |
 

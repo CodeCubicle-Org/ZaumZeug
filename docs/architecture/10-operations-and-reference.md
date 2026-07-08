@@ -35,13 +35,16 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 **Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` sets SDK (`zaumzeug`) and Haystack loggers to DEBUG when `zaumzeug serve|compile --verbose` or `HARNESS_LOG_LEVEL=DEBUG`. `log_request()` emits structured per-request context (`model_id`, `tool`, `artifact_path`). `SecretRedactingFilter` redacts API keys and bearer tokens. CLI reference: `user-docs/reference/cli.md`. Tests: `tests/unit/test_logging.py`.
 
 **Implementation (E2-S07, 2026-07-08):** `workflow.yaml` schema validation via `load_workflow()` — `workflow_config` check in doctor; `validate_serve()` fails fast on invalid workflow before entry resolution. Tests: `tests/unit/config/test_workflow_schema.py`.
+
+**Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` (`src/zaumzeug/integrations/mock.py`) returns fixture text from `tests/fixtures/responses/`; `ModelRouter` (`src/zaumzeug/runtime/model_router.py`) dispatches `provider: mock` without live API keys or provider integration packages. Shipped `install/templates/config/models.example.yaml`. Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`). E1-S07 CI matrix will smoke-test serve with mock when workflow lands.
+
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
 | `--dry-run` on compile | Validate without GEPA/LLM (E4-S06) |
 | `--verbose` on serve/compile | **Done** (E2-S06) — SDK + Haystack structured debug logging |
 | `HARNESS_LOG_LEVEL=DEBUG` | **Done** (E2-S06) — equivalent to `--verbose`; SDK + Haystack request logging |
 | `install --verify` | Doctor + optional dry-run serve |
-| Mock `models.yaml` profile | CI without API keys |
+| Mock `models.yaml` profile | **Done** (E3-S05) — CI and local dev without API keys |
 | `tests/usr-harnesses/fixture/` | Minimal harness for SDK tests (not shipped) |
 | debugpy | `python -m debugpy --listen 5678 -m zaumzeug.cli serve example` |
 | Hayhooks escape hatch | Raw `hayhooks run` to isolate Haystack vs config |
@@ -51,7 +54,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 ```text
 tests/
-├── unit/                         # config merge, doctor checks, ModelRouter mock (Phase 2+)
+├── unit/                         # config merge, doctor checks, ModelRouter mock ✅ (E3-S05)
 ├── integration/                  # doctor harness scans, serve HTTP contract, deploy smoke
 ├── usr-harnesses/                # SDK runs against fixture/example harness trees
 │   ├── fixture/                  # minimal harness — not shipped to users
@@ -91,7 +94,7 @@ Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/
 
 | Phase | Debug/test deliverables |
 |---|---|
-| 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile, fixture harness |
+| 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), fixture harness |
 | 2 | compile `--dry-run`, export golden tests, trace → `LLMTestCase`, optional `zaumzeug eval` |
 | 3 | MCP integration tests, tool correctness eval when DeepEval present |
 | 4 | `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |

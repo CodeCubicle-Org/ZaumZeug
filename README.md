@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 implementation in progress. Epic E2 (configuration and validation) is **complete**: package skeleton, `harness.yaml` and `workflow.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (including deploy-bundle validation), `zaumzeug serve --dry-run`, and structured logging (E2-S00–S07). Next: E3 runtime (mock model, ModelRouter, serve). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 implementation in progress. Epic E2 (configuration and validation) is **complete** (E2-S00–S07). E3 runtime has begun: **mock model profile** (E3-S05) — `ModelRouter` + `MockChatGenerator`, fixture responses, no API keys for CI. Next: full ModelRouter (E3-S01), serve, example harness. Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
