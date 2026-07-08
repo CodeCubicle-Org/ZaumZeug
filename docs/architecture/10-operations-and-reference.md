@@ -36,7 +36,9 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E2-S07, 2026-07-08):** `workflow.yaml` schema validation via `load_workflow()` — `workflow_config` check in doctor; `validate_serve()` fails fast on invalid workflow before entry resolution. Tests: `tests/unit/config/test_workflow_schema.py`.
 
-**Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` (`src/zaumzeug/integrations/mock.py`) returns fixture text from `tests/fixtures/responses/`; `ModelRouter` (`src/zaumzeug/runtime/model_router.py`) dispatches `provider: mock` without live API keys or provider integration packages. Shipped `install/templates/config/models.example.yaml`. Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`). E1-S07 CI matrix will smoke-test serve with mock when workflow lands.
+**Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` (`src/zaumzeug/integrations/mock.py`) returns fixture text from `tests/fixtures/responses/`; `ModelRouter` (`src/zaumzeug/runtime/model_router.py`) dispatches `provider: mock` without live API keys or provider integration packages. Shipped `install/templates/config/models.example.yaml`. Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`).
+
+**Implementation (E3-S01, 2026-07-08):** Config-driven `ModelRouter` — `src/zaumzeug/integrations/haystack.py` (`PROVIDERS`, `build_chat_generator`); Phase 1 live providers `openrouter` and `openai_compatible` (LM Studio / local OpenAI-compatible APIs via `api_base_url`); lazy generator cache; install hints on missing packages. Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s01`), `tests/integration/test_openai_contract.py` (AC-8 routing).
 
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
@@ -45,6 +47,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 | `HARNESS_LOG_LEVEL=DEBUG` | **Done** (E2-S06) — equivalent to `--verbose`; SDK + Haystack request logging |
 | `install --verify` | Doctor + optional dry-run serve |
 | Mock `models.yaml` profile | **Done** (E3-S05) — CI and local dev without API keys |
+| Phase 1 ModelRouter providers | **Done** (E3-S01) — `mock`, `openrouter`, `openai_compatible` (local LM Studio) |
 | `tests/usr-harnesses/fixture/` | Minimal harness for SDK tests (not shipped) |
 | debugpy | `python -m debugpy --listen 5678 -m zaumzeug.cli serve example` |
 | Hayhooks escape hatch | Raw `hayhooks run` to isolate Haystack vs config |
@@ -54,7 +57,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 ```text
 tests/
-├── unit/                         # config merge, doctor checks, ModelRouter mock ✅ (E3-S05)
+├── unit/                         # config merge, doctor checks, ModelRouter ✅ (E3-S01, E3-S05)
 ├── integration/                  # doctor harness scans, serve HTTP contract, deploy smoke
 ├── usr-harnesses/                # SDK runs against fixture/example harness trees
 │   ├── fixture/                  # minimal harness — not shipped to users
@@ -94,7 +97,7 @@ Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/
 
 | Phase | Debug/test deliverables |
 |---|---|
-| 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), fixture harness |
+| 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness |
 | 2 | compile `--dry-run`, export golden tests, trace → `LLMTestCase`, optional `zaumzeug eval` |
 | 3 | MCP integration tests, tool correctness eval when DeepEval present |
 | 4 | `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |

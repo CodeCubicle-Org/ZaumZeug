@@ -9,3 +9,16 @@ models:
   mock:
     provider: mock
     model: harness-fixture
+
+# --- Local dev (opt-in; not used in CI) --------------------------------------
+# Uncomment and set default_model_id: local when LM Studio (or similar) is running.
+#
+# default_model_id: local
+#
+# models:
+#   local:
+#     provider: openai_compatible
+#     model: your-loaded-model-id
+#     api_base_url: http://localhost:1234/v1
+#
+# .env: OPENAI_API_KEY=lm-studio  (placeholder; local servers usually ignore it)

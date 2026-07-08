@@ -43,6 +43,7 @@ _PROVIDER_ENV_KEYS: dict[str, tuple[str, ...]] = {
     "openai": ("OPENAI_API_KEY",),
     "anthropic": ("ANTHROPIC_API_KEY",),
     "openrouter": ("OPENROUTER_API_KEY",),
+    "openai_compatible": (),  # optional for localhost; placeholder key is enough
     "azure": ("AZURE_API_KEY", "AZURE_OPENAI_API_KEY"),
     "cohere": ("COHERE_API_KEY",),
     "gemini": ("GEMINI_API_KEY", "GOOGLE_API_KEY"),

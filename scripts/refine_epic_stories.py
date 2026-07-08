@@ -812,8 +812,9 @@ def patch_e3_s01(text: str) -> str:
 | Provider id | Phase | Notes |
 |---|---|---|
 | `mock` | 1 | Default for CI and example harness ([E3-S05](09-story.md)) |
-| `openrouter` | 1 | Live models via OpenRouter API key in `.env` |
-| `openai`, `anthropic`, etc. | 2+ | Phase-gated — fail with phase hint if configured in Phase 1 |
+| `openrouter` | 1 | Hosted models via OpenRouter API key in `.env` |
+| `openai_compatible` | 1 | Local or self-hosted OpenAI-compatible APIs (LM Studio, Ollama, vLLM); `api_base_url` in YAML; API key optional for localhost |
+| `openai`, `anthropic`, etc. | 2+ | Native cloud providers — phase-gated; fail with phase hint if configured in Phase 1 |
 
 """
     if "### Phase 1 provider allowlist" in text:

@@ -12,12 +12,12 @@ HarnessDevelopment/
 │   ├── cli.py
 │   ├── config/               # Pydantic schemas, loaders (E2-S01), models merge (E2-S02), resolver (E2-S03)
 │   ├── doctor/               # Preflight checks — pass/warn/fail (E2-S04a–S04c)
-│   ├── runtime/              # ModelRouter (E3-S05 mock), agent factory, tool registry
+│   ├── runtime/              # ModelRouter (E3-S01, E3-S05), agent factory, tool registry
 │   ├── compile/              # DSPy loader, GEPA runner, export contract
 │   ├── deploy/               # usr-harnesses/ → deploy/ packager
 │   ├── eval/                 # Optional DeepEval bridge
 │   ├── serve/                # validate_serve + dry-run (E2-S05); Hayhooks runner (E3-S02)
-│   ├── integrations/         # mock ChatGenerator (E3-S05); Haystack, DSPy, GEPA, LiteLLM adapters
+│   ├── integrations/         # mock (E3-S05), haystack provider map (E3-S01); DSPy, GEPA, LiteLLM adapters
 │   └── fixtures/responses/   # bundled mock LLM fixtures (pip install; mirrors tests/fixtures/responses/)
 ├── usr-harnesses/<name>/         # USER dev workspace (author, compile, experiment)
 ├── deploy/<name>/            # PRODUCTION bundle (generated)

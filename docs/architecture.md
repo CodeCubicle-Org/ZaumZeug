@@ -1,6 +1,6 @@
 # ZaumZeug — Architecture
 
-**Last updated:** 2026-07-08 (E3-S05 — mock model profile, `ModelRouter`, `MockChatGenerator`)  
+**Last updated:** 2026-07-08 (E3-S01 — config-driven `ModelRouter`, Phase 1 providers, `openai_compatible` local dev)  
 **Related:** [PRD](prd.md) · [Ideation archive](ideation-stage.md) · [Stories index](stories/00-README.md)
 
 **Document scope:** This document defines **how** the system is built — structure, flows, protocols, and SDK modules. Product **what/why**, epics, acceptance criteria, and phases live in **[prd.md](prd.md)**. Cross-reference; do not duplicate.

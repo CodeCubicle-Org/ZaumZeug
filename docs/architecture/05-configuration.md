@@ -229,7 +229,7 @@ User-facing explanation of `workflow.yaml`, pipeline stages, and agent-internal 
 
 ## 7. Model routing
 
-**Resolved (PRD open #5):** Ship a **custom `ModelRouter`** (`runtime/model_router.py`) as the default. It reads `model_id` from the **active agent's** merged `agents-models.yaml` and optional request override; lazily constructs the matching Haystack `ChatGenerator`. **OpenRouter** is supported via `openrouter-haystack` when a registry entry uses `provider: openrouter`.
+**Resolved (PRD open #5):** Ship a **custom `ModelRouter`** (`runtime/model_router.py`) as the default. It reads `model_id` from the **active agent's** merged `agents-models.yaml` and optional request override; lazily constructs the matching Haystack `ChatGenerator`. **Phase 1 live providers:** `openrouter` via `openrouter-haystack`; **`openai_compatible`** via `openai-haystack` with `api_base_url` for local OpenAI-compatible servers (LM Studio, Ollama, vLLM). Native cloud providers (`openai`, `anthropic`, …) are Phase 2+.
 
 ```mermaid
 flowchart LR
@@ -250,14 +250,17 @@ flowchart LR
     genB --> haystack
 ```
 
-- **Registry:** per-agent `model_id` → provider + model + kwargs (`agents-models.yaml`).
+- **Registry:** per-agent `model_id` → provider + model + optional `api_base_url` + kwargs (`agents-models.yaml`). `api_base_url` is not a secret — use YAML for localhost endpoints; override via `OPENAI_API_BASE` in `.env` when needed.
 - **ModelRouter:** one instance (or cache) **per agent role**; workflow stage transition swaps active router.
 - **API:** OpenAI `model` = harness name; optional request `model_id` overrides **current stage's** registry.
 - **Cross-agent models:** `vuln-hunter` and `finding-validator` may use different providers with no client-side override — workflow handles the switch.
 - **Compile:** DSPy/GEPA use LiteLLM strings from **that agent's** merged registry.
 - **Secrets:** `.env` only; provider packages opt-in per referenced providers across all agents in the harness.
 - **Mock profile:** `provider: mock` in `agents-models.yaml` for CI and first-run serve. `MockChatGenerator` loads `{model}.txt` or `{model}.json` from `tests/fixtures/responses/` (repo dev) or `zaumzeug.fixtures.responses` (pip install). No `haystack_integrations` package required. **Done** (E3-S05).
+- **Local dev (LM Studio):** `provider: openai_compatible`, `api_base_url: http://localhost:1234/v1`, and the model id from the local server. Placeholder `OPENAI_API_KEY` in `.env` is enough for most localhost endpoints. Shipped `models.example.yaml` stays mock-only for CI; local profiles are opt-in per harness.
 
-**Implementation (E3-S05, 2026-07-08):** `ModelRouter` + `MockChatGenerator` — see §6.6 implementation note. Live providers (OpenRouter, OpenAI, …) land in E3-S01.
+**Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` in `src/zaumzeug/integrations/mock.py` returns canned text from `tests/fixtures/responses/{model}.txt` (or `.json` with a `content` field); bundled copy under `src/zaumzeug/fixtures/responses/` for pip installs. `ModelRouter` in `src/zaumzeug/runtime/model_router.py` dispatches `provider: mock` without `haystack_integrations` packages. Shipped default: `install/templates/config/models.example.yaml` (`default_model_id: mock`, `model: harness-fixture`). Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`).
+
+**Implementation (E3-S01, 2026-07-08):** Full `ModelRouter` — `src/zaumzeug/integrations/haystack.py` maps Phase 1 providers (`openrouter`, `openai_compatible`) to Haystack `ChatGenerator` classes; `ModelEntryConfig.api_base_url` for local OpenAI-compatible servers (LM Studio); secrets from `.env` via `os.environ`; generator cache keyed by `(provider, api_base_url, model)`; missing packages fail with `pip install …` hint; native cloud providers phase-gated to Phase 2+. Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s01`); AC-8 routing helper in `tests/integration/test_openai_contract.py`.
 
 ---

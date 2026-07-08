@@ -5,7 +5,7 @@
 | **Document** | Epic E3 user stories |
 | **File** | `docs/stories/02-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-08 (E3-S01 done) |
 | **Status** | Backlog |
 | **Build order** | **2 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -100,6 +100,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Persona** | Harness developer |
 | **Priority** | P0 |
 | **Prerequisites** | [E3-S05](#e3-s05-mock-model-profile) · [E2-S02](../01-epic.md#e2-s02-modelsyaml-merge) |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -114,19 +115,21 @@ As a **harness developer**, I want a config-driven ModelRouter, so that I can sw
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Stage-scoped `ModelRouter` reads active agent's merged `agents-models.yaml`
-- [ ] **AC-2** Lazy-builds Haystack `ChatGenerator` per provider
-- [ ] **AC-3** OpenRouter via `openrouter-haystack` when registry entry uses `provider: openrouter`
-- [ ] **AC-4** Caches generator instances per provider
-- [ ] **AC-5** Fails fast with actionable message if provider package missing (include `pip install …` hint)
-- [ ] **AC-6** No hardcoded model names in SDK source
-- [ ] **AC-7** OpenAI API: optional request `model_id` selects LLM; harness name remains agent identity
+- [x] **AC-1** Stage-scoped `ModelRouter` reads active agent's merged `agents-models.yaml`
+- [x] **AC-2** Lazy-builds Haystack `ChatGenerator` per provider
+- [x] **AC-3** OpenRouter via `openrouter-haystack` when registry entry uses `provider: openrouter`
+- [x] **AC-4** `openai_compatible` via `openai-haystack` when registry entry uses `provider: openai_compatible`; `api_base_url` from YAML (or `OPENAI_API_BASE` in `.env`); suitable for LM Studio and other local OpenAI-compatible servers
+- [x] **AC-5** Caches generator instances per provider + endpoint (distinct `api_base_url` values do not share a cache entry)
+- [x] **AC-6** Fails fast with actionable message if provider package missing (include `pip install …` hint)
+- [x] **AC-7** No hardcoded model names in SDK source
+- [x] **AC-8** OpenAI API: optional request `model_id` selects LLM; harness name remains agent identity *(routing layer — full HTTP in E3-S07)*
 
 ### Implementation tasks (build)
 
-- [ ] Extend `src/zaumzeug/runtime/model_router.py` *(mock provider done in E3-S05)*
-- [ ] Implement provider map in `src/zaumzeug/integrations/haystack.py` (`provider` → import + generator class)
-- [ ] Load secrets from `.env` via `python-dotenv` or stdlib — never from YAML
+- [x] Extend `src/zaumzeug/runtime/model_router.py` *(mock provider done in E3-S05)*
+- [x] Implement provider map in `src/zaumzeug/integrations/haystack.py` (`provider` → import + generator class)
+- [x] Add optional `api_base_url` to `ModelEntryConfig` (non-secret; required for `openai_compatible`)
+- [x] Load secrets from `.env` via stdlib `os.environ` — never from YAML
 
 ### Verification (after build)
 
@@ -137,18 +140,19 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-1 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac1_config_model_id_and_request_override` |
 | AC-2 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac2_lazy_build_generator` |
 | AC-3 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac3_openrouter_provider_path` |
-| AC-4 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac4_generator_cache_per_provider` |
-| AC-5 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac5_missing_package_install_hint` |
-| AC-6 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac6_no_hardcoded_model_names` |
-| AC-7 | `tests/integration/test_openai_contract.py::test_e3_s01_ac7_request_model_id_override` *(shared with E3-S07)* |
+| AC-4 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac4_openai_compatible_local_provider_path` |
+| AC-5 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac5_generator_cache_per_provider_endpoint` |
+| AC-6 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac6_missing_package_install_hint` |
+| AC-7 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac7_no_hardcoded_model_names` |
+| AC-8 | `tests/integration/test_openai_contract.py::test_e3_s01_ac8_request_model_id_override` *(shared with E3-S07)* |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/runtime/test_model_router.py -v -k e3_s01` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/runtime/test_model_router.py -v -k e3_s01` passes
 
 ### Definition of done
 
-- [ ] Missing `openai-haystack` produces install hint, not stack trace
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Missing provider packages produce install hint, not stack trace
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

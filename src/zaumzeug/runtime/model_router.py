@@ -8,12 +8,15 @@ from typing import Any
 from haystack.dataclasses import ChatMessage
 
 from zaumzeug.config.models import AgentModelsConfig, ModelEntryConfig
-from zaumzeug.integrations.mock import MockChatGenerator
+from zaumzeug.integrations.haystack import (
+    PROVIDERS,
+    ProviderBuildError,
+    build_chat_generator,
+    provider_cache_key,
+)
 
-# Provider id → (module, class name). Mock is built-in; live providers added in E3-S01.
-PROVIDERS: dict[str, tuple[str, str]] = {
-    "mock": ("zaumzeug.integrations.mock", "MockChatGenerator"),
-}
+# Re-exported for tests and doctor.
+__all__ = ["PROVIDERS", "ModelRouter", "ModelRouterError"]
 
 
 class ModelRouterError(RuntimeError):
@@ -33,7 +36,7 @@ class ModelRouter:
         self._models_config = models_config
         self._fixture_dir = fixture_dir
         self._project_root = Path(project_root) if project_root is not None else None
-        self._generator_cache: dict[str, Any] = {}
+        self._generator_cache: dict[tuple[str, str, str], Any] = {}
 
     @property
     def models_config(self) -> AgentModelsConfig:
@@ -58,11 +61,20 @@ class ModelRouter:
     def build_generator(self, model_id: str | None = None) -> Any:
         """Lazily construct and cache a ChatGenerator for the resolved entry."""
         entry = self.get_entry(model_id)
-        if entry.provider in self._generator_cache:
-            return self._generator_cache[entry.provider]
+        cache_key = provider_cache_key(entry)
+        if cache_key in self._generator_cache:
+            return self._generator_cache[cache_key]
 
-        generator = self._build_generator(entry)
-        self._generator_cache[entry.provider] = generator
+        try:
+            generator = build_chat_generator(
+                entry,
+                fixture_dir=self._fixture_dir,
+                project_root=self._project_root,
+            )
+        except ProviderBuildError as exc:
+            raise ModelRouterError(str(exc)) from exc
+
+        self._generator_cache[cache_key] = generator
         return generator
 
     def run(
@@ -75,35 +87,3 @@ class ModelRouter:
         """Run the resolved ChatGenerator for *model_id*."""
         generator = self.build_generator(model_id)
         return generator.run(messages, **kwargs)
-
-    def _build_generator(self, entry: ModelEntryConfig) -> Any:
-        if entry.provider == "mock":
-            return MockChatGenerator(
-                model=entry.model,
-                fixture_dir=self._fixture_dir,
-                project_root=self._project_root,
-                generation_kwargs=entry.generation_kwargs,
-            )
-
-        if entry.provider not in PROVIDERS:
-            raise ModelRouterError(
-                f"provider {entry.provider!r} is not available in Phase 1 "
-                f"(supported: {', '.join(sorted(PROVIDERS))})"
-            )
-
-        module_path, class_name = PROVIDERS[entry.provider]
-        try:
-            import importlib
-
-            module = importlib.import_module(module_path)
-            generator_cls = getattr(module, class_name)
-        except ImportError as exc:
-            raise ModelRouterError(
-                f"provider package for {entry.provider!r} is not installed "
-                f"(import {module_path} failed: {exc})"
-            ) from exc
-
-        return generator_cls(
-            model=entry.model,
-            generation_kwargs=entry.generation_kwargs or {},
-        )

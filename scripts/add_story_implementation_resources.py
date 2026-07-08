@@ -175,7 +175,9 @@ models:
 
 - [Haystack Chat Generators](https://docs.haystack.deepset.ai/docs/chatgenerators)
 - [openrouter-haystack](https://pypi.org/project/openrouter-haystack/)
-- [openai-haystack](https://pypi.org/project/openai-haystack/) · [anthropic-haystack](https://pypi.org/project/anthropic-haystack/)
+- [openai-haystack](https://pypi.org/project/openai-haystack/) — also used for **local OpenAI-compatible** servers (LM Studio, Ollama, vLLM) via `api_base_url`
+- [anthropic-haystack](https://pypi.org/project/anthropic-haystack/)
+- [LM Studio local server](https://lmstudio.ai/docs/app/api/endpoints/openai) (default `http://localhost:1234/v1`)
 - [LiteLLM provider strings](https://docs.litellm.ai/docs/providers) (compile-time LM wiring in Phase 2)
 - [Architecture §7 — ModelRouter](../../architecture/05-configuration.md#7-model-routing)
 
@@ -185,6 +187,7 @@ models:
 PROVIDERS = {
     "mock": ("zaumzeug.integrations.mock", "MockChatGenerator"),
     "openrouter": ("haystack_integrations.components.generators.openrouter", "OpenRouterChatGenerator"),
+    "openai_compatible": ("haystack.components.generators.chat", "OpenAIChatGenerator"),
 }
 ```
 """,

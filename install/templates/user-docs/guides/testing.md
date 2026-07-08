@@ -65,6 +65,24 @@ Global defaults ship in `install/templates/config/models.example.yaml` (copied t
 
 Unit tests: `pytest tests/unit/runtime/test_model_router.py -v -k e3_s05`.
 
+### Local LLM (LM Studio, optional)
+
+For development with a local OpenAI-compatible server, use **`openai_compatible`** in `agents-models.yaml` (not in the shipped CI default):
+
+```yaml
+default_model_id: local
+
+models:
+  local:
+    provider: openai_compatible
+    model: your-loaded-model-id
+    api_base_url: http://localhost:1234/v1
+```
+
+Set a placeholder in `.env` if needed: `OPENAI_API_KEY=lm-studio`. Install the provider package when using live routing: `pip install openai-haystack`.
+
+Unit tests: `pytest tests/unit/runtime/test_model_router.py -v -k e3_s01`.
+
 ---
 
 ## Where tests live
@@ -109,7 +127,7 @@ Focus on **contracts and errors**, not LLM prose.
 |---|---|
 | Config schema | Invalid yaml → field-level Pydantic error with path |
 | Model merge | Harness `models.yaml` + agent `agents-models.yaml` → expected `default_model_id` |
-| ModelRouter mock | `provider: mock` → fixture text from `tests/fixtures/responses/` (no API keys) |
+| ModelRouter | `provider: mock` → fixtures; `openai_compatible` + `api_base_url` → local LM Studio (E3-S01) |
 | Resolution | `artifact` present → serve path loads artifact, ignores `system_prompt` |
 | Export (Phase 2+) | `dump_state()` snapshot matches golden file |
 

@@ -82,6 +82,7 @@ class ModelEntryConfig(BaseModel):
 
     provider: str
     model: str
+    api_base_url: str | None = None
     generation_kwargs: dict[str, Any] | None = None
 
 
