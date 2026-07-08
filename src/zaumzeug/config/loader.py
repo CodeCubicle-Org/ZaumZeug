@@ -10,6 +10,7 @@ from pydantic import ValidationError
 
 from zaumzeug.config.schemas import (
     CURRENT_SDK_PHASE,
+    AgentConfig,
     HarnessConfig,
     PHASE_GATED_FIELDS,
     WorkflowConfig,
@@ -104,6 +105,21 @@ def strip_eval_for_doctor_validation(data: dict[str, Any]) -> dict[str, Any]:
     return stripped
 
 
+def strip_phase_gated_agent_tools(data: dict[str, Any]) -> dict[str, Any]:
+    """Remove phase-gated ``tools`` keys before workflow cross-validation in Phase 1."""
+    stripped = dict(data)
+    tools = stripped.get("tools")
+    if not isinstance(tools, dict):
+        return stripped
+
+    tools_copy = dict(tools)
+    if CURRENT_SDK_PHASE < 3:
+        tools_copy.pop("mcp", None)
+        tools_copy.pop("custom", None)
+    stripped["tools"] = tools_copy
+    return stripped
+
+
 def load_harness_for_doctor(path: Path | str) -> HarnessConfig:
     """Load ``harness.yaml`` for doctor, tolerating warned phase-gated keys."""
     path = Path(path)
@@ -155,6 +171,17 @@ def _validate_harness_agent_names(harness_dir: Path) -> list[str]:
             errors.append(
                 f"agents/{folder_name}/agent.yaml: missing required `name` field"
             )
+            continue
+
+        try:
+            AgentConfig.model_validate(strip_phase_gated_agent_tools(data))
+        except ValidationError as exc:
+            for err in exc.errors():
+                loc = ".".join(str(part) for part in err.get("loc", ()))
+                field = loc or "<root>"
+                errors.append(
+                    f"agents/{folder_name}/agent.yaml: {field}: {err.get('msg', 'validation failed')}"
+                )
             continue
 
         if yaml_name != folder_name:
@@ -227,6 +254,17 @@ def load_workflow_yaml(harness_dir: Path | str) -> dict[str, Any]:
     """Load validated ``workflow.yaml`` as a plain mapping."""
     workflow = load_workflow(harness_dir)
     return workflow.model_dump(exclude_none=True)
+
+
+def load_agent_config(path: Path | str) -> AgentConfig:
+    """Load and validate ``agents/<name>/agent.yaml``."""
+    path = Path(path)
+    data = _read_yaml_mapping(path)
+
+    try:
+        return AgentConfig.model_validate(data)
+    except ValidationError as exc:
+        raise ConfigValidationError.from_validation_error(path, exc) from exc
 
 
 def load_harness(path: Path | str) -> HarnessConfig:

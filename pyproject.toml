@@ -23,6 +23,7 @@ classifiers = [
 dependencies = [
   "haystack-ai",
   "hayhooks",
+  "httpx",
   "litellm",
   "pydantic>=2",
   "pyyaml",

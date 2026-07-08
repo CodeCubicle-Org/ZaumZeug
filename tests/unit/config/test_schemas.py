@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from zaumzeug.config import ConfigValidationError, HarnessConfig, load_harness
+from zaumzeug.config import ConfigValidationError, HarnessConfig, load_agent_config, load_harness
 
 # Architecture §6.6 — Phase 1 minimal harness.yaml
 PHASE1_MINIMAL: dict = {
@@ -121,3 +121,23 @@ def test_e2_s01_ac4_error_includes_path_and_field(tmp_path: Path) -> None:
         token in message
         for token in ("name", "unknown_section")
     ), f"expected a field name in message: {message}"
+
+
+def test_e3_s03_ac5_unknown_builtin_id_fails_with_list(tmp_path: Path) -> None:
+    """AC-5: Unknown builtin tool id fails validation with available ids for Phase 1."""
+    path = _write_yaml(
+        tmp_path / "agent.yaml",
+        {
+            "name": "researcher",
+            "agent": {"system_prompt": "prompts/system.md"},
+            "tools": {"builtin": ["not_a_real_tool"]},
+        },
+    )
+
+    with pytest.raises(ConfigValidationError) as exc_info:
+        load_agent_config(path)
+
+    message = str(exc_info.value)
+    assert "not_a_real_tool" in message
+    assert "web_fetch" in message
+    assert "available" in message.lower()

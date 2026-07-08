@@ -85,9 +85,10 @@ class MockChatGenerator:
         self,
         messages: list[ChatMessage] | str,
         generation_kwargs: dict[str, Any] | None = None,
+        tools: Any = None,
         **kwargs: Any,
     ) -> dict[str, list[ChatMessage]]:
-        del messages, generation_kwargs, kwargs
+        del messages, generation_kwargs, tools, kwargs
         content = load_fixture_response(
             self.model,
             fixture_dir=self._fixture_dir,

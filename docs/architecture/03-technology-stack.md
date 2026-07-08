@@ -53,7 +53,7 @@ Canonical package layout. Root `pyproject.toml` exists as of E2-S00 (2026-07-08)
 
 | Group | Install command | Includes | Excludes |
 |---|---|---|---|
-| **Runtime** (core) | `pip install zaumzeug` | `haystack-ai`, `hayhooks`, `litellm`, `pydantic`, `pyyaml`, CLI entry `zaumzeug` | `dspy-ai`, `gepa`, `deepeval` |
+| **Runtime** (core) | `pip install zaumzeug` | `haystack-ai`, `hayhooks`, `httpx`, `litellm`, `pydantic`, `pyyaml`, CLI entry `zaumzeug` | `dspy-ai`, `gepa`, `deepeval` |
 | **`[dev]`** extra | `pip install -e ".[dev]"` | Runtime + **`dspy-ai`**, **`gepa`**, test stack ([§4.5](#45-test-dependencies)), `debugpy`, editable SDK | Provider Haystack integrations (user-installed) |
 | **`[eval]`** extra | `pip install "zaumzeug[eval]"` | `deepeval` (requires runtime core) | — |
 
@@ -68,6 +68,7 @@ requires-python = ">=3.11"
 dependencies = [
   "haystack-ai",
   "hayhooks",
+  "httpx",
   "litellm",
   "pydantic>=2",
   "pyyaml",
@@ -79,7 +80,6 @@ dev = [
   "gepa",
   "pytest",
   "pytest-asyncio",
-  "httpx",
   "respx",
   "debugpy",
 ]
@@ -99,7 +99,7 @@ Test libraries ship in **`[dev]`** (SDK repo) and **`[eval]`** (optional harness
 |---|---|---|---|
 | **pytest** | All SDK tests | 1+ | Test runner, fixtures, parametrization, markers |
 | **pytest-asyncio** | Integration, serve | 1+ | Async Hayhooks/Haystack serve and workflow tests |
-| **httpx** | Integration | 1+ | HTTP client for `/v1/chat/completions` contract tests ([E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests)) |
+| **httpx** | Runtime + integration | 1+ | Outbound HTTP for builtin `web_fetch`; also used in `/v1/chat/completions` contract tests ([E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests)) |
 | **respx** | Integration | 1+ | Mock outbound HTTP at boundary (tool `web_fetch`, provider stubs) |
 | **debugpy** | Local debug | 1+ | IDE attach to `zaumzeug serve` ([§13.2](10-operations-and-reference.md#132-mechanisms)) |
 | **syrupy** *(optional)* | Unit | 2+ | Golden snapshots for compile export / `artifact-manifest.json` ([E4-S03](../stories/04-epic.md#e4-s03-export-contract-haystack-artifacts)) |

@@ -1,7 +1,14 @@
 """Config schemas, loaders, models.yaml merge, and agent resolution."""
 
+from zaumzeug.config.builtins import (
+    BUILTIN_TOOL_PHASES,
+    BuiltinToolValidationError,
+    available_builtin_tool_ids,
+    validate_builtin_tool_ids,
+)
 from zaumzeug.config.loader import (
     ConfigValidationError,
+    load_agent_config,
     load_harness,
     load_harness_for_doctor,
     load_workflow,
@@ -37,6 +44,9 @@ from zaumzeug.config.resolver import (
 from zaumzeug.config.schemas import (
     CURRENT_SDK_PHASE,
     PHASE_GATED_FIELDS,
+    AgentConfig,
+    AgentSectionConfig,
+    AgentToolsConfig,
     HarnessConfig,
     HayhooksConfig,
     ServeConfig,
@@ -46,14 +56,19 @@ from zaumzeug.config.schemas import (
 
 __all__ = [
     "ARTIFACT_MANIFEST",
+    "BUILTIN_TOOL_PHASES",
     "CURRENT_SDK_PHASE",
     "DEPLOY_HARNESS_ROOT",
     "DEPLOY_MANIFEST",
     "DEV_HARNESS_ROOT",
     "HARNESS_ROOT_ENV",
     "PHASE_GATED_FIELDS",
+    "AgentConfig",
     "AgentModelsConfig",
     "AgentResolutionError",
+    "AgentSectionConfig",
+    "AgentToolsConfig",
+    "BuiltinToolValidationError",
     "CompileResolution",
     "ConfigValidationError",
     "HarnessConfig",
@@ -64,10 +79,12 @@ __all__ = [
     "ServeConfig",
     "WorkflowConfig",
     "WorkflowStage",
+    "available_builtin_tool_ids",
     "deep_merge",
     "harness_dir",
     "harness_root_segment",
     "is_deploy_mode",
+    "load_agent_config",
     "load_agent_yaml",
     "load_harness",
     "load_harness_for_doctor",
@@ -78,4 +95,5 @@ __all__ = [
     "resolve_agent_compile",
     "resolve_agent_serve",
     "resolve_serve_entry",
+    "validate_builtin_tool_ids",
 ]

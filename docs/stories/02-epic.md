@@ -164,6 +164,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Persona** | Harness developer |
 | **Priority** | P1 |
 | **Prerequisites** | [E2-S01](../01-epic.md#e2-s01-pydantic-config-schemas) |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -176,16 +177,16 @@ As a **harness developer**, I want a built-in `web_fetch` tool, so that my resea
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Phase 1 ships `web_fetch` in SDK tool catalog
-- [ ] **AC-2** HTTPS only; 30s timeout; 1 MB response cap
-- [ ] **AC-3** Blocks private/link-local IPs (SSRF guard)
-- [ ] **AC-4** Referenced via `tools.builtin: [web_fetch]` in yaml
-- [ ] **AC-5** Unknown builtin ID fails validation with list of available IDs for current phase
+- [x] **AC-1** Phase 1 ships `web_fetch` in SDK tool catalog
+- [x] **AC-2** HTTPS only; 30s timeout; 1 MB response cap
+- [x] **AC-3** Blocks private/link-local IPs (SSRF guard)
+- [x] **AC-4** Referenced via `tools.builtin: [web_fetch]` in yaml
+- [x] **AC-5** Unknown builtin ID fails validation with list of available IDs for current phase
 
 ### Implementation tasks (build)
 
-- [ ] Implement `src/zaumzeug/runtime/tools/web_fetch.py`
-- [ ] Register in `src/zaumzeug/runtime/tools/catalog.py` (phase-aware catalog)
+- [x] Implement `src/zaumzeug/runtime/tools/web_fetch.py`
+- [x] Register in `src/zaumzeug/runtime/tools/catalog.py` (phase-aware catalog)
 
 ### Verification (after build)
 
@@ -199,13 +200,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-4 | `tests/integration/test_runtime_factory.py::test_e3_s03_ac4_yaml_builtin_reference` |
 | AC-5 | `tests/unit/config/test_schemas.py::test_e3_s03_ac5_unknown_builtin_id_fails_with_list` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/runtime/tools/test_web_fetch.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/runtime/tools/test_web_fetch.py -v` passes
 
 ### Definition of done
 
-- [ ] Catalog loader wired into runtime factory (E3-S00)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Catalog loader wired into runtime factory (`runtime/factory.py`; full serve wiring in E3-S02)
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

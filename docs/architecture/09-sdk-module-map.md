@@ -15,7 +15,7 @@ Maps to [PRD epics](../prd.md#8-functional-requirements-epics). Implementation l
 | 1b | Doctor | `doctor/` | E2 | **Done** (E2-S04a–S04c) — preflight checks, phase-aware warnings, `--deploy`, `--verbose`, `--json` |
 | 2 | Config loader + Pydantic schemas | `config/` | E2 | **Done** (E2-S01–S03, S04c, S07) — `harness.yaml`, `workflow.yaml`, `models.yaml` merge, agent resolver, harness root resolution |
 | 3 | ModelRouter | `runtime/model_router.py` | E3 | **Done** (E3-S01, 2026-07-08) — config-driven router; Phase 1 providers: `mock`, `openrouter`, `openai_compatible`; lazy cache per provider+endpoint; phase-gated native cloud providers |
-| 4 | Runtime factory + builtin tools | `runtime/`, `runtime/tools.py` | E3, E7 | Planned |
+| 4 | Runtime factory + builtin tools | `runtime/factory.py`, `runtime/tools/` | E3, E7 | **Partial** (E3-S03, 2026-07-08) — `web_fetch` builtin + phase-aware catalog; `build_agent()` wires `tools.builtin`; full factory ACs in E3-S00 |
 | 5 | Serve / Hayhooks wrapper | `serve/` | E3, E7 | **Partial** (E2-S05) — `validate_serve()`, `--dry-run`; Hayhooks runner pending (E3-S02) |
 | 6 | DSPy module loader | `compile/` | E4 | Planned |
 | 7 | Export contract | `compile/export.py` | E4 | Planned |

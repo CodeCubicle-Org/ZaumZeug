@@ -139,14 +139,14 @@ SDK-provided tools referenced by `tools.builtin` in `harness.yaml`:
 
 | Tool ID | Phase | Description |
 |---|---|---|
-| Tool ID | Phase | Description |
-|---|---|---|
 | `web_fetch` | **1** | Fetch URL content (HTTP GET); returns text for agent context. **v1 limits:** HTTPS only; 30s timeout; 1 MB response cap; blocks private/link-local IPs (SSRF guard). CI may stub HTTP. |
 | `calculator` | 3 | Safe arithmetic expression evaluation |
 | `read_file` | 3 | Read text file under harness folder (path sandboxed to workspace) |
 | `search_docs` | 4 | Search indexed documents when RAG pipeline attached |
 
 Phase 1 **minimum ship:** `web_fetch` only. Phase 3+ entries are planned; unknown builtin ID → config validation error with list of available IDs for current phase.
+
+**Implementation (E3-S03, 2026-07-08):** Builtin `web_fetch` in `src/zaumzeug/runtime/tools/web_fetch.py` — Haystack `@component` + `ComponentTool`, outbound fetch via **httpx** (HTTPS only, 30s timeout, 1 MB cap, SSRF guard on host resolution and redirect chain). Phase-aware catalog in `src/zaumzeug/runtime/tools/catalog.py` and `src/zaumzeug/config/builtins.py`. `AgentConfig` / `load_agent_config()` validate `tools.builtin` ids; workflow cross-checks agent yaml via `load_workflow()`. `build_agent()` in `src/zaumzeug/runtime/factory.py` wires builtins from yaml. Tests: `tests/unit/runtime/tools/test_web_fetch.py`, `tests/integration/test_runtime_factory.py` (`test_e3_s03_ac4_*`), `tests/unit/config/test_schemas.py` (`test_e3_s03_ac5_*`). Stub outbound HTTP in CI with **respx** ([§4.5](03-technology-stack.md#45-test-dependencies)).
 
 Custom tools use `tools.custom` (user Python), not this catalog — [PRD E7.2](../prd.md#epic-e7--tools-mcp-and-acp-phase-3).
 

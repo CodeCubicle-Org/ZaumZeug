@@ -12,7 +12,7 @@ HarnessDevelopment/
 │   ├── cli.py
 │   ├── config/               # Pydantic schemas, loaders (E2-S01), models merge (E2-S02), resolver (E2-S03)
 │   ├── doctor/               # Preflight checks — pass/warn/fail (E2-S04a–S04c)
-│   ├── runtime/              # ModelRouter (E3-S01, E3-S05), agent factory, tool registry
+│   ├── runtime/              # ModelRouter (E3-S01, E3-S05), factory (E3-S00), tools/ (E3-S03)
 │   ├── compile/              # DSPy loader, GEPA runner, export contract
 │   ├── deploy/               # usr-harnesses/ → deploy/ packager
 │   ├── eval/                 # Optional DeepEval bridge

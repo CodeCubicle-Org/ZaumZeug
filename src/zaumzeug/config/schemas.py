@@ -11,8 +11,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 from pydantic_core import InitErrorDetails, PydanticCustomError
 
-# SDK delivery phase used for allowlists (Architecture §6.2).
-CURRENT_SDK_PHASE = 1
+from zaumzeug.config.constants import CURRENT_SDK_PHASE
 
 # Absolute key paths from ``harness.yaml`` root → minimum delivery phase.
 # Nested models look up with their section prefix; error ``loc`` stays relative
@@ -137,6 +136,61 @@ class WorkflowConfig(BaseModel):
     def _entry_non_empty(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("`entry` must be a non-empty agent name")
+        return value
+
+
+class AgentSectionConfig(BaseModel):
+    """Nested ``agent`` block in ``agent.yaml`` (Phase 1+)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    system_prompt: str | None = None
+    artifact: str | None = None
+
+
+class AgentToolsConfig(BaseModel):
+    """``tools`` block in ``agent.yaml`` (Architecture §6.5)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    builtin: list[str] = Field(default_factory=list)
+    mcp: list[dict[str, Any]] | None = None
+    custom: list[str] | None = None
+
+    @field_validator("builtin")
+    @classmethod
+    def _validate_builtin_ids(cls, value: list[str]) -> list[str]:
+        from zaumzeug.config.builtins import validate_builtin_tool_ids
+
+        validate_builtin_tool_ids(value)
+        return value
+
+    @model_validator(mode="after")
+    def _phase_gate_tool_sections(self) -> AgentToolsConfig:
+        if CURRENT_SDK_PHASE < 3:
+            if self.mcp:
+                raise ValueError("`mcp` is Phase 3")
+            if self.custom:
+                raise ValueError("`custom` is Phase 3")
+        return self
+
+
+class AgentConfig(BaseModel):
+    """Root schema for ``agents/<name>/agent.yaml`` (Phase 1+)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    description: str | None = None
+    default_model_id: str | None = None
+    agent: AgentSectionConfig | None = None
+    tools: AgentToolsConfig | None = None
+
+    @field_validator("name")
+    @classmethod
+    def _name_non_empty(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("`name` must be a non-empty agent name")
         return value
 
 
