@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, ValidationError, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 from pydantic_core import InitErrorDetails, PydanticCustomError
 
 # SDK delivery phase used for allowlists (Architecture §6.2).
@@ -21,6 +21,7 @@ PHASE_GATED_FIELDS: dict[tuple[str, ...], int] = {
     ("compile",): 2,
     ("eval",): 2,
     ("deploy",): 2,
+    ("parallelism",): 2,
     ("serve", "acp"): 3,
     ("serve", "a2a"): 4,
     ("serve", "expose"): 4,
@@ -93,6 +94,50 @@ class ServeConfig(BaseModel):
             path_prefix=("serve",),
             model_name=cls.__name__,
         )
+
+
+class WorkflowStage(BaseModel):
+    """One serial stage in ``workflow.yaml`` — exactly ``agent`` or ``pipeline``."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    agent: str | None = None
+    pipeline: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _phase_gate(cls, data: Any) -> Any:
+        return _reject_phase_gated_keys(
+            data,
+            path_prefix=(),
+            model_name=cls.__name__,
+        )
+
+    @model_validator(mode="after")
+    def _exactly_one_ref(self) -> WorkflowStage:
+        has_agent = bool(self.agent and self.agent.strip())
+        has_pipeline = bool(self.pipeline and self.pipeline.strip())
+        if has_agent == has_pipeline:
+            raise ValueError(
+                "each stage must have exactly one of `agent` or `pipeline`"
+            )
+        return self
+
+
+class WorkflowConfig(BaseModel):
+    """Root schema for ``workflow.yaml`` (Architecture §6.6 Phase 1)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    entry: str
+    stages: list[WorkflowStage] = Field(min_length=1)
+
+    @field_validator("entry")
+    @classmethod
+    def _entry_non_empty(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("`entry` must be a non-empty agent name")
+        return value
 
 
 class HarnessConfig(BaseModel):

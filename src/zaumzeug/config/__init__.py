@@ -1,6 +1,12 @@
 """Config schemas, loaders, models.yaml merge, and agent resolution."""
 
-from zaumzeug.config.loader import ConfigValidationError, load_harness, load_harness_for_doctor
+from zaumzeug.config.loader import (
+    ConfigValidationError,
+    load_harness,
+    load_harness_for_doctor,
+    load_workflow,
+    load_workflow_yaml,
+)
 from zaumzeug.config.models import (
     AgentModelsConfig,
     ModelEntryConfig,
@@ -24,7 +30,6 @@ from zaumzeug.config.resolver import (
     RuntimeSource,
     ServeResolution,
     load_agent_yaml,
-    load_workflow_yaml,
     resolve_agent_compile,
     resolve_agent_serve,
     resolve_serve_entry,
@@ -35,6 +40,8 @@ from zaumzeug.config.schemas import (
     HarnessConfig,
     HayhooksConfig,
     ServeConfig,
+    WorkflowConfig,
+    WorkflowStage,
 )
 
 __all__ = [
@@ -55,6 +62,8 @@ __all__ = [
     "RuntimeSource",
     "ServeResolution",
     "ServeConfig",
+    "WorkflowConfig",
+    "WorkflowStage",
     "deep_merge",
     "harness_dir",
     "harness_root_segment",
@@ -63,6 +72,7 @@ __all__ = [
     "load_harness",
     "load_harness_for_doctor",
     "load_merged_agent_models",
+    "load_workflow",
     "load_workflow_yaml",
     "merge_model_registries",
     "resolve_agent_compile",

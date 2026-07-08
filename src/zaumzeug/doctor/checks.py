@@ -22,7 +22,8 @@ from zaumzeug.config import (
 )
 from zaumzeug.config.harness_root import DEPLOY_MANIFEST
 from zaumzeug.config.loader import ConfigValidationError, strip_eval_for_doctor_validation
-from zaumzeug.config.resolver import ARTIFACT_MANIFEST, load_workflow_yaml
+from zaumzeug.config.loader import ConfigValidationError, load_workflow
+from zaumzeug.config.resolver import ARTIFACT_MANIFEST
 from zaumzeug.config.schemas import CURRENT_SDK_PHASE, HarnessConfig, PHASE_GATED_FIELDS
 from zaumzeug.doctor.project import list_agent_names
 from zaumzeug.doctor.report import CheckResult
@@ -552,6 +553,44 @@ def check_deploy_manifest(harness_name: str, harness_dir: Path) -> list[CheckRes
     return checks
 
 
+def check_workflow_config(harness_name: str, harness_dir: Path) -> list[CheckResult]:
+    """Load and validate ``workflow.yaml`` with agent cross-checks."""
+    workflow_yaml = harness_dir / "workflow.yaml"
+    if not workflow_yaml.is_file():
+        return [
+            CheckResult(
+                name="workflow_config",
+                severity="fail",
+                message=f"Missing workflow.yaml at {workflow_yaml}",
+                harness=harness_name,
+            )
+        ]
+
+    try:
+        workflow = load_workflow(harness_dir)
+    except ConfigValidationError as exc:
+        return [
+            CheckResult(
+                name="workflow_config",
+                severity="fail",
+                message=str(exc),
+                harness=harness_name,
+            )
+        ]
+
+    return [
+        CheckResult(
+            name="workflow_config",
+            severity="pass",
+            message=(
+                f"workflow.yaml valid at {workflow_yaml} "
+                f"(entry={workflow.entry}, stages={len(workflow.stages)})"
+            ),
+            harness=harness_name,
+        )
+    ]
+
+
 def check_harness_config(harness_name: str, harness_dir: Path) -> list[CheckResult]:
     """Load and validate harness.yaml."""
     harness_yaml = harness_dir / "harness.yaml"
@@ -592,21 +631,12 @@ def check_harness_config(harness_name: str, harness_dir: Path) -> list[CheckResu
 def workflow_agent_names(harness_dir: Path) -> list[str]:
     """Collect agent names from workflow entry and stages."""
     try:
-        workflow = load_workflow_yaml(harness_dir)
-    except AgentResolutionError:
+        workflow = load_workflow(harness_dir)
+    except ConfigValidationError:
         return list_agent_names(harness_dir)
 
-    names: list[str] = []
-    entry = workflow.get("entry")
-    if isinstance(entry, str) and entry:
-        names.append(entry)
-    stages = workflow.get("stages")
-    if isinstance(stages, list):
-        for stage in stages:
-            if isinstance(stage, dict):
-                agent = stage.get("agent")
-                if isinstance(agent, str) and agent:
-                    names.append(agent)
-    if names:
-        return list(dict.fromkeys(names))
-    return list_agent_names(harness_dir)
+    names: list[str] = [workflow.entry]
+    for stage in workflow.stages:
+        if stage.agent:
+            names.append(stage.agent)
+    return list(dict.fromkeys(names))

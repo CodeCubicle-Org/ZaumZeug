@@ -18,6 +18,7 @@ from zaumzeug.doctor.checks import (
     check_port_conflict,
     check_python_version,
     check_runtime_paths,
+    check_workflow_config,
     check_workflow_diagram_staleness,
     workflow_agent_names,
 )
@@ -79,6 +80,7 @@ def run_doctor(
         if deploy_mode:
             checks.extend(check_deploy_manifest(name, harness_dir))
         checks.extend(check_harness_config(name, harness_dir))
+        checks.extend(check_workflow_config(name, harness_dir))
         agent_names = workflow_agent_names(harness_dir)
         if not agent_names:
             checks.append(

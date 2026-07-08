@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/08-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-08 |
 | **Story ID** | E2-S07 |
+| **Status** | Done |
 | **Epic** | [E2 — Configuration and Validation](../01-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 1 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P0 |
 | **Prerequisites** | [E2-S01](02-story.md#e2-s01-pydantic-config-schemas) |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -52,20 +54,27 @@ stages:
   - agent: researcher
 ```
 
+**Code**
+
+- `src/zaumzeug/config/schemas.py` — `WorkflowConfig`, `WorkflowStage`
+- `src/zaumzeug/config/loader.py` — `load_workflow()`, agent cross-validation
+- `src/zaumzeug/doctor/checks.py` — `check_workflow_config`
+- `src/zaumzeug/serve/validate.py` — workflow validation on serve dry-run
+
 ### Acceptance criteria
 
-- [ ] **AC-1** `workflow.yaml` requires `entry` and non-empty `stages` list
-- [ ] **AC-2** Each stage is exactly one of `agent: <name>` or `pipeline: <id>` (serial order)
-- [ ] **AC-3** Every `agent` ref resolves to `agents/<name>/agent.yaml`
-- [ ] **AC-4** Agent names unique within harness; folder name matches `agent.yaml` `name`
-- [ ] **AC-5** `parallelism` field fails in Phase 1 with phase hint (deferred)
-- [ ] **AC-6** `example` harness `workflow.yaml` from §6.6 passes validation
+- [x] **AC-1** `workflow.yaml` requires `entry` and non-empty `stages` list
+- [x] **AC-2** Each stage is exactly one of `agent: <name>` or `pipeline: <id>` (serial order)
+- [x] **AC-3** Every `agent` ref resolves to `agents/<name>/agent.yaml`
+- [x] **AC-4** Agent names unique within harness; folder name matches `agent.yaml` `name`
+- [x] **AC-5** `parallelism` field fails in Phase 1 with phase hint (deferred)
+- [x] **AC-6** `example` harness `workflow.yaml` from §6.6 passes validation
 
 ### Implementation tasks (build)
 
-- [ ] Add `WorkflowConfig` schema in `src/zaumzeug/config/schemas.py`
-- [ ] Cross-validate workflow agent refs against `agents/` directory in loader
-- [ ] Wire into `zaumzeug doctor` and serve/run dry paths
+- [x] Add `WorkflowConfig` schema in `src/zaumzeug/config/schemas.py`
+- [x] Cross-validate workflow agent refs against `agents/` directory in loader
+- [x] Wire into `zaumzeug doctor` and serve/run dry paths
 
 ### Verification (after build)
 
@@ -80,10 +89,10 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-5 | `tests/unit/config/test_workflow_schema.py::test_e2_s07_ac5_parallelism_phase_hint` |
 | AC-6 | `tests/unit/config/test_workflow_schema.py::test_e2_s07_ac6_example_workflow_valid` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/config/test_workflow_schema.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/config/test_workflow_schema.py -v` passes
 
 ### Definition of done
 
-- [ ] Doctor validates workflow for named harness
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Doctor validates workflow for named harness
+- [x] Verification checklist complete; all ACs traced to tests

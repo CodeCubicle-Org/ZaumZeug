@@ -156,17 +156,19 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E2-S01, 2026-07-08):** Phase 1 `harness.yaml` root fields are validated by `zaumzeug.config.load_harness()` → `HarnessConfig` (`src/zaumzeug/config/schemas.py`, `loader.py`). Phase-gated keys (`compile`, `eval`, `deploy`, `serve.acp`, …) fail with a phase hint.
 
-**Implementation (E2-S02, 2026-07-08):** Per-agent model registries merge via `zaumzeug.config.load_merged_agent_models()` (`models.py`). Agent and workflow schemas land in later E2 stories.
+**Implementation (E2-S02, 2026-07-08):** Per-agent model registries merge via `zaumzeug.config.load_merged_agent_models()` (`models.py`).
+
+**Implementation (E2-S07, 2026-07-08):** `workflow.yaml` validated by `zaumzeug.config.load_workflow()` → `WorkflowConfig` / `WorkflowStage` (`schemas.py`, `loader.py`). Requires non-empty `entry` and `stages`; each stage is exactly `agent` or `pipeline`; `parallelism` is Phase 2 (phase hint in Phase 1). Cross-checks: every `agent` ref (including `entry`) resolves to `agents/<name>/agent.yaml`; agent folder names match `agent.yaml` `name`; no duplicate agent names. Wired into `zaumzeug doctor` (`check_workflow_config`), `zaumzeug serve --dry-run` (`validate_serve`), and `resolve_serve_entry()`. Tests: `tests/unit/config/test_workflow_schema.py`.
 
 **Implementation (E2-S03, 2026-07-08):** Per-agent serve/compile resolution via `zaumzeug.config.resolver` — `artifact` > `system_prompt` > error at serve; `compile.module` required at compile; `resolve_serve_entry()` reads `workflow.yaml` `entry`. Exported from `zaumzeug.config` for doctor, serve, and compile commands.
 
-**Implementation (E2-S04a, 2026-07-08):** `zaumzeug doctor` in `src/zaumzeug/doctor/` — environment checks (Python 3.11+, package import, `.env`/API keys), harness config validation, per-agent model registry checks, runtime path checks via `resolve_agent_serve()`, port conflict warn. CLI: optional harness name (project-wide scan when omitted), `--verbose`, `--json`. Tests: `tests/unit/cli/test_doctor.py`, `tests/integration/test_doctor.py`.
+**Implementation (E2-S04a, 2026-07-08):** `zaumzeug doctor` in `src/zaumzeug/doctor/` — environment checks (Python 3.11+, package import, `.env`/API keys), harness and workflow config validation, per-agent model registry checks, runtime path checks via `resolve_agent_serve()`, port conflict warn. CLI: optional harness name (project-wide scan when omitted), `--verbose`, `--json`. Tests: `tests/unit/cli/test_doctor.py`, `tests/integration/test_doctor.py`.
 
 **Implementation (E2-S04b, 2026-07-08):** Phase-aware warn checks: `eval` section in Phase 1 (`eval_section`), MCP without `uv` on PATH (`mcp_uv`), stale or missing `docs/workflow-diagram.md` (`workflow_diagram`). `load_harness_for_doctor()` strips warned keys before validation so exit code stays 0 when only warnings fire.
 
 **Implementation (E2-S04c, 2026-07-08):** `zaumzeug doctor --deploy` (or `HARNESS_ROOT=deploy`) resolves harnesses under `deploy/<name>/`. Validates deploy `manifest.json` (§10.3 schema) and pinned `artifact-manifest.json` paths when `artifact_run_id` is a per-agent map; reuses E2-S04a core checks (config, models, runtime paths, port). Dev-only warnings (`mcp_uv`, `workflow_diagram`) are skipped in deploy mode. Root resolution: `src/zaumzeug/config/harness_root.py`.
 
-**Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run` in `src/zaumzeug/serve/` — `validate_serve()` uses strict `load_harness()` (not doctor's stripped loader), `resolve_serve_entry()`, and doctor model/runtime checks; optional `--deploy` and `--json`. No Hayhooks bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
+**Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run` in `src/zaumzeug/serve/` — `validate_serve()` uses strict `load_harness()` and `load_workflow()`, `resolve_serve_entry()`, and doctor model/runtime checks; optional `--deploy` and `--json`. No Hayhooks bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
 
 **Phase 1:** `workflow.yaml` ships with the multi-agent layout (minimum one serial stage). **`zaumzeug run`** executes serial stages (E3). **Parallel fan-out** (`parallelism: N`) is deferred post–Phase 1.
 

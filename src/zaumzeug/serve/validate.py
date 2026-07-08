@@ -16,6 +16,7 @@ from zaumzeug.config import (
     ServeResolution,
     load_harness,
     load_merged_agent_models,
+    load_workflow,
     resolve_serve_entry,
 )
 from zaumzeug.config.harness_root import harness_dir as resolve_harness_dir
@@ -118,6 +119,25 @@ def validate_serve(
             harness_name=harness_name,
             harness_dir=harness_path,
             checks=checks,
+        )
+
+    try:
+        load_workflow(harness_path)
+    except ConfigValidationError as exc:
+        checks.append(
+            CheckResult(
+                name="workflow_config",
+                severity="fail",
+                message=str(exc),
+                harness=harness_name,
+            )
+        )
+        return ServeValidationResult(
+            harness_name=harness_name,
+            harness_dir=harness_path,
+            checks=checks,
+            harness_config=harness_config,
+            port=_serve_port(harness_config),
         )
 
     if deploy_mode:

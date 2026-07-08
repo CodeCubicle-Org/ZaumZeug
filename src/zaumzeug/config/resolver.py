@@ -7,7 +7,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from zaumzeug.config.loader import ConfigValidationError, _read_yaml_mapping
+from zaumzeug.config.loader import ConfigValidationError, _read_yaml_mapping, load_workflow
 
 ARTIFACT_MANIFEST = "artifact-manifest.json"
 
@@ -118,16 +118,6 @@ def load_agent_yaml(harness_dir: Path | str, agent_name: str) -> tuple[Path, dic
             path=path,
             agent_name=agent_name,
         ) from exc
-
-
-def load_workflow_yaml(harness_dir: Path | str) -> dict[str, Any]:
-    """Load ``workflow.yaml`` from the harness directory."""
-    harness_dir = Path(harness_dir)
-    path = harness_dir / "workflow.yaml"
-    try:
-        return _read_yaml_mapping(path)
-    except ConfigValidationError as exc:
-        raise AgentResolutionError(str(exc), path=path) from exc
 
 
 def resolve_agent_serve(
@@ -248,20 +238,20 @@ def resolve_serve_entry(
 ) -> ServeResolution:
     """Resolve the workflow ``entry`` agent for interactive ``zaumzeug serve``."""
     harness_dir = Path(harness_dir)
-    workflow = load_workflow_yaml(harness_dir)
-    entry = workflow.get("entry")
-    if not entry or not isinstance(entry, str):
-        workflow_path = harness_dir / "workflow.yaml"
+    workflow_path = harness_dir / "workflow.yaml"
+    try:
+        workflow = load_workflow(harness_dir)
+    except ConfigValidationError as exc:
         raise AgentResolutionError(
-            f"Missing `entry` in {workflow_path}",
+            str(exc),
             path=workflow_path,
             harness_name=harness_name,
-            suggestion=f"Set `entry: <agent-name>` in {workflow_path}",
-        )
+            suggestion=f"Fix `entry` and `stages` in {workflow_path}",
+        ) from exc
     return resolve_agent_serve(
         harness_dir,
         harness_name=harness_name,
-        agent_name=entry,
+        agent_name=workflow.entry,
     )
 
 

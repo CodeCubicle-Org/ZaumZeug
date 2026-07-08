@@ -60,7 +60,15 @@ Each stage is **exactly one** of:
 - pipeline: <pipeline-id>  # deterministic Haystack pipeline
 ```
 
-The **`entry`** agent must exist under `agents/<name>/`. Every **`agent:`** reference in `stages` must match an `agents/<name>/` folder. Names must be unique within the harness.
+The **`entry`** agent must exist under `agents/<name>/`. Every **`agent:`** reference in `stages` must match an `agents/<name>/` folder. Agent folder names must match the `name` field in each `agent.yaml`, and agent names must be unique within the harness.
+
+**Validation:** `zaumzeug doctor` and `zaumzeug serve --dry-run` load `workflow.yaml` through `load_workflow()` and fail with field-level errors when:
+
+- `entry` or `stages` is missing or empty
+- a stage has both `agent` and `pipeline`, or neither
+- an `agent` ref (including `entry`) does not resolve to `agents/<name>/agent.yaml`
+- agent folder names do not match `agent.yaml` `name`, or names are duplicated
+- `parallelism` is set on a stage (Phase 2 — rejected in Phase 1 with a phase hint)
 
 ### Minimal example (Phase 1)
 
@@ -211,7 +219,8 @@ Full **pipeline exposure** ships in **Phase 4** (RAG and production hardening). 
 | **`zaumzeug run <harness>`** | Runs all **`stages`** in order (agents + pipelines) |
 | **`zaumzeug run <harness> --from <stage>`** | Partial run from a given stage (debug) |
 | **`zaumzeug compile <harness>`** | Regenerates **`docs/workflow-diagram.md`**; per-agent GEPA when configured (Phase 2+) |
-| **`zaumzeug doctor <harness>`** | Validates agent refs, config, stale diagram vs `workflow.yaml` |
+| **`zaumzeug doctor <harness>`** | Validates `workflow.yaml` (schema + agent refs), `harness.yaml`, models, runtime paths; warns on stale diagram |
+| **`zaumzeug serve <harness> --dry-run`** | Same workflow validation path as doctor before resolving the entry agent |
 
 ---
 

@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 implementation in progress. Package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution (E2-S00–S03), `zaumzeug doctor` including deploy-bundle validation (E2-S04a–S04c), `zaumzeug serve --dry-run` (E2-S05), and structured logging (E2-S06) are done; next: `workflow.yaml` schema (E2-S07). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 implementation in progress. Epic E2 (configuration and validation) is **complete**: package skeleton, `harness.yaml` and `workflow.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (including deploy-bundle validation), `zaumzeug serve --dry-run`, and structured logging (E2-S00–S07). Next: E3 runtime (mock model, ModelRouter, serve). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -130,10 +130,10 @@ zaumzeug doctor --verbose     # Include passing checks
 zaumzeug doctor --json        # Machine-readable report (exit 1 on fail; warns are non-blocking)
 ```
 
-Doctor warns (non-blocking) when: `eval` is present in Phase 1, MCP tools are configured but `uv` is missing, or `workflow.yaml` is newer than `docs/workflow-diagram.md`. In `--deploy` mode, doctor validates `manifest.json`, pinned artifact runs, and reuses core config/runtime checks against the deploy bundle (dev-only warnings are skipped).
+Doctor validates `harness.yaml`, **`workflow.yaml`** (entry, stages, agent refs, agent folder names), merged model registries, and runtime paths. It warns (non-blocking) when: `eval` is present in Phase 1, MCP tools are configured but `uv` is missing, or `workflow.yaml` is newer than `docs/workflow-diagram.md`. In `--deploy` mode, doctor validates `manifest.json`, pinned artifact runs, and reuses core config/runtime checks against the deploy bundle (dev-only warnings are skipped).
 
 ```bash
-zaumzeug serve <harness> --dry-run    # Validate config + resolved paths (no Hayhooks, no LLM)
+zaumzeug serve <harness> --dry-run    # Validate harness.yaml, workflow.yaml, and resolved paths (no Hayhooks, no LLM)
 zaumzeug serve <harness> --dry-run --deploy   # Same against deploy/<harness>/
 zaumzeug serve <harness> --dry-run --json     # Machine-readable summary
 zaumzeug serve <harness> --verbose    # SDK + Haystack debug logging (or HARNESS_LOG_LEVEL=DEBUG)

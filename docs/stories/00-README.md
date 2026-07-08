@@ -62,9 +62,9 @@ E2-S04b  zaumzeug doctor (phase-aware warnings) ✅
 E2-S04c  zaumzeug doctor --deploy ✅
 E2-S05  zaumzeug serve --dry-run ✅
 E2-S06  structured logging ✅
-E2-S07  workflow.yaml schema ← next
+E2-S07  workflow.yaml schema ✅
    ↓
-E3-S05  Mock model (needed before serve smoke)
+E3-S05  Mock model (needed before serve smoke) ← next
 E3-S01  ModelRouter
 E3-S03  web_fetch
 E3-S00  Runtime factory (Agent builder)

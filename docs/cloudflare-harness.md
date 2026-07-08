@@ -131,7 +131,7 @@ ZaumZeug is a **harness factory**: `Harness = Workflow + Agents + Machinery` ([P
 
 | Gap | Note |
 |---|---|
-| Serial `workflow.yaml` + `zaumzeug run` | **In ZaumZeug scope** — E2-S07, E3-S08 ([§4.8](#48-how-zaumzeug-epics-deliver-this-factory-only--not-cloudflare-specific)) |
+| Serial `workflow.yaml` + `zaumzeug run` | **In ZaumZeug scope** — E2-S07 ✅, E3-S08 ([§4.8](#48-how-zaumzeug-epics-deliver-this-factory-only--not-cloudflare-specific)) |
 | Workflow diagram in harness docs | **In ZaumZeug scope** — E4-S08; `docs/workflow-diagram.md` at compile |
 | Parallel fan-out (`parallelism: N`) | Deferred post–Phase 1; serial workflow first |
 | PoC sandbox isolation | User/tool concern for this domain; [Architecture §14](architecture/10-operations-and-reference.md#14-security-phase-1-stance) |
@@ -396,7 +396,7 @@ Parallel fan-out (`parallelism: N`) is **deferred** post–Phase 1 — not a sep
 
 | Capability | Epic | Story |
 |---|---|---|
-| `workflow.yaml` schema (serial) | E2 | E2-S07 |
+| `workflow.yaml` schema (serial) | E2 | E2-S07 ✅ |
 | `zaumzeug run` + stage-scoped `ModelRouter` | E3 | E3-S08 |
 | `docs/workflow-diagram.md` at compile | E4 | E4-S08 |
 | Deploy agents + workflow + diagram | E5 | E5-S02 |

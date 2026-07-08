@@ -24,7 +24,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 |---|---|
 | `zaumzeug doctor` | Preflight; `--verbose`, `--json`, `--deploy`; per-harness or project-wide |
 
-**Implementation (E2-S04a, 2026-07-08):** `src/zaumzeug/doctor/` — `CheckResult` severity (`pass`/`warn`/`fail`), checks for Python version, package import, `.env`/live-model API keys, `harness.yaml`, merged model registries, runtime paths (`resolve_agent_serve`), and port availability. Exit code 1 when any check **fails**; warnings are non-blocking.
+**Implementation (E2-S04a, 2026-07-08):** `src/zaumzeug/doctor/` — `CheckResult` severity (`pass`/`warn`/`fail`), checks for Python version, package import, `.env`/live-model API keys, `harness.yaml`, `workflow.yaml`, merged model registries, runtime paths (`resolve_agent_serve`), and port availability. Exit code 1 when any check **fails**; warnings are non-blocking.
 
 **Implementation (E2-S04b, 2026-07-08):** Additional warn-only checks: `eval` section present in Phase 1 (`eval_section`), MCP configured without `uv` on PATH (`mcp_uv`), stale or missing `docs/workflow-diagram.md` vs `workflow.yaml` (`workflow_diagram`). Doctor uses `load_harness_for_doctor()` to validate harness config while tolerating warned phase-gated keys.
 
@@ -33,6 +33,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 **Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run [--deploy] [--json]` — `validate_serve()` in `src/zaumzeug/serve/validate.py`; prints port, entry agent, model id, runtime path, and tools; exit 1 on validation failure. No port bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
 
 **Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` sets SDK (`zaumzeug`) and Haystack loggers to DEBUG when `zaumzeug serve|compile --verbose` or `HARNESS_LOG_LEVEL=DEBUG`. `log_request()` emits structured per-request context (`model_id`, `tool`, `artifact_path`). `SecretRedactingFilter` redacts API keys and bearer tokens. CLI reference: `user-docs/reference/cli.md`. Tests: `tests/unit/test_logging.py`.
+
+**Implementation (E2-S07, 2026-07-08):** `workflow.yaml` schema validation via `load_workflow()` — `workflow_config` check in doctor; `validate_serve()` fails fast on invalid workflow before entry resolution. Tests: `tests/unit/config/test_workflow_schema.py`.
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
 | `--dry-run` on compile | Validate without GEPA/LLM (E4-S06) |

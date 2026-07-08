@@ -8,7 +8,12 @@ from typing import Any
 import yaml
 from pydantic import ValidationError
 
-from zaumzeug.config.schemas import CURRENT_SDK_PHASE, HarnessConfig, PHASE_GATED_FIELDS
+from zaumzeug.config.schemas import (
+    CURRENT_SDK_PHASE,
+    HarnessConfig,
+    PHASE_GATED_FIELDS,
+    WorkflowConfig,
+)
 
 
 class ConfigValidationError(ValueError):
@@ -116,6 +121,112 @@ def load_harness_for_doctor(path: Path | str) -> HarnessConfig:
             config = config.model_copy(update={"models": str(resolved)})
 
     return config
+
+
+def _agent_yaml_path(harness_dir: Path, agent_name: str) -> Path:
+    return harness_dir / "agents" / agent_name / "agent.yaml"
+
+
+def _validate_harness_agent_names(harness_dir: Path) -> list[str]:
+    """Return agent-name consistency errors (AC-4)."""
+    agents_dir = harness_dir / "agents"
+    if not agents_dir.is_dir():
+        return []
+
+    errors: list[str] = []
+    seen_yaml_names: dict[str, str] = {}
+
+    for agent_dir in sorted(agents_dir.iterdir()):
+        if not agent_dir.is_dir():
+            continue
+        agent_yaml = agent_dir / "agent.yaml"
+        if not agent_yaml.is_file():
+            continue
+
+        folder_name = agent_dir.name
+        try:
+            data = _read_yaml_mapping(agent_yaml)
+        except ConfigValidationError as exc:
+            errors.append(f"agents/{folder_name}/agent.yaml: {exc}")
+            continue
+
+        yaml_name = data.get("name")
+        if not isinstance(yaml_name, str) or not yaml_name.strip():
+            errors.append(
+                f"agents/{folder_name}/agent.yaml: missing required `name` field"
+            )
+            continue
+
+        if yaml_name != folder_name:
+            errors.append(
+                f"agents/{folder_name}/agent.yaml: `name` is '{yaml_name}' "
+                f"but folder is '{folder_name}'"
+            )
+
+        if yaml_name in seen_yaml_names:
+            prior = seen_yaml_names[yaml_name]
+            errors.append(
+                f"duplicate agent name '{yaml_name}' in agents/{prior} "
+                f"and agents/{folder_name}"
+            )
+        else:
+            seen_yaml_names[yaml_name] = folder_name
+
+    return errors
+
+
+def _validate_workflow_agent_refs(
+    harness_dir: Path,
+    workflow: WorkflowConfig,
+) -> list[str]:
+    """Return unknown agent reference errors (AC-3)."""
+    errors: list[str] = []
+    refs: list[str] = [workflow.entry]
+    for stage in workflow.stages:
+        if stage.agent:
+            refs.append(stage.agent)
+
+    for agent_name in dict.fromkeys(refs):
+        agent_yaml = _agent_yaml_path(harness_dir, agent_name)
+        if not agent_yaml.is_file():
+            errors.append(
+                f"unknown agent ref '{agent_name}': expected {agent_yaml}"
+            )
+    return errors
+
+
+def load_workflow(harness_dir: Path | str) -> WorkflowConfig:
+    """Load and validate ``workflow.yaml`` with agent cross-checks (PRD E2.7)."""
+    harness_dir = Path(harness_dir)
+    path = harness_dir / "workflow.yaml"
+    data = _read_yaml_mapping(path)
+
+    try:
+        workflow = WorkflowConfig.model_validate(data)
+    except ValidationError as exc:
+        raise ConfigValidationError.from_validation_error(path, exc) from exc
+
+    cross_errors = (
+        _validate_harness_agent_names(harness_dir)
+        + _validate_workflow_agent_refs(harness_dir, workflow)
+    )
+    if cross_errors:
+        lines = [f"Invalid config in {path}:"]
+        for message in cross_errors:
+            lines.append(f"  {message}")
+        raise ConfigValidationError(
+            path,
+            "\n".join(lines),
+            field=cross_errors[0].split(":", 1)[0],
+        )
+
+    return workflow
+
+
+def load_workflow_yaml(harness_dir: Path | str) -> dict[str, Any]:
+    """Load validated ``workflow.yaml`` as a plain mapping."""
+    workflow = load_workflow(harness_dir)
+    return workflow.model_dump(exclude_none=True)
 
 
 def load_harness(path: Path | str) -> HarnessConfig:
