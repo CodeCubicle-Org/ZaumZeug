@@ -1,6 +1,6 @@
 """Config schemas, loaders, models.yaml merge, and agent resolution."""
 
-from zaumzeug.config.loader import ConfigValidationError, load_harness
+from zaumzeug.config.loader import ConfigValidationError, load_harness, load_harness_for_doctor
 from zaumzeug.config.models import (
     AgentModelsConfig,
     ModelEntryConfig,
@@ -45,6 +45,7 @@ __all__ = [
     "deep_merge",
     "load_agent_yaml",
     "load_harness",
+    "load_harness_for_doctor",
     "load_merged_agent_models",
     "load_workflow_yaml",
     "merge_model_registries",

@@ -8,7 +8,7 @@ from typing import Any
 import yaml
 from pydantic import ValidationError
 
-from zaumzeug.config.schemas import HarnessConfig
+from zaumzeug.config.schemas import CURRENT_SDK_PHASE, HarnessConfig, PHASE_GATED_FIELDS
 
 
 class ConfigValidationError(ValueError):
@@ -89,6 +89,33 @@ def _read_yaml_mapping(path: Path) -> dict[str, Any]:
             field="<root>",
         )
     return data
+
+
+def strip_eval_for_doctor_validation(data: dict[str, Any]) -> dict[str, Any]:
+    """Remove ``eval`` for Phase 1 doctor validation when it only warrants a warn."""
+    stripped = dict(data)
+    if PHASE_GATED_FIELDS.get(("eval",), 0) > CURRENT_SDK_PHASE:
+        stripped.pop("eval", None)
+    return stripped
+
+
+def load_harness_for_doctor(path: Path | str) -> HarnessConfig:
+    """Load ``harness.yaml`` for doctor, tolerating warned phase-gated keys."""
+    path = Path(path)
+    data = strip_eval_for_doctor_validation(_read_yaml_mapping(path))
+
+    try:
+        config = HarnessConfig.model_validate(data)
+    except ValidationError as exc:
+        raise ConfigValidationError.from_validation_error(path, exc) from exc
+
+    if config.models is not None:
+        models_path = Path(config.models)
+        if not models_path.is_absolute():
+            resolved = (path.parent / models_path).resolve()
+            config = config.model_copy(update={"models": str(resolved)})
+
+    return config
 
 
 def load_harness(path: Path | str) -> HarnessConfig:

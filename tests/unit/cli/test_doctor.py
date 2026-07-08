@@ -1,5 +1,6 @@
 # Story: E2-S04a / E2.4
-"""E2-S04a — `zaumzeug doctor` core checks (unit)."""
+# Story: E2-S04b / E2.4
+"""E2-S04 — `zaumzeug doctor` checks (unit)."""
 
 from __future__ import annotations
 
@@ -14,6 +15,7 @@ import yaml
 from zaumzeug.cli import _doctor_command, build_parser
 from zaumzeug.doctor.checks import (
     check_env_for_live_models,
+    check_mcp_uv_presence,
     check_package_import,
     check_port_conflict,
     check_python_version,
@@ -198,3 +200,62 @@ def test_e2_s04_ac9_verbose_and_json_output(
     _doctor_command(args_quiet)
     captured_quiet = capsys.readouterr()
     assert "PASS python_version" not in captured_quiet.out
+
+
+def test_e2_s04_ac4_eval_section_phase1_warn(tmp_path: Path) -> None:
+    """AC-1 (E2-S04b): warn when eval section is present in Phase 1."""
+    project_root = tmp_path / "project"
+    _minimal_harness(
+        project_root,
+        harness_yaml={
+            "name": "example",
+            "serve": {"hayhooks": {"port": 1416}},
+            "eval": {
+                "framework": "builtin",
+                "valset": "eval/val.jsonl",
+            },
+        },
+    )
+
+    report = run_doctor(harness_name="example", project_root=project_root)
+    eval_warns = [
+        c for c in report.checks if c.name == "eval_section" and c.severity == "warn"
+    ]
+    assert eval_warns
+    assert "Phase 2" in eval_warns[0].message
+    assert report.exit_code == 0
+
+
+def test_e2_s04_ac8_mcp_without_uv_warns(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-2 (E2-S04b): warn when MCP is configured but uv is missing."""
+    project_root = tmp_path / "project"
+    _minimal_harness(
+        project_root,
+        agent_yaml={
+            "name": "researcher",
+            "agent": {"system_prompt": "prompts/system.md"},
+            "tools": {
+                "mcp": [
+                    {
+                        "name": "filesystem",
+                        "command": "uv",
+                        "args": ["run", "mcp-server-filesystem", "/workspace"],
+                    }
+                ]
+            },
+        },
+    )
+    monkeypatch.setattr("zaumzeug.doctor.checks.shutil.which", lambda cmd: None)
+
+    report = run_doctor(harness_name="example", project_root=project_root)
+    mcp_warns = [c for c in report.checks if c.name == "mcp_uv" and c.severity == "warn"]
+    assert mcp_warns
+    assert "uv" in mcp_warns[0].message.lower()
+    assert report.exit_code == 0
+
+    harness_dir = project_root / "usr-harnesses" / "example"
+    direct = check_mcp_uv_presence("example", harness_dir)
+    assert direct.severity == "warn"

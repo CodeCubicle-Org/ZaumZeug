@@ -24,7 +24,9 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 |---|---|
 | `zaumzeug doctor` | Preflight; `--verbose`, `--json`; per-harness or project-wide |
 
-**Implementation (E2-S04a, 2026-07-08):** `src/zaumzeug/doctor/` — `CheckResult` severity (`pass`/`warn`/`fail`), checks for Python version, package import, `.env`/live-model API keys, `harness.yaml`, merged model registries, runtime paths (`resolve_agent_serve`), and port availability. Exit code 1 when any check fails.
+**Implementation (E2-S04a, 2026-07-08):** `src/zaumzeug/doctor/` — `CheckResult` severity (`pass`/`warn`/`fail`), checks for Python version, package import, `.env`/live-model API keys, `harness.yaml`, merged model registries, runtime paths (`resolve_agent_serve`), and port availability. Exit code 1 when any check **fails**; warnings are non-blocking.
+
+**Implementation (E2-S04b, 2026-07-08):** Additional warn-only checks: `eval` section present in Phase 1 (`eval_section`), MCP configured without `uv` on PATH (`mcp_uv`), stale or missing `docs/workflow-diagram.md` vs `workflow.yaml` (`workflow_diagram`). Doctor uses `load_harness_for_doctor()` to validate harness config while tolerating warned phase-gated keys.
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
 | `--dry-run` on serve/compile | Validate without server or GEPA/LLM |
 | `HARNESS_LOG_LEVEL=DEBUG` | SDK + Haystack request logging |

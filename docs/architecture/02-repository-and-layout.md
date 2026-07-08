@@ -11,7 +11,7 @@ HarnessDevelopment/
 ├── src/zaumzeug/          # SDK internals
 │   ├── cli.py
 │   ├── config/               # Pydantic schemas, loaders (E2-S01), models merge (E2-S02), resolver (E2-S03)
-│   ├── doctor/               # Preflight checks — pass/warn/fail (E2-S04a)
+│   ├── doctor/               # Preflight checks — pass/warn/fail (E2-S04a–S04b)
 │   ├── runtime/              # Agent factory, ModelRouter, tool registry
 │   ├── compile/              # DSPy loader, GEPA runner, export contract
 │   ├── deploy/               # usr-harnesses/ → deploy/ packager

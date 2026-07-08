@@ -4,19 +4,24 @@ from __future__ import annotations
 
 import importlib
 import os
+import shutil
 import socket
 import sys
 from pathlib import Path
 from typing import Any, Iterable
 
+import yaml
+
+from pydantic import ValidationError
+
 from zaumzeug.config import (
     AgentResolutionError,
-    ConfigValidationError,
-    load_harness,
     load_merged_agent_models,
     resolve_agent_serve,
 )
+from zaumzeug.config.loader import ConfigValidationError, strip_eval_for_doctor_validation
 from zaumzeug.config.resolver import load_workflow_yaml
+from zaumzeug.config.schemas import CURRENT_SDK_PHASE, HarnessConfig, PHASE_GATED_FIELDS
 from zaumzeug.doctor.project import list_agent_names
 from zaumzeug.doctor.report import CheckResult
 
@@ -305,28 +310,157 @@ def check_port_conflict(
     )
 
 
+def _read_harness_yaml(harness_yaml: Path) -> dict[str, Any]:
+    if not harness_yaml.is_file():
+        return {}
+    data = yaml.safe_load(harness_yaml.read_text(encoding="utf-8"))
+    return data if isinstance(data, dict) else {}
+
+
+def check_eval_section_phase_hint(harness_name: str, harness_dir: Path) -> CheckResult | None:
+    """AC-1 (E2-S04b): Warn when ``eval`` is present in Phase 1."""
+    min_phase = PHASE_GATED_FIELDS.get(("eval",))
+    if min_phase is None or min_phase <= CURRENT_SDK_PHASE:
+        return None
+
+    harness_yaml = harness_dir / "harness.yaml"
+    if "eval" not in _read_harness_yaml(harness_yaml):
+        return None
+
+    return CheckResult(
+        name="eval_section",
+        severity="warn",
+        message=(
+            f"`eval` in harness.yaml is Phase {min_phase}; "
+            "ignored until zaumzeug eval is available"
+        ),
+        harness=harness_name,
+    )
+
+
+def check_mcp_uv_presence(harness_name: str, harness_dir: Path) -> CheckResult:
+    """AC-2 (E2-S04b): Warn when MCP tools are configured but ``uv`` is missing."""
+    agents_dir = harness_dir / "agents"
+    mcp_configured = False
+    if agents_dir.is_dir():
+        for agent_dir in sorted(agents_dir.iterdir()):
+            if not agent_dir.is_dir():
+                continue
+            agent_yaml = agent_dir / "agent.yaml"
+            if not agent_yaml.is_file():
+                continue
+            data = yaml.safe_load(agent_yaml.read_text(encoding="utf-8")) or {}
+            tools = data.get("tools")
+            if isinstance(tools, dict) and tools.get("mcp"):
+                mcp_configured = True
+                break
+
+    if not mcp_configured:
+        return CheckResult(
+            name="mcp_uv",
+            severity="pass",
+            message="No MCP tools configured",
+            harness=harness_name,
+        )
+
+    if shutil.which("uv"):
+        return CheckResult(
+            name="mcp_uv",
+            severity="pass",
+            message="MCP configured and `uv` is available on PATH",
+            harness=harness_name,
+        )
+
+    return CheckResult(
+        name="mcp_uv",
+        severity="warn",
+        message=(
+            "MCP tools configured but `uv` was not found on PATH; "
+            "stdio MCP servers are often launched via uv"
+        ),
+        harness=harness_name,
+    )
+
+
+def check_workflow_diagram_staleness(harness_name: str, harness_dir: Path) -> CheckResult:
+    """AC-3 (E2-S04b): Warn when workflow.yaml is newer than the diagram."""
+    workflow_yaml = harness_dir / "workflow.yaml"
+    diagram_path = harness_dir / "docs" / "workflow-diagram.md"
+
+    if not workflow_yaml.is_file():
+        return CheckResult(
+            name="workflow_diagram",
+            severity="pass",
+            message="No workflow.yaml to compare",
+            harness=harness_name,
+        )
+
+    workflow_mtime = workflow_yaml.stat().st_mtime
+    if not diagram_path.is_file():
+        return CheckResult(
+            name="workflow_diagram",
+            severity="warn",
+            message=(
+                f"Missing {diagram_path.relative_to(harness_dir)}; "
+                "run `zaumzeug compile <harness> --workflow-diagram-only`"
+            ),
+            harness=harness_name,
+        )
+
+    if workflow_mtime > diagram_path.stat().st_mtime:
+        return CheckResult(
+            name="workflow_diagram",
+            severity="warn",
+            message=(
+                f"{workflow_yaml.name} is newer than "
+                f"{diagram_path.relative_to(harness_dir)}; re-run compile to refresh"
+            ),
+            harness=harness_name,
+        )
+
+    return CheckResult(
+        name="workflow_diagram",
+        severity="pass",
+        message="workflow-diagram.md is up to date with workflow.yaml",
+        harness=harness_name,
+    )
+
+
 def check_harness_config(harness_name: str, harness_dir: Path) -> list[CheckResult]:
     """Load and validate harness.yaml."""
     harness_yaml = harness_dir / "harness.yaml"
+    checks: list[CheckResult] = []
+
+    eval_hint = check_eval_section_phase_hint(harness_name, harness_dir)
+    if eval_hint is not None:
+        checks.append(eval_hint)
+
+    raw = _read_harness_yaml(harness_yaml)
+    validation_data = strip_eval_for_doctor_validation(raw)
     try:
-        load_harness(harness_yaml)
-    except ConfigValidationError as exc:
-        return [
+        HarnessConfig.model_validate(validation_data)
+    except ValidationError as exc:
+        checks.append(
             CheckResult(
                 name="harness_config",
                 severity="fail",
-                message=str(exc),
+                message=str(
+                    ConfigValidationError.from_validation_error(harness_yaml, exc)
+                ),
                 harness=harness_name,
             )
-        ]
-    return [
+        )
+        return checks
+
+    checks.append(
         CheckResult(
             name="harness_config",
             severity="pass",
             message=f"harness.yaml valid at {harness_yaml}",
             harness=harness_name,
         )
-    ]
+    )
+    return checks
 
 
 def workflow_agent_names(harness_dir: Path) -> list[str]:

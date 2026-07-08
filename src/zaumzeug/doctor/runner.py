@@ -4,16 +4,18 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from zaumzeug.config import load_harness
+from zaumzeug.config import load_harness_for_doctor
 from zaumzeug.doctor.checks import (
     _live_providers,
     check_env_for_live_models,
     check_harness_config,
+    check_mcp_uv_presence,
     check_model_registry,
     check_package_import,
     check_port_conflict,
     check_python_version,
     check_runtime_paths,
+    check_workflow_diagram_staleness,
     workflow_agent_names,
 )
 from zaumzeug.doctor.project import discover_harnesses, find_project_root, list_agent_names
@@ -81,7 +83,7 @@ def run_doctor(
         harness_models_path: str | None = None
         harness_yaml = harness_dir / "harness.yaml"
         if harness_yaml.is_file():
-            harness_models_path = load_harness(harness_yaml).models
+            harness_models_path = load_harness_for_doctor(harness_yaml).models
 
         model_checks, merged_registries = check_model_registry(
             name,
@@ -100,10 +102,12 @@ def run_doctor(
 
         port = 1416
         if harness_yaml.is_file():
-            harness_cfg = load_harness(harness_yaml)
+            harness_cfg = load_harness_for_doctor(harness_yaml)
             if harness_cfg.serve and harness_cfg.serve.hayhooks:
                 port = harness_cfg.serve.hayhooks.port
         checks.append(check_port_conflict(name, port=port))
+        checks.append(check_mcp_uv_presence(name, harness_dir))
+        checks.append(check_workflow_diagram_staleness(name, harness_dir))
 
     checks.extend(check_env_for_live_models(root, live_providers=_live_providers(all_merged)))
     return DoctorReport(checks=checks)

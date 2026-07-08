@@ -1,8 +1,11 @@
 # Story: E2-S04a / E2.4
-"""E2-S04a — `zaumzeug doctor` core checks (integration)."""
+# Story: E2-S04b / E2.4
+"""E2-S04 — `zaumzeug doctor` checks (integration)."""
 
 from __future__ import annotations
 
+import os
+import time
 from pathlib import Path
 
 import yaml
@@ -118,3 +121,57 @@ def test_e2_s04_ac10_named_harness_and_project_scan(tmp_path: Path) -> None:
     discovery = next(c for c in scanned.checks if c.name == "harness_discovery")
     assert discovery.severity == "pass"
     assert "2 harness" in discovery.message
+
+
+def test_e2_s04_ac11_stale_workflow_diagram_warn(tmp_path: Path) -> None:
+    """AC-3 (E2-S04b): warn when workflow.yaml is newer than workflow-diagram.md."""
+    project_root = tmp_path / "project"
+    harness_dir = project_root / "usr-harnesses" / "example"
+    _write_yaml(
+        harness_dir / "harness.yaml",
+        {"name": "example", "serve": {"hayhooks": {"port": 1416}}},
+    )
+    workflow_path = _write_yaml(
+        harness_dir / "workflow.yaml",
+        {"entry": "researcher", "stages": [{"agent": "researcher"}]},
+    )
+    agent_dir = harness_dir / "agents" / "researcher"
+    _write_yaml(
+        agent_dir / "agent.yaml",
+        {
+            "name": "researcher",
+            "agent": {"system_prompt": "prompts/system.md"},
+        },
+    )
+    prompt = agent_dir / "prompts" / "system.md"
+    prompt.parent.mkdir(parents=True, exist_ok=True)
+    prompt.write_text("prompt", encoding="utf-8")
+    _write_yaml(
+        agent_dir / "agents-models.yaml",
+        {
+            "default_model_id": "mock",
+            "models": {
+                "mock": {"provider": "mock", "model": "harness-fixture"},
+            },
+        },
+    )
+
+    docs_dir = harness_dir / "docs"
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    diagram_path = docs_dir / "workflow-diagram.md"
+    diagram_path.write_text("# stale diagram\n", encoding="utf-8")
+
+    # Ensure workflow.yaml mtime is strictly newer than the diagram.
+    stale_time = time.time() - 60
+    os.utime(diagram_path, (stale_time, stale_time))
+    os.utime(workflow_path, (time.time(), time.time()))
+
+    report = run_doctor(harness_name="example", project_root=project_root)
+    diagram_warns = [
+        c
+        for c in report.checks
+        if c.name == "workflow_diagram" and c.severity == "warn"
+    ]
+    assert diagram_warns
+    assert "workflow.yaml" in diagram_warns[0].message
+    assert report.exit_code == 0

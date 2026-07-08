@@ -5,8 +5,8 @@
 | **Document** | Epic E2 user stories |
 | **File** | `docs/stories/01-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 (E2-S04a done) |
-| **Status** | In progress (E2-S00–S04a done) |
+| **Last modified** | 2026-07-08 (E2-S04b done) |
+| **Status** | In progress (E2-S00–S04b done) |
 | **Build order** | **1 of 8** (implement first) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -29,8 +29,8 @@
 3. **E2-S02** — `models.yaml` merge — **Done** ([03-story.md](epic-stories/03-story.md))
 4. **E2-S03** — Runtime agent resolution rules — **Done** ([04-story.md](epic-stories/04-story.md))
 5. **E2-S04a** — `zaumzeug doctor` (core checks) — **Done** ([05.1-story.md](epic-stories/05.1-story.md))
-6. **E2-S04b** — `zaumzeug doctor` (phase-aware warnings) ← **next**
-7. **E2-S05** — Serve `--dry-run` *(after E3 serve stub exists)*
+6. **E2-S04b** — `zaumzeug doctor` (phase-aware warnings) — **Done** ([05.2-story.md](epic-stories/05.2-story.md))
+7. **E2-S05** — Serve `--dry-run` *(after E3 serve stub exists)* ← **next**
 8. **E2-S06** — Logging
 9. **E2-S07** — `workflow.yaml` schema (serial stages)
 
@@ -297,8 +297,11 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 |---|---|
 | **Feature** | E2.4 (part 2) |
 | **Prerequisites** | [E2-S04a](epic-stories/05.1-story.md) · [E2-S07](#e2-s07-workflowyaml-schema-serial) |
+| **Status** | Done (2026-07-08) |
 
 **AC:** Eval section Phase 1 warn; MCP without `uv` warn; stale workflow-diagram warn.
+
+**Build:** Phase-aware warn checks in `src/zaumzeug/doctor/checks.py`; `load_harness_for_doctor()` in `src/zaumzeug/config/loader.py`. See [epic-stories/05.2-story.md](epic-stories/05.2-story.md).
 
 ### E2-S04c — `--deploy` mode *(Phase 2)*
 

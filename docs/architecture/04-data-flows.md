@@ -109,7 +109,9 @@ At **`zaumzeug compile <harness>`**, the SDK **always** regenerates harness work
 **Operational rules:**
 
 - Do not hand-edit `docs/workflow-diagram.md` — compile overwrites ([§15](10-operations-and-reference.md#15-anti-patterns)).
-- `zaumzeug doctor` **warns** when `workflow.yaml` is newer than `docs/workflow-diagram.md`.
+- `zaumzeug doctor` **warns** when `workflow.yaml` is newer than `docs/workflow-diagram.md` (or diagram missing).
+
+**Implementation (E2-S04b, 2026-07-08):** `check_workflow_diagram_staleness()` in `src/zaumzeug/doctor/checks.py` compares file mtimes under each harness; missing diagram suggests `zaumzeug compile <harness> --workflow-diagram-only`.
 - `zaumzeug deploy` copies `docs/` into `deploy/<harness>/docs/` ([§10.1](07-deploy-packaging.md#101-dev-vs-deploy)).
 - Per-agent GEPA (`zaumzeug compile <harness> --agent <name>`) still refreshes the harness-level diagram.
 

@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 implementation in progress. Package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution (E2-S00–S03), and `zaumzeug doctor` core checks (E2-S04a) are done; next: doctor phase-aware warnings (E2-S04b). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 implementation in progress. Package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution (E2-S00–S03), and `zaumzeug doctor` including phase-aware warnings (E2-S04a–S04b) are done; next: serve dry-run and workflow schema (E2-S05–S07). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -126,8 +126,10 @@ Model routing is configuration-driven via `models.yaml` — swap providers witho
 ```bash
 zaumzeug doctor [harness]     # Preflight env + config (scan all harnesses if name omitted)
 zaumzeug doctor --verbose     # Include passing checks
-zaumzeug doctor --json        # Machine-readable report (exit 1 on fail)
+zaumzeug doctor --json        # Machine-readable report (exit 1 on fail; warns are non-blocking)
 ```
+
+Doctor warns (non-blocking) when: `eval` is present in Phase 1, MCP tools are configured but `uv` is missing, or `workflow.yaml` is newer than `docs/workflow-diagram.md`.
 
 **Planned:**
 
