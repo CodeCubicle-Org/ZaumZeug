@@ -5,8 +5,8 @@
 | **Document** | Epic E2 user stories |
 | **File** | `docs/stories/01-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
-| **Status** | Backlog |
+| **Last modified** | 2026-07-08 |
+| **Status** | In progress (E2-S00, E2-S01, E2-S02 done) |
 | **Build order** | **1 of 8** (implement first) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -24,12 +24,14 @@
 
 ### Story implementation order (within this epic)
 
-1. **E2-S00** — Package skeleton + CLI stub *(foundation)*
-2. **E2-S01** → **E2-S02** → **E2-S03** — Schemas, merge, resolver
-3. **E2-S04a** → **E2-S04b** — `zaumzeug doctor` (core checks, then phase-aware warnings)
-4. **E2-S05** — Serve `--dry-run` *(after E3 serve stub exists)*
-5. **E2-S06** — Logging
-6. **E2-S07** — `workflow.yaml` schema (serial stages)
+1. **E2-S00** — Package skeleton + CLI stub *(foundation)* — **Done** ([01-story.md](epic-stories/01-story.md))
+2. **E2-S01** — Pydantic config schemas — **Done** ([02-story.md](epic-stories/02-story.md))
+3. **E2-S02** — `models.yaml` merge — **Done** ([03-story.md](epic-stories/03-story.md))
+4. **E2-S03** — Runtime agent resolution rules ← **next**
+5. **E2-S04a** → **E2-S04b** — `zaumzeug doctor` (core checks, then phase-aware warnings)
+6. **E2-S05** — Serve `--dry-run` *(after E3 serve stub exists)*
+7. **E2-S06** — Logging
+8. **E2-S07** — `workflow.yaml` schema (serial stages)
 
 *(Phase 2: **E2-S04c** — `doctor --deploy`; see [epic-stories/05.3-story.md](epic-stories/05.3-story.md))*
 
@@ -43,6 +45,7 @@
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
 | **Prerequisites** | None — **start here** |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -59,20 +62,20 @@ As an **SDK maintainer**, I want a pip-installable package with a `harness` CLI 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `pyproject.toml` exists with `name = "zaumzeug"`, `requires-python >= 3.11`, runtime deps per §4.4
-- [ ] **AC-2** `[project.optional-dependencies]` includes `dev` (`dspy-ai`, `gepa`, `pytest`, `pytest-asyncio`, `httpx`, `respx`, `debugpy`) and `eval` (`deepeval`) per [Architecture §4.5](../architecture/03-technology-stack.md#45-test-dependencies)
-- [ ] **AC-3** Entry point: `zaumzeug = "zaumzeug.cli:main"`
-- [ ] **AC-4** Package layout matches Architecture §3: `src/zaumzeug/` with `cli.py`, `config/`, `runtime/`, `compile/`, `deploy/`, `eval/`, `serve/`, `integrations/`
-- [ ] **AC-5** `zaumzeug --help` exits 0 with subcommand stubs: `init`, `doctor`, `serve`, `run`, (`compile`, `deploy`, `eval`, `mcp`, `acp` as Phase 2+ stubs OK)
-- [ ] **AC-6** Repo `.gitattributes` normalizes text line endings to `\n`
-- [ ] **AC-7** `pip install -e ".[dev]"` succeeds from repo root
+- [x] **AC-1** `pyproject.toml` exists with `name = "zaumzeug"`, `requires-python >= 3.11`, runtime deps per §4.4
+- [x] **AC-2** `[project.optional-dependencies]` includes `dev` (`dspy-ai`, `gepa`, `pytest`, `pytest-asyncio`, `httpx`, `respx`, `debugpy`) and `eval` (`deepeval`) per [Architecture §4.5](../architecture/03-technology-stack.md#45-test-dependencies)
+- [x] **AC-3** Entry point: `zaumzeug = "zaumzeug.cli:main"`
+- [x] **AC-4** Package layout matches Architecture §3: `src/zaumzeug/` with `cli.py`, `config/`, `runtime/`, `compile/`, `deploy/`, `eval/`, `serve/`, `integrations/`
+- [x] **AC-5** `zaumzeug --help` exits 0 with subcommand stubs: `init`, `doctor`, `serve`, `run`, (`compile`, `deploy`, `eval`, `mcp`, `acp` as Phase 2+ stubs OK)
+- [x] **AC-6** Repo `.gitattributes` normalizes text line endings to `\n`
+- [x] **AC-7** `pip install -e ".[dev]"` succeeds from repo root
 
 ### Implementation tasks (build)
 
-- [ ] Create `pyproject.toml` per Architecture §4.4 illustrative fragment
-- [ ] Create `src/zaumzeug/__init__.py` and `src/zaumzeug/cli.py` with `argparse` subparsers
-- [ ] Create empty module packages: `config/`, `runtime/`, `serve/`, `compile/`, `deploy/`, `eval/`, `integrations/`
-- [ ] Add `.gitattributes` for `* text=auto eol=lf`
+- [x] Create `pyproject.toml` per Architecture §4.4 illustrative fragment
+- [x] Create `src/zaumzeug/__init__.py` and `src/zaumzeug/cli.py` with `argparse` subparsers
+- [x] Create empty module packages: `config/`, `runtime/`, `serve/`, `compile/`, `deploy/`, `eval/`, `integrations/`
+- [x] Add `.gitattributes` for `* text=auto eol=lf`
 
 ### Verification (after build)
 
@@ -88,14 +91,14 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-6 | **manual:** `.gitattributes` contains `* text=auto eol=lf` (file inspection) |
 | AC-7 | **manual:** `pip install -e ".[dev]"` from clean venv (or CI job in E1-S07) |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/test_e2_s00_package.py tests/unit/test_cli_help.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/test_e2_s00_package.py tests/unit/test_cli_help.py -v` passes
 
 ### Definition of done
 
-- [ ] Editable install works — unblocks E1-S01 and all CLI stories
-- [ ] No hardcoded OS paths in skeleton code
-- [ ] Verification checklist complete; `pytest` green for automated ACs
+- [x] Editable install works — unblocks E1-S01 and all CLI stories
+- [x] No hardcoded OS paths in skeleton code
+- [x] Verification checklist complete; `pytest` green for automated ACs
 
 ---
 
@@ -107,6 +110,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Persona** | Harness developer |
 | **Priority** | P0 |
 | **Prerequisites** | [E2-S00](#e2-s00-sdk-package-skeleton-and-cli-foundation) |
+| **Status** | Done (2026-07-08) — see [epic-stories/02-story.md](epic-stories/02-story.md) |
 
 ### User story
 
@@ -121,16 +125,16 @@ As a **harness developer**, I want invalid YAML to fail with field-level errors,
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Invalid `harness.yaml` fails with Pydantic field-level errors
-- [ ] **AC-2** Phase 1 minimal example from §6.6 passes validation
-- [ ] **AC-3** Unknown sections/fields for current phase fail with phase hint (e.g. “`compile` is Phase 2”)
-- [ ] **AC-4** Config validation error clarity meets [PRD §11](../prd.md#11-success-metrics)
+- [x] **AC-1** Invalid `harness.yaml` fails with Pydantic field-level errors
+- [x] **AC-2** Phase 1 minimal example from §6.6 passes validation
+- [x] **AC-3** Unknown sections/fields for current phase fail with phase hint (e.g. “`compile` is Phase 2”)
+- [x] **AC-4** Config validation error clarity meets [PRD §11](../prd.md#11-success-metrics)
 
 ### Implementation tasks (build)
 
-- [ ] Implement schemas in `src/zaumzeug/config/schemas.py`
-- [ ] Implement loader in `src/zaumzeug/config/loader.py` (read yaml, invoke schemas, resolve paths via `pathlib`)
-- [ ] Phase-gated field allowlists per epic/phase map
+- [x] Implement schemas in `src/zaumzeug/config/schemas.py`
+- [x] Implement loader in `src/zaumzeug/config/loader.py` (read yaml, invoke schemas, resolve paths via `pathlib`)
+- [x] Phase-gated field allowlists per epic/phase map
 
 ### Verification (after build)
 
@@ -143,14 +147,14 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-3 | `tests/unit/config/test_schemas.py::test_e2_s01_ac3_unknown_key_phase_hint` |
 | AC-4 | `tests/unit/config/test_schemas.py::test_e2_s01_ac4_error_includes_path_and_field` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/config/test_schemas.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/config/test_schemas.py -v` passes
 
 ### Definition of done
 
-- [ ] Example harness config passes
-- [ ] Error messages include file path and field name
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Example harness config passes
+- [x] Error messages include file path and field name
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 
@@ -162,6 +166,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Persona** | Harness developer |
 | **Priority** | P0 |
 | **Prerequisites** | [E2-S00](#e2-s00-sdk-package-skeleton-and-cli-foundation) |
+| **Status** | Done (2026-07-08) — see [epic-stories/03-story.md](epic-stories/03-story.md) |
 
 ### User story
 
@@ -175,16 +180,16 @@ As a **harness developer**, I want global, harness, and per-agent model registri
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Global `config/models.yaml` deep-merges with harness `models.yaml` (when present)
-- [ ] **AC-2** Per-agent `agents/<name>/agents-models.yaml` deep-merges over harness + global
-- [ ] **AC-3** Nested dicts merge recursively; child keys win
-- [ ] **AC-4** Lists in child file **replace** parent lists entirely
-- [ ] **AC-5** Each agent's `default_model_id` validated against that agent's merged registry
+- [x] **AC-1** Global `config/models.yaml` deep-merges with harness `models.yaml` (when present)
+- [x] **AC-2** Per-agent `agents/<name>/agents-models.yaml` deep-merges over harness + global
+- [x] **AC-3** Nested dicts merge recursively; child keys win
+- [x] **AC-4** Lists in child file **replace** parent lists entirely
+- [x] **AC-5** Each agent's `default_model_id` validated against that agent's merged registry
 
 ### Implementation tasks (build)
 
-- [ ] Implement merge in `src/zaumzeug/config/models.py`
-- [ ] Support `models: models.yaml` file reference in `harness.yaml`
+- [x] Implement merge in `src/zaumzeug/config/models.py`
+- [x] Support `models: models.yaml` file reference in `harness.yaml`
 
 ### Verification (after build)
 
@@ -198,14 +203,14 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-4 | `tests/unit/config/test_models_merge.py::test_e2_s02_ac4_same_model_id_override` |
 | AC-5 | `tests/unit/config/test_models_merge.py::test_e2_s02_ac5_missing_default_model_id_fails` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/config/test_models_merge.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/config/test_models_merge.py -v` passes
 
 ### Definition of done
 
-- [ ] Merge rules covered by unit tests ([PRD story seed](../prd.md#epic-e2--configuration-and-validation-phase-1))
-- [ ] Secrets never loaded from YAML (`.env` only)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Merge rules covered by unit tests ([PRD story seed](../prd.md#epic-e2--configuration-and-validation-phase-1))
+- [x] Secrets never loaded from YAML (`.env` only)
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

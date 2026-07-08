@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-08 (E2-S02 done) |
 | **Status** | Active |
 
 ---
@@ -31,12 +31,27 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 
 ---
 
+## Implementation progress
+
+| Story | Status | Date |
+|---|---|---|
+| [E2-S00](epic-stories/01-story.md) — SDK package skeleton and CLI foundation | Done | 2026-07-08 |
+| [E2-S01](epic-stories/02-story.md) — Pydantic config schemas | Done | 2026-07-08 |
+| [E2-S02](epic-stories/03-story.md) — `models.yaml` merge | Done | 2026-07-08 |
+| [E2-S03](epic-stories/04-story.md) — Runtime agent resolution rules | Next | — |
+
+Phase 1 implementation: package skeleton, `harness.yaml` validation, and three-tier `models.yaml` merge are done (E2-S00–S02); remaining E2/E3/E1 stories follow the [build graph](#phase-1-build-graph) below.
+
+---
+
 ## Phase 1 build graph
 
 ```text
-E2-S00  Package skeleton + pyproject.toml + CLI stub
+E2-S00  Package skeleton + pyproject.toml + CLI stub ✅
    ↓
-E2-S01…S03  Config load, merge, resolver
+E2-S01  Pydantic config schemas ✅
+E2-S02  models.yaml merge ✅
+E2-S03  Runtime agent resolution rules
 E2-S04a…S04b  zaumzeug doctor (core + phase warnings)
 E2-S05…S07  dry-run, logging, workflow schema
    ↓
@@ -159,8 +174,8 @@ Every story follows **build first, verify second**. A story is **not done** unti
 | AC-3 | `tests/unit/config/test_schemas.py::test_e2_s01_ac3_unknown_key_phase_hint` |
 | AC-4 | `tests/unit/config/test_schemas.py::test_e2_s01_ac4_error_includes_path_and_field` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/config/test_schemas.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/config/test_schemas.py -v` passes
 ```
 
 ---

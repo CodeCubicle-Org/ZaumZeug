@@ -5,18 +5,20 @@
 | **Document** | Individual user stories (extracted from epic files) |
 | **Folder** | `docs/stories/epic-stories/` |
 | **Created** | 2026-07-05 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-08 (E2-S02 done) |
 | **Related** | [Epic index](../00-README.md) · [PRD](../../prd.md) · [Implementation resources](00-implementation-resources.md) |
 
 ---
 
 Stories numbered in **global build order**. Split stories use decimal suffixes (e.g. `05.1-story.md`). **Total: 69** story files.
 
+**Implementation progress:** [01-story.md](01-story.md) (E2-S00) **Done**; [02-story.md](02-story.md) (E2-S01) **Done**; [03-story.md](03-story.md) (E2-S02) **Done** (2026-07-08). Next: [04-story.md](04-story.md) (E2-S03).
+
 | File | Story | Phase | Epic |
 |---|---|---|---|
-| [01-story.md](01-story.md) | E2-S00 — SDK package skeleton and CLI foundation | 1 | [E2](../01-epic.md) |
-| [02-story.md](02-story.md) | E2-S01 — Pydantic config schemas | 1 | [E2](../01-epic.md) |
-| [03-story.md](03-story.md) | E2-S02 — `models.yaml` merge | 1 | [E2](../01-epic.md) |
+| [01-story.md](01-story.md) | E2-S00 — SDK package skeleton and CLI foundation ✅ | 1 | [E2](../01-epic.md) |
+| [02-story.md](02-story.md) | E2-S01 — Pydantic config schemas ✅ | 1 | [E2](../01-epic.md) |
+| [03-story.md](03-story.md) | E2-S02 — `models.yaml` merge ✅ | 1 | [E2](../01-epic.md) |
 | [04-story.md](04-story.md) | E2-S03 — Runtime agent resolution rules | 1 | [E2](../01-epic.md) |
 | [05.1-story.md](05.1-story.md) | E2-S04a — `zaumzeug doctor` — core checks | 1 | [E2](../01-epic.md) |
 | [05.2-story.md](05.2-story.md) | E2-S04b — `zaumzeug doctor` — phase-aware warnings | 1 | [E2](../01-epic.md) |

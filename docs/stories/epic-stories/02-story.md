@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/02-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-08 |
 | **Story ID** | E2-S01 |
+| **Status** | Done |
 | **Epic** | [E2 — Configuration and Validation](../01-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 1 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P0 |
 | **Prerequisites** | [E2-S00](01-story.md#e2-s00-sdk-package-skeleton-and-cli-foundation) |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -51,26 +53,29 @@ As a **harness developer**, I want invalid YAML to fail with field-level errors,
 
 ```python
 from pathlib import Path
-import yaml
-from zaumzeug.config.schemas import HarnessConfig
 
-def load_harness(path: Path) -> HarnessConfig:
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
-    return HarnessConfig.model_validate(data)
+from zaumzeug.config import ConfigValidationError, HarnessConfig, load_harness
+
+def load_example_harness(path: Path) -> HarnessConfig:
+    try:
+        return load_harness(path)
+    except ConfigValidationError as exc:
+        # exc.path, exc.field, exc.errors — field-level messages for authors
+        raise SystemExit(str(exc)) from exc
 ```
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Invalid `harness.yaml` fails with Pydantic field-level errors
-- [ ] **AC-2** Phase 1 minimal example from §6.6 passes validation
-- [ ] **AC-3** Unknown sections/fields for current phase fail with phase hint (e.g. “`compile` is Phase 2”)
-- [ ] **AC-4** Config validation error clarity meets [PRD §11](../../prd.md#11-success-metrics)
+- [x] **AC-1** Invalid `harness.yaml` fails with Pydantic field-level errors
+- [x] **AC-2** Phase 1 minimal example from §6.6 passes validation
+- [x] **AC-3** Unknown sections/fields for current phase fail with phase hint (e.g. “`compile` is Phase 2”)
+- [x] **AC-4** Config validation error clarity meets [PRD §11](../../prd.md#11-success-metrics)
 
 ### Implementation tasks (build)
 
-- [ ] Implement schemas in `src/zaumzeug/config/schemas.py`
-- [ ] Implement loader in `src/zaumzeug/config/loader.py` (read yaml, invoke schemas, resolve paths via `pathlib`)
-- [ ] Phase-gated field allowlists per epic/phase map
+- [x] Implement schemas in `src/zaumzeug/config/schemas.py`
+- [x] Implement loader in `src/zaumzeug/config/loader.py` (read yaml, invoke schemas, resolve paths via `pathlib`)
+- [x] Phase-gated field allowlists per epic/phase map
 
 ### Verification (after build)
 
@@ -83,13 +88,13 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-3 | `tests/unit/config/test_schemas.py::test_e2_s01_ac3_unknown_key_phase_hint` |
 | AC-4 | `tests/unit/config/test_schemas.py::test_e2_s01_ac4_error_includes_path_and_field` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/config/test_schemas.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/config/test_schemas.py -v` passes
 
 ### Definition of done
 
-- [ ] Example harness config passes
-- [ ] Error messages include file path and field name
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Example harness config passes
+- [x] Error messages include file path and field name
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---

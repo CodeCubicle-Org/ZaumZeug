@@ -39,6 +39,8 @@ Single entry per harness: **`harness.yaml`**. Workflow: **`workflow.yaml`**. Per
 
 Requirements: [PRD E2.2](../prd.md#epic-e2--configuration-and-validation-phase-1).
 
+**Implementation (E2-S02, 2026-07-08):** Three-tier merge via `zaumzeug.config.load_merged_agent_models()` (`src/zaumzeug/config/models.py`). `deep_merge()` applies the rules above (recursive dict merge, list replace, explicit empty dict replaces). `AgentModelsConfig` validates each agent's `default_model_id` against the merged registry and rejects secret keys in YAML (credentials in `.env` only). Harness `models:` file references are resolved by `load_harness()` (E2-S01).
+
 ### 6.2 Config sections
 
 | Section | File | Phase | Wires | Epic |
@@ -151,6 +153,10 @@ Custom tools use `tools.custom` (user Python), not this catalog — [PRD E7.2](.
 ### 6.6 Phase 1 config schema
 
 Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validation-phase-1), [E3.4](../prd.md#epic-e3--runtime-and-local-serve-phase-1), [E3.5](../prd.md#epic-e3--runtime-and-local-serve-phase-1).
+
+**Implementation (E2-S01, 2026-07-08):** Phase 1 `harness.yaml` root fields are validated by `zaumzeug.config.load_harness()` → `HarnessConfig` (`src/zaumzeug/config/schemas.py`, `loader.py`). Phase-gated keys (`compile`, `eval`, `deploy`, `serve.acp`, …) fail with a phase hint.
+
+**Implementation (E2-S02, 2026-07-08):** Per-agent model registries merge via `zaumzeug.config.load_merged_agent_models()` (`models.py`). Agent and workflow schemas land in later E2 stories.
 
 **Phase 1:** `workflow.yaml` ships with the multi-agent layout (minimum one serial stage). **`zaumzeug run`** executes serial stages (E3). **Parallel fan-out** (`parallelism: N`) is deferred post–Phase 1.
 

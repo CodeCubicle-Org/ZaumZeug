@@ -1,8 +1,8 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-05 (illustrative-example disclaimer; not in ZaumZeug scope)  
-**Status:** Phase 0 → Phase 1 planning  
-**Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md)
+**Last updated:** 2026-07-08 (Phase 1 — E2-S00 package skeleton, E2-S01 `harness.yaml` schemas)  
+**Status:** Phase 1 implementation in progress  
+**Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
 **Document scope:** This PRD defines **what** to build — goals, users, journeys, epics, acceptance criteria, phases, and open decisions. Technical **how** (stack, flows, protocols, repo layout, SDK modules) lives in **[architecture.md](architecture.md)** and topic files under **[architecture/](architecture/00-README.md)**. Cross-reference; do not duplicate.
 
@@ -270,7 +270,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 | ID | Feature | Acceptance criteria |
 |---|---|---|
-| E2.1 | Pydantic config schemas | **AC:** Invalid yaml fails with field-level errors; [Architecture §6.6](architecture/05-configuration.md#66-phase-1-config-schema) Phase 1 example passes; unknown sections/fields for current phase fail with phase hint. |
+| E2.1 | Pydantic config schemas | **AC:** Invalid yaml fails with field-level errors; [Architecture §6.6](architecture/05-configuration.md#66-phase-1-config-schema) Phase 1 example passes; unknown sections/fields for current phase fail with phase hint. **Implemented** (E2-S01, 2026-07-08): `zaumzeug.config.load_harness`, `HarnessConfig`; tests in `tests/unit/config/test_schemas.py`. |
 | E2.2 | Model registry merge | **AC:** Three-tier merge per [Architecture §6.1](architecture/05-configuration.md#61-model-registry-merge): global → harness `models.yaml` → per-agent `agents-models.yaml`; recursive dict merge; list replace; missing `default_model_id` per agent fails validation. |
 | E2.3 | Runtime resolution | **AC:** Per-agent: serve loads `artifact` > `system_prompt` > error; compile requires `compile.module` in `agent.yaml`. Workflow `entry` agent used for interactive serve. ([Architecture §5.2](architecture/04-data-flows.md#52-runtime-agent-resolution).) |
 | E2.4 | `zaumzeug doctor` | **AC:** Checks Python version, install, `.env`, config validity (including `eval` section when present — warn), every agent runtime path, every `agents-models.yaml`, workflow.yaml consistency, stale workflow diagram warn, ports (warn), uv when MCP configured. Supports `--verbose`, `--json`; optional harness name or project-wide. |

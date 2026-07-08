@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zaumzeug"
+version = "0.1.0"
+description = "Harness SDK for configurable multi-agent AI workflows"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [{ name = "ZaumZeug contributors" }]
+keywords = ["harness", "agents", "haystack", "dspy", "gepa"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+  "haystack-ai",
+  "hayhooks",
+  "litellm",
+  "pydantic>=2",
+  "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = [
+  "dspy-ai",
+  "gepa",
+  "pytest",
+  "pytest-asyncio",
+  "httpx",
+  "respx",
+  "debugpy",
+]
+eval = ["deepeval"]
+
+[project.scripts]
+zaumzeug = "zaumzeug.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

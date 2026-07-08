@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/03-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-08 |
 | **Story ID** | E2-S02 |
+| **Status** | Done |
 | **Epic** | [E2 — Configuration and Validation](../01-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 1 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P0 |
 | **Prerequisites** | [E2-S00](01-story.md#e2-s00-sdk-package-skeleton-and-cli-foundation) |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -58,16 +60,16 @@ def deep_merge(base: dict, override: dict) -> dict:
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Global `config/models.yaml` deep-merges with harness `models.yaml` (when present)
-- [ ] **AC-2** Per-agent `agents/<name>/agents-models.yaml` deep-merges over harness + global
-- [ ] **AC-3** Nested dicts merge recursively; child keys win
-- [ ] **AC-4** Lists in child file **replace** parent lists entirely
-- [ ] **AC-5** Each agent's `default_model_id` validated against that agent's merged registry
+- [x] **AC-1** Global `config/models.yaml` deep-merges with harness `models.yaml` (when present)
+- [x] **AC-2** Per-agent `agents/<name>/agents-models.yaml` deep-merges over harness + global
+- [x] **AC-3** Nested dicts merge recursively; child keys win
+- [x] **AC-4** Lists in child file **replace** parent lists entirely
+- [x] **AC-5** Each agent's `default_model_id` validated against that agent's merged registry
 
 ### Implementation tasks (build)
 
-- [ ] Implement merge in `src/zaumzeug/config/models.py`
-- [ ] Support `models: models.yaml` file reference in `harness.yaml`
+- [x] Implement merge in `src/zaumzeug/config/models.py`
+- [x] Support `models: models.yaml` file reference in `harness.yaml`
 
 ### Verification (after build)
 
@@ -81,13 +83,13 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-4 | `tests/unit/config/test_models_merge.py::test_e2_s02_ac4_same_model_id_override` |
 | AC-5 | `tests/unit/config/test_models_merge.py::test_e2_s02_ac5_missing_default_model_id_fails` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/config/test_models_merge.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/config/test_models_merge.py -v` passes
 
 ### Definition of done
 
-- [ ] Merge rules covered by unit tests ([PRD story seed](../../prd.md#epic-e2--configuration-and-validation-phase-1))
-- [ ] Secrets never loaded from YAML (`.env` only)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Merge rules covered by unit tests ([PRD story seed](../../prd.md#epic-e2--configuration-and-validation-phase-1))
+- [x] Secrets never loaded from YAML (`.env` only)
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---

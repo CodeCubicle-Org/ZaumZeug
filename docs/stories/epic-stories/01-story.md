@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/01-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-08 |
 | **Story ID** | E2-S00 |
+| **Status** | Done |
 | **Epic** | [E2 — Configuration and Validation](../01-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 1 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
 | **Prerequisites** | None — **start here** |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -45,7 +47,7 @@ As an **SDK maintainer**, I want a pip-installable package with a `harness` CLI 
 
 - [Python packaging — pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/)
 - [Python argparse subcommands](https://docs.python.org/3/library/argparse.html#sub-commands)
-- [Architecture §4.4 — illustrative `pyproject.toml`](../../architecture/03-technology-stack.md#44-pyprojecttoml-dependency-groups-phase-1-stub)
+- [Architecture §4.4 — `pyproject.toml`](../../architecture/03-technology-stack.md#44-pyprojecttoml-dependency-groups-phase-1-stub)
 
 **Code sketch — CLI entry**
 
@@ -62,20 +64,20 @@ def main() -> None:
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `pyproject.toml` exists with `name = "zaumzeug"`, `requires-python >= 3.11`, runtime deps per §4.4
-- [ ] **AC-2** `[project.optional-dependencies]` includes `dev` (`dspy-ai`, `gepa`, `pytest`, `pytest-asyncio`, `httpx`, `respx`, `debugpy`) and `eval` (`deepeval`) per [Architecture §4.5](../../architecture/03-technology-stack.md#45-test-dependencies)
-- [ ] **AC-3** Entry point: `zaumzeug = "zaumzeug.cli:main"`
-- [ ] **AC-4** Package layout matches Architecture §3: `src/zaumzeug/` with `cli.py`, `config/`, `runtime/`, `compile/`, `deploy/`, `eval/`, `serve/`, `integrations/`
-- [ ] **AC-5** `zaumzeug --help` exits 0 with subcommand stubs: `init`, `doctor`, `serve`, `run`, (`compile`, `deploy`, `eval`, `mcp`, `acp` as Phase 2+ stubs OK)
-- [ ] **AC-6** Repo `.gitattributes` normalizes text line endings to `\n`
-- [ ] **AC-7** `pip install -e ".[dev]"` succeeds from repo root
+- [x] **AC-1** `pyproject.toml` exists with `name = "zaumzeug"`, `requires-python >= 3.11`, runtime deps per §4.4
+- [x] **AC-2** `[project.optional-dependencies]` includes `dev` (`dspy-ai`, `gepa`, `pytest`, `pytest-asyncio`, `httpx`, `respx`, `debugpy`) and `eval` (`deepeval`) per [Architecture §4.5](../../architecture/03-technology-stack.md#45-test-dependencies)
+- [x] **AC-3** Entry point: `zaumzeug = "zaumzeug.cli:main"`
+- [x] **AC-4** Package layout matches Architecture §3: `src/zaumzeug/` with `cli.py`, `config/`, `runtime/`, `compile/`, `deploy/`, `eval/`, `serve/`, `integrations/`
+- [x] **AC-5** `zaumzeug --help` exits 0 with subcommand stubs: `init`, `doctor`, `serve`, `run`, (`compile`, `deploy`, `eval`, `mcp`, `acp` as Phase 2+ stubs OK)
+- [x] **AC-6** Repo `.gitattributes` normalizes text line endings to `\n`
+- [x] **AC-7** `pip install -e ".[dev]"` succeeds from repo root
 
 ### Implementation tasks (build)
 
-- [ ] Create `pyproject.toml` per Architecture §4.4 illustrative fragment
-- [ ] Create `src/zaumzeug/__init__.py` and `src/zaumzeug/cli.py` with `argparse` subparsers
-- [ ] Create empty module packages: `config/`, `runtime/`, `serve/`, `compile/`, `deploy/`, `eval/`, `integrations/`
-- [ ] Add `.gitattributes` for `* text=auto eol=lf`
+- [x] Create `pyproject.toml` per Architecture §4.4 illustrative fragment
+- [x] Create `src/zaumzeug/__init__.py` and `src/zaumzeug/cli.py` with `argparse` subparsers
+- [x] Create empty module packages: `config/`, `runtime/`, `serve/`, `compile/`, `deploy/`, `eval/`, `integrations/`
+- [x] Add `.gitattributes` for `* text=auto eol=lf`
 
 ### Verification (after build)
 
@@ -91,13 +93,13 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-6 | **manual:** `.gitattributes` contains `* text=auto eol=lf` (file inspection) |
 | AC-7 | **manual:** `pip install -e ".[dev]"` from clean venv (or CI job in E1-S07) |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/test_e2_s00_package.py tests/unit/test_cli_help.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/test_e2_s00_package.py tests/unit/test_cli_help.py -v` passes
 
 ### Definition of done
 
-- [ ] Editable install works — unblocks E1-S01 and all CLI stories
-- [ ] No hardcoded OS paths in skeleton code
-- [ ] Verification checklist complete; `pytest` green for automated ACs
+- [x] Editable install works — unblocks E1-S01 and all CLI stories
+- [x] No hardcoded OS paths in skeleton code
+- [x] Verification checklist complete; `pytest` green for automated ACs
 
 ---

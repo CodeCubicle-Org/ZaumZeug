@@ -49,7 +49,7 @@ Model choice lives in **`models.yaml`**, not source code. Users do **not** pin H
 
 ### 4.4 `pyproject.toml` dependency groups (Phase 1 stub)
 
-Canonical package layout for implementation. Exact pins added when `pyproject.toml` is created in Phase 1; ranges below are intentional until lockfile policy is decided (v1: no committed lockfile).
+Canonical package layout. Root `pyproject.toml` exists as of E2-S00 (2026-07-08); this section remains the dependency-group reference. Exact pins may tighten later; ranges below are intentional until lockfile policy is decided (v1: no committed lockfile).
 
 | Group | Install command | Includes | Excludes |
 |---|---|---|---|
@@ -59,7 +59,7 @@ Canonical package layout for implementation. Exact pins added when `pyproject.to
 
 **Provider integrations** (`openai-haystack`, `anthropic-haystack`, `openrouter-haystack`, …): **not** in core or `[dev]`. Install only providers referenced in `models.yaml`. `ModelRouter` fails at startup with an actionable message if a configured provider package is missing.
 
-**Illustrative `[project]` fragment:**
+**`[project]` fragment (matches repo `pyproject.toml`):**
 
 ```toml
 [project]
