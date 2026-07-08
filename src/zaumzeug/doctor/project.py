@@ -11,15 +11,23 @@ def find_project_root(start: Path | str | None = None) -> Path:
     for candidate in (current, *current.parents):
         if (candidate / "usr-harnesses").is_dir():
             return candidate
+        if (candidate / "deploy").is_dir():
+            return candidate
         if (candidate / "config" / "models.yaml").is_file():
             return candidate
     return current
 
 
-def discover_harnesses(project_root: Path | str) -> list[tuple[str, Path]]:
-    """Return ``(name, harness_dir)`` for each harness under ``usr-harnesses/``."""
+def discover_harnesses(
+    project_root: Path | str,
+    *,
+    deploy: bool = False,
+) -> list[tuple[str, Path]]:
+    """Return ``(name, harness_dir)`` for each harness under the active root."""
+    from zaumzeug.config.harness_root import harness_root_segment
+
     project_root = Path(project_root)
-    harness_root = project_root / "usr-harnesses"
+    harness_root = project_root / harness_root_segment(deploy=deploy)
     if not harness_root.is_dir():
         return []
 

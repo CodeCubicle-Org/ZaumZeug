@@ -8,6 +8,15 @@ from zaumzeug.config.models import (
     load_merged_agent_models,
     merge_model_registries,
 )
+from zaumzeug.config.harness_root import (
+    DEPLOY_HARNESS_ROOT,
+    DEPLOY_MANIFEST,
+    DEV_HARNESS_ROOT,
+    HARNESS_ROOT_ENV,
+    harness_dir,
+    harness_root_segment,
+    is_deploy_mode,
+)
 from zaumzeug.config.resolver import (
     ARTIFACT_MANIFEST,
     AgentResolutionError,
@@ -31,6 +40,10 @@ from zaumzeug.config.schemas import (
 __all__ = [
     "ARTIFACT_MANIFEST",
     "CURRENT_SDK_PHASE",
+    "DEPLOY_HARNESS_ROOT",
+    "DEPLOY_MANIFEST",
+    "DEV_HARNESS_ROOT",
+    "HARNESS_ROOT_ENV",
     "PHASE_GATED_FIELDS",
     "AgentModelsConfig",
     "AgentResolutionError",
@@ -43,6 +56,9 @@ __all__ = [
     "ServeResolution",
     "ServeConfig",
     "deep_merge",
+    "harness_dir",
+    "harness_root_segment",
+    "is_deploy_mode",
     "load_agent_yaml",
     "load_harness",
     "load_harness_for_doctor",

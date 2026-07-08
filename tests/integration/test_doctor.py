@@ -1,15 +1,20 @@
 # Story: E2-S04a / E2.4
 # Story: E2-S04b / E2.4
+# Story: E2-S04c / E2.4
 """E2-S04 — `zaumzeug doctor` checks (integration)."""
 
 from __future__ import annotations
 
+import json
 import os
 import time
 from pathlib import Path
 
+import pytest
 import yaml
 
+from zaumzeug.config.harness_root import harness_dir
+from zaumzeug.config.resolver import ARTIFACT_MANIFEST
 from zaumzeug.doctor.runner import run_doctor
 
 
@@ -44,6 +49,61 @@ def _harness_layout(
     _write_yaml(agent_dir / "agent.yaml", agent_yaml)
     _write_yaml(agent_dir / "agents-models.yaml", agent_models)
     return harness_dir
+
+
+def _deploy_manifest(
+    *,
+    artifact_run_id: str | dict[str, str] = "20260624-001",
+) -> dict:
+    return {
+        "build_id": "test-build-id",
+        "source_git_sha": "abc123",
+        "harness_yaml_hash": "sha256-deadbeef",
+        "artifact_run_id": artifact_run_id,
+        "created_at": "2026-06-24T12:00:00Z",
+    }
+
+
+def _deploy_bundle_layout(
+    project_root: Path,
+    *,
+    harness_name: str,
+    agent_yaml: dict,
+    agent_models: dict,
+    workflow: dict | None = None,
+    manifest: dict | None = None,
+    artifact_run_id: str = "20260624-001",
+    with_artifact_manifest: bool = True,
+) -> Path:
+    bundle_dir = project_root / "deploy" / harness_name
+    _write_yaml(
+        bundle_dir / "harness.yaml",
+        {"name": harness_name, "serve": {"hayhooks": {"port": 1416}}},
+    )
+    _write_yaml(
+        bundle_dir / "workflow.yaml",
+        workflow
+        or {
+            "entry": "researcher",
+            "stages": [{"agent": "researcher"}],
+        },
+    )
+    agent_dir = bundle_dir / "agents" / "researcher"
+    _write_yaml(agent_dir / "agent.yaml", agent_yaml)
+    _write_yaml(agent_dir / "agents-models.yaml", agent_models)
+    if with_artifact_manifest:
+        artifact_dir = agent_dir / "artifacts" / artifact_run_id
+        artifact_dir.mkdir(parents=True, exist_ok=True)
+        (artifact_dir / ARTIFACT_MANIFEST).write_text(
+            json.dumps({"version": 1, "module_hash": "abc"}),
+            encoding="utf-8",
+        )
+    manifest_path = bundle_dir / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest or _deploy_manifest(artifact_run_id=artifact_run_id)),
+        encoding="utf-8",
+    )
+    return bundle_dir
 
 
 def test_e2_s04_ac5_missing_artifact_and_system_prompt_fails(tmp_path: Path) -> None:
@@ -175,3 +235,170 @@ def test_e2_s04_ac11_stale_workflow_diagram_warn(tmp_path: Path) -> None:
     assert diagram_warns
     assert "workflow.yaml" in diagram_warns[0].message
     assert report.exit_code == 0
+
+
+def test_e2_s04c_ac1_deploy_root_resolution(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-1 (E2-S04c): --deploy resolves harness from deploy/<name>/."""
+    project_root = tmp_path / "project"
+    bundle_dir = _deploy_bundle_layout(
+        project_root,
+        harness_name="shipped",
+        agent_yaml={
+            "name": "researcher",
+            "agent": {"artifact": "artifacts/20260624-001"},
+        },
+        agent_models={
+            "default_model_id": "mock",
+            "models": {
+                "mock": {"provider": "mock", "model": "harness-fixture"},
+            },
+        },
+    )
+    dev_dir = project_root / "usr-harnesses" / "shipped"
+    dev_dir.mkdir(parents=True)
+    _write_yaml(dev_dir / "harness.yaml", {"name": "shipped"})
+
+    report = run_doctor(harness_name="shipped", project_root=project_root, deploy=True)
+    assert report.exit_code == 0
+    manifest_pass = next(
+        c for c in report.checks if c.name == "deploy_manifest" and c.severity == "pass"
+    )
+    assert "manifest" in manifest_pass.message
+    assert harness_dir(project_root, "shipped", deploy=True) == bundle_dir
+
+    monkeypatch.delenv("HARNESS_ROOT", raising=False)
+    env_report = run_doctor(harness_name="shipped", project_root=project_root)
+    assert not any(c.name == "deploy_manifest" for c in env_report.checks)
+
+    monkeypatch.setenv("HARNESS_ROOT", "deploy")
+    env_deploy_report = run_doctor(harness_name="shipped", project_root=project_root)
+    assert any(c.name == "deploy_manifest" for c in env_deploy_report.checks)
+    assert env_deploy_report.exit_code == 0
+
+
+def test_e2_s04c_ac2_validates_deploy_manifest(tmp_path: Path) -> None:
+    """AC-2 (E2-S04c): validates deploy manifest.json and pinned artifact runs."""
+    project_root = tmp_path / "project"
+    _deploy_bundle_layout(
+        project_root,
+        harness_name="valid",
+        agent_yaml={
+            "name": "researcher",
+            "agent": {"artifact": "artifacts/20260624-001"},
+        },
+        agent_models={
+            "default_model_id": "mock",
+            "models": {
+                "mock": {"provider": "mock", "model": "harness-fixture"},
+            },
+        },
+        manifest=_deploy_manifest(
+            artifact_run_id={"researcher": "20260624-001"},
+        ),
+    )
+
+    report = run_doctor(harness_name="valid", project_root=project_root, deploy=True)
+    manifest_pass = next(
+        c for c in report.checks if c.name == "deploy_manifest" and c.severity == "pass"
+    )
+    artifact_pass = next(
+        c for c in report.checks if c.name == "deploy_artifact" and c.severity == "pass"
+    )
+    assert manifest_pass.harness == "valid"
+    assert "researcher" in artifact_pass.message
+    assert report.exit_code == 0
+
+
+def test_e2_s04c_ac3_reuses_core_checks(tmp_path: Path) -> None:
+    """AC-3 (E2-S04c): reuses E2-S04a core checks against deploy bundle layout."""
+    project_root = tmp_path / "project"
+    _deploy_bundle_layout(
+        project_root,
+        harness_name="core",
+        agent_yaml={
+            "name": "researcher",
+            "agent": {"artifact": "artifacts/20260624-001"},
+        },
+        agent_models={
+            "default_model_id": "mock",
+            "models": {
+                "mock": {"provider": "mock", "model": "harness-fixture"},
+            },
+        },
+    )
+
+    report = run_doctor(harness_name="core", project_root=project_root, deploy=True)
+    check_names = {c.name for c in report.checks}
+    assert "harness_config" in check_names
+    assert "model_registry" in check_names
+    assert "runtime_path" in check_names
+    assert "port_conflict" in check_names
+    assert "mcp_uv" not in check_names
+    assert "workflow_diagram" not in check_names
+    assert report.exit_code == 0
+
+
+def test_e2_s04c_ac4_fails_on_broken_bundle(tmp_path: Path) -> None:
+    """AC-4 (E2-S04c): non-zero exit on missing manifest or broken artifact refs."""
+    project_root = tmp_path / "project"
+
+    missing_manifest_dir = project_root / "deploy" / "no-manifest"
+    _deploy_bundle_layout(
+        project_root,
+        harness_name="no-manifest",
+        agent_yaml={
+            "name": "researcher",
+            "agent": {"artifact": "artifacts/20260624-001"},
+        },
+        agent_models={
+            "default_model_id": "mock",
+            "models": {
+                "mock": {"provider": "mock", "model": "harness-fixture"},
+            },
+        },
+    )
+    (missing_manifest_dir / "manifest.json").unlink()
+
+    missing_report = run_doctor(
+        harness_name="no-manifest",
+        project_root=project_root,
+        deploy=True,
+    )
+    assert missing_report.exit_code == 1
+    assert any(
+        c.name == "deploy_manifest" and c.severity == "fail"
+        for c in missing_report.checks
+    )
+
+    broken_dir = _deploy_bundle_layout(
+        project_root,
+        harness_name="broken-artifact",
+        agent_yaml={
+            "name": "researcher",
+            "agent": {"artifact": "artifacts/missing-run"},
+        },
+        agent_models={
+            "default_model_id": "mock",
+            "models": {
+                "mock": {"provider": "mock", "model": "harness-fixture"},
+            },
+        },
+        with_artifact_manifest=False,
+    )
+
+    broken_report = run_doctor(
+        harness_name="broken-artifact",
+        project_root=project_root,
+        deploy=True,
+    )
+    assert broken_report.exit_code == 1
+    runtime_fails = [
+        c
+        for c in broken_report.checks
+        if c.name == "runtime_path" and c.severity == "fail"
+    ]
+    assert runtime_fails
+    assert broken_dir.exists()

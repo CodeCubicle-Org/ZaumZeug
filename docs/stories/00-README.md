@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 (E2-S04b done) |
+| **Last modified** | 2026-07-08 (E2-S04c done) |
 | **Status** | Active |
 
 ---
@@ -41,8 +41,9 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E2-S03](epic-stories/04-story.md) — Runtime agent resolution rules | Done | 2026-07-08 |
 | [E2-S04a](epic-stories/05.1-story.md) — `zaumzeug doctor` (core checks) | Done | 2026-07-08 |
 | [E2-S04b](epic-stories/05.2-story.md) — `zaumzeug doctor` (phase-aware warnings) | Done | 2026-07-08 |
+| [E2-S04c](epic-stories/05.3-story.md) — `zaumzeug doctor --deploy` mode | Done | 2026-07-08 |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, and `zaumzeug doctor` (E2-S00–S04b) are done; remaining E2/E3/E1 stories follow the [build graph](#phase-1-build-graph) below.
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, and `zaumzeug doctor` (E2-S00–S04c) are done; remaining E2/E3/E1 stories follow the [build graph](#phase-1-build-graph) below.
 
 ---
 
@@ -56,6 +57,7 @@ E2-S02  models.yaml merge ✅
 E2-S03  Runtime agent resolution rules ✅
 E2-S04a  zaumzeug doctor (core checks) ✅
 E2-S04b  zaumzeug doctor (phase-aware warnings) ✅
+E2-S04c  zaumzeug doctor --deploy ✅
 E2-S05…S07  dry-run, logging, workflow schema ← next
    ↓
 E3-S05  Mock model (needed before serve smoke)

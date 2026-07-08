@@ -1,6 +1,6 @@
 # ZaumZeug — Architecture
 
-**Last updated:** 2026-07-08 (E2-S04b — doctor phase-aware warnings in `src/zaumzeug/doctor/`)  
+**Last updated:** 2026-07-08 (E2-S04c — doctor `--deploy` mode in `src/zaumzeug/doctor/` and `src/zaumzeug/config/harness_root.py`)  
 **Related:** [PRD](prd.md) · [Ideation archive](ideation-stage.md) · [Stories index](stories/00-README.md)
 
 **Document scope:** This document defines **how** the system is built — structure, flows, protocols, and SDK modules. Product **what/why**, epics, acceptance criteria, and phases live in **[prd.md](prd.md)**. Cross-reference; do not duplicate.

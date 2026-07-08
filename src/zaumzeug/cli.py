@@ -30,7 +30,7 @@ def _stub_command(name: str) -> Callable[[argparse.Namespace], int]:
 
 
 def _doctor_command(args: argparse.Namespace) -> int:
-    report = run_doctor(harness_name=args.harness_name)
+    report = run_doctor(harness_name=args.harness_name, deploy=args.deploy)
     if args.json:
         print(report.to_json())
     else:
@@ -59,6 +59,11 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="?",
         default=None,
         help="harness name under usr-harnesses/ (default: scan all)",
+    )
+    doctor.add_argument(
+        "--deploy",
+        action="store_true",
+        help="validate deploy bundle under deploy/ (or HARNESS_ROOT=deploy)",
     )
     doctor.add_argument(
         "--verbose",

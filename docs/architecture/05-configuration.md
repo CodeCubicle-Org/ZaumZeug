@@ -164,6 +164,8 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E2-S04b, 2026-07-08):** Phase-aware warn checks: `eval` section in Phase 1 (`eval_section`), MCP without `uv` on PATH (`mcp_uv`), stale or missing `docs/workflow-diagram.md` (`workflow_diagram`). `load_harness_for_doctor()` strips warned keys before validation so exit code stays 0 when only warnings fire.
 
+**Implementation (E2-S04c, 2026-07-08):** `zaumzeug doctor --deploy` (or `HARNESS_ROOT=deploy`) resolves harnesses under `deploy/<name>/`. Validates deploy `manifest.json` (§10.3 schema) and pinned `artifact-manifest.json` paths when `artifact_run_id` is a per-agent map; reuses E2-S04a core checks (config, models, runtime paths, port). Dev-only warnings (`mcp_uv`, `workflow_diagram`) are skipped in deploy mode. Root resolution: `src/zaumzeug/config/harness_root.py`.
+
 **Phase 1:** `workflow.yaml` ships with the multi-agent layout (minimum one serial stage). **`zaumzeug run`** executes serial stages (E3). **Parallel fan-out** (`parallelism: N`) is deferred post–Phase 1.
 
 **`usr-harnesses/example/harness.yaml`** (Phase 1 CI — multi-agent layout, single stage):

@@ -5,8 +5,8 @@
 | **Document** | Epic E2 user stories |
 | **File** | `docs/stories/01-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 (E2-S04b done) |
-| **Status** | In progress (E2-S00–S04b done) |
+| **Last modified** | 2026-07-08 (E2-S04c done) |
+| **Status** | In progress (E2-S00–S04c done) |
 | **Build order** | **1 of 8** (implement first) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -30,11 +30,10 @@
 4. **E2-S03** — Runtime agent resolution rules — **Done** ([04-story.md](epic-stories/04-story.md))
 5. **E2-S04a** — `zaumzeug doctor` (core checks) — **Done** ([05.1-story.md](epic-stories/05.1-story.md))
 6. **E2-S04b** — `zaumzeug doctor` (phase-aware warnings) — **Done** ([05.2-story.md](epic-stories/05.2-story.md))
-7. **E2-S05** — Serve `--dry-run` *(after E3 serve stub exists)* ← **next**
-8. **E2-S06** — Logging
-9. **E2-S07** — `workflow.yaml` schema (serial stages)
-
-*(Phase 2: **E2-S04c** — `doctor --deploy`; see [epic-stories/05.3-story.md](epic-stories/05.3-story.md))*
+7. **E2-S04c** — `zaumzeug doctor --deploy` — **Done** ([05.3-story.md](epic-stories/05.3-story.md))
+8. **E2-S05** — Serve `--dry-run` *(after E3 serve stub exists)* ← **next**
+9. **E2-S06** — Logging
+10. **E2-S07** — `workflow.yaml` schema (serial stages)
 
 ---
 
@@ -275,7 +274,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 ## E2-S04 — `zaumzeug doctor` *(split into sub-stories)*
 
-> **Canonical story files:** [E2-S04a — core](epic-stories/05.1-story.md) · [E2-S04b — warnings](epic-stories/05.2-story.md) · [E2-S04c — `--deploy`](epic-stories/05.3-story.md) (Phase 2)
+> **Canonical story files:** [E2-S04a — core](epic-stories/05.1-story.md) · [E2-S04b — warnings](epic-stories/05.2-story.md) · [E2-S04c — `--deploy`](epic-stories/05.3-story.md)
 
 ### E2-S04a — core checks
 
@@ -303,16 +302,17 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 **Build:** Phase-aware warn checks in `src/zaumzeug/doctor/checks.py`; `load_harness_for_doctor()` in `src/zaumzeug/config/loader.py`. See [epic-stories/05.2-story.md](epic-stories/05.2-story.md).
 
-### E2-S04c — `--deploy` mode *(Phase 2)*
+### E2-S04c — `--deploy` mode
 
 | Field | Value |
 |---|---|
 | **Feature** | E2.4 (part 3) |
 | **Prerequisites** | [E2-S04a](epic-stories/05.1-story.md) · [E5-S01](../06-epic.md#e5-s01-zaumzeug-deploy-command) · [E5-S03](../06-epic.md#e5-s03-zaumzeug-serve-deploy) |
+| **Status** | Done (2026-07-08) |
 
-**AC:** `--deploy` resolves `deploy/<name>/`; validates deploy manifest; reuses core checks.
+**AC:** `--deploy` / `HARNESS_ROOT=deploy` resolves `deploy/<name>/`; validates deploy `manifest.json` and pinned artifacts; reuses E2-S04a core checks; non-zero exit on missing manifest or broken artifact refs.
 
-**Verification:** See [epic-stories/05.1-story.md](epic-stories/05.1-story.md) through [05.3-story.md](epic-stories/05.3-story.md) for full AC → test mapping.
+**Build:** `check_deploy_manifest()` in `src/zaumzeug/doctor/checks.py`; harness root resolution in `src/zaumzeug/config/harness_root.py`; `run_doctor(deploy=True)` and CLI `--deploy`. See [epic-stories/05.3-story.md](epic-stories/05.3-story.md).
 
 ---
 

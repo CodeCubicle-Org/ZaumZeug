@@ -15,6 +15,8 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 | Development | `usr-harnesses/<name>/` | default |
 | Production | `deploy/<name>/` | `--deploy` or `HARNESS_ROOT=deploy` |
 
+**Implementation (E2-S04c, 2026-07-08):** Harness root resolution centralized in `src/zaumzeug/config/harness_root.py` (`is_deploy_mode()`, `harness_dir()`). `zaumzeug doctor --deploy` validates bundles under `deploy/<name>/`; serve/mcp/acp `--deploy` wiring is still pending ([E5-S03](../stories/epic-stories/43-story.md), [E5-S04](../stories/epic-stories/44-story.md)).
+
 ### 8.2 `harness` vs raw `hayhooks`
 
 **Canonical:** `zaumzeug serve|mcp|acp|run`. SDK loads config, builds agents from `agents/<name>/`, invokes **self-hosted Hayhooks** for serve paths.

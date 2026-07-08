@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import json
 import os
 import shutil
 import socket
@@ -19,13 +20,22 @@ from zaumzeug.config import (
     load_merged_agent_models,
     resolve_agent_serve,
 )
+from zaumzeug.config.harness_root import DEPLOY_MANIFEST
 from zaumzeug.config.loader import ConfigValidationError, strip_eval_for_doctor_validation
-from zaumzeug.config.resolver import load_workflow_yaml
+from zaumzeug.config.resolver import ARTIFACT_MANIFEST, load_workflow_yaml
 from zaumzeug.config.schemas import CURRENT_SDK_PHASE, HarnessConfig, PHASE_GATED_FIELDS
 from zaumzeug.doctor.project import list_agent_names
 from zaumzeug.doctor.report import CheckResult
 
 MIN_PYTHON = (3, 11)
+
+_DEPLOY_MANIFEST_REQUIRED_FIELDS = (
+    "build_id",
+    "source_git_sha",
+    "harness_yaml_hash",
+    "artifact_run_id",
+    "created_at",
+)
 
 # Provider → env vars that must be set when the provider is configured (non-mock).
 _PROVIDER_ENV_KEYS: dict[str, tuple[str, ...]] = {
@@ -424,6 +434,122 @@ def check_workflow_diagram_staleness(harness_name: str, harness_dir: Path) -> Ch
         message="workflow-diagram.md is up to date with workflow.yaml",
         harness=harness_name,
     )
+
+
+def check_deploy_manifest(harness_name: str, harness_dir: Path) -> list[CheckResult]:
+    """AC-2 (E2-S04c): Validate deploy ``manifest.json`` and pinned artifact runs."""
+    manifest_path = harness_dir / DEPLOY_MANIFEST
+    checks: list[CheckResult] = []
+
+    if not manifest_path.is_file():
+        checks.append(
+            CheckResult(
+                name="deploy_manifest",
+                severity="fail",
+                message=f"Missing deploy manifest at {manifest_path}",
+                harness=harness_name,
+            )
+        )
+        return checks
+
+    try:
+        raw = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        checks.append(
+            CheckResult(
+                name="deploy_manifest",
+                severity="fail",
+                message=f"Invalid JSON in {manifest_path}: {exc}",
+                harness=harness_name,
+            )
+        )
+        return checks
+
+    if not isinstance(raw, dict):
+        checks.append(
+            CheckResult(
+                name="deploy_manifest",
+                severity="fail",
+                message=f"Deploy manifest must be a JSON object: {manifest_path}",
+                harness=harness_name,
+            )
+        )
+        return checks
+
+    missing_fields = [
+        field
+        for field in _DEPLOY_MANIFEST_REQUIRED_FIELDS
+        if field not in raw or raw[field] in (None, "")
+    ]
+    if missing_fields:
+        checks.append(
+            CheckResult(
+                name="deploy_manifest",
+                severity="fail",
+                message=(
+                    f"Deploy manifest missing required field(s): "
+                    f"{', '.join(missing_fields)}"
+                ),
+                harness=harness_name,
+            )
+        )
+        return checks
+
+    checks.append(
+        CheckResult(
+            name="deploy_manifest",
+            severity="pass",
+            message=f"deploy manifest valid at {manifest_path}",
+            harness=harness_name,
+        )
+    )
+
+    artifact_run_id = raw["artifact_run_id"]
+    if isinstance(artifact_run_id, dict):
+        for agent_name, run_id in sorted(artifact_run_id.items()):
+            if not isinstance(agent_name, str) or not isinstance(run_id, str):
+                checks.append(
+                    CheckResult(
+                        name="deploy_artifact",
+                        severity="fail",
+                        message=(
+                            "artifact_run_id map entries must be string agent name "
+                            f"→ string run id (got {agent_name!r}: {run_id!r})"
+                        ),
+                        harness=harness_name,
+                    )
+                )
+                continue
+            artifact_dir = (
+                harness_dir / "agents" / agent_name / "artifacts" / run_id
+            )
+            manifest = artifact_dir / ARTIFACT_MANIFEST
+            if not manifest.is_file():
+                checks.append(
+                    CheckResult(
+                        name="deploy_artifact",
+                        severity="fail",
+                        message=(
+                            f"Pinned artifact for agent '{agent_name}' missing "
+                            f"{ARTIFACT_MANIFEST} at {artifact_dir}"
+                        ),
+                        harness=harness_name,
+                    )
+                )
+            else:
+                checks.append(
+                    CheckResult(
+                        name="deploy_artifact",
+                        severity="pass",
+                        message=(
+                            f"agent '{agent_name}' pinned run '{run_id}' has "
+                            f"{ARTIFACT_MANIFEST}"
+                        ),
+                        harness=harness_name,
+                    )
+                )
+
+    return checks
 
 
 def check_harness_config(harness_name: str, harness_dir: Path) -> list[CheckResult]:
