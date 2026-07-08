@@ -449,4 +449,4 @@ Per [Story verification](00-README.md#story-verification-required).
 
 > **Canonical story files:** [E5-S09a — core script](epic-stories/49.1-story.md) · [E5-S09b — wrappers](epic-stories/49.2-story.md) · [E5-S09c — verify](epic-stories/49.3-story.md)
 
-See epic-stories for full AC → test mapping. `--verify` depends on [E2-S04c](../01-epic.md#e2-s04--zaumzeug-doctor-split-into-sub-stories) and [E2-S05](../01-epic.md#e2-s05-dry-run-on-serve).
+See epic-stories for full AC → test mapping. `--verify` depends on [E2-S04c](../01-epic.md#e2-s04--zaumzeug-doctor-split-into-sub-stories) ✅ and [E2-S05](../01-epic.md#e2-s05-dry-run-on-serve) ✅ ([E5-S09c](epic-stories/49.3-story.md#e5-s09c-target-install-verify-integration) wires both in `target_install.py`). CI matrix dry-run ([E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix)) closes [E2-S05 DoD](epic-stories/06-story.md#definition-of-done) via AC-3.

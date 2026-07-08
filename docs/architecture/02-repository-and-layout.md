@@ -16,7 +16,7 @@ HarnessDevelopment/
 │   ├── compile/              # DSPy loader, GEPA runner, export contract
 │   ├── deploy/               # usr-harnesses/ → deploy/ packager
 │   ├── eval/                 # Optional DeepEval bridge
-│   ├── serve/                # Hayhooks wrapper, MCP/REST/ACP boot
+│   ├── serve/                # validate_serve + dry-run (E2-S05); Hayhooks runner (E3-S02)
 │   └── integrations/         # Haystack, DSPy, GEPA, LiteLLM adapters
 ├── usr-harnesses/<name>/         # USER dev workspace (author, compile, experiment)
 ├── deploy/<name>/            # PRODUCTION bundle (generated)

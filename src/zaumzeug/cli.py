@@ -7,6 +7,8 @@ import sys
 from collections.abc import Callable
 
 from zaumzeug.doctor import run_doctor
+from zaumzeug.serve import format_dry_run, validate_serve
+from zaumzeug.serve.dry_run import dry_run_to_json
 
 
 # Phase 1 commands and Phase 2+ stubs listed for help discovery.
@@ -36,6 +38,18 @@ def _doctor_command(args: argparse.Namespace) -> int:
     else:
         print(report.format(verbose=args.verbose))
     return report.exit_code
+
+
+def _serve_command(args: argparse.Namespace) -> int:
+    if args.dry_run:
+        result = validate_serve(args.harness_name, deploy=args.deploy)
+        if args.json:
+            print(dry_run_to_json(result))
+        else:
+            print(format_dry_run(result))
+        return result.exit_code
+    print("zaumzeug serve: not implemented yet", file=sys.stderr)
+    return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -77,8 +91,30 @@ def build_parser() -> argparse.ArgumentParser:
     )
     doctor.set_defaults(_handler=_doctor_command)
 
+    serve = sub.add_parser("serve", help="start Hayhooks for a harness")
+    serve.add_argument(
+        "harness_name",
+        help="harness name under usr-harnesses/ (or deploy/ with --deploy)",
+    )
+    serve.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="validate config and resolved paths without starting Hayhooks",
+    )
+    serve.add_argument(
+        "--deploy",
+        action="store_true",
+        help="load harness from deploy/<name>/ (or HARNESS_ROOT=deploy)",
+    )
+    serve.add_argument(
+        "--json",
+        action="store_true",
+        help="emit machine-readable JSON dry-run report",
+    )
+    serve.set_defaults(_handler=_serve_command)
+
     for name in _COMMANDS:
-        if name == "doctor":
+        if name in {"doctor", "serve"}:
             continue
         cmd = sub.add_parser(name, help=f"{name} command (stub)")
         cmd.set_defaults(_handler=_stub_command(name))

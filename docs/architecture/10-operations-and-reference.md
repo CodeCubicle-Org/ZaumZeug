@@ -29,8 +29,11 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 **Implementation (E2-S04b, 2026-07-08):** Additional warn-only checks: `eval` section present in Phase 1 (`eval_section`), MCP configured without `uv` on PATH (`mcp_uv`), stale or missing `docs/workflow-diagram.md` vs `workflow.yaml` (`workflow_diagram`). Doctor uses `load_harness_for_doctor()` to validate harness config while tolerating warned phase-gated keys.
 
 **Implementation (E2-S04c, 2026-07-08):** `--deploy` flag (or `HARNESS_ROOT=deploy`) validates production bundles under `deploy/<name>/`. Checks deploy `manifest.json`, pinned artifact runs (`deploy_manifest`, `deploy_artifact`), and reuses E2-S04a core checks; skips dev-only warnings. Tests: `tests/integration/test_doctor.py` (`-k e2_s04c`).
+
+**Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run [--deploy] [--json]` — `validate_serve()` in `src/zaumzeug/serve/validate.py`; prints port, entry agent, model id, runtime path, and tools; exit 1 on validation failure. No port bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
-| `--dry-run` on serve/compile | Validate without server or GEPA/LLM |
+| `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
+| `--dry-run` on compile | Validate without GEPA/LLM (E4-S06) |
 | `HARNESS_LOG_LEVEL=DEBUG` | SDK + Haystack request logging |
 | `install --verify` | Doctor + optional dry-run serve |
 | Mock `models.yaml` profile | CI without API keys |
@@ -83,7 +86,7 @@ Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/
 
 | Phase | Debug/test deliverables |
 |---|---|
-| 1 | doctor, config unit tests, serve `--dry-run`, mock profile, fixture harness |
+| 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), mock profile, fixture harness |
 | 2 | compile `--dry-run`, export golden tests, trace → `LLMTestCase`, optional `zaumzeug eval` |
 | 3 | MCP integration tests, tool correctness eval when DeepEval present |
 | 4 | `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |

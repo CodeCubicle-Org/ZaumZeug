@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 implementation in progress. Package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution (E2-S00–S03), and `zaumzeug doctor` including phase-aware warnings (E2-S04a–S04b) and deploy-bundle validation (E2-S04c) are done; next: serve dry-run and workflow schema (E2-S05–S07). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 implementation in progress. Package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution (E2-S00–S03), `zaumzeug doctor` including deploy-bundle validation (E2-S04a–S04c), and `zaumzeug serve --dry-run` (E2-S05) are done; next: structured logging and workflow schema (E2-S06–S07). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -131,6 +131,12 @@ zaumzeug doctor --json        # Machine-readable report (exit 1 on fail; warns a
 ```
 
 Doctor warns (non-blocking) when: `eval` is present in Phase 1, MCP tools are configured but `uv` is missing, or `workflow.yaml` is newer than `docs/workflow-diagram.md`. In `--deploy` mode, doctor validates `manifest.json`, pinned artifact runs, and reuses core config/runtime checks against the deploy bundle (dev-only warnings are skipped).
+
+```bash
+zaumzeug serve <harness> --dry-run    # Validate config + resolved paths (no Hayhooks, no LLM)
+zaumzeug serve <harness> --dry-run --deploy   # Same against deploy/<harness>/
+zaumzeug serve <harness> --dry-run --json     # Machine-readable summary
+```
 
 **Planned:**
 

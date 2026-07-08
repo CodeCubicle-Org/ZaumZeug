@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/06-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-08 |
 | **Story ID** | E2-S05 |
+| **Status** | Done |
 | **Epic** | [E2 — Configuration and Validation](../01-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 1 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P1 |
 | **Prerequisites** | [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) · [E2-S04a](05.1-story.md#e2-s04a-zaumzeug-doctor-core-checks) · [E2-S01](02-story.md#e2-s01-pydantic-config-schemas) |
+| **Status** | Done (2026-07-08) |
 
 ### User story
 
@@ -42,18 +44,24 @@ As a **harness developer**, I want `zaumzeug serve --dry-run`, so that I can val
 - [Architecture §8.2 — serve layering](../../architecture/06-runtime-and-protocols.md#82-harness-vs-raw-hayhooks)
 - Reuse config loader + resolver from [E2-S03](04-story.md); no Hayhooks bind on dry-run path
 
+**Code**
+
+- `src/zaumzeug/serve/validate.py` — `validate_serve()` (shared with E3-S02 real serve)
+- `src/zaumzeug/serve/dry_run.py` — human-readable and `--json` report formatting
+- `src/zaumzeug/cli.py` — `serve <harness> --dry-run [--deploy] [--json]`
+
 ### Acceptance criteria
 
-- [ ] **AC-1** Validates config via same path as real serve
-- [ ] **AC-2** Prints resolved config summary (model id, artifact path, tools, port)
-- [ ] **AC-3** Does not bind port or invoke LLM
-- [ ] **AC-4** Exit 0 on success, non-zero on validation failure
+- [x] **AC-1** Validates config via same path as real serve
+- [x] **AC-2** Prints resolved config summary (model id, artifact path, tools, port)
+- [x] **AC-3** Does not bind port or invoke LLM
+- [x] **AC-4** Exit 0 on success, non-zero on validation failure
 
 ### Implementation tasks (build)
 
-- [ ] Add `--dry-run` flag to serve command
-- [ ] Reuse config loader + runtime resolver + doctor checks
-- [ ] Human-readable and optional `--json` output
+- [x] Add `--dry-run` flag to serve command
+- [x] Reuse config loader + runtime resolver + doctor checks
+- [x] Human-readable and optional `--json` output
 
 ### Verification (after build)
 
@@ -68,13 +76,13 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-4 | `tests/integration/test_serve_dry_run.py::test_e2_s05_ac4_exit_zero_on_valid_config` |
 | AC-4 | `tests/integration/test_serve_dry_run.py::test_e2_s05_ac4_exit_nonzero_on_invalid_config` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/test_serve_dry_run.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/test_serve_dry_run.py -v` passes
 
 ### Definition of done
 
-- [ ] CI matrix runs dry-run on all OS (E1-S07)
-- [ ] target_install `--verify` uses serve dry-run (E5-S09)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [ ] Called by [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) CI matrix ([AC-3](24-story.md#acceptance-criteria); serve dry-run ready — wire in `.github/workflows/`)
+- [ ] Called by [E5-S09c](49.3-story.md#e5-s09c-target-install-verify-integration) `--verify` ([AC-2](49.3-story.md#acceptance-criteria); serve dry-run ready — wire in `target_install.py`)
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---

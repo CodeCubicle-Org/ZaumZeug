@@ -371,7 +371,7 @@ Per [Story verification](00-README.md#story-verification-required). **Docs-only*
 | **Feature** | E1.7 |
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
-| **Prerequisites** | [E1-S01](#e1-s01-cross-platform-install-script) through [E1-S03](#e1-s03-project-scaffolding-on-install) · [E2](../01-epic.md) · [E3](../02-epic.md) complete |
+| **Prerequisites** | [E1-S01](#e1-s01-cross-platform-install-script) through [E1-S03](#e1-s03-project-scaffolding-on-install) · [E2](../01-epic.md) · [E2-S05](epic-stories/06-story.md#e2-s05-dry-run-on-serve) ✅ · [E3](../02-epic.md) complete |
 
 ### User story
 
@@ -419,6 +419,7 @@ Per [Story verification](00-README.md#story-verification-required). **CI orchest
 - [ ] 100% install success rate on CI matrix ([PRD §11](../prd.md#11-success-metrics))
 - [ ] Runtime smoke 100% on all three OS jobs
 - [ ] Verification checklist complete
+- [ ] [E2-S05](epic-stories/06-story.md#definition-of-done) DoD *Called by E1-S07 CI matrix* checked off when AC-3 passes on all three runners
 
 ---
 

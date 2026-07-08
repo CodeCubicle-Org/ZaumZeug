@@ -72,7 +72,7 @@ r = httpx.post(f"{base}/v1/chat/completions", json={
 - [ ] Implement `src/zaumzeug/serve/runner.py` — canonical entry (not raw `hayhooks run`)
 - [ ] Call `runtime/factory.build_agent()` then pass to Hayhooks
 - [ ] Register OpenAI-compatible routes via Hayhooks API
-- [ ] Add `--dry-run` integration with E2-S05 resolver output
+- [ ] Call `validate_serve()` from runner before Hayhooks bind ([E2-S05](06-story.md#e2-s05-dry-run-on-serve) — `validate_serve()` available)
 - [ ] Document Hayhooks escape hatch in `user-docs/reference/cli.md`
 
 ### Verification (after build)

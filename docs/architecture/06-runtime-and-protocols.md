@@ -15,7 +15,7 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 | Development | `usr-harnesses/<name>/` | default |
 | Production | `deploy/<name>/` | `--deploy` or `HARNESS_ROOT=deploy` |
 
-**Implementation (E2-S04c, 2026-07-08):** Harness root resolution centralized in `src/zaumzeug/config/harness_root.py` (`is_deploy_mode()`, `harness_dir()`). `zaumzeug doctor --deploy` validates bundles under `deploy/<name>/`; serve/mcp/acp `--deploy` wiring is still pending ([E5-S03](../stories/epic-stories/43-story.md), [E5-S04](../stories/epic-stories/44-story.md)).
+**Implementation (E2-S04c, 2026-07-08):** Harness root resolution centralized in `src/zaumzeug/config/harness_root.py` (`is_deploy_mode()`, `harness_dir()`). `zaumzeug doctor --deploy` validates bundles under `deploy/<name>/`; `zaumzeug serve --dry-run --deploy` uses the same root resolution ([E2-S05](../stories/epic-stories/06-story.md)). Full Hayhooks serve/mcp/acp `--deploy` wiring is still pending ([E5-S03](../stories/epic-stories/43-story.md), [E5-S04](../stories/epic-stories/44-story.md)).
 
 ### 8.2 `harness` vs raw `hayhooks`
 
@@ -24,6 +24,7 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 | Command | Behavior |
 |---|---|
 | `zaumzeug serve <harness>` | Interactive: workflow `entry` agent via Hayhooks (`/v1/chat/completions`, optional MCP/ACP) |
+| `zaumzeug serve <harness> --dry-run` | Validate config and resolved paths; print summary — no Hayhooks bind, no LLM ([E2-S05](../stories/epic-stories/06-story.md)) |
 | `zaumzeug run <harness>` | **Serial workflow:** executes `workflow.yaml` stages in order; stage-scoped `ModelRouter` per agent ([PRD E3.6](../prd.md#epic-e3--runtime-and-local-serve-phase-1)) |
 | `zaumzeug run <harness> --from <stage>` | Partial run from a workflow stage (debug) |
 

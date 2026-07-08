@@ -298,7 +298,7 @@ As a **harness developer**, I want `zaumzeug serve <name>` to start Hayhooks fro
 - [ ] Implement `src/zaumzeug/serve/runner.py` — canonical entry (not raw `hayhooks run`)
 - [ ] Call `runtime/factory.build_agent()` then pass to Hayhooks
 - [ ] Register OpenAI-compatible routes via Hayhooks API
-- [ ] Add `--dry-run` integration with E2-S05 resolver output
+- [ ] Add `--dry-run` integration with E2-S05 `validate_serve()` ([06-story.md](06-story.md#e2-s05-dry-run-on-serve) — Done; wire in E3-S02 runner)
 - [ ] Document Hayhooks escape hatch in `user-docs/reference/cli.md`
 
 ### Verification (after build)
