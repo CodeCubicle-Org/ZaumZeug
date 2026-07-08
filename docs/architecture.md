@@ -1,6 +1,6 @@
 # ZaumZeug — Architecture
 
-**Last updated:** 2026-07-08 (E2-S03 — runtime agent resolution in `zaumzeug.config.resolver`)  
+**Last updated:** 2026-07-08 (E2-S04a — `zaumzeug doctor` core checks in `src/zaumzeug/doctor/`)  
 **Related:** [PRD](prd.md) · [Ideation archive](ideation-stage.md) · [Stories index](stories/00-README.md)
 
 **Document scope:** This document defines **how** the system is built — structure, flows, protocols, and SDK modules. Product **what/why**, epics, acceptance criteria, and phases live in **[prd.md](prd.md)**. Cross-reference; do not duplicate.

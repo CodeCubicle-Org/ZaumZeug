@@ -5,8 +5,8 @@
 | **Document** | Epic E2 user stories |
 | **File** | `docs/stories/01-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 |
-| **Status** | In progress (E2-S00–S03 done) |
+| **Last modified** | 2026-07-08 (E2-S04a done) |
+| **Status** | In progress (E2-S00–S04a done) |
 | **Build order** | **1 of 8** (implement first) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -28,10 +28,11 @@
 2. **E2-S01** — Pydantic config schemas — **Done** ([02-story.md](epic-stories/02-story.md))
 3. **E2-S02** — `models.yaml` merge — **Done** ([03-story.md](epic-stories/03-story.md))
 4. **E2-S03** — Runtime agent resolution rules — **Done** ([04-story.md](epic-stories/04-story.md))
-5. **E2-S04a** → **E2-S04b** — `zaumzeug doctor` (core checks, then phase-aware warnings) ← **next**
-6. **E2-S05** — Serve `--dry-run` *(after E3 serve stub exists)*
-7. **E2-S06** — Logging
-8. **E2-S07** — `workflow.yaml` schema (serial stages)
+5. **E2-S04a** — `zaumzeug doctor` (core checks) — **Done** ([05.1-story.md](epic-stories/05.1-story.md))
+6. **E2-S04b** — `zaumzeug doctor` (phase-aware warnings) ← **next**
+7. **E2-S05** — Serve `--dry-run` *(after E3 serve stub exists)*
+8. **E2-S06** — Logging
+9. **E2-S07** — `workflow.yaml` schema (serial stages)
 
 *(Phase 2: **E2-S04c** — `doctor --deploy`; see [epic-stories/05.3-story.md](epic-stories/05.3-story.md))*
 
@@ -265,7 +266,8 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 ### Definition of done
 
-- [ ] Doctor and serve use same resolution logic *(resolver ready; close when E2-S04a and E3-S00 are done)*
+- [x] Doctor uses same resolution logic via `resolve_agent_serve()` (E2-S04a, 2026-07-08)
+- [ ] Serve uses same resolution logic *(close when E3-S00 / E3-S02 are done)*
 - [x] No DSPy import on serve path
 - [x] Verification checklist complete; all ACs traced to tests
 
@@ -283,10 +285,11 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Persona** | Harness developer · Ops |
 | **Priority** | P0 |
 | **Prerequisites** | [E2-S01](#e2-s01-pydantic-config-schemas) · [E2-S02](#e2-s02-modelsyaml-merge) · [E2-S03](#e2-s03-runtime-agent-resolution-rules) |
+| **Status** | Done (2026-07-08) |
 
 **AC:** Python 3.11+, package import, `.env` warn, runtime path, model registry keys, port conflict warn, `--verbose`/`--json`, harness scan.
 
-**Build:** `doctor` subcommand; core check modules (pass/warn/fail).
+**Build:** `doctor` subcommand in `src/zaumzeug/doctor/`; core check modules (pass/warn/fail). See [epic-stories/05.1-story.md](epic-stories/05.1-story.md).
 
 ### E2-S04b — phase-aware warnings
 

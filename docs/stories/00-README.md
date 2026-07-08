@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 (E2-S03 done) |
+| **Last modified** | 2026-07-08 (E2-S04a done) |
 | **Status** | Active |
 
 ---
@@ -39,9 +39,10 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E2-S01](epic-stories/02-story.md) — Pydantic config schemas | Done | 2026-07-08 |
 | [E2-S02](epic-stories/03-story.md) — `models.yaml` merge | Done | 2026-07-08 |
 | [E2-S03](epic-stories/04-story.md) — Runtime agent resolution rules | Done | 2026-07-08 |
-| [E2-S04a](epic-stories/05.1-story.md) — `zaumzeug doctor` (core checks) | Next | — |
+| [E2-S04a](epic-stories/05.1-story.md) — `zaumzeug doctor` (core checks) | Done | 2026-07-08 |
+| [E2-S04b](epic-stories/05.2-story.md) — `zaumzeug doctor` (phase-aware warnings) | Next | — |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, and runtime agent resolution (E2-S00–S03) are done; remaining E2/E3/E1 stories follow the [build graph](#phase-1-build-graph) below.
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, and `zaumzeug doctor` core checks (E2-S00–S04a) are done; remaining E2/E3/E1 stories follow the [build graph](#phase-1-build-graph) below.
 
 ---
 
@@ -53,7 +54,8 @@ E2-S00  Package skeleton + pyproject.toml + CLI stub ✅
 E2-S01  Pydantic config schemas ✅
 E2-S02  models.yaml merge ✅
 E2-S03  Runtime agent resolution rules ✅
-E2-S04a…S04b  zaumzeug doctor (core + phase warnings)
+E2-S04a  zaumzeug doctor (core checks) ✅
+E2-S04b  zaumzeug doctor (phase-aware warnings) ← next
 E2-S05…S07  dry-run, logging, workflow schema
    ↓
 E3-S05  Mock model (needed before serve smoke)

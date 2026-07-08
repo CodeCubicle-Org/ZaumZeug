@@ -23,6 +23,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 | Mechanism | Purpose |
 |---|---|
 | `zaumzeug doctor` | Preflight; `--verbose`, `--json`; per-harness or project-wide |
+
+**Implementation (E2-S04a, 2026-07-08):** `src/zaumzeug/doctor/` — `CheckResult` severity (`pass`/`warn`/`fail`), checks for Python version, package import, `.env`/live-model API keys, `harness.yaml`, merged model registries, runtime paths (`resolve_agent_serve`), and port availability. Exit code 1 when any check fails.
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
 | `--dry-run` on serve/compile | Validate without server or GEPA/LLM |
 | `HARNESS_LOG_LEVEL=DEBUG` | SDK + Haystack request logging |
@@ -37,8 +39,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 ```text
 tests/
-├── unit/                         # config merge, ModelRouter mock, export snapshots (Phase 2+)
-├── integration/                  # serve HTTP contract, localhost bind, deploy smoke
+├── unit/                         # config merge, doctor checks, ModelRouter mock (Phase 2+)
+├── integration/                  # doctor harness scans, serve HTTP contract, deploy smoke
 ├── usr-harnesses/                # SDK runs against fixture/example harness trees
 │   ├── fixture/                  # minimal harness — not shipped to users
 │   └── example/                  # optional DeepEval pytest when [eval] installed

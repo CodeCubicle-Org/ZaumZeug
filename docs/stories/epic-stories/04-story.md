@@ -81,7 +81,8 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 ### Definition of done
 
-- [ ] Doctor and serve use same resolution logic *(resolver ready; close when [E2-S04a](05.1-story.md#definition-of-done) and [E3-S00](12-story.md#definition-of-done) are done)*
+- [x] Doctor uses same resolution logic via `resolve_agent_serve()` ([E2-S04a](05.1-story.md), 2026-07-08)
+- [ ] Serve uses same resolution logic *(close when [E3-S00](12-story.md#definition-of-done) / [E3-S02](13-story.md) are done)*
 - [x] No DSPy import on serve path
 - [x] Verification checklist complete; all ACs traced to tests
 

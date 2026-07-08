@@ -55,7 +55,9 @@ At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug run` (workflow
 5. Else if `agent.yaml` → `system_prompt` file exists → use as `Agent.system_prompt`.
 6. Else → fail fast with actionable error (include `harness-name` and `agent-name`).
 
-**Implementation (E2-S03, 2026-07-08):** Serve/compile resolution via `zaumzeug.config.resolve_agent_serve()`, `resolve_agent_compile()`, and `resolve_serve_entry()` (`src/zaumzeug/config/resolver.py`). When `agent.artifact` is set, `artifact-manifest.json` must exist in that directory. No DSPy import on the serve resolution path. Doctor and serve CLI wiring reuse this module in E2-S04a and E3-S02.
+**Implementation (E2-S03, 2026-07-08):** Serve/compile resolution via `zaumzeug.config.resolve_agent_serve()`, `resolve_agent_compile()`, and `resolve_serve_entry()` (`src/zaumzeug/config/resolver.py`). When `agent.artifact` is set, `artifact-manifest.json` must exist in that directory. No DSPy import on the serve resolution path.
+
+**Implementation (E2-S04a, 2026-07-08):** `zaumzeug doctor` runtime path checks call `resolve_agent_serve()` for each workflow agent — same resolution logic as serve will use ([E3-S02](../stories/02-epic.md#e3-s02-zaumzeug-serve-dev-mode)). Serve CLI wiring is still pending.
 
 **Interactive serve** (`zaumzeug serve <harness>`): runs the workflow's **entry** agent (or sole agent) for chat/MCP/ACP clients. **Workflow run** (`zaumzeug run <harness>`): executes the full or partial stage graph.
 
