@@ -2,7 +2,7 @@
   <img src="imgs/zaumzeug-harness-sdk.jpg" alt="ZaumZeug — harness SDK for multi-agent AI workflows" width="100%">
 </p>
 
-# ZaumZeug
+# ZaumZeug - ZaZu
 
 **A harness SDK and factory for configurable multi-agent AI workflows.**
 
