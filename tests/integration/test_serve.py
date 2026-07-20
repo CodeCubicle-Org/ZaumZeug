@@ -1,5 +1,6 @@
 # Story: E3-S02 / E3.2
 # Story: E3-S04 / E3.4 (AC-4)
+# Story: E3-S06 (AC-4)
 """E3-S02 — ``zaumzeug serve`` (dev mode) integration tests."""
 
 from __future__ import annotations
@@ -177,6 +178,38 @@ def test_e3_s02_prepare_fails_on_invalid_harness(tmp_path: Path) -> None:
     with pytest.raises(ServePrepareError) as exc_info:
         prepare_serve("missing", project_root=project_root)
     assert not exc_info.value.validation.ok
+
+
+def test_e3_s06_ac4_localhost_bind_enforced(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-4: Phase 1 serve enforces localhost bind; rejects wide-open hosts."""
+    project_root = tmp_path / "project"
+    _minimal_harness(project_root, port=6161)
+    monkeypatch.setattr(
+        "zaumzeug.serve.validate.find_project_root",
+        lambda start=None: project_root,
+    )
+
+    prepared = prepare_serve("example", project_root=project_root)
+    assert prepared.host == DEFAULT_BIND_HOST
+    assert prepared.host == "127.0.0.1"
+
+    with pytest.raises(ValueError, match="localhost only"):
+        prepare_serve("example", project_root=project_root, host="0.0.0.0")
+
+    run_app_mock = MagicMock()
+    monkeypatch.setattr("zaumzeug.serve.runner.run_app", run_app_mock)
+    monkeypatch.setattr(
+        "zaumzeug.serve.runner.prepare_serve",
+        lambda *args, **kwargs: prepared,
+    )
+    code = run_serve("example", project_root=project_root)
+    assert code == 0
+    _args, kwargs = run_app_mock.call_args
+    assert kwargs["host"] == "127.0.0.1"
+    assert kwargs["host"] != "0.0.0.0"
 
 
 def test_e3_s04_ac4_serve_example_without_env(

@@ -1,0 +1,6 @@
+default_model_id: mock
+
+models:
+  mock:
+    provider: mock
+    model: harness-fixture

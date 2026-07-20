@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-20 (E3-S04 done) |
+| **Last modified** | 2026-07-20 (E3-S06 done) |
 | **Status** | Active |
 
 ---

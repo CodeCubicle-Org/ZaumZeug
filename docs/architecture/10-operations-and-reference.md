@@ -40,6 +40,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E3-S01, 2026-07-08):** Config-driven `ModelRouter` — `src/zaumzeug/integrations/haystack.py` (`PROVIDERS`, `build_chat_generator`); Phase 1 live providers `openrouter` and `openai_compatible` (LM Studio / local OpenAI-compatible APIs via `api_base_url`); lazy generator cache; install hints on missing packages. Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s01`), `tests/integration/test_openai_contract.py` (AC-8 routing).
 
+**Implementation (E3-S06, 2026-07-20):** Test pyramid layout — `tests/unit/` (incl. `export/` placeholder), `tests/integration/`, `tests/usr-harnesses/fixture/` minimal harness, `tests/fixtures/responses/` + `cassettes/`, `tests/e2e/` gated by `HARNESS_LIVE_LLM=1`. Serve enforces localhost bind (`_enforce_localhost_bind`). Docs: `HARNESS_LIVE_LLM` + debugpy + Phase 1 security notes in `user-docs/reference/cli.md` and `user-docs/guides/testing.md`. Tests: `tests/usr-harnesses/fixture/test_fixture_harness.py`, `tests/integration/test_serve.py` (`-k e3_s06`).
+
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
 | `zaumzeug serve` (dev) | **Done** (E3-S02, 2026-07-20) — Hayhooks runner, OpenAI REST, localhost bind |
@@ -58,12 +60,12 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 ```text
 tests/
-├── unit/                         # config merge, doctor checks, ModelRouter ✅ (E3-S01, E3-S05)
+├── unit/                         # config merge, doctor checks, ModelRouter, export/ (Phase 2+)
 ├── integration/                  # doctor harness scans, serve HTTP contract, deploy smoke
 ├── usr-harnesses/                # SDK runs against fixture/example harness trees
-│   ├── fixture/                  # minimal harness — not shipped to users
+│   ├── fixture/                  # minimal harness — not shipped to users ✅ (E3-S06)
 │   └── example/                  # optional DeepEval pytest when [eval] installed
-├── e2e/                          # HARNESS_LIVE_LLM=1 only; nightly / pre-release
+├── e2e/                          # HARNESS_LIVE_LLM=1 only; nightly / pre-release ✅ gate (E3-S06)
 └── fixtures/
     ├── responses/                # canned mock LLM replies (mock profile)
     └── cassettes/                # optional VCR YAML (pytest-recording; Phase 2+)
@@ -98,7 +100,7 @@ Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/
 
 | Phase | Debug/test deliverables |
 |---|---|
-| 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness |
+| 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06) |
 | 2 | compile `--dry-run`, export golden tests, trace → `LLMTestCase`, optional `zaumzeug eval` |
 | 3 | MCP integration tests, tool correctness eval when DeepEval present |
 | 4 | `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
@@ -176,6 +178,8 @@ Begin with **20–50 cases from real failures** (production bugs, doctor errors,
 ## 14. Security (Phase 1 stance)
 
 Requirements: [PRD E8.2](../prd.md#epic-e8--rag-and-production-hardening-phase-4).
+
+**Implementation (E3-S06, 2026-07-20):** `serve/runner.py` defaults to and **enforces** `127.0.0.1` / `localhost` / `::1` — rejects `0.0.0.0`. User-facing notes: `user-docs/reference/cli.md` (Phase 1 security notes) and `user-docs/guides/testing.md`.
 
 - **Local dev:** bind `localhost`; no auth on Hayhooks.
 - **Secrets:** `.env` only — never in yaml, artifacts, or deploy bundle.

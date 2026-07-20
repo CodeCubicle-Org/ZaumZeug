@@ -10,6 +10,7 @@ ZaumZeug command-line interface reference for harness developers.
 |---|---|---|
 | `HARNESS_LOG_LEVEL` | `DEBUG`, `INFO`, `WARNING`, `ERROR` | Sets SDK and Haystack log verbosity (same effect as `--verbose` when `DEBUG`) |
 | `HARNESS_ROOT` | `deploy` | Load harnesses from `deploy/` instead of `usr-harnesses/` |
+| `HARNESS_LIVE_LLM` | `1` | Opt-in live provider e2e (`pytest tests/e2e`). Unset in default CI — mock profile only |
 
 ---
 
@@ -43,6 +44,16 @@ zaumzeug serve example --verbose
 HARNESS_LOG_LEVEL=DEBUG zaumzeug serve example --dry-run
 ```
 
+### IDE attach (debugpy)
+
+`debugpy` ships in the `[dev]` extra. Attach your IDE to a listening serve process:
+
+```bash
+python -m debugpy --listen 5678 -m zaumzeug.cli serve example
+```
+
+Then connect the debugger to `localhost:5678`.
+
 ### Hayhooks escape hatch
 
 Prefer `zaumzeug serve` for normal work — it loads harness config and builds agents for you. For low-level Haystack debugging only, you can run raw Hayhooks against a pipeline folder:
@@ -55,6 +66,12 @@ hayhooks mcp run
 ```
 
 Use this to isolate Haystack/Hayhooks issues from harness YAML or SDK wiring. Production and day-to-day local serve should stay on `zaumzeug serve`.
+
+### Phase 1 security notes
+
+- **Bind:** `zaumzeug serve` listens on **`127.0.0.1` only**. Wide-open hosts (`0.0.0.0`) are rejected in Phase 1.
+- **Auth:** Hayhooks has no in-process auth in Phase 1 — keep serve on localhost; put Traefik (or similar) in front for production (Phase 4).
+- **Secrets:** API keys live in `.env` only — never in YAML, artifacts, or deploy bundles.
 
 ---
 
@@ -99,5 +116,5 @@ Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack
 
 ## Related
 
-- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`
+- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy
 - [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml` and agent routing

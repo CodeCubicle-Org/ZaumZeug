@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers · SDK contributors |
-| **Last updated** | 2026-07-08 |
+| **Last updated** | 2026-07-20 |
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
@@ -142,13 +142,13 @@ Use `pytest.mark.parametrize` for edge cases (empty yaml, unknown phase keys, mi
 Integration tests start a **real** `zaumzeug serve` on an ephemeral localhost port with the **mock** profile.
 
 ```python
-# Illustrative pattern — actual helpers ship with E3-S06/E3-S07
+# Illustrative pattern — fixture harness under tests/usr-harnesses/fixture/
 import httpx
 
 def test_chat_completions_contract(ephemeral_serve_url):
     r = httpx.post(
         f"{ephemeral_serve_url}/v1/chat/completions",
-        json={"model": "mock-researcher", "messages": [{"role": "user", "content": "hi"}]},
+        json={"model": "fixture", "messages": [{"role": "user", "content": "hi"}]},
     )
     assert r.status_code == 200
     body = r.json()
@@ -158,6 +158,16 @@ def test_chat_completions_contract(ephemeral_serve_url):
 ```
 
 Use **`respx`** to stub outbound `web_fetch` or provider HTTP without hitting the public internet.
+
+---
+
+## Phase 1 security notes
+
+Local `zaumzeug serve` is unauthenticated in Phase 1. Keep exposure narrow:
+
+- Bind is **`127.0.0.1` only** — wide-open `0.0.0.0` is rejected.
+- Put secrets in `.env` only (never YAML or deploy bundles).
+- Production auth is proxy-only (Traefik ForwardAuth / bearer) in Phase 4 — see CLI security notes.
 
 ---
 
@@ -199,11 +209,11 @@ For deploy gates, set `deploy.eval_gate` in `harness.yaml` (`skip` | `warn` | `b
 
 | Variable | Purpose |
 |---|---|
-| `HARNESS_LIVE_LLM=1` | Enable `tests/e2e/` and live provider smoke |
+| `HARNESS_LIVE_LLM=1` | Enable `tests/e2e/` live provider smoke (nightly / manual only — **never** set in default CI) |
 | `HARNESS_LOG_LEVEL=DEBUG` | Verbose SDK + Haystack logs while debugging (equivalent to `serve`/`compile --verbose`) |
 | `PYTEST_OPENAI_API_KEY` | Re-record VCR cassettes (`pytest --record-mode=once`) |
 
-Never commit API keys. `.env` is gitignored.
+Never commit API keys. `.env` is gitignored. Default CI runs mock only — see [CLI reference](../reference/cli.md) for `HARNESS_LIVE_LLM` and debugpy.
 
 ---
 
@@ -254,4 +264,4 @@ zaumzeug serve example --dry-run
 ## Related guides
 
 - [Multi-agent workflow](multi-agent-workflow.md) — `workflow.yaml` and stage routing under test
-- [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `--dry-run`, `doctor`, `eval` flags
+- [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_LIVE_LLM`, debugpy, `--dry-run`, `doctor`, `eval` flags, Phase 1 security notes

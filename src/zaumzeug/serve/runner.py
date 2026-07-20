@@ -24,6 +24,18 @@ from zaumzeug.serve.validate import ServeValidationResult, validate_serve
 
 # Phase 1 security: localhost only (Architecture §14). No 0.0.0.0 without future config.
 DEFAULT_BIND_HOST = "127.0.0.1"
+_ALLOWED_BIND_HOSTS = frozenset({"127.0.0.1", "localhost", "::1"})
+
+
+def _enforce_localhost_bind(host: str) -> str:
+    """Reject non-loopback binds in Phase 1 (Architecture §14)."""
+    normalized = host.strip().lower()
+    if normalized not in _ALLOWED_BIND_HOSTS:
+        raise ValueError(
+            f"Phase 1 serve binds localhost only (got {host!r}). "
+            "Wide-open binds (e.g. 0.0.0.0) require a future explicit config."
+        )
+    return host.strip()
 
 
 class AgentPipelineWrapper(BasePipelineWrapper):
@@ -126,6 +138,7 @@ def prepare_serve(
 
     Does not bind a socket. Call :func:`run_app` (or :func:`run_serve`) to listen.
     """
+    bind_host = _enforce_localhost_bind(host)
     root = Path(project_root) if project_root is not None else find_project_root()
     validation = validate_serve(
         harness_name,
@@ -148,7 +161,11 @@ def prepare_serve(
     )
 
     pipelines_dir = Path(tempfile.mkdtemp(prefix="zaumzeug-hayhooks-pipelines-"))
-    _configure_hayhooks(host=host, port=validation.port, pipelines_dir=pipelines_dir)
+    _configure_hayhooks(
+        host=bind_host,
+        port=validation.port,
+        pipelines_dir=pipelines_dir,
+    )
     app = create_app()
     _register_agent_pipeline(
         app,
@@ -160,7 +177,7 @@ def prepare_serve(
         harness_name=validation.harness_name,
         harness_dir=validation.harness_dir,
         agent_name=validation.entry.agent_name,
-        host=host,
+        host=bind_host,
         port=validation.port,
         app=app,
         agent=agent,

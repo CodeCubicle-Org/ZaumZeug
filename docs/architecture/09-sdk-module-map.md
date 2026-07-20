@@ -16,7 +16,7 @@ Maps to [PRD epics](../prd.md#8-functional-requirements-epics). Implementation l
 | 2 | Config loader + Pydantic schemas | `config/` | E2 | **Done** (E2-S01–S03, S04c, S07) — `harness.yaml`, `workflow.yaml`, `models.yaml` merge, agent resolver, harness root resolution |
 | 3 | ModelRouter | `runtime/model_router.py` | E3 | **Done** (E3-S01, 2026-07-08) — config-driven router; Phase 1 providers: `mock`, `openrouter`, `openai_compatible`; lazy cache per provider+endpoint; phase-gated native cloud providers |
 | 4 | Runtime factory + builtin tools | `runtime/factory.py`, `runtime/tools/` | E3, E7 | **Done** (E3-S00, 2026-07-20) — `build_agent()` builds single Haystack `Agent` via ModelRouter + `resolve_agent_serve()` + builtin catalog (`web_fetch`); no DSPy/GEPA on this path |
-| 5 | Serve / Hayhooks wrapper | `serve/` | E3, E7 | **Partial** (E2-S05, E3-S02, 2026-07-20) — `validate_serve()`, `--dry-run`, `runner.py` (`prepare_serve` / `run_serve`) builds entry agent via factory and starts Hayhooks on localhost; MCP/ACP pending E7 |
+| 5 | Serve / Hayhooks wrapper | `serve/` | E3, E7 | **Partial** (E2-S05, E3-S02, E3-S06, 2026-07-20) — `validate_serve()`, `--dry-run`, `runner.py` (`prepare_serve` / `run_serve`) builds entry agent via factory and starts Hayhooks on **enforced** localhost; MCP/ACP pending E7 |
 | 6 | DSPy module loader | `compile/` | E4 | Planned |
 | 7 | Export contract | `compile/export.py` | E4 | Planned |
 | 8 | Workflow diagram generator | `compile/workflow_diagram.py` | E4 | Planned |

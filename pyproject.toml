@@ -53,3 +53,6 @@ zaumzeug = ["fixtures/responses/*.txt", "fixtures/responses/*.json"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+  "live_llm: live provider e2e — requires HARNESS_LIVE_LLM=1 (not default CI)",
+]

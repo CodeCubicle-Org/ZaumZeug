@@ -401,6 +401,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Persona** | SDK maintainer |
 | **Priority** | P1 |
 | **Prerequisites** | [E3-S02](#e3-s02-zaumzeug-serve-dev-mode) |
+| **Status** | Done (2026-07-20) |
 
 ### User story
 
@@ -415,18 +416,18 @@ As an **SDK maintainer**, I want a test pyramid and Phase 1 security defaults, s
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `tests/unit/` for config merge, ModelRouter mock, export snapshots (later); layout per [Architecture §13.3](../architecture/10-operations-and-reference.md#133-test-pyramid)
-- [ ] **AC-2** `tests/usr-harnesses/fixture/` minimal harness; `tests/fixtures/responses/` for mock profile
-- [ ] **AC-3** `HARNESS_LIVE_LLM=1` documented env for optional live API e2e ([Architecture §13.1](../architecture/10-operations-and-reference.md#131-design-principles))
-- [ ] **AC-4** Phase 1 serve binds localhost; documented in security notes
-- [ ] **AC-5** `debugpy` invocation documented for IDE attach ([Architecture §13.2](../architecture/10-operations-and-reference.md#132-mechanisms))
+- [x] **AC-1** `tests/unit/` for config merge, ModelRouter mock, export snapshots (later); layout per [Architecture §13.3](../architecture/10-operations-and-reference.md#133-test-pyramid)
+- [x] **AC-2** `tests/usr-harnesses/fixture/` minimal harness; `tests/fixtures/responses/` for mock profile
+- [x] **AC-3** `HARNESS_LIVE_LLM=1` documented env for optional live API e2e ([Architecture §13.1](../architecture/10-operations-and-reference.md#131-design-principles))
+- [x] **AC-4** Phase 1 serve binds localhost; documented in security notes
+- [x] **AC-5** `debugpy` invocation documented for IDE attach ([Architecture §13.2](../architecture/10-operations-and-reference.md#132-mechanisms))
 
 ### Implementation tasks (build)
 
-- [ ] Create `tests/usr-harnesses/fixture/` with minimal valid Phase 1 yaml
-- [ ] Add `tests/unit/` structure per Architecture §13.3
-- [ ] Document `HARNESS_LIVE_LLM` and debugpy in `user-docs/reference/cli.md` and [user-docs/guides/testing.md](../../user-docs/guides/testing.md)
-- [ ] Verify serve runner defaults to localhost bind
+- [x] Create `tests/usr-harnesses/fixture/` with minimal valid Phase 1 yaml
+- [x] Add `tests/unit/` structure per Architecture §13.3
+- [x] Document `HARNESS_LIVE_LLM` and debugpy in `user-docs/reference/cli.md` and [user-docs/guides/testing.md](../../user-docs/guides/testing.md)
+- [x] Verify serve runner defaults to localhost bind
 
 ### Verification (after build)
 
@@ -434,19 +435,19 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 | AC | Test |
 |---|---|
-| AC-1 | **manual:** `tests/unit/` tree matches Architecture §13.3 layout |
+| AC-1 | **manual:** `tests/unit/` tree matches Architecture §13.3 layout (`config/`, `runtime/`, `export/` placeholder) |
 | AC-2 | `tests/usr-harnesses/fixture/test_fixture_harness.py::test_e3_s06_ac2_minimal_harness_valid` |
 | AC-3 | **manual:** `user-docs/reference/cli.md` documents `HARNESS_LIVE_LLM=1` |
 | AC-4 | `tests/integration/test_serve.py::test_e3_s06_ac4_localhost_bind_enforced` |
 | AC-5 | **manual:** CLI reference includes debugpy one-liner |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/usr-harnesses/fixture/ -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/usr-harnesses/fixture/ -v` passes
 
 ### Definition of done
 
-- [ ] CI uses mock only — no live LLM keys in default workflow
-- [ ] Verification checklist complete; all ACs traced to tests or manual rows
+- [x] CI uses mock only — no live LLM keys in default workflow (`tests/e2e/` skipped unless `HARNESS_LIVE_LLM=1`; `live_llm` marker registered)
+- [x] Verification checklist complete; all ACs traced to tests or manual rows
 
 ---
 

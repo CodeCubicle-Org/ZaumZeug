@@ -1,0 +1,6 @@
+name: fixture
+description: Minimal Phase 1 harness for SDK unit/integration tests (not shipped)
+
+serve:
+  hayhooks:
+    port: 1416
