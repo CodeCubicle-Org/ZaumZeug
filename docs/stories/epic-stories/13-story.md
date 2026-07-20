@@ -5,14 +5,15 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/13-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-20 |
 | **Story ID** | E3-S02 |
+| **Status** | Done |
 | **Epic** | [E3 — Runtime and Local Serve](../02-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 2 of 8 |
 | **Story sequence** | 13 of 63 (global build order) |
 | **Source** | Extracted from [`02-epic.md`](../02-epic.md) |
-| **Related** | [Stories index](../00-README.md) · [Epic E3](../../prd.md#epic-e3--runtime-and-local-serve-phase-1) · [Architecture](../../architecture.md) |
+| **Related** | [Stories index](../00-README.md) · [Epic E3](../../prd.md#epic-e3--runtime-and-local-serve-phase-1) · [Architecture](../../architecture.md) · **Closes open DoD from** [E3-S00](12-story.md#definition-of-done) · **Open ACs/DoD carried to** [E1-S07](24-story.md) · **Closed by** [E3-S04](14-story.md) (*serve example*) |
 
 ---
 
@@ -24,6 +25,9 @@
 | **Persona** | Harness developer · Client integrator |
 | **Priority** | P0 |
 | **Prerequisites** | [E3-S00](12-story.md#e3-s00-runtime-factory-haystack-agent-builder) · [E2-S04a](05.1-story.md#e2-s04a-zaumzeug-doctor-core-checks) |
+| **Carries forward (closed here)** | [E3-S00 DoD](12-story.md#definition-of-done): *Used by `serve/runner.py` — not duplicated in serve layer* (closed 2026-07-20) |
+| **Open — carried forward** | [AC-6](#acceptance-criteria) · [AC-7](#acceptance-criteria) → [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) |
+| **Closed by E3-S04** | [DoD *serve example*](#definition-of-done) → [E3-S04](14-story.md#e3-s04-example-harness-general-research-agent) (2026-07-20) |
 
 ### User story
 
@@ -59,21 +63,21 @@ r = httpx.post(f"{base}/v1/chat/completions", json={
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Loads `usr-harnesses/<name>/` by default
-- [ ] **AC-2** Starts Hayhooks on port from `serve.hayhooks.port`
-- [ ] **AC-3** Binds **localhost** in Phase 1 (no wide-open `0.0.0.0` without explicit config)
-- [ ] **AC-4** `/v1/chat/completions` returns valid OpenAI-shaped JSON
-- [ ] **AC-5** Also exposes `GET /v1/models` per Architecture §9.4
-- [ ] **AC-6** Identical behavior on Windows, macOS, Linux
-- [ ] **AC-7** Smoke-tested in CI matrix with mock model ([E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix))
+- [x] **AC-1** Loads `usr-harnesses/<name>/` by default
+- [x] **AC-2** Starts Hayhooks on port from `serve.hayhooks.port`
+- [x] **AC-3** Binds **localhost** in Phase 1 (no wide-open `0.0.0.0` without explicit config)
+- [x] **AC-4** `/v1/chat/completions` returns valid OpenAI-shaped JSON
+- [x] **AC-5** Also exposes `GET /v1/models` per Architecture §9.4
+- [ ] **AC-6** Identical behavior on Windows, macOS, Linux *(open — carried to [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix))*
+- [ ] **AC-7** Smoke-tested in CI matrix with mock model *(open — carried to [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix))*
 
 ### Implementation tasks (build)
 
-- [ ] Implement `src/zaumzeug/serve/runner.py` — canonical entry (not raw `hayhooks run`)
-- [ ] Call `runtime/factory.build_agent()` then pass to Hayhooks
-- [ ] Register OpenAI-compatible routes via Hayhooks API
-- [ ] Call `validate_serve()` from runner before Hayhooks bind ([E2-S05](06-story.md#e2-s05-dry-run-on-serve) — `validate_serve()` available)
-- [ ] Document Hayhooks escape hatch in `user-docs/reference/cli.md`
+- [x] Implement `src/zaumzeug/serve/runner.py` — canonical entry (not raw `hayhooks run`)
+- [x] Call `runtime/factory.build_agent()` then pass to Hayhooks — **closes** [E3-S00 DoD](12-story.md#definition-of-done) (*Used by `serve/runner.py` — not duplicated in serve layer*); do **not** reimplement Agent construction in the serve layer
+- [x] Register OpenAI-compatible routes via Hayhooks API
+- [x] Call `validate_serve()` from runner before Hayhooks bind ([E2-S05](06-story.md#e2-s05-dry-run-on-serve) — `validate_serve()` available)
+- [x] Document Hayhooks escape hatch in `user-docs/reference/cli.md`
 
 ### Verification (after build)
 
@@ -86,15 +90,16 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-3 | `tests/integration/test_serve.py::test_e3_s02_ac3_localhost_bind_default` |
 | AC-4 | `tests/integration/test_openai_contract.py::test_e3_s02_ac4_chat_completions_shape` *(shared E3-S07)* |
 | AC-5 | `tests/integration/test_serve.py::test_e3_s02_ac5_get_v1_models` |
-| AC-6 | **shared:** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) matrix on three OS |
-| AC-7 | **shared:** E1-S07 serve smoke job with mock model |
+| AC-6 | **open — carried to** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) (three-OS matrix) |
+| AC-7 | **open — carried to** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) (serve smoke job with mock model) |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/test_serve.py tests/integration/test_openai_contract.py -v -k e3_s02` passes locally
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/test_serve.py tests/integration/test_openai_contract.py -v -k e3_s02` passes locally
 
 ### Definition of done
 
-- [ ] `zaumzeug serve example` works with templates from E3-S04 (mock, no `.env`)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] `zaumzeug serve example` works with templates from E3-S04 (mock, no `.env`) *(closed by [E3-S04](14-story.md#e3-s04-example-harness-general-research-agent) 2026-07-20)*
+- [x] `serve/runner.py` uses `runtime/factory.build_agent()` only — check off [E3-S00](12-story.md#definition-of-done) DoD *Used by `serve/runner.py`*
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---

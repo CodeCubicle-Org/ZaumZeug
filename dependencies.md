@@ -4,13 +4,56 @@
 
 ZaumZeug integrates these projects. Versions are pinned by the `zaumzeug` package — users install provider integrations only as needed.
 
+## Python version and local install
+
+| | |
+|---|---|
+| **Declared** | `requires-python = ">=3.11"` in `pyproject.toml` |
+| **Recommended for contributors** | **Python 3.11–3.13** (CPython wheels available for core deps) |
+| **Last verified** | 2026-07-20 — Windows + Python 3.13.5 for E3-S00 factory tests |
+
+### Known incompatibility (2026-07-20)
+
+`pip install -e ".[dev]"` (or a full install of the declared core deps) can fail on **very new CPython** when a dependency must **build from source** instead of using a prebuilt wheel.
+
+| Symptom | Cause |
+|---|---|
+| `metadata-generation-failed` on **`litellm`** | `litellm` (or a build dep such as `pydantic-core`) tries to compile native code |
+| Message about **Rust / Cargo not installed or not on PATH** | Source build needs a working Rust toolchain; transient `puccinialin` installs may report `cargo` present then fail PATH checks |
+
+**Observed on:** Python **3.14** (Windows). **Worked on:** Python **3.13.5** with prebuilt wheels for `pydantic` / `haystack-ai` / test stack.
+
+**Phase 1 note:** SDK runtime code under `src/zaumzeug/` does **not** import `litellm` yet (LiteLLM is listed for GEPA / compile-time LM wiring in Phase 2). A full `pip install -e ".[dev]"` still resolves `litellm` because it is declared in core `dependencies`.
+
+### Workaround for Phase 1 runtime / unit tests
+
+If a full editable install fails on an unsupported Python, use a **3.11–3.13** venv, or install the packages Phase 1 tests actually need and the editable package without pulling `litellm`:
+
+```powershell
+# Prefer an interpreter that has wheels (example: 3.13 on Windows)
+py -3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install pydantic haystack-ai httpx pyyaml pytest pytest-asyncio respx
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]" --no-deps
+# Optional when you need the Hayhooks CLI surface:
+.\.venv\Scripts\python.exe -m pip install hayhooks
+```
+
+Then run story tests as usual, e.g.:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest tests/integration/test_runtime_factory.py tests/unit/runtime/test_factory_imports.py -v
+```
+
+**Follow-ups (not done yet):** pin or relax `litellm` once Phase 2 needs it; consider moving it to a compile/dev extra so Phase 1 installs stay lean; document CI matrix Python versions in E1-S07.
+
 ## Core runtime
 
 | Project | Package | Role |
 |---|---|---|
 | [Haystack](https://github.com/deepset-ai/haystack) | `haystack-ai` | Agent loop, pipelines, RAG, tools |
 | [Hayhooks](https://docs.haystack.deepset.ai/docs/hayhooks) | `hayhooks` | REST/MCP serve, OpenAI-compatible API |
-| [LiteLLM](https://github.com/BerriAI/litellm) | `litellm` | Unified model API for GEPA task/reflection LMs |
+| [LiteLLM](https://github.com/BerriAI/litellm) | `litellm` | Unified model API for GEPA task/reflection LMs *(Phase 2+; see [Python version notes](#python-version-and-local-install))* |
 | [Pydantic](https://docs.pydantic.dev/latest/) | `pydantic` | Config validation and schemas |
 | [PyYAML](https://pyyaml.org/) | `pyyaml` | Harness and model YAML loading |
 

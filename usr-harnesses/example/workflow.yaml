@@ -1,0 +1,3 @@
+entry: researcher
+stages:
+  - agent: researcher

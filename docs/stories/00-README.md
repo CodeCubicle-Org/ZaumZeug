@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 (E3-S03 done) |
+| **Last modified** | 2026-07-20 (E3-S04 done) |
 | **Status** | Active |
 
 ---
@@ -48,8 +48,11 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E3-S05](epic-stories/09-story.md) — Mock model profile | Done | 2026-07-08 |
 | [E3-S01](epic-stories/10-story.md) — ModelRouter | Done | 2026-07-08 |
 | [E3-S03](epic-stories/11-story.md) — Builtin tool: `web_fetch` | Done | 2026-07-08 |
+| [E3-S00](epic-stories/12-story.md) — Runtime factory (Haystack Agent builder) | Done | 2026-07-20 |
+| [E3-S02](epic-stories/13-story.md) — `zaumzeug serve` (dev mode) | Done | 2026-07-20 |
+| [E3-S04](epic-stories/14-story.md) — Example harness (general research agent) | Done | 2026-07-20 |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), and builtin `web_fetch` tool (E3-S03) are done; remaining E3/E1 stories follow the [build graph](#phase-1-build-graph) below.
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), and the reference `example` research harness (E3-S04) are done; remaining E3/E1 stories follow the [build graph](#phase-1-build-graph) below.
 
 ---
 
@@ -70,11 +73,11 @@ E2-S07  workflow.yaml schema ✅
 E3-S05  Mock model profile ✅
 E3-S01  ModelRouter ✅
 E3-S03  web_fetch ✅
+E3-S00  Runtime factory (Agent builder) ✅
+E3-S02  zaumzeug serve ✅
    ↓
-E3-S00  Runtime factory (Agent builder)
-E3-S02  zaumzeug serve
+E3-S04  Example harness templates ✅
 E3-S08  zaumzeug run (serial workflow; after E2-S07)
-E3-S04  Example harness templates
 E3-S06  Test infra + Phase 1 security (localhost)
 E3-S07  OpenAI REST contract tests
    ↓

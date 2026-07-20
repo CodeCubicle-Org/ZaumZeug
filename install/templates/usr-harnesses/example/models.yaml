@@ -1,0 +1,4 @@
+# Optional harness-wide model aliases (merged under global config/models.yaml
+# and over agents/<name>/agents-models.yaml).
+#
+# The entry agent default is mock — see agents/researcher/agents-models.yaml.

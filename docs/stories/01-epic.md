@@ -266,7 +266,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 ### Definition of done
 
 - [x] Doctor uses same resolution logic via `resolve_agent_serve()` (E2-S04a, 2026-07-08)
-- [ ] Serve uses same resolution logic *(close when E3-S00 / E3-S02 are done)*
+- [x] Serve uses same resolution logic via `resolve_agent_serve()` in factory + `serve/runner.py` ([E3-S00](../02-epic.md), [E3-S02](epic-stories/13-story.md), 2026-07-20)
 - [x] No DSPy import on serve path
 - [x] Verification checklist complete; all ACs traced to tests
 

@@ -42,6 +42,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
+| `zaumzeug serve` (dev) | **Done** (E3-S02, 2026-07-20) — Hayhooks runner, OpenAI REST, localhost bind |
 | `--dry-run` on compile | Validate without GEPA/LLM (E4-S06) |
 | `--verbose` on serve/compile | **Done** (E2-S06) — SDK + Haystack structured debug logging |
 | `HARNESS_LOG_LEVEL=DEBUG` | **Done** (E2-S06) — equivalent to `--verbose`; SDK + Haystack request logging |
@@ -50,7 +51,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 | Phase 1 ModelRouter providers | **Done** (E3-S01) — `mock`, `openrouter`, `openai_compatible` (local LM Studio) |
 | `tests/usr-harnesses/fixture/` | Minimal harness for SDK tests (not shipped) |
 | debugpy | `python -m debugpy --listen 5678 -m zaumzeug.cli serve example` |
-| Hayhooks escape hatch | Raw `hayhooks run` to isolate Haystack vs config |
+| Hayhooks escape hatch | **Done** (E3-S02) — documented in `user-docs/reference/cli.md`; raw `hayhooks run` for low-level debugging |
 | Swagger `/docs` | Manual REST probes |
 
 ### 13.3 Test pyramid

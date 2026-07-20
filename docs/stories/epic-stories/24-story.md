@@ -5,14 +5,14 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/24-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 |
+| **Last modified** | 2026-07-20 |
 | **Story ID** | E1-S07 |
 | **Epic** | [E1 — Onboarding and Project Setup](../03-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 3 of 8 |
 | **Story sequence** | 24 of 63 (global build order) |
 | **Source** | Extracted from [`03-epic.md`](../03-epic.md) |
-| **Related** | [Stories index](../00-README.md) · [Epic E1](../../prd.md#epic-e1--onboarding-and-project-setup-phase-1) · [Architecture](../../architecture.md) |
+| **Related** | [Stories index](../00-README.md) · [Epic E1](../../prd.md#epic-e1--onboarding-and-project-setup-phase-1) · [Architecture](../../architecture.md) · **Closes open ACs from** [E3-S02](13-story.md#acceptance-criteria) |
 
 ---
 
@@ -24,6 +24,7 @@
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
 | **Prerequisites** | [E1-S01](18-story.md#e1-s01-cross-platform-install-script) through [E1-S03](20-story.md#e1-s03-project-scaffolding-on-install) · [E2-S04a](05.1-story.md) · [E2-S04b](05.2-story.md) · [E2-S05](06-story.md#e2-s05-dry-run-on-serve) ✅ · [E3](../02-epic.md) runtime stories complete |
+| **Closes open from** | [E3-S02 AC-6](13-story.md#acceptance-criteria) · [E3-S02 AC-7](13-story.md#acceptance-criteria) (three-OS matrix + mock serve smoke) |
 
 ### User story
 
@@ -45,6 +46,7 @@ As an **SDK maintainer**, I want CI to verify install and mock-model serve on Wi
 - [pytest in CI](https://docs.pytest.org/en/stable/how-to/usage.html)
 - [Architecture §13.6 — mock-first CI](../../architecture/10-operations-and-reference.md#136-testing-playbook)
 - [E2-S05 — serve `--dry-run`](06-story.md#e2-s05-dry-run-on-serve) — **Done** (2026-07-08); satisfies AC-3 serve step
+- [E3-S02 — `zaumzeug serve`](13-story.md#e3-s02-zaumzeug-serve-dev-mode) — **Done** (2026-07-20); satisfies AC-1/AC-4 serve smoke (closes [E3-S02 AC-6 · AC-7](13-story.md#acceptance-criteria))
 
 
 ### Upstream integration — [E2-S05](06-story.md#e2-s05-dry-run-on-serve) *(Done)*
@@ -61,6 +63,18 @@ As an **SDK maintainer**, I want CI to verify install and mock-model serve on Wi
 
 Completing **AC-3** on all three matrix runners closes [E2-S05 DoD](06-story.md#definition-of-done) *Called by E1-S07 CI matrix*.
 
+### Upstream integration — [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) *(Done)*
+
+[E3-S02](13-story.md) provides real `zaumzeug serve` (Hayhooks + mock). Matrix smoke must use the CLI runner — **do not** reimplement serve in the workflow.
+
+| Contract | Value |
+|---|---|
+| **CLI (AC-4)** | `zaumzeug serve example` on ephemeral localhost port with mock model |
+| **Programmatic** | `zaumzeug.serve.prepare_serve` / `run_serve` |
+| **Closes** | [E3-S02 AC-6](13-story.md#acceptance-criteria) (three OS) · [E3-S02 AC-7](13-story.md#acceptance-criteria) (mock serve smoke) |
+| **Requires** | Example harness from [E3-S04](14-story.md#e3-s04-example-harness-general-research-agent) |
+
+Completing **AC-1** and **AC-4** on all three matrix runners closes the open E3-S02 ACs carried forward.
 ### Acceptance criteria
 
 - [ ] **AC-1** Workflow runs on `windows-latest`, `ubuntu-latest`, `macos-latest`
@@ -129,5 +143,6 @@ Per [Story verification](../00-README.md#story-verification-required). **CI orch
 - [ ] Runtime smoke 100% on all three OS jobs
 - [ ] Verification checklist complete
 - [ ] [E2-S05](06-story.md#definition-of-done) DoD *Called by E1-S07 CI matrix* checked off when AC-3 passes on `windows-latest`, `ubuntu-latest`, and `macos-latest`
+- [ ] [E3-S02 AC-6 · AC-7](13-story.md#acceptance-criteria) checked off when AC-1 and AC-4 pass on all three OS runners
 
 ---

@@ -87,7 +87,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 ### Definition of done
 
-- [x] Catalog loader wired into runtime factory (`build_builtin_tools()` / `build_agent()` in `runtime/factory.py`; serve runner integration in E3-S02)
+- [x] Catalog loader wired into runtime factory (`build_builtin_tools()` / `build_agent()` in `runtime/factory.py`; serve runner uses factory in E3-S02, 2026-07-20)
 - [x] Verification checklist complete; all ACs traced to tests
 
 ---

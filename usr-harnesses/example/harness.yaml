@@ -1,0 +1,8 @@
+name: example
+description: Reference research harness (multi-agent layout; one workflow stage in Phase 1)
+
+models: models.yaml    # optional harness-wide aliases
+
+serve:
+  hayhooks:
+    port: 1416

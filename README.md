@@ -115,7 +115,7 @@ Never edit `deploy/` by hand — it is regenerated on each deploy. See [Testing]
 | Optimization | [GEPA](https://github.com/gepa-ai/gepa) | Offline prompt and module optimization |
 | Evaluation | [DeepEval](https://github.com/confident-ai/deepeval) *(optional)* | Dev regression and quality metrics |
 
-Model routing is configuration-driven via `models.yaml` — swap providers without changing agent code. See [dependencies.md](dependencies.md) for the full list of external tools and libraries.
+Model routing is configuration-driven via `models.yaml` — swap providers without changing agent code. See [dependencies.md](dependencies.md) for the full list of external tools and libraries, including [Python version notes](dependencies.md#python-version-and-local-install).
 
 ---
 
@@ -191,7 +191,7 @@ zaumzeug mcp <harness>        # Serve via Model Context Protocol
 
 ## Contributing
 
-Issues and discussions are welcome. See [docs/stories/](docs/stories/00-README.md) for the implementation roadmap and current progress.
+Issues and discussions are welcome. See [docs/stories/](docs/stories/00-README.md) for the implementation roadmap and current progress. For local SDK work, use **Python 3.11–3.13** and see [Python version and local install](dependencies.md#python-version-and-local-install) if `pip install -e ".[dev]"` fails.
 
 ---
 

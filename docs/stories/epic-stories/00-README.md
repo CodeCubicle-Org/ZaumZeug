@@ -5,14 +5,14 @@
 | **Document** | Individual user stories (extracted from epic files) |
 | **Folder** | `docs/stories/epic-stories/` |
 | **Created** | 2026-07-05 |
-| **Last modified** | 2026-07-08 (E3-S03 done) |
+| **Last modified** | 2026-07-20 (E3-S04 done) |
 | **Related** | [Epic index](../00-README.md) · [PRD](../../prd.md) · [Implementation resources](00-implementation-resources.md) |
 
 ---
 
 Stories numbered in **global build order**. Split stories use decimal suffixes (e.g. `05.1-story.md`). **Total: 69** story files.
 
-**Implementation progress:** [01-story.md](01-story.md) (E2-S00) **Done**; [02-story.md](02-story.md) (E2-S01) **Done**; [03-story.md](03-story.md) (E2-S02) **Done**; [04-story.md](04-story.md) (E2-S03) **Done**; [05.1-story.md](05.1-story.md) (E2-S04a) **Done**; [05.2-story.md](05.2-story.md) (E2-S04b) **Done**; [05.3-story.md](05.3-story.md) (E2-S04c) **Done**; [06-story.md](06-story.md) (E2-S05) **Done** (2026-07-08); [07-story.md](07-story.md) (E2-S06) **Done** (2026-07-08); [08-story.md](08-story.md) (E2-S07) **Done** (2026-07-08); [09-story.md](09-story.md) (E3-S05) **Done** (2026-07-08); [10-story.md](10-story.md) (E3-S01) **Done** (2026-07-08); [11-story.md](11-story.md) (E3-S03) **Done** (2026-07-08). Next: [12-story.md](12-story.md) (E3-S00).
+**Implementation progress:** [01-story.md](01-story.md) (E2-S00) **Done**; [02-story.md](02-story.md) (E2-S01) **Done**; [03-story.md](03-story.md) (E2-S02) **Done**; [04-story.md](04-story.md) (E2-S03) **Done**; [05.1-story.md](05.1-story.md) (E2-S04a) **Done**; [05.2-story.md](05.2-story.md) (E2-S04b) **Done**; [05.3-story.md](05.3-story.md) (E2-S04c) **Done**; [06-story.md](06-story.md) (E2-S05) **Done** (2026-07-08); [07-story.md](07-story.md) (E2-S06) **Done** (2026-07-08); [08-story.md](08-story.md) (E2-S07) **Done** (2026-07-08); [09-story.md](09-story.md) (E3-S05) **Done** (2026-07-08); [10-story.md](10-story.md) (E3-S01) **Done** (2026-07-08); [11-story.md](11-story.md) (E3-S03) **Done** (2026-07-08); [12-story.md](12-story.md) (E3-S00) **Done** (2026-07-20); [13-story.md](13-story.md) (E3-S02) **Done** (2026-07-20); [14-story.md](14-story.md) (E3-S04) **Done** (2026-07-20). Next: [15-story.md](15-story.md) (E3-S06).
 
 | File | Story | Phase | Epic |
 |---|---|---|---|
@@ -29,9 +29,9 @@ Stories numbered in **global build order**. Split stories use decimal suffixes (
 | [09-story.md](09-story.md) | E3-S05 — Mock model profile ✅ | 1 | [E3](../02-epic.md) |
 | [10-story.md](10-story.md) | E3-S01 — ModelRouter ✅ | 1 | [E3](../02-epic.md) |
 | [11-story.md](11-story.md) | E3-S03 — Builtin tool: `web_fetch` ✅ | 1 | [E3](../02-epic.md) |
-| [12-story.md](12-story.md) | E3-S00 — Runtime factory (Haystack Agent builder) | 1 | [E3](../02-epic.md) |
-| [13-story.md](13-story.md) | E3-S02 — `zaumzeug serve` (dev mode) | 1 | [E3](../02-epic.md) |
-| [14-story.md](14-story.md) | E3-S04 — Example harness (general research agent) | 1 | [E3](../02-epic.md) |
+| [12-story.md](12-story.md) | E3-S00 — Runtime factory (Haystack Agent builder) ✅ | 1 | [E3](../02-epic.md) |
+| [13-story.md](13-story.md) | E3-S02 — `zaumzeug serve` (dev mode) ✅ | 1 | [E3](../02-epic.md) |
+| [14-story.md](14-story.md) | E3-S04 — Example harness (general research agent) ✅ | 1 | [E3](../02-epic.md) |
 | [15-story.md](15-story.md) | E3-S06 — Phase 1 test infrastructure and security baseline | 1 | [E3](../02-epic.md) |
 | [16-story.md](16-story.md) | E3-S07 — OpenAI REST contract tests | 1 | [E3](../02-epic.md) |
 | [17-story.md](17-story.md) | E3-S08 — `zaumzeug run` (serial workflow) | 1 | [E3](../02-epic.md) |

@@ -8,7 +8,7 @@ from collections.abc import Callable
 
 from zaumzeug.doctor import run_doctor
 from zaumzeug.logging import configure_logging
-from zaumzeug.serve import format_dry_run, validate_serve
+from zaumzeug.serve import format_dry_run, run_serve, validate_serve
 from zaumzeug.serve.dry_run import dry_run_to_json
 
 
@@ -56,8 +56,7 @@ def _serve_command(args: argparse.Namespace) -> int:
         else:
             print(format_dry_run(result))
         return result.exit_code
-    print("zaumzeug serve: not implemented yet", file=sys.stderr)
-    return 0
+    return run_serve(args.harness_name, deploy=args.deploy)
 
 
 def build_parser() -> argparse.ArgumentParser:

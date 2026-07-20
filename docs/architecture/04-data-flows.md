@@ -59,7 +59,9 @@ At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug run` (workflow
 
 **Implementation (E2-S04a, 2026-07-08):** `zaumzeug doctor` runtime path checks call `resolve_agent_serve()` for each workflow agent — same resolution logic as serve ([E3-S02](../stories/02-epic.md#e3-s02-zaumzeug-serve-dev-mode)).
 
-**Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run` calls `validate_serve()` (`src/zaumzeug/serve/validate.py`) — `load_harness()`, `resolve_serve_entry()`, doctor model/runtime checks, deploy manifest when `--deploy`. Human-readable or `--json` summary; no Hayhooks or LLM. Real Hayhooks serve (E3-S02) will call the same `validate_serve()` before binding.
+**Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run` calls `validate_serve()` (`src/zaumzeug/serve/validate.py`) — `load_harness()`, `resolve_serve_entry()`, doctor model/runtime checks, deploy manifest when `--deploy`. Human-readable or `--json` summary; no Hayhooks or LLM.
+
+**Implementation (E3-S02, 2026-07-20):** `zaumzeug serve <harness>` calls the same `validate_serve()` then `runtime/factory.build_agent()` and starts Hayhooks via `serve/runner.py` — OpenAI `/v1/chat/completions` + `GET /v1/models`, bind `127.0.0.1`, port from `serve.hayhooks.port`. Escape hatch documented in `user-docs/reference/cli.md`.
 
 **Interactive serve** (`zaumzeug serve <harness>`): runs the workflow's **entry** agent (or sole agent) for chat/MCP/ACP clients. **Workflow run** (`zaumzeug run <harness>`): executes the full or partial stage graph.
 

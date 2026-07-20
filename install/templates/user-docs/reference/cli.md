@@ -15,7 +15,7 @@ ZaumZeug command-line interface reference for harness developers.
 
 ## `zaumzeug serve`
 
-Start Hayhooks for a harness (or validate without starting).
+Start Hayhooks for a harness under `usr-harnesses/<name>/` (dev mode), or validate without starting.
 
 ```bash
 zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose]
@@ -28,12 +28,33 @@ zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose]
 | `--json` | Emit machine-readable JSON (dry-run only) |
 | `--verbose` | Enable SDK and Haystack structured debug logging |
 
+**Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**). Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`).
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /v1/chat/completions` | OpenAI-compatible chat (use `"model": "<harness>"`) |
+| `GET /v1/models` | Lists the served harness pipeline |
+| `POST /<harness>/run` | Direct Hayhooks run API |
+
 **Logging:** Use `--verbose` or set `HARNESS_LOG_LEVEL=DEBUG` to see per-request context (`model_id`, tool name, artifact path). API keys are redacted automatically.
 
 ```bash
 zaumzeug serve example --verbose
 HARNESS_LOG_LEVEL=DEBUG zaumzeug serve example --dry-run
 ```
+
+### Hayhooks escape hatch
+
+Prefer `zaumzeug serve` for normal work — it loads harness config and builds agents for you. For low-level Haystack debugging only, you can run raw Hayhooks against a pipeline folder:
+
+```bash
+# Escape hatch — bypasses ZaumZeug config/agent factory
+hayhooks run
+# or, for MCP:
+hayhooks mcp run
+```
+
+Use this to isolate Haystack/Hayhooks issues from harness YAML or SDK wiring. Production and day-to-day local serve should stay on `zaumzeug serve`.
 
 ---
 

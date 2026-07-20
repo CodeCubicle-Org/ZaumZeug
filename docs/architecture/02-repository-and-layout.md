@@ -16,7 +16,7 @@ HarnessDevelopment/
 │   ├── compile/              # DSPy loader, GEPA runner, export contract
 │   ├── deploy/               # usr-harnesses/ → deploy/ packager
 │   ├── eval/                 # Optional DeepEval bridge
-│   ├── serve/                # validate_serve + dry-run (E2-S05); Hayhooks runner (E3-S02)
+│   ├── serve/                # validate_serve + dry-run (E2-S05); Hayhooks runner (E3-S02, done)
 │   ├── integrations/         # mock (E3-S05), haystack provider map (E3-S01); DSPy, GEPA, LiteLLM adapters
 │   └── fixtures/responses/   # bundled mock LLM fixtures (pip install; mirrors tests/fixtures/responses/)
 ├── usr-harnesses/<name>/         # USER dev workspace (author, compile, experiment)
@@ -145,7 +145,9 @@ user-docs/
 └── reference/cli.md
 ```
 
-Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [multi-agent-workflow.md](../user-docs/guides/multi-agent-workflow.md), [testing.md](../user-docs/guides/testing.md).
+Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [first-harness.md](../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../user-docs/guides/multi-agent-workflow.md), [testing.md](../user-docs/guides/testing.md).
+
+**Implementation (E3-S04, 2026-07-20):** [user-docs/getting-started/first-harness.md](../user-docs/getting-started/first-harness.md) documents the shipped `example` research harness (mock-first serve). Install template: `install/templates/user-docs/getting-started/first-harness.md`.
 
 **Implementation (E2-S06, 2026-07-08):** [user-docs/reference/cli.md](../user-docs/reference/cli.md) documents `HARNESS_LOG_LEVEL`, `--verbose` on serve/compile, and related CLI flags. Install template: `install/templates/user-docs/reference/cli.md`.
 

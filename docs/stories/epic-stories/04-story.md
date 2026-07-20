@@ -5,8 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/04-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 |
-| **Story ID** | E2-S03 |
+| **Last modified** | 2026-07-20 |
 | **Status** | Done |
 | **Epic** | [E2 — Configuration and Validation](../01-epic.md) |
 | **Phase** | 1 |
@@ -82,7 +81,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 ### Definition of done
 
 - [x] Doctor uses same resolution logic via `resolve_agent_serve()` ([E2-S04a](05.1-story.md), 2026-07-08)
-- [ ] Serve uses same resolution logic *(close when [E3-S00](12-story.md#definition-of-done) / [E3-S02](13-story.md) are done)*
+- [x] Serve uses same resolution logic via `resolve_agent_serve()` in `runtime/factory.build_agent()` ([E3-S00](12-story.md), 2026-07-20) and `serve/runner.py` ([E3-S02](13-story.md), 2026-07-20)
 - [x] No DSPy import on serve path
 - [x] Verification checklist complete; all ACs traced to tests
 

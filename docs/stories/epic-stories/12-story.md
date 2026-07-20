@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/12-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-20 |
 | **Story ID** | E3-S00 |
+| **Status** | Done |
 | **Epic** | [E3 — Runtime and Local Serve](../02-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 2 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
 | **Prerequisites** | [E3-S01](10-story.md#e3-s01-modelrouter) · [E3-S03](11-story.md#e3-s03-builtin-tool-web_fetch) · [E2-S03](04-story.md#e2-s03-runtime-agent-resolution-rules) |
+| **Status** | Done (2026-07-20) |
 
 ### User story
 
@@ -57,18 +59,18 @@ def build_agent(*, chat_generator, tools, system_prompt: str) -> Agent:
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `src/zaumzeug/runtime/factory.py` builds Haystack `Agent` from harness config
-- [ ] **AC-2** Injects `ModelRouter` as chat generator backend
-- [ ] **AC-3** Registers builtin tools from `tools.builtin`
-- [ ] **AC-4** Loads `system_prompt` from resolved file path (E2-S03)
-- [ ] **AC-5** **No DSPy or GEPA imports** in this module
-- [ ] **AC-6** **No double agent loops** — single Haystack Agent only
+- [x] **AC-1** `src/zaumzeug/runtime/factory.py` builds Haystack `Agent` from harness config
+- [x] **AC-2** Injects `ModelRouter` as chat generator backend
+- [x] **AC-3** Registers builtin tools from `tools.builtin`
+- [x] **AC-4** Loads `system_prompt` from resolved file path (E2-S03)
+- [x] **AC-5** **No DSPy or GEPA imports** in this module
+- [x] **AC-6** **No double agent loops** — single Haystack Agent only
 
 ### Implementation tasks (build)
 
-- [ ] Implement `build_agent(harness_config, harness_root) -> Agent` in `runtime/factory.py`
-- [ ] Wire `config/resolver.py` for prompt path
-- [ ] Wire `runtime/tools/catalog.py` for builtins
+- [x] Implement `build_agent(harness_dir, *, harness_name, agent_name, router) -> Agent` in `runtime/factory.py`
+- [x] Wire `config/resolver.py` for prompt path
+- [x] Wire `runtime/tools/catalog.py` for builtins
 
 ### Verification (after build)
 
@@ -83,13 +85,13 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-5 | `tests/unit/runtime/test_factory_imports.py::test_e3_s00_ac5_no_dspy_gepa_imports` |
 | AC-6 | `tests/integration/test_runtime_factory.py::test_e3_s00_ac6_single_agent_no_nested_loops` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/test_runtime_factory.py tests/unit/runtime/test_factory_imports.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/test_runtime_factory.py tests/unit/runtime/test_factory_imports.py -v` passes
 
 ### Definition of done
 
-- [ ] Used by `serve/runner.py` (E3-S02) — not duplicated in serve layer
-- [ ] Verification checklist complete; all ACs traced to tests
-- [ ] Reuses `zaumzeug.config.resolver` in `build_agent()`; when complete, check off [E2-S03](04-story.md#definition-of-done) DoD *serve uses same resolution logic*
+- [x] Used by `serve/runner.py` ([E3-S02](13-story.md#definition-of-done), 2026-07-20) — not duplicated in serve layer
+- [x] Verification checklist complete; all ACs traced to tests
+- [x] Reuses `zaumzeug.config.resolver` in `build_agent()`; when complete, check off [E2-S03](04-story.md#definition-of-done) DoD *serve uses same resolution logic*
 
 ---
