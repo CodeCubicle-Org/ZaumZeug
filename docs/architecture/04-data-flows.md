@@ -63,6 +63,8 @@ At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug run` (workflow
 
 **Implementation (E3-S02, 2026-07-20):** `zaumzeug serve <harness>` calls the same `validate_serve()` then `runtime/factory.build_agent()` and starts Hayhooks via `serve/runner.py` — OpenAI `/v1/chat/completions` + `GET /v1/models`, bind `127.0.0.1`, port from `serve.hayhooks.port`. Escape hatch documented in `user-docs/reference/cli.md`.
 
+**Implementation (E3-S08, 2026-07-21):** `zaumzeug run <harness>` executes the full (or `--from`-partial) stage graph via `runtime/workflow.run_workflow()` — stage-scoped ModelRouter + factory per agent stage; prior output forwarded as prepended user context. Pipeline stages stubbed until Phase 4.
+
 **Interactive serve** (`zaumzeug serve <harness>`): runs the workflow's **entry** agent (or sole agent) for chat/MCP/ACP clients. **Workflow run** (`zaumzeug run <harness>`): executes the full or partial stage graph.
 
 At `zaumzeug compile <harness> --agent <agent-name>` (offline):

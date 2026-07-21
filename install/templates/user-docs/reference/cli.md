@@ -89,6 +89,30 @@ Use this to isolate Haystack/Hayhooks issues from harness YAML or SDK wiring. Pr
 
 ---
 
+## `zaumzeug run`
+
+Execute `workflow.yaml` stages serially (multi-agent orchestration). Each agent stage loads that agent's config and merged `agents-models.yaml`, builds a Haystack Agent via the runtime factory, and forwards prior stage output as context to the next stage.
+
+```bash
+zaumzeug run <harness> [--from STAGE] [--input TEXT] [--deploy] [--verbose]
+```
+
+| Flag | Description |
+|---|---|
+| `--from STAGE` | Start from this workflow stage id (agent or pipeline name) — skip earlier stages |
+| `--input TEXT` | User input passed to each agent stage (also receives prior stage output as context) |
+| `--deploy` | Load harness from `deploy/<name>/` (or set `HARNESS_ROOT=deploy`) |
+| `--verbose` | Enable SDK and Haystack structured debug logging |
+
+```bash
+zaumzeug run example --input "Summarize the latest release notes"
+zaumzeug run example --from reviewer --input "Check the draft"
+```
+
+**Behavior:** Stages run top-to-bottom from `workflow.yaml`. Prior stage assistant text is prepended as a user message before `--input` for the next agent. Pipeline stages are not executable in Phase 1 (schema allowed; full invoke is Phase 4). Resolution errors include harness and agent names.
+
+---
+
 ## `zaumzeug compile`
 
 Compile harness artifacts with GEPA (Phase 2+).

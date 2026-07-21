@@ -178,7 +178,7 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E3-S04, 2026-07-20):** Reference `example` harness at `usr-harnesses/example/` (and install template `install/templates/usr-harnesses/example/`) — `agents/researcher/` with `default_model_id: mock`, single-stage `workflow.yaml`, builtin `web_fetch`, no RAG. First-run docs: `user-docs/getting-started/first-harness.md`. Tests: `tests/usr-harnesses/fixture/test_example_harness.py`, `tests/integration/test_serve.py` (`-k e3_s04`).
 
-**Phase 1:** `workflow.yaml` ships with the multi-agent layout (minimum one serial stage). **`zaumzeug run`** executes serial stages (E3). **Parallel fan-out** (`parallelism: N`) is deferred post–Phase 1.
+**Phase 1:** `workflow.yaml` ships with the multi-agent layout (minimum one serial stage). **`zaumzeug run`** executes serial stages (**Done** — E3-S08, 2026-07-21). **Parallel fan-out** (`parallelism: N`) is deferred post–Phase 1.
 
 **`usr-harnesses/example/harness.yaml`** (Phase 1 CI — multi-agent layout, single stage):
 

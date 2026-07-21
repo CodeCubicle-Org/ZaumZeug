@@ -5,7 +5,7 @@
 | **Document** | Epic E3 user stories |
 | **File** | `docs/stories/02-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-21 (E3-S07 done) |
+| **Last modified** | 2026-07-21 (E3-S08 done) |
 | **Status** | Backlog |
 | **Build order** | **2 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -33,7 +33,7 @@
 6. **E3-S04** — Example harness templates ✅ *(unblocks E1 scaffolding)*
 7. **E3-S06** — Test infrastructure + Phase 1 security ✅
 8. **E3-S07** — OpenAI REST contract tests ✅ *(open DoD → [E1-S07](03-epic.md#e1-s07-cross-platform-ci-matrix))*
-9. **E3-S08** — `zaumzeug run` (serial workflow)
+9. **E3-S08** — `zaumzeug run` (serial workflow) ✅
 
 ---
 
@@ -512,6 +512,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Persona** | Harness developer |
 | **Priority** | P0 |
 | **Prerequisites** | [E2-S07](../01-epic.md#e2-s07-workflowyaml-schema-serial) · [E3-S00](#e3-s00-runtime-factory-haystack-agent-builder) · [E3-S01](#e3-s01-modelrouter) |
+| **Status** | Done (2026-07-21) |
 
 ### User story
 
@@ -525,19 +526,19 @@ As a **harness developer**, I want `zaumzeug run` to execute my harness workflow
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Executes `workflow.yaml` stages in order (serial only Phase 1)
-- [ ] **AC-2** Each agent stage loads `agents/<name>/` config and merged `agents-models.yaml`
-- [ ] **AC-3** Prior stage output passed as context to next agent stage
-- [ ] **AC-4** Pipeline stages invoke exposed pipeline when `serve.expose` lists id (Phase 4+; stub OK in Phase 1)
-- [ ] **AC-5** `--from <stage>` runs partial workflow for debugging
-- [ ] **AC-6** Fails fast with harness + agent name on resolution errors
-- [ ] **AC-7** Integration test: two-agent serial workflow with mock models
+- [x] **AC-1** Executes `workflow.yaml` stages in order (serial only Phase 1)
+- [x] **AC-2** Each agent stage loads `agents/<name>/` config and merged `agents-models.yaml`
+- [x] **AC-3** Prior stage output passed as context to next agent stage
+- [x] **AC-4** Pipeline stages invoke exposed pipeline when `serve.expose` lists id (Phase 4+; stub OK in Phase 1)
+- [x] **AC-5** `--from <stage>` runs partial workflow for debugging
+- [x] **AC-6** Fails fast with harness + agent name on resolution errors
+- [x] **AC-7** Integration test: two-agent serial workflow with mock models
 
 ### Implementation tasks (build)
 
-- [ ] Implement `src/zaumzeug/runtime/workflow.py` serial executor
-- [ ] Add `run` subcommand in `src/zaumzeug/cli.py`
-- [ ] Reuse runtime factory per stage with stage-scoped ModelRouter
+- [x] Implement `src/zaumzeug/runtime/workflow.py` serial executor
+- [x] Add `run` subcommand in `src/zaumzeug/cli.py`
+- [x] Reuse runtime factory per stage with stage-scoped ModelRouter
 
 ### Verification (after build)
 
@@ -548,15 +549,15 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-1 | `tests/integration/test_workflow_run.py::test_e3_s08_ac1_serial_stage_order` |
 | AC-2 | `tests/integration/test_workflow_run.py::test_e3_s08_ac2_per_agent_models_registry` |
 | AC-3 | `tests/integration/test_workflow_run.py::test_e3_s08_ac3_stage_output_forwarded` |
-| AC-4 | **manual:** pipeline stage deferred Phase 4 |
+| AC-4 | **manual:** pipeline stage deferred Phase 4 (Phase 1 raises actionable `WorkflowError` stub) |
 | AC-5 | `tests/integration/test_workflow_run.py::test_e3_s08_ac5_from_stage_partial_run` |
 | AC-6 | `tests/integration/test_workflow_run.py::test_e3_s08_ac6_actionable_agent_error` |
 | AC-7 | `tests/integration/test_workflow_run.py::test_e3_s08_ac7_two_agent_mock_workflow` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/test_workflow_run.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/test_workflow_run.py -v` passes
 
 ### Definition of done
 
-- [ ] `zaumzeug run example` works with single-stage workflow
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] `zaumzeug run example` works with single-stage workflow
+- [x] Verification checklist complete; all ACs traced to tests
