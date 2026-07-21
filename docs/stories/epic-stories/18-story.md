@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/18-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-21 |
 | **Story ID** | E1-S01 |
+| **Status** | Done |
 | **Epic** | [E1 — Onboarding and Project Setup](../03-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 3 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P0 |
 | **Prerequisites** | [E2-S00](01-story.md#e2-s00-sdk-package-skeleton-and-cli-foundation) · [E2-S04a](05.1-story.md#e2-s04a-zaumzeug-doctor-core-checks) · [E3-S04](14-story.md#e3-s04-example-harness-general-research-agent) |
+| **Status** | Done (2026-07-21) |
 
 ### User story
 
@@ -48,22 +50,22 @@ As a **harness developer**, I want a single Python install script that works on 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `install/client_install.py` runs on Windows, macOS, and Linux with Python 3.11+
-- [ ] **AC-2** Creates project `.venv` when not present (unless `--skip-venv`)
-- [ ] **AC-3** Runs `pip install -e ".[dev]"` successfully per Architecture §4.4
-- [ ] **AC-4** Re-running the script is idempotent (no duplicate scaffolding or broken state)
-- [ ] **AC-5** Supports flags: `--verify`, `--no-example`, `--skip-venv`, `--cursor-mcp`
-- [ ] **AC-6** `--verify` runs `zaumzeug doctor` after install ([E2-S04](05.1-story.md#e2-s04a-zaumzeug-doctor-core-checks))
-- [ ] **AC-7** Uses `pathlib` only — no hardcoded OS path separators ([Architecture §2.5](../../architecture/01-overview-and-principles.md#25-cross-platform-portability))
+- [x] **AC-1** `install/client_install.py` runs on Windows, macOS, and Linux with Python 3.11+
+- [x] **AC-2** Creates project `.venv` when not present (unless `--skip-venv`)
+- [x] **AC-3** Runs `pip install -e ".[dev]"` successfully per Architecture §4.4
+- [x] **AC-4** Re-running the script is idempotent (no duplicate scaffolding or broken state)
+- [x] **AC-5** Supports flags: `--verify`, `--no-example`, `--skip-venv`, `--cursor-mcp`
+- [x] **AC-6** `--verify` runs `zaumzeug doctor` after install ([E2-S04](05.1-story.md#e2-s04a-zaumzeug-doctor-core-checks))
+- [x] **AC-7** Uses `pathlib` only — no hardcoded OS path separators ([Architecture §2.5](../../architecture/01-overview-and-principles.md#25-cross-platform-portability))
 
 ### Implementation tasks (build)
 
-- [ ] Create `install/client_install.py` with OS detection via `platform.system()`
-- [ ] Implement venv creation and activation path hints (`Scripts` vs `bin`)
-- [ ] Wire editable install: `pip install -e ".[dev]"`
-- [ ] Parse and forward CLI flags (`--verify`, `--no-example`, `--skip-venv`, `--cursor-mcp`)
-- [ ] Add non-blocking Git missing warning
-- [ ] Return non-zero exit code on failure with actionable stderr
+- [x] Create `install/client_install.py` with OS detection via `platform.system()`
+- [x] Implement venv creation and activation path hints (`Scripts` vs `bin`)
+- [x] Wire editable install: `pip install -e ".[dev]"`
+- [x] Parse and forward CLI flags (`--verify`, `--no-example`, `--skip-venv`, `--cursor-mcp`)
+- [x] Add non-blocking Git missing warning
+- [x] Return non-zero exit code on failure with actionable stderr
 
 ### Verification (after build)
 
@@ -79,13 +81,13 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-6 | `tests/unit/install/test_client_install.py::test_e1_s01_ac6_verify_invokes_doctor` |
 | AC-7 | `tests/unit/install/test_client_install.py::test_e1_s01_ac7_pathlib_no_hardcoded_separators` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/install/test_client_install.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/install/test_client_install.py -v` passes
 
 ### Definition of done
 
-- [ ] Idempotent re-run verified
-- [ ] No secrets written to disk
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Idempotent re-run verified
+- [x] No secrets written to disk
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---

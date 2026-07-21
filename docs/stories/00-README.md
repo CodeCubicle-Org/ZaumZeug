@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-21 (E3-S08 done) |
+| **Last modified** | 2026-07-21 (E1-S01 done) |
 | **Status** | Active |
 
 ---
@@ -54,8 +54,9 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E3-S06](epic-stories/15-story.md) — Phase 1 test infrastructure and security baseline | Done | 2026-07-20 |
 | [E3-S07](epic-stories/16-story.md) — OpenAI REST contract tests | Done | 2026-07-21 |
 | [E3-S08](epic-stories/17-story.md) — `zaumzeug run` (serial workflow) | Done | 2026-07-21 |
+| [E1-S01](epic-stories/18-story.md) — Cross-platform install script | Done | 2026-07-21 |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), and serial `zaumzeug run` (E3-S08) are done; remaining E1 stories follow the [build graph](#phase-1-build-graph) below.
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), and `install/client_install.py` (E1-S01) are done; remaining E1 stories follow the [build graph](#phase-1-build-graph) below.
 
 ---
 
@@ -84,7 +85,8 @@ E3-S06  Test infra + Phase 1 security (localhost) ✅
 E3-S07  OpenAI REST contract tests ✅
 E3-S08  zaumzeug run (serial workflow) ✅
    ↓
-E1-S01…S03  Install + scaffolding (copies E3 templates)
+E1-S01  Cross-platform install script ✅
+E1-S02…S03  Install wrappers + scaffolding (copies E3 templates)
 E1-S04  zaumzeug init
 E1-S05…S06  Docs + README
 E1-S07  CI matrix (last — validates full stack)
