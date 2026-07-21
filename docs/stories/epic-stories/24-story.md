@@ -5,14 +5,14 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/24-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-20 |
+| **Last modified** | 2026-07-21 |
 | **Story ID** | E1-S07 |
 | **Epic** | [E1 — Onboarding and Project Setup](../03-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 3 of 8 |
 | **Story sequence** | 24 of 63 (global build order) |
 | **Source** | Extracted from [`03-epic.md`](../03-epic.md) |
-| **Related** | [Stories index](../00-README.md) · [Epic E1](../../prd.md#epic-e1--onboarding-and-project-setup-phase-1) · [Architecture](../../architecture.md) · **Closes open ACs from** [E3-S02](13-story.md#acceptance-criteria) |
+| **Related** | [Stories index](../00-README.md) · [Epic E1](../../prd.md#epic-e1--onboarding-and-project-setup-phase-1) · [Architecture](../../architecture.md) · **Closes open ACs/DoD from** [E3-S02](13-story.md#acceptance-criteria) · [E3-S07](16-story.md#definition-of-done) |
 
 ---
 
@@ -24,7 +24,7 @@
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
 | **Prerequisites** | [E1-S01](18-story.md#e1-s01-cross-platform-install-script) through [E1-S03](20-story.md#e1-s03-project-scaffolding-on-install) · [E2-S04a](05.1-story.md) · [E2-S04b](05.2-story.md) · [E2-S05](06-story.md#e2-s05-dry-run-on-serve) ✅ · [E3](../02-epic.md) runtime stories complete |
-| **Closes open from** | [E3-S02 AC-6](13-story.md#acceptance-criteria) · [E3-S02 AC-7](13-story.md#acceptance-criteria) (three-OS matrix + mock serve smoke) |
+| **Closes open from** | [E3-S02 AC-6](13-story.md#acceptance-criteria) · [E3-S02 AC-7](13-story.md#acceptance-criteria) (three-OS matrix + mock serve smoke) · [E3-S07 DoD](16-story.md#definition-of-done) *Green on all three OS in CI matrix* |
 
 ### User story
 
@@ -47,6 +47,7 @@ As an **SDK maintainer**, I want CI to verify install and mock-model serve on Wi
 - [Architecture §13.6 — mock-first CI](../../architecture/10-operations-and-reference.md#136-testing-playbook)
 - [E2-S05 — serve `--dry-run`](06-story.md#e2-s05-dry-run-on-serve) — **Done** (2026-07-08); satisfies AC-3 serve step
 - [E3-S02 — `zaumzeug serve`](13-story.md#e3-s02-zaumzeug-serve-dev-mode) — **Done** (2026-07-20); satisfies AC-1/AC-4 serve smoke (closes [E3-S02 AC-6 · AC-7](13-story.md#acceptance-criteria))
+- [E3-S07 — OpenAI REST contract tests](16-story.md#e3-s07-openai-rest-contract-tests) — **Done** (2026-07-21); contract suite for matrix (`pytest tests/integration/test_openai_contract.py`); closes [E3-S07 DoD](16-story.md#definition-of-done) when green on all three OS
 
 
 ### Upstream integration — [E2-S05](06-story.md#e2-s05-dry-run-on-serve) *(Done)*
@@ -75,6 +76,20 @@ Completing **AC-3** on all three matrix runners closes [E2-S05 DoD](06-story.md#
 | **Requires** | Example harness from [E3-S04](14-story.md#e3-s04-example-harness-general-research-agent) |
 
 Completing **AC-1** and **AC-4** on all three matrix runners closes the open E3-S02 ACs carried forward.
+
+### Upstream integration — [E3-S07](16-story.md#e3-s07-openai-rest-contract-tests) *(Done)*
+
+[E3-S07](16-story.md) provides the OpenAI REST contract suite (ephemeral port + mock + optional `model_id` + `respx`-stubbed `web_fetch`). Matrix jobs should run the suite — **do not** duplicate contract assertions in the workflow YAML.
+
+| Contract | Value |
+|---|---|
+| **pytest** | `pytest tests/integration/test_openai_contract.py -v` |
+| **Fixture** | `tests/integration/conftest.py::ephemeral_serve_url` |
+| **Closes** | [E3-S07 DoD](16-story.md#definition-of-done) *Green on all three OS in CI matrix* |
+| **Requires** | [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) serve runner · [E3-S05](09-story.md#e3-s05-mock-model-profile) mock profile |
+
+Completing the contract pytest job on all three matrix runners closes the open E3-S07 DoD carried forward.
+
 ### Acceptance criteria
 
 - [ ] **AC-1** Workflow runs on `windows-latest`, `ubuntu-latest`, `macos-latest`
@@ -113,12 +128,15 @@ jobs:
         run: zaumzeug serve example --dry-run
       - name: Serve smoke (mock)
         run: zaumzeug serve example --port 0  # ephemeral; mock model only
+      - name: OpenAI REST contract (E3-S07)
+        run: pytest tests/integration/test_openai_contract.py -v
 ```
 
 ### Implementation tasks (build)
 
 - [ ] Add GitHub Actions workflow (e.g. `ci-matrix.yml`)
 - [ ] Use ephemeral port binding for serve smoke test
+- [ ] Run `pytest tests/integration/test_openai_contract.py` on each matrix OS (closes [E3-S07 DoD](16-story.md#definition-of-done))
 - [ ] Set timeout and fail-fast on first step failure
 - [ ] Cache pip where practical
 
@@ -132,7 +150,7 @@ Per [Story verification](../00-README.md#story-verification-required). **CI orch
 | AC-2 | **CI:** job step runs `client_install.py --skip-venv --verify` |
 | AC-3 | **CI:** job steps run `doctor` and `serve example --dry-run` |
 | AC-4 | **CI:** job step smoke-tests serve on ephemeral port (mock only) |
-| AC-5 | **CI:** all matrix jobs green on default branch |
+| AC-5 | **CI:** all matrix jobs green on default branch *(includes OpenAI contract pytest — [E3-S07 DoD](16-story.md#definition-of-done))* |
 | AC-6 | **manual:** `.github/workflows/ci-matrix.yml` (or equivalent) exists |
 
 - [ ] Workflow green on all three OS; AC table satisfied
@@ -144,5 +162,6 @@ Per [Story verification](../00-README.md#story-verification-required). **CI orch
 - [ ] Verification checklist complete
 - [ ] [E2-S05](06-story.md#definition-of-done) DoD *Called by E1-S07 CI matrix* checked off when AC-3 passes on `windows-latest`, `ubuntu-latest`, and `macos-latest`
 - [ ] [E3-S02 AC-6 · AC-7](13-story.md#acceptance-criteria) checked off when AC-1 and AC-4 pass on all three OS runners
+- [ ] [E3-S07 DoD](16-story.md#definition-of-done) *Green on all three OS in CI matrix* checked off when `pytest tests/integration/test_openai_contract.py` is green on all three OS runners
 
 ---

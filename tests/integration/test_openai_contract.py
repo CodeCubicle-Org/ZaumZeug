@@ -1,23 +1,36 @@
 # Story: E3-S01 / E3.1
 # Story: E3-S02 / E3.2 (AC-4 chat completions shape)
-# Story: E3-S07 (partial — full HTTP contract lands with zaumzeug serve)
-"""OpenAI REST contract helpers and serve smoke (E3-S01 AC-8, E3-S02 AC-4)."""
+# Story: E3-S07 / OpenAI REST contract
+"""OpenAI REST contract helpers and HTTP contract tests (E3-S01 AC-8, E3-S02 AC-4, E3-S07)."""
 
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
+import httpx
 import pytest
-import yaml
+import respx
 from fastapi.testclient import TestClient
 from haystack.dataclasses import ChatMessage
 
 from zaumzeug.config.models import AgentModelsConfig
 from zaumzeug.runtime.model_router import ModelRouter
+from zaumzeug.runtime.tools.web_fetch import fetch_url
 from zaumzeug.serve.runner import prepare_serve
+
+from .conftest import write_contract_harness
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_DIR = REPO_ROOT / "tests" / "fixtures" / "responses"
+
+_ALT_MODELS = {
+    "default_model_id": "mock",
+    "models": {
+        "mock": {"provider": "mock", "model": "harness-fixture"},
+        "alt": {"provider": "mock", "model": "alt-fixture"},
+    },
+}
 
 
 def resolve_chat_completion_model_id(
@@ -36,43 +49,9 @@ def resolve_chat_completion_model_id(
     return router.resolve_model_id(request_model_id)
 
 
-def _write_yaml(path: Path, data: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
-
-
 def _contract_harness(project_root: Path) -> Path:
-    harness_dir = project_root / "usr-harnesses" / "example"
-    _write_yaml(
-        harness_dir / "harness.yaml",
-        {"name": "example", "serve": {"hayhooks": {"port": 1416}}},
-    )
-    _write_yaml(
-        harness_dir / "workflow.yaml",
-        {"entry": "researcher", "stages": [{"agent": "researcher"}]},
-    )
-    agent_dir = harness_dir / "agents" / "researcher"
-    _write_yaml(
-        agent_dir / "agent.yaml",
-        {
-            "name": "researcher",
-            "default_model_id": "mock",
-            "agent": {"system_prompt": "prompts/system.md"},
-        },
-    )
-    prompt_path = agent_dir / "prompts" / "system.md"
-    prompt_path.parent.mkdir(parents=True, exist_ok=True)
-    prompt_path.write_text("You are a researcher.", encoding="utf-8")
-    _write_yaml(
-        agent_dir / "agents-models.yaml",
-        {
-            "default_model_id": "mock",
-            "models": {
-                "mock": {"provider": "mock", "model": "harness-fixture"},
-            },
-        },
-    )
-    return harness_dir
+    """Legacy helper for E3-S02 TestClient smoke (port from yaml unused in-process)."""
+    return write_contract_harness(project_root, port=1416)
 
 
 def test_e3_s01_ac8_request_model_id_override() -> None:
@@ -149,3 +128,91 @@ def test_e3_s02_ac4_chat_completions_shape(
     assert message["role"] == "assistant"
     assert isinstance(message["content"], str)
     assert message["content"]
+
+
+def test_e3_s07_ac1_chat_completions_openai_shape(ephemeral_serve_url: str) -> None:
+    """AC-1: ephemeral serve POST ``/v1/chat/completions`` returns OpenAI JSON shape."""
+    response = httpx.post(
+        f"{ephemeral_serve_url}/v1/chat/completions",
+        json={
+            "model": "example",
+            "messages": [{"role": "user", "content": "hi"}],
+        },
+        timeout=10.0,
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert "choices" in payload
+    assert payload["choices"]
+    message = payload["choices"][0]["message"]
+    assert message["role"] == "assistant"
+    assert isinstance(message["content"], str)
+    assert message["content"]
+
+
+@pytest.mark.parametrize(
+    "ephemeral_serve_url",
+    [{"models": _ALT_MODELS}],
+    indirect=True,
+)
+def test_e3_s07_ac2_request_model_id_override(ephemeral_serve_url: str) -> None:
+    """AC-2: optional request ``model_id`` selects the ModelRouter registry entry."""
+    default_response = httpx.post(
+        f"{ephemeral_serve_url}/v1/chat/completions",
+        json={
+            "model": "example",
+            "messages": [{"role": "user", "content": "default"}],
+        },
+        timeout=10.0,
+    )
+    assert default_response.status_code == 200
+    default_content = default_response.json()["choices"][0]["message"]["content"]
+
+    override_response = httpx.post(
+        f"{ephemeral_serve_url}/v1/chat/completions",
+        json={
+            "model": "example",
+            "model_id": "alt",
+            "messages": [{"role": "user", "content": "override"}],
+        },
+        timeout=10.0,
+    )
+    assert override_response.status_code == 200
+    override_payload = override_response.json()
+    assert override_payload["model"] == "example"
+    override_content = override_payload["choices"][0]["message"]["content"]
+
+    assert "Alternate mock fixture" in override_content
+    assert override_content != default_content
+    assert "Mock harness fixture" in default_content
+
+
+@pytest.mark.parametrize(
+    "ephemeral_serve_url",
+    [{"with_web_fetch": True}],
+    indirect=True,
+)
+def test_e3_s07_ac3_no_network_mock_and_stub_fetch(ephemeral_serve_url: str) -> None:
+    """AC-3: contract path uses mock LLM; stub ``web_fetch`` HTTP when tool invoked."""
+    response = httpx.post(
+        f"{ephemeral_serve_url}/v1/chat/completions",
+        json={
+            "model": "example",
+            "messages": [{"role": "user", "content": "hi"}],
+        },
+        timeout=10.0,
+    )
+    assert response.status_code == 200
+    content = response.json()["choices"][0]["message"]["content"]
+    assert isinstance(content, str)
+    assert content
+
+    with patch("zaumzeug.runtime.tools.web_fetch.is_public_host", return_value=True):
+        with respx.mock(assert_all_called=True) as router:
+            route = router.get("https://example.com/contract").mock(
+                return_value=httpx.Response(200, text="stubbed-page")
+            )
+            fetched = fetch_url("https://example.com/contract")
+
+    assert fetched == "stubbed-page"
+    assert route.call_count == 1

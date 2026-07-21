@@ -42,6 +42,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E3-S06, 2026-07-20):** Test pyramid layout — `tests/unit/` (incl. `export/` placeholder), `tests/integration/`, `tests/usr-harnesses/fixture/` minimal harness, `tests/fixtures/responses/` + `cassettes/`, `tests/e2e/` gated by `HARNESS_LIVE_LLM=1`. Serve enforces localhost bind (`_enforce_localhost_bind`). Docs: `HARNESS_LIVE_LLM` + debugpy + Phase 1 security notes in `user-docs/reference/cli.md` and `user-docs/guides/testing.md`. Tests: `tests/usr-harnesses/fixture/test_fixture_harness.py`, `tests/integration/test_serve.py` (`-k e3_s06`).
 
+**Implementation (E3-S07, 2026-07-21):** OpenAI REST contract on ephemeral port — `tests/integration/conftest.py::ephemeral_serve_url`, `tests/integration/test_openai_contract.py` (`-k e3_s07`); HTTP `model_id` override wired in `serve/runner.py`.
+
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
 | `zaumzeug serve` (dev) | **Done** (E3-S02, 2026-07-20) — Hayhooks runner, OpenAI REST, localhost bind |
@@ -100,7 +102,7 @@ Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/
 
 | Phase | Debug/test deliverables |
 |---|---|
-| 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06) |
+| 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06), OpenAI REST contract ✅ (E3-S07) |
 | 2 | compile `--dry-run`, export golden tests, trace → `LLMTestCase`, optional `zaumzeug eval` |
 | 3 | MCP integration tests, tool correctness eval when DeepEval present |
 | 4 | `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
@@ -143,8 +145,8 @@ End-user walkthrough: [user-docs/guides/testing.md](../user-docs/guides/testing.
 
 | Tier | Trigger | Jobs | Epics |
 |---|---|---|---|
-| **Smoke** | Every push; `windows-latest`, `ubuntu-latest`, `macos-latest` | `client_install.py --verify`, `zaumzeug doctor`, `serve --dry-run`, mock serve smoke | [E1-S07](../stories/03-epic.md#e1-s07-cross-platform-ci-matrix), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests) |
-| **Unit + integration** | Every push (same workflow or dedicated job) | `pytest tests/unit tests/integration tests/usr-harnesses -v` | [E2](../stories/01-epic.md), [E3-S06](../stories/02-epic.md#e3-s06-phase-1-test-infrastructure-and-security-baseline) |
+| **Smoke** | Every push; `windows-latest`, `ubuntu-latest`, `macos-latest` | `client_install.py --verify`, `zaumzeug doctor`, `serve --dry-run`, mock serve smoke, `pytest tests/integration/test_openai_contract.py` | [E1-S07](../stories/03-epic.md#e1-s07-cross-platform-ci-matrix) *(closes open DoD from [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests))* |
+| **Unit + integration** | Every push (same workflow or dedicated job) | `pytest tests/unit tests/integration tests/usr-harnesses -v` | [E2](../stories/01-epic.md), [E3-S06](../stories/02-epic.md#e3-s06-phase-1-test-infrastructure-and-security-baseline), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests) ✅ |
 | **Eval regression** | PR touching prompts/artifacts; nightly | `deepeval test run` on critical cases; `deploy.eval_gate` on release | [E6](../stories/05-epic.md), [E5-S06](../stories/06-epic.md#e5-s06-deploy-eval-gate) |
 | **Live e2e** | Nightly / manual | `HARNESS_LIVE_LLM=1 pytest tests/e2e -v` | Optional — not Phase 1 CI gate |
 

@@ -5,7 +5,7 @@
 | **Document** | Epic E1 user stories |
 | **File** | `docs/stories/03-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-21 |
 | **Status** | Backlog |
 | **Build order** | **3 of 8** (after E2 + E3 — install/CI need working SDK) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -372,6 +372,7 @@ Per [Story verification](00-README.md#story-verification-required). **Docs-only*
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
 | **Prerequisites** | [E1-S01](#e1-s01-cross-platform-install-script) through [E1-S03](#e1-s03-project-scaffolding-on-install) · [E2](../01-epic.md) · [E2-S05](epic-stories/06-story.md#e2-s05-dry-run-on-serve) ✅ · [E3](../02-epic.md) complete |
+| **Closes open from** | [E3-S02 AC-6 · AC-7](epic-stories/13-story.md#acceptance-criteria) · [E3-S07 DoD](epic-stories/16-story.md#definition-of-done) *Green on all three OS in CI matrix* |
 
 ### User story
 
@@ -382,6 +383,7 @@ As an **SDK maintainer**, I want CI to verify install and mock-model serve on Wi
 - [PRD E1.7](../prd.md#epic-e1--onboarding-and-project-setup-phase-1)
 - [PRD §11 — Success metrics](../prd.md#11-success-metrics)
 - [Architecture §2.5](../architecture/01-overview-and-principles.md#25-cross-platform-portability)
+- [E3-S07 — OpenAI REST contract](epic-stories/16-story.md#e3-s07-openai-rest-contract-tests) — **Done** (2026-07-21); matrix should run `pytest tests/integration/test_openai_contract.py`
 
 ### Acceptance criteria
 
@@ -396,6 +398,7 @@ As an **SDK maintainer**, I want CI to verify install and mock-model serve on Wi
 
 - [ ] Add GitHub Actions workflow (e.g. `ci-matrix.yml`)
 - [ ] Use ephemeral port binding for serve smoke test
+- [ ] Run `pytest tests/integration/test_openai_contract.py` on each matrix OS (closes [E3-S07 DoD](epic-stories/16-story.md#definition-of-done))
 - [ ] Set timeout and fail-fast on first step failure
 - [ ] Cache pip where practical
 
@@ -409,7 +412,7 @@ Per [Story verification](00-README.md#story-verification-required). **CI orchest
 | AC-2 | **CI:** job step runs `client_install.py --skip-venv --verify` |
 | AC-3 | **CI:** job steps run `doctor` and `serve example --dry-run` |
 | AC-4 | **CI:** job step smoke-tests serve on ephemeral port (mock only) |
-| AC-5 | **CI:** all matrix jobs green on default branch |
+| AC-5 | **CI:** all matrix jobs green on default branch *(includes OpenAI contract pytest — [E3-S07 DoD](epic-stories/16-story.md#definition-of-done))* |
 | AC-6 | **manual:** `.github/workflows/ci-matrix.yml` (or equivalent) exists |
 
 - [ ] Workflow green on all three OS; AC table satisfied
@@ -420,6 +423,8 @@ Per [Story verification](00-README.md#story-verification-required). **CI orchest
 - [ ] Runtime smoke 100% on all three OS jobs
 - [ ] Verification checklist complete
 - [ ] [E2-S05](epic-stories/06-story.md#definition-of-done) DoD *Called by E1-S07 CI matrix* checked off when AC-3 passes on all three runners
+- [ ] [E3-S02 AC-6 · AC-7](epic-stories/13-story.md#acceptance-criteria) checked off when AC-1 and AC-4 pass on all three OS runners
+- [ ] [E3-S07 DoD](epic-stories/16-story.md#definition-of-done) *Green on all three OS in CI matrix* checked off when `pytest tests/integration/test_openai_contract.py` is green on all three OS runners
 
 ---
 

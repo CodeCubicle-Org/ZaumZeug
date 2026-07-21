@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/10-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 |
+| **Last modified** | 2026-07-21 |
 | **Story ID** | E3-S01 |
 | **Status** | Done |
 | **Epic** | [E3 — Runtime and Local Serve](../02-epic.md) |
@@ -13,7 +13,7 @@
 | **Epic build order** | 2 of 8 |
 | **Story sequence** | 10 of 63 (global build order) |
 | **Source** | Extracted from [`02-epic.md`](../02-epic.md) |
-| **Related** | [Stories index](../00-README.md) · [Epic E3](../../prd.md#epic-e3--runtime-and-local-serve-phase-1) · [Architecture](../../architecture.md) |
+| **Related** | [Stories index](../00-README.md) · [Epic E3](../../prd.md#epic-e3--runtime-and-local-serve-phase-1) · [Architecture](../../architecture.md) · **HTTP AC-8 closed by** [E3-S07](16-story.md#e3-s07-openai-rest-contract-tests) |
 
 ---
 
@@ -95,7 +95,7 @@ models:
 - [x] **AC-5** Caches generator instances per provider + endpoint (distinct `api_base_url` values do not share a cache entry)
 - [x] **AC-6** Fails fast with actionable message if provider package missing (include `pip install …` hint)
 - [x] **AC-7** No hardcoded model names in SDK source
-- [x] **AC-8** OpenAI API: optional request `model_id` selects LLM; harness name remains agent identity *(routing layer — full HTTP contract in [E3-S07](16-story.md))*
+- [x] **AC-8** OpenAI API: optional request `model_id` selects LLM; harness name remains agent identity *(HTTP contract closed by [E3-S07](16-story.md) 2026-07-21)*
 
 ### Implementation tasks (build)
 
@@ -117,7 +117,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-5 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac5_generator_cache_per_provider_endpoint` |
 | AC-6 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac6_missing_package_install_hint` *(also `test_e3_s01_ac6_phase_gated_native_provider`)*
 | AC-7 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac7_no_hardcoded_model_names` |
-| AC-8 | `tests/integration/test_openai_contract.py::test_e3_s01_ac8_request_model_id_override` *(routing helper; full `POST /v1/chat/completions` in E3-S07)* |
+| AC-8 | `tests/integration/test_openai_contract.py::test_e3_s01_ac8_request_model_id_override` *(routing helper)* · `test_e3_s07_ac2_request_model_id_override` *(HTTP — [E3-S07](16-story.md))* |
 
 - [x] Every AC row above has a passing test or documented manual exception
 - [x] `pytest tests/unit/runtime/test_model_router.py -v -k e3_s01` passes

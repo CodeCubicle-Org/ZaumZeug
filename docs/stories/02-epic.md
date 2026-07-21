@@ -5,7 +5,7 @@
 | **Document** | Epic E3 user stories |
 | **File** | `docs/stories/02-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-20 (E3-S04 done) |
+| **Last modified** | 2026-07-21 (E3-S07 done) |
 | **Status** | Backlog |
 | **Build order** | **2 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -31,8 +31,8 @@
 4. **E3-S00** — Runtime factory (Haystack Agent builder)
 5. **E3-S02** — `zaumzeug serve`
 6. **E3-S04** — Example harness templates ✅ *(unblocks E1 scaffolding)*
-7. **E3-S06** — Test infrastructure + Phase 1 security
-8. **E3-S07** — OpenAI REST contract tests
+7. **E3-S06** — Test infrastructure + Phase 1 security ✅
+8. **E3-S07** — OpenAI REST contract tests ✅ *(open DoD → [E1-S07](03-epic.md#e1-s07-cross-platform-ci-matrix))*
 9. **E3-S08** — `zaumzeug run` (serial workflow)
 
 ---
@@ -122,7 +122,7 @@ As a **harness developer**, I want a config-driven ModelRouter, so that I can sw
 - [x] **AC-5** Caches generator instances per provider + endpoint (distinct `api_base_url` values do not share a cache entry)
 - [x] **AC-6** Fails fast with actionable message if provider package missing (include `pip install …` hint)
 - [x] **AC-7** No hardcoded model names in SDK source
-- [x] **AC-8** OpenAI API: optional request `model_id` selects LLM; harness name remains agent identity *(routing layer — full HTTP in E3-S07)*
+- [x] **AC-8** OpenAI API: optional request `model_id` selects LLM; harness name remains agent identity *(HTTP contract closed by E3-S07, 2026-07-21)*
 
 ### Implementation tasks (build)
 
@@ -144,7 +144,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-5 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac5_generator_cache_per_provider_endpoint` |
 | AC-6 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac6_missing_package_install_hint` |
 | AC-7 | `tests/unit/runtime/test_model_router.py::test_e3_s01_ac7_no_hardcoded_model_names` |
-| AC-8 | `tests/integration/test_openai_contract.py::test_e3_s01_ac8_request_model_id_override` *(shared with E3-S07)* |
+| AC-8 | `tests/integration/test_openai_contract.py::test_e3_s01_ac8_request_model_id_override` *(routing helper)* · `test_e3_s07_ac2_request_model_id_override` *(HTTP)* |
 
 - [x] Every AC row above has a passing test or documented manual exception
 - [x] `pytest tests/unit/runtime/test_model_router.py -v -k e3_s01` passes
@@ -459,6 +459,8 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Persona** | SDK maintainer |
 | **Priority** | P1 |
 | **Prerequisites** | [E3-S02](#e3-s02-zaumzeug-serve-dev-mode) · [E3-S05](#e3-s05-mock-model-profile) |
+| **Status** | Done (2026-07-21) |
+| **Open — carried forward** | DoD *Green on all three OS in CI matrix* → [E1-S07](03-epic.md#e1-s07-cross-platform-ci-matrix) |
 
 ### User story
 
@@ -471,15 +473,16 @@ As an **SDK maintainer**, I want automated OpenAI-shaped request/response tests,
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Integration test POST `/v1/chat/completions` with mock model returns expected JSON shape (`choices`, `message`, `role`, `content`)
-- [ ] **AC-2** Test accepts optional `model_id` in request body for ModelRouter override
-- [ ] **AC-3** Test runs in CI without network (mock model, stub `web_fetch` if tool invoked)
+- [x] **AC-1** Integration test POST `/v1/chat/completions` with mock model returns expected JSON shape (`choices`, `message`, `role`, `content`)
+- [x] **AC-2** Test accepts optional `model_id` in request body for ModelRouter override
+- [x] **AC-3** Test runs in CI without network (mock model, stub `web_fetch` if tool invoked)
 
 ### Implementation tasks (build)
 
-- [ ] Add `tests/integration/test_openai_contract.py`
-- [ ] Start serve on ephemeral port via subprocess or test fixture
-- [ ] Stub HTTP for `web_fetch` when tool invoked in contract tests
+- [x] Add `tests/integration/test_openai_contract.py`
+- [x] Start serve on ephemeral port via subprocess or test fixture
+- [x] Stub HTTP for `web_fetch` when tool invoked in contract tests
+- [x] Wire request `model_id` through `AgentPipelineWrapper.run_chat_completion` → ModelRouter
 
 ### Verification (after build)
 
@@ -491,13 +494,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-2 | `tests/integration/test_openai_contract.py::test_e3_s07_ac2_request_model_id_override` |
 | AC-3 | `tests/integration/test_openai_contract.py::test_e3_s07_ac3_no_network_mock_and_stub_fetch` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/test_openai_contract.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/test_openai_contract.py -v` passes
 
 ### Definition of done
 
-- [ ] Green on all three OS in CI matrix ([E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix))
-- [ ] Verification checklist complete; all ACs traced to tests
+- [ ] Green on all three OS in CI matrix *(open — carried to [E1-S07](03-epic.md#e1-s07-cross-platform-ci-matrix); closed when matrix runs `pytest tests/integration/test_openai_contract.py` green on all three runners)*
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

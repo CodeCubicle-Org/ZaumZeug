@@ -99,8 +99,8 @@ Test libraries ship in **`[dev]`** (SDK repo) and **`[eval]`** (optional harness
 |---|---|---|---|
 | **pytest** | All SDK tests | 1+ | Test runner, fixtures, parametrization, markers |
 | **pytest-asyncio** | Integration, serve | 1+ | Async Hayhooks/Haystack serve and workflow tests |
-| **httpx** | Runtime + integration | 1+ | Outbound HTTP for builtin `web_fetch`; also used in `/v1/chat/completions` contract tests ([E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests)) |
-| **respx** | Integration | 1+ | Mock outbound HTTP at boundary (tool `web_fetch`, provider stubs) |
+| **httpx** | Runtime + integration | 1+ | Outbound HTTP for builtin `web_fetch`; OpenAI contract tests against ephemeral serve ([E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests) ✅) |
+| **respx** | Integration | 1+ | Mock outbound HTTP at boundary (`web_fetch` stubs in unit + E3-S07 contract tests) |
 | **debugpy** | Local debug | 1+ | IDE attach to `zaumzeug serve` ([§13.2](10-operations-and-reference.md#132-mechanisms)) |
 | **syrupy** *(optional)* | Unit | 2+ | Golden snapshots for compile export / `artifact-manifest.json` ([E4-S03](../stories/04-epic.md#e4-s03-export-contract-haystack-artifacts)) |
 | **pytest-recording** *(optional)* | Integration | 2+ | VCR cassettes for re-recordable provider HTTP when mock profile is insufficient |

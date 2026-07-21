@@ -1,6 +1,6 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-08 (Phase 1 — E2-S00 package skeleton, E2-S01 `harness.yaml` schemas)  
+**Last updated:** 2026-07-21 (E3-S07 — OpenAI REST contract tests; HTTP `model_id` on serve)  
 **Status:** Phase 1 implementation in progress  
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -288,14 +288,14 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 | ID | Feature | Acceptance criteria |
 |---|---|---|
-| E3.1 | ModelRouter | **Done** (E3-S01, 2026-07-08) — Stage-scoped `ModelRouter` reads active agent's merged `agents-models.yaml`; optional request `model_id` override; lazy-builds `ChatGenerator` per provider; OpenRouter when `provider: openrouter`; `openai_compatible` with `api_base_url` for local OpenAI-compatible servers (LM Studio, etc.); fails fast if provider package missing; no hardcoded models. ([Architecture §7](architecture/05-configuration.md#7-model-routing).) |
-| E3.2 | `zaumzeug serve` (dev) | **AC:** Loads `usr-harnesses/<name>/`; runs workflow `entry` agent; starts Hayhooks on configured port; `/v1/chat/completions` returns response. Cross-platform; CI matrix (E1.7) with mock model. |
+| E3.1 | ModelRouter | **Done** (E3-S01, 2026-07-08; HTTP override E3-S07, 2026-07-21) — Stage-scoped `ModelRouter` reads active agent's merged `agents-models.yaml`; optional request `model_id` override on `POST /v1/chat/completions`; lazy-builds `ChatGenerator` per provider; OpenRouter when `provider: openrouter`; `openai_compatible` with `api_base_url` for local OpenAI-compatible servers (LM Studio, etc.); fails fast if provider package missing; no hardcoded models. ([Architecture §7](architecture/05-configuration.md#7-model-routing).) |
+| E3.2 | `zaumzeug serve` (dev) | **AC:** Loads `usr-harnesses/<name>/`; runs workflow `entry` agent; starts Hayhooks on configured port; `/v1/chat/completions` returns response. Cross-platform; CI matrix (E1.7) with mock model. **Implemented** (E3-S02, 2026-07-20) for local serve; OpenAI contract suite **Done** ([E3-S07](stories/epic-stories/16-story.md), 2026-07-21). Three-OS CI matrix open → [E1-S07](stories/epic-stories/24-story.md). |
 | E3.3 | Builtin tools | **AC:** Phase 1 ships `web_fetch`; catalog in [Architecture §6.5](architecture/05-configuration.md#65-builtin-tools-catalog). |
 | E3.4 | Example harness | **AC:** `example` uses multi-agent layout ([Architecture §6.6](architecture/05-configuration.md#66-phase-1-config-schema)): `agents/researcher/`, `workflow.yaml` (one stage), `web_fetch`, `default_model_id: mock`; `zaumzeug serve example` works without `.env`. |
 | E3.5 | Mock model profile | **AC:** `mock` provider in `agents-models.yaml`; canned responses from `tests/fixtures/responses/`; CI uses mock exclusively. |
 | E3.6 | `zaumzeug run` (serial workflow) | **AC:** Executes `workflow.yaml` stages in order; each agent stage uses that agent's config and `agents-models.yaml`; passes prior stage output as context to next; pipeline stages invoke exposed Haystack pipelines (when present). Fails fast on missing agent. **Serial only** in Phase 1. |
 
-**Story seeds:** Integration test with mock LM; OpenAI-shaped request/response contract test.
+**Story seeds:** Integration test with mock LM; OpenAI-shaped request/response contract test — **Done** (E3-S07, 2026-07-21).
 
 ---
 

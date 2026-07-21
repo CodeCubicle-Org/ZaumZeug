@@ -1,0 +1,1 @@
+Alternate mock fixture response for ModelRouter model_id override contract tests.

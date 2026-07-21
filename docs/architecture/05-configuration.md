@@ -172,6 +172,8 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E3-S02, 2026-07-20):** `zaumzeug serve <harness>` via `serve/runner.py` — same `validate_serve()`, then `build_agent()`, Hayhooks on `127.0.0.1` / `serve.hayhooks.port`. Tests: `tests/integration/test_serve.py`, `tests/integration/test_openai_contract.py` (AC-4).
 
+**Implementation (E3-S07, 2026-07-21):** OpenAI REST contract — `AgentPipelineWrapper.run_chat_completion` reads optional request `model_id` and swaps the agent `chat_generator` via stage-scoped `ModelRouter`. Ephemeral-port fixture `tests/integration/conftest.py::ephemeral_serve_url`; tests `tests/integration/test_openai_contract.py` (`-k e3_s07`); `web_fetch` stubbed with `respx` for offline CI.
+
 **Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` in `src/zaumzeug/integrations/mock.py` returns canned text from `tests/fixtures/responses/{model}.txt` (or `.json` with a `content` field); bundled copy under `src/zaumzeug/fixtures/responses/` for pip installs. `ModelRouter` in `src/zaumzeug/runtime/model_router.py` dispatches `provider: mock` without `haystack_integrations` packages. Shipped default: `install/templates/config/models.example.yaml` (`default_model_id: mock`, `model: harness-fixture`). Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`).
 
 **Implementation (E3-S04, 2026-07-20):** Reference `example` harness at `usr-harnesses/example/` (and install template `install/templates/usr-harnesses/example/`) — `agents/researcher/` with `default_model_id: mock`, single-stage `workflow.yaml`, builtin `web_fetch`, no RAG. First-run docs: `user-docs/getting-started/first-harness.md`. Tests: `tests/usr-harnesses/fixture/test_example_harness.py`, `tests/integration/test_serve.py` (`-k e3_s04`).
@@ -256,7 +258,7 @@ flowchart LR
 
 - **Registry:** per-agent `model_id` → provider + model + optional `api_base_url` + kwargs (`agents-models.yaml`). `api_base_url` is not a secret — use YAML for localhost endpoints; override via `OPENAI_API_BASE` in `.env` when needed.
 - **ModelRouter:** one instance (or cache) **per agent role**; workflow stage transition swaps active router.
-- **API:** OpenAI `model` = harness name; optional request `model_id` overrides **current stage's** registry.
+- **API:** OpenAI `model` = harness name; optional request `model_id` overrides **current stage's** registry. **Done** (E3-S07 HTTP path).
 - **Cross-agent models:** `vuln-hunter` and `finding-validator` may use different providers with no client-side override — workflow handles the switch.
 - **Compile:** DSPy/GEPA use LiteLLM strings from **that agent's** merged registry.
 - **Secrets:** `.env` only; provider packages opt-in per referenced providers across all agents in the harness.
@@ -266,5 +268,7 @@ flowchart LR
 **Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` in `src/zaumzeug/integrations/mock.py` returns canned text from `tests/fixtures/responses/{model}.txt` (or `.json` with a `content` field); bundled copy under `src/zaumzeug/fixtures/responses/` for pip installs. `ModelRouter` in `src/zaumzeug/runtime/model_router.py` dispatches `provider: mock` without `haystack_integrations` packages. Shipped default: `install/templates/config/models.example.yaml` (`default_model_id: mock`, `model: harness-fixture`). Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`).
 
 **Implementation (E3-S01, 2026-07-08):** Full `ModelRouter` — `src/zaumzeug/integrations/haystack.py` maps Phase 1 providers (`openrouter`, `openai_compatible`) to Haystack `ChatGenerator` classes; `ModelEntryConfig.api_base_url` for local OpenAI-compatible servers (LM Studio); secrets from `.env` via `os.environ`; generator cache keyed by `(provider, api_base_url, model)`; missing packages fail with `pip install …` hint; native cloud providers phase-gated to Phase 2+. Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s01`); AC-8 routing helper in `tests/integration/test_openai_contract.py`.
+
+**Implementation (E3-S07, 2026-07-21):** HTTP `model_id` override on `POST /v1/chat/completions` — see serve runner note above; contract tests assert default vs `alt` mock fixture content.
 
 ---

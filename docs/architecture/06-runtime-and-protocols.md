@@ -21,6 +21,8 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 **Implementation (E3-S02, 2026-07-20):** `src/zaumzeug/serve/runner.py` — `validate_serve()` → `build_agent()` → Hayhooks `create_app` / `run_app` on `127.0.0.1` and `serve.hayhooks.port`. OpenAI routes via Hayhooks registry (`/v1/chat/completions`, `GET /v1/models`). Full `--deploy` path for production bundles remains E5-S03/E5-S04; runner already accepts `deploy=` for root resolution.
 
+**Implementation (E3-S07, 2026-07-21):** OpenAI REST contract tests on ephemeral localhost port; optional request `model_id` overrides the entry agent's ModelRouter registry (`AgentPipelineWrapper`). Tests: `tests/integration/test_openai_contract.py` (`-k e3_s07`).
+
 ### 8.2 `harness` vs raw `hayhooks`
 
 **Canonical:** `zaumzeug serve|mcp|acp|run`. SDK loads config, builds agents from `agents/<name>/`, invokes **self-hosted Hayhooks** for serve paths.
@@ -97,6 +99,10 @@ Use when harness **is** the primary agent in Zed/JetBrains/Neovim. Harness may s
 Also exposed: `GET /v1/models`, `POST /{pipeline}/run`, optional `/docs` (Swagger) for manual probes.
 
 Clients use OpenAI-shaped requests against your `baseURL` (e.g. `http://127.0.0.1:1416/v1`) — not the OpenAI API. Any HTTP client or OpenAI SDK with custom `baseURL` works.
+
+**Request fields:** OpenAI `model` = harness/pipeline name. Optional ZaumZeug extension `model_id` selects the LLM from the entry agent's ModelRouter registry ([Architecture §7](05-configuration.md#7-model-routing)).
+
+**Implementation (E3-S07, 2026-07-21):** Contract tests assert response shape (`choices` / `message` / `role` / `content`), HTTP `model_id` override, and offline CI (mock + `respx`-stubbed `web_fetch`). Fixture: `tests/integration/conftest.py::ephemeral_serve_url`. Tests: `tests/integration/test_openai_contract.py` (`-k e3_s07`). Cross-OS CI green open — carried to [E1-S07](../stories/epic-stories/24-story.md#e1-s07-cross-platform-ci-matrix).
 
 ### 9.5 What does NOT call the harness directly
 

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers · SDK contributors |
-| **Last updated** | 2026-07-20 |
+| **Last updated** | 2026-07-21 |
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
@@ -139,16 +139,16 @@ Use `pytest.mark.parametrize` for edge cases (empty yaml, unknown phase keys, mi
 
 ## Writing integration tests
 
-Integration tests start a **real** `zaumzeug serve` on an ephemeral localhost port with the **mock** profile.
+Integration tests start a **real** Hayhooks app on an ephemeral localhost port with the **mock** profile. The shared fixture lives at `tests/integration/conftest.py::ephemeral_serve_url` (E3-S07).
 
 ```python
-# Illustrative pattern — fixture harness under tests/usr-harnesses/fixture/
+# See tests/integration/test_openai_contract.py
 import httpx
 
 def test_chat_completions_contract(ephemeral_serve_url):
     r = httpx.post(
         f"{ephemeral_serve_url}/v1/chat/completions",
-        json={"model": "fixture", "messages": [{"role": "user", "content": "hi"}]},
+        json={"model": "example", "messages": [{"role": "user", "content": "hi"}]},
     )
     assert r.status_code == 200
     body = r.json()
@@ -157,7 +157,9 @@ def test_chat_completions_contract(ephemeral_serve_url):
     assert isinstance(body["choices"][0]["message"]["content"], str)
 ```
 
-Use **`respx`** to stub outbound `web_fetch` or provider HTTP without hitting the public internet.
+Optional request field **`model_id`** selects a registry LLM (OpenAI `model` stays the harness name). Use **`respx`** to stub outbound `web_fetch` or provider HTTP without hitting the public internet.
+
+Contract suite (E3-S07): `pytest tests/integration/test_openai_contract.py -v` — asserts OpenAI JSON shape, `model_id` override, and offline mock + stubbed fetch. Cross-OS green in CI is tracked under E1-S07.
 
 ---
 

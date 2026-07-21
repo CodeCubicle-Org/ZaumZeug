@@ -5,14 +5,15 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/16-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-21 |
 | **Story ID** | E3-S07 |
+| **Status** | Done |
 | **Epic** | [E3 — Runtime and Local Serve](../02-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 2 of 8 |
 | **Story sequence** | 16 of 63 (global build order) |
 | **Source** | Extracted from [`02-epic.md`](../02-epic.md) |
-| **Related** | [Stories index](../00-README.md) · [Epic E3](../../prd.md#epic-e3--runtime-and-local-serve-phase-1) · [Architecture](../../architecture.md) |
+| **Related** | [Stories index](../00-README.md) · [Epic E3](../../prd.md#epic-e3--runtime-and-local-serve-phase-1) · [Architecture](../../architecture.md) · **Open DoD carried to** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) |
 
 ---
 
@@ -24,6 +25,8 @@
 | **Persona** | SDK maintainer |
 | **Priority** | P1 |
 | **Prerequisites** | [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) · [E3-S05](09-story.md#e3-s05-mock-model-profile) |
+| **Status** | Done (2026-07-21) |
+| **Open — carried forward** | [DoD *Green on all three OS*](#definition-of-done) → [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) |
 
 ### User story
 
@@ -51,15 +54,16 @@ As an **SDK maintainer**, I want automated OpenAI-shaped request/response tests,
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Integration test POST `/v1/chat/completions` with mock model returns expected JSON shape (`choices`, `message`, `role`, `content`)
-- [ ] **AC-2** Test accepts optional `model_id` in request body for ModelRouter override
-- [ ] **AC-3** Test runs in CI without network (mock model, stub `web_fetch` if tool invoked)
+- [x] **AC-1** Integration test POST `/v1/chat/completions` with mock model returns expected JSON shape (`choices`, `message`, `role`, `content`)
+- [x] **AC-2** Test accepts optional `model_id` in request body for ModelRouter override
+- [x] **AC-3** Test runs in CI without network (mock model, stub `web_fetch` if tool invoked)
 
 ### Implementation tasks (build)
 
-- [ ] Add `tests/integration/test_openai_contract.py`
-- [ ] Start serve on ephemeral port via subprocess or test fixture
-- [ ] Stub HTTP for `web_fetch` when tool invoked in contract tests
+- [x] Add `tests/integration/test_openai_contract.py`
+- [x] Start serve on ephemeral port via subprocess or test fixture
+- [x] Stub HTTP for `web_fetch` when tool invoked in contract tests
+- [x] Wire request `model_id` through `AgentPipelineWrapper.run_chat_completion` → ModelRouter
 
 ### Verification (after build)
 
@@ -71,12 +75,12 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-2 | `tests/integration/test_openai_contract.py::test_e3_s07_ac2_request_model_id_override` |
 | AC-3 | `tests/integration/test_openai_contract.py::test_e3_s07_ac3_no_network_mock_and_stub_fetch` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/test_openai_contract.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/test_openai_contract.py -v` passes
 
 ### Definition of done
 
-- [ ] Green on all three OS in CI matrix ([E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix))
-- [ ] Verification checklist complete; all ACs traced to tests
+- [ ] Green on all three OS in CI matrix *(open — carried to [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix); closed when matrix runs `pytest tests/integration/test_openai_contract.py` green on all three runners)*
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---

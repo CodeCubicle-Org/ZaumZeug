@@ -33,9 +33,23 @@ zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose]
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /v1/chat/completions` | OpenAI-compatible chat (use `"model": "<harness>"`) |
+| `POST /v1/chat/completions` | OpenAI-compatible chat — `"model": "<harness>"`; optional `"model_id": "<registry-key>"` selects the LLM |
 | `GET /v1/models` | Lists the served harness pipeline |
 | `POST /<harness>/run` | Direct Hayhooks run API |
+
+**OpenAI `model` vs `model_id`:** Clients pass the harness name as OpenAI `model` (deployment identity). To override which registry LLM answers, add optional `model_id` (a key from the entry agent's merged `agents-models.yaml`). Omit `model_id` to use the agent's `default_model_id`.
+
+```bash
+# Default mock (or configured default_model_id)
+curl -s http://127.0.0.1:1416/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"example","messages":[{"role":"user","content":"hi"}]}'
+
+# Override registry entry (must exist in agents-models.yaml)
+curl -s http://127.0.0.1:1416/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"example","model_id":"alt","messages":[{"role":"user","content":"hi"}]}'
+```
 
 **Logging:** Use `--verbose` or set `HARNESS_LOG_LEVEL=DEBUG` to see per-request context (`model_id`, tool name, artifact path). API keys are redacted automatically.
 
