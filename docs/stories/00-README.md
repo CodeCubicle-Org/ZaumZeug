@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-22 (E1-S04 done) |
+| **Last modified** | 2026-07-22 (E1-S05 done) |
 | **Status** | Active |
 
 ---
@@ -58,8 +58,9 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E1-S02](epic-stories/19-story.md) — Install shell wrappers | Done | 2026-07-22 |
 | [E1-S03](epic-stories/20-story.md) — Project scaffolding on install | Done | 2026-07-22 |
 | [E1-S04](epic-stories/21-story.md) — `zaumzeug init` command | Done | 2026-07-22 |
+| [E1-S05](epic-stories/22-story.md) — User documentation skeleton | Done | 2026-07-22 |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), and `zaumzeug init` (E1-S04) are done; remaining E1 stories follow the [build graph](#phase-1-build-graph) below.
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), and user-docs skeleton (E1-S05) are done; remaining E1 stories follow the [build graph](#phase-1-build-graph) below.
 
 ---
 
@@ -92,10 +93,10 @@ E1-S01  Cross-platform install script ✅
 E1-S02  Install shell wrappers ✅
 E1-S03  Project scaffolding on install (copies E3 templates) ✅
 E1-S04  zaumzeug init ✅
-E1-S05…S06  Docs + README
+E1-S05  User docs skeleton ✅
+E1-S06  Root README
 E1-S07  CI matrix (last — validates full stack)
 ```
-
 ---
 
 ## Validation summary (2026-07-05, re-checked)
@@ -183,7 +184,7 @@ Every story follows **build first, verify second**. A story is **not done** unti
 
 ### Manual-only exceptions (allowed when documented)
 
-- **Pure documentation** stories (e.g. E1-S05, E7-S08, E8-S02): Verification uses a **manual** checklist mapped to ACs; no pytest required unless link/content assertions are added later.
+- **Pure documentation** stories (e.g. E1-S06, E7-S08, E8-S02): Verification uses a **manual** checklist mapped to ACs; no pytest required unless link/content assertions are added later. (E1-S05 added path/content tests in `tests/unit/docs/`.)
 - **CI orchestration** (E1-S07): Verification is the workflow itself; individual ACs trace to workflow steps/jobs.
 - **Deferred / blocked** stories (E1-S08, E4-S04, E8-S04): Verification section omitted until unblocked; template still applies when implemented.
 

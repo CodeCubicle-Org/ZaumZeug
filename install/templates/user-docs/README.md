@@ -12,7 +12,7 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 
 | Guide | Description |
 |---|---|
-| [Installation](getting-started/installation.md) | OS install wrappers and optional flags |
+| [Installation](getting-started/installation.md) | Prerequisites, install commands, disk, extras, updates, troubleshooting |
 | [Project setup](getting-started/project-setup.md) | Layout and `zaumzeug init` for new harnesses |
 | [Your first harness](getting-started/first-harness.md) | Run the shipped `example` research agent (mock, no API keys) |
 

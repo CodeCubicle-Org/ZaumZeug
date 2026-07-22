@@ -5,7 +5,7 @@
 | **Document** | Epic E1 user stories |
 | **File** | `docs/stories/03-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-22 (E1-S04 done) |
+| **Last modified** | 2026-07-22 (E1-S05 done) |
 | **Status** | In progress |
 | **Build order** | **3 of 8** (after E2 + E3 — install/CI need working SDK) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -28,7 +28,7 @@
 1. **E1-S01** → **E1-S02** — Install script + wrappers ✅
 2. **E1-S03** — Scaffolding *(copies E3-S04 templates)* ✅
 3. **E1-S04** — `zaumzeug init` ✅
-4. **E1-S05** → **E1-S06** — User docs + root README
+4. **E1-S05** ✅ → **E1-S06** — User docs + root README
 5. **E1-S07** — CI matrix **last** (validates full Phase 1 stack)
 
 ---
@@ -124,7 +124,7 @@ As a **harness developer**, I want OS-specific install wrappers that delegate to
 
 - [x] Add `install/client-install.sh` (bash)
 - [x] Add `install/client-install.ps1` (PowerShell)
-- [x] Document commands in user-docs (see E1-S05) — command table in `user-docs/getting-started/installation.md`; full guide → E1-S05
+- [x] Document commands in user-docs (see E1-S05) — command table + full §7.4 guide in `user-docs/getting-started/installation.md` (**Done** E1-S05)
 
 ### Verification (after build)
 
@@ -269,6 +269,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E1.5 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
+| **Status** | Done (2026-07-22) |
 
 ### User story
 
@@ -282,35 +283,36 @@ As a **harness developer**, I want a structured `user-docs/` tree after install,
 
 ### Acceptance criteria
 
-- [ ] **AC-1** After install: `user-docs/README.md`, `getting-started/` (installation, project-setup, first-harness), `reference/cli.md`, `guides/multi-agent-workflow.md`, `guides/testing.md`
-- [ ] **AC-2** `getting-started/installation.md` covers prerequisites, effort, disk ranges, optional extras, updating dependencies, troubleshooting
-- [ ] **AC-3** Content aligns with PRD §7.4 (not duplicated SDK internals)
+- [x] **AC-1** After install: `user-docs/README.md`, `getting-started/` (installation, project-setup, first-harness), `reference/cli.md`, `guides/multi-agent-workflow.md`, `guides/testing.md`
+- [x] **AC-2** `getting-started/installation.md` covers prerequisites, effort, disk ranges, optional extras, updating dependencies, troubleshooting
+- [x] **AC-3** Content aligns with PRD §7.4 (not duplicated SDK internals)
 
 ### Implementation tasks (build)
 
-- [ ] Add / complete template files under `install/templates/user-docs/` (include `guides/testing.md` per [Architecture §13.6](../architecture/10-operations-and-reference.md#136-testing-playbook); ensure `getting-started/project-setup.md` exists for AC-1)
+- [x] Add / complete template files under `install/templates/user-docs/` (include `guides/testing.md` per [Architecture §13.6](../architecture/10-operations-and-reference.md#136-testing-playbook); ensure `getting-started/project-setup.md` exists for AC-1)
 - [x] Copy skeleton during `client_install.py` — **done in [E1-S03](#e1-s03-project-scaffolding-on-install)** (`scaffold_project` copy-if-missing of `install/templates/user-docs/`)
-- [ ] Expand `installation.md` to full PRD §7.4 topics (prerequisites, effort, disk, extras, updates, troubleshooting)
-- [ ] Link to Architecture only for “technical behavior” footnotes
+- [x] Expand `installation.md` to full PRD §7.4 topics (prerequisites, effort, disk, extras, updates, troubleshooting)
+- [x] Link to Architecture only for “technical behavior” footnotes
 
 ### Verification (after build)
 
-Per [Story verification](00-README.md#story-verification-required). **Docs-only** — manual checklist mapped to ACs.
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E1-S05 / E1.5`.
 
-| AC | Verification |
+| AC | Test |
 |---|---|
-| AC-1 | **manual:** post-install tree contains listed paths |
-| AC-2 | **manual:** installation.md includes all §7.4 topics (checklist in PRD) |
-| AC-3 | **manual:** no SDK internals duplicated; links to Architecture where needed |
+| AC-1 | `tests/unit/docs/test_user_docs_skeleton.py::test_e1_s05_ac1_template_tree_has_required_paths` |
+| AC-1 | `tests/unit/docs/test_user_docs_skeleton.py::test_e1_s05_ac1_live_tree_has_required_paths` |
+| AC-2 | `tests/unit/docs/test_user_docs_skeleton.py::test_e1_s05_ac2_installation_covers_prd_74_topics` |
+| AC-3 | `tests/unit/docs/test_user_docs_skeleton.py::test_e1_s05_ac3_installation_links_architecture_not_sdk_internals` |
 
-- [ ] Manual checklist completed and recorded in PR or story notes
-- [ ] Optional future: `tests/unit/docs/test_user_docs_skeleton.py` for path presence
+- [x] Every AC row above has a passing test
+- [x] `pytest tests/unit/docs/test_user_docs_skeleton.py -v` passes
 
 ### Definition of done
 
-- [ ] All install table commands from PRD §7.4 appear in installation.md
-- [ ] Dependency update scenarios documented (post-`git pull`, manual refresh, production redeploy)
-- [ ] Verification checklist complete
+- [x] All install table commands from PRD §7.4 appear in installation.md
+- [x] Dependency update scenarios documented (post-`git pull`, manual refresh, production redeploy)
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

@@ -56,7 +56,7 @@ As a **harness developer**, I want OS-specific install wrappers that delegate to
 
 - [x] Add `install/client-install.sh` (bash)
 - [x] Add `install/client-install.ps1` (PowerShell)
-- [x] Document commands in user-docs (see E1-S05) — command table in `user-docs/getting-started/installation.md` (+ install template); full guide → E1-S05
+- [x] Document commands in user-docs (see E1-S05) — command table in `user-docs/getting-started/installation.md` (+ install template); full §7.4 guide **Done** in [E1-S05](22-story.md)
 
 ### Verification (after build)
 

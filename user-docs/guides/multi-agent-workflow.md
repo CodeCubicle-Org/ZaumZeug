@@ -250,6 +250,6 @@ These may appear in later releases; they are **not** required to build a Phase 1
 
 ## Related reading
 
-- [Getting started — first harness](../getting-started/first-harness.md) *(when available after install)*
+- [Getting started — first harness](../getting-started/first-harness.md)
 - [CLI reference](../reference/cli.md) — `serve`, `run`, `compile`, `--verbose`, `HARNESS_LOG_LEVEL`
 - Generated diagram: **`usr-harnesses/<harness>/docs/workflow-diagram.md`** after compile

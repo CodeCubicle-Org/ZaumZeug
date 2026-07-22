@@ -157,6 +157,8 @@ Install copies this tree from `install/templates/user-docs/` ([§3.4](02-reposit
 
 **Implementation (E1-S03, 2026-07-22):** Install copies `install/templates/user-docs/` into project `user-docs/` (copy-if-missing). Content completeness (installation prerequisites / troubleshooting) → [E1-S05](../stories/epic-stories/22-story.md).
 
+**Implementation (E1-S05, 2026-07-22):** Full `user-docs/` skeleton per §3.5 — `getting-started/installation.md` expands [PRD §7.4](../prd.md#74-user-installation-guide-content-for-readme--phase-1) (prerequisites, effort, disk, extras, updates, troubleshooting); Architecture §3.4 linked for technical install behavior only. Tests: `tests/unit/docs/test_user_docs_skeleton.py`.
+
 **Implementation (E1-S02, 2026-07-22):** [user-docs/getting-started/installation.md](../../user-docs/getting-started/installation.md) documents OS install wrappers and flags (command table from [PRD §7.4](../prd.md#74-user-installation-guide-content-for-readme--phase-1)). Full prerequisites / troubleshooting → [E1-S05](../stories/epic-stories/22-story.md). Install template: `install/templates/user-docs/getting-started/installation.md`.
 
 **Implementation (E1-S04, 2026-07-22):** [user-docs/getting-started/project-setup.md](../../user-docs/getting-started/project-setup.md) documents `zaumzeug init` and project layout. Install template: `install/templates/user-docs/getting-started/project-setup.md`. Remaining user-docs depth → [E1-S05](../stories/epic-stories/22-story.md).
