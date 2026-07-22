@@ -124,7 +124,7 @@ Requirements: **[PRD G4](../prd.md#3-goals)**, **[E1.7](../prd.md#epic-e1--onboa
 
 | Rule | Implementation |
 |---|---|
-| **Single install implementation** | All install logic in `install/client_install.py` (stdlib + `pathlib`); `.sh` / `.ps1` wrappers delegate only |
+| **Single install implementation** | All install logic in `install/client_install.py` (stdlib + `pathlib`); `.sh` / `.ps1` wrappers delegate only (**Done** E1-S01/S02 — [§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)) |
 | **No hardcoded paths** | SDK and install use `pathlib.Path`; no `/` or `\` literals for harness roots, venv, or artifacts |
 | **OS detection** | `platform.system()` for venv paths (`Scripts` vs `bin`), activation hints, and optional shell-specific messaging — not duplicated in shell scripts |
 | **Env over convention** | `HARNESS_ROOT`, `HARNESS_LOG_LEVEL`, port overrides in yaml — avoid OS-specific defaults in code |

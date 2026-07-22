@@ -223,7 +223,9 @@ Never commit API keys. `.env` is gitignored. Default CI runs mock only — see [
 
 Default branch CI (Win / macOS / Linux) runs:
 
-1. `python install/client_install.py --skip-venv --verify`
+1. OS install wrapper or `python install/client_install.py --skip-venv --verify`
+   - Windows: `.\install\client-install.ps1 --skip-venv --verify`
+   - macOS / Linux: `./install/client-install.sh --skip-venv --verify`
 2. `zaumzeug doctor`
 3. `zaumzeug serve example --dry-run`
 4. Mock-model serve smoke on ephemeral port

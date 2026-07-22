@@ -145,7 +145,7 @@ End-user walkthrough: [user-docs/guides/testing.md](../user-docs/guides/testing.
 
 | Tier | Trigger | Jobs | Epics |
 |---|---|---|---|
-| **Smoke** | Every push; `windows-latest`, `ubuntu-latest`, `macos-latest` | `client_install.py --verify`, `zaumzeug doctor`, `serve --dry-run`, mock serve smoke, `pytest tests/integration/test_openai_contract.py` | [E1-S07](../stories/03-epic.md#e1-s07-cross-platform-ci-matrix) *(closes open DoD from [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests))* |
+| **Smoke** | Every push; `windows-latest`, `ubuntu-latest`, `macos-latest` | OS install wrappers or `client_install.py --verify`, `zaumzeug doctor`, `serve --dry-run`, mock serve smoke, `pytest tests/integration/test_openai_contract.py` | [E1-S07](../stories/03-epic.md#e1-s07-cross-platform-ci-matrix) *(closes open DoD from [E1-S02](../stories/epic-stories/19-story.md#definition-of-done), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests))* |
 | **Unit + integration** | Every push (same workflow or dedicated job) | `pytest tests/unit tests/integration tests/usr-harnesses -v` | [E2](../stories/01-epic.md), [E3-S06](../stories/02-epic.md#e3-s06-phase-1-test-infrastructure-and-security-baseline), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests) ✅ |
 | **Eval regression** | PR touching prompts/artifacts; nightly | `deepeval test run` on critical cases; `deploy.eval_gate` on release | [E6](../stories/05-epic.md), [E5-S06](../stories/06-epic.md#e5-s06-deploy-eval-gate) |
 | **Live e2e** | Nightly / manual | `HARNESS_LIVE_LLM=1 pytest tests/e2e -v` | Optional — not Phase 1 CI gate |

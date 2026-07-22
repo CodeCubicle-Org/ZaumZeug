@@ -1,6 +1,6 @@
 # AI Harness — Ideation & Research (archive)
 
-**Last updated:** 2026-06-24
+**Last updated:** 2026-06-24 *(wrapper section marked Done — E1-S02, 2026-07-22)*
 
 > **Structured outputs:** Requirement-level content from this archive is mirrored in **[prd.md](prd.md)** and **[architecture.md](architecture.md)**. This file retains full YAML examples, install script walkthroughs, and protocol essays.
 
@@ -413,7 +413,9 @@ python install/client_install.py
 | `--verify` | Run `harness doctor` at end |
 | `--cursor-mcp` | Write `.cursor/mcp.json` from template (not just `.example`) |
 
-### Wrapper implementation (planned)
+### Wrapper implementation *(Done — E1-S02, 2026-07-22)*
+
+Shipped as `install/client-install.sh` and `install/client-install.ps1` (prefer working `py -3` / `python3` / `python`; forward all args; no install logic). See [Architecture §3.4](architecture/02-repository-and-layout.md#34-install-scripts-dev-vs-target) and [installation.md](../user-docs/getting-started/installation.md). Archive sketch below retained for history:
 
 **`install/client-install.sh`:**
 

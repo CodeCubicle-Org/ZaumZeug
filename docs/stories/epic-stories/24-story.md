@@ -5,14 +5,14 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/24-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-21 |
+| **Last modified** | 2026-07-22 |
 | **Story ID** | E1-S07 |
 | **Epic** | [E1 — Onboarding and Project Setup](../03-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 3 of 8 |
 | **Story sequence** | 24 of 63 (global build order) |
 | **Source** | Extracted from [`03-epic.md`](../03-epic.md) |
-| **Related** | [Stories index](../00-README.md) · [Epic E1](../../prd.md#epic-e1--onboarding-and-project-setup-phase-1) · [Architecture](../../architecture.md) · **Closes open ACs/DoD from** [E3-S02](13-story.md#acceptance-criteria) · [E3-S07](16-story.md#definition-of-done) |
+| **Related** | [Stories index](../00-README.md) · [Epic E1](../../prd.md#epic-e1--onboarding-and-project-setup-phase-1) · [Architecture](../../architecture.md) · **Closes open ACs/DoD from** [E1-S02](19-story.md#definition-of-done) · [E3-S02](13-story.md#acceptance-criteria) · [E3-S07](16-story.md#definition-of-done) |
 
 ---
 
@@ -24,7 +24,7 @@
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
 | **Prerequisites** | [E1-S01](18-story.md#e1-s01-cross-platform-install-script) through [E1-S03](20-story.md#e1-s03-project-scaffolding-on-install) · [E2-S04a](05.1-story.md) · [E2-S04b](05.2-story.md) · [E2-S05](06-story.md#e2-s05-dry-run-on-serve) ✅ · [E3](../02-epic.md) runtime stories complete |
-| **Closes open from** | [E3-S02 AC-6](13-story.md#acceptance-criteria) · [E3-S02 AC-7](13-story.md#acceptance-criteria) (three-OS matrix + mock serve smoke) · [E3-S07 DoD](16-story.md#definition-of-done) *Green on all three OS in CI matrix* |
+| **Closes open from** | [E1-S02 DoD](19-story.md#definition-of-done) *Wrappers tested on respective OS in CI matrix* · [E3-S02 AC-6](13-story.md#acceptance-criteria) · [E3-S02 AC-7](13-story.md#acceptance-criteria) (three-OS matrix + mock serve smoke) · [E3-S07 DoD](16-story.md#definition-of-done) *Green on all three OS in CI matrix* |
 
 ### User story
 
@@ -48,6 +48,7 @@ As an **SDK maintainer**, I want CI to verify install and mock-model serve on Wi
 - [E2-S05 — serve `--dry-run`](06-story.md#e2-s05-dry-run-on-serve) — **Done** (2026-07-08); satisfies AC-3 serve step
 - [E3-S02 — `zaumzeug serve`](13-story.md#e3-s02-zaumzeug-serve-dev-mode) — **Done** (2026-07-20); satisfies AC-1/AC-4 serve smoke (closes [E3-S02 AC-6 · AC-7](13-story.md#acceptance-criteria))
 - [E3-S07 — OpenAI REST contract tests](16-story.md#e3-s07-openai-rest-contract-tests) — **Done** (2026-07-21); contract suite for matrix (`pytest tests/integration/test_openai_contract.py`); closes [E3-S07 DoD](16-story.md#definition-of-done) when green on all three OS
+- [E1-S02 — Install shell wrappers](19-story.md#e1-s02-install-shell-wrappers) — **Done** (2026-07-22); per-OS wrappers for matrix; closes [E1-S02 DoD](19-story.md#definition-of-done) when wrappers run green on respective OS runners
 
 
 ### Upstream integration — [E2-S05](06-story.md#e2-s05-dry-run-on-serve) *(Done)*
@@ -89,6 +90,20 @@ Completing **AC-1** and **AC-4** on all three matrix runners closes the open E3-
 | **Requires** | [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) serve runner · [E3-S05](09-story.md#e3-s05-mock-model-profile) mock profile |
 
 Completing the contract pytest job on all three matrix runners closes the open E3-S07 DoD carried forward.
+
+### Upstream integration — [E1-S02](19-story.md#e1-s02-install-shell-wrappers) *(Done)*
+
+[E1-S02](19-story.md) provides thin `client-install.sh` / `client-install.ps1` wrappers. Matrix jobs should invoke the OS-appropriate wrapper (or document `python install/client_install.py` as the universal fallback used in AC-2) — **do not** reimplement install logic in the workflow.
+
+| Contract | Value |
+|---|---|
+| **POSIX (ubuntu/macOS)** | `./install/client-install.sh --skip-venv --verify` |
+| **Windows (PowerShell)** | `.\install\client-install.ps1 --skip-venv --verify` |
+| **Universal fallback (AC-2)** | `python install/client_install.py --skip-venv --verify` |
+| **Closes** | [E1-S02 DoD](19-story.md#definition-of-done) *Wrappers tested on respective OS in CI matrix* |
+| **Requires** | [E1-S01](18-story.md#e1-s01-cross-platform-install-script) `client_install.py` |
+
+Completing per-OS wrapper (or documented equivalent) install steps on all three matrix runners closes the open E1-S02 DoD carried forward.
 
 ### Acceptance criteria
 
@@ -163,5 +178,6 @@ Per [Story verification](../00-README.md#story-verification-required). **CI orch
 - [ ] [E2-S05](06-story.md#definition-of-done) DoD *Called by E1-S07 CI matrix* checked off when AC-3 passes on `windows-latest`, `ubuntu-latest`, and `macos-latest`
 - [ ] [E3-S02 AC-6 · AC-7](13-story.md#acceptance-criteria) checked off when AC-1 and AC-4 pass on all three OS runners
 - [ ] [E3-S07 DoD](16-story.md#definition-of-done) *Green on all three OS in CI matrix* checked off when `pytest tests/integration/test_openai_contract.py` is green on all three OS runners
+- [ ] [E1-S02 DoD](19-story.md#definition-of-done) *Wrappers tested on respective OS in CI matrix* checked off when per-OS wrappers (or documented `client_install.py` fallback) run green on all three OS runners
 
 ---

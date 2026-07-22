@@ -1,6 +1,6 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-21 (E3-S07 — OpenAI REST contract tests; HTTP `model_id` on serve)  
+**Last updated:** 2026-07-22 (E1-S02 — install shell wrappers)  
 **Status:** Phase 1 implementation in progress  
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -250,8 +250,8 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 | ID | Feature | Acceptance criteria |
 |---|---|---|
-| E1.1 | Cross-platform install | **AC:** `client_install.py` runs on Win/macOS/Linux with Python 3.11+; creates `.venv`; `pip install -e ".[dev]"` succeeds per [Architecture §4.4](architecture/03-technology-stack.md#44-pyprojecttoml-dependency-groups-phase-1-stub); idempotent re-run. Supports flags: `--verify`, `--no-example`, `--skip-venv`, `--cursor-mcp` (see [Architecture §3.4](architecture/02-repository-and-layout.md#34-install-scripts-dev-vs-target)). |
-| E1.2 | Install wrappers | **AC:** `client-install.sh` and `client-install.ps1` delegate to Python script with forwarded flags. |
+| E1.1 | Cross-platform install | **Done** (E1-S01, 2026-07-21) — `install/client_install.py` runs on Win/macOS/Linux with Python 3.11+; creates `.venv`; `pip install -e ".[dev]"` succeeds per [Architecture §4.4](architecture/03-technology-stack.md#44-pyprojecttoml-dependency-groups-phase-1-stub); idempotent re-run. Supports flags: `--verify`, `--no-example`, `--skip-venv`, `--cursor-mcp` (see [Architecture §3.4](architecture/02-repository-and-layout.md#34-install-scripts-dev-vs-target)). Three-OS CI matrix open → [E1-S07](stories/epic-stories/24-story.md). |
+| E1.2 | Install wrappers | **Done** (E1-S02, 2026-07-22) — `client-install.sh` and `client-install.ps1` delegate to `client_install.py` with forwarded flags; no duplicated install logic. Command table: [user-docs/getting-started/installation.md](../user-docs/getting-started/installation.md). Per-OS CI wrapper invocation open → [E1-S07](stories/epic-stories/24-story.md). |
 | E1.3 | Project scaffolding | **AC:** Install copies `usr-harnesses/example/`, `user-docs/` skeleton, `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`; updates `.gitignore` for `.venv`, `artifacts/`, `deploy/`, `.env`. Never overwrites existing `.env`. |
 | E1.4 | `zaumzeug init` | **AC:** `zaumzeug init <name>` creates `usr-harnesses/<name>/` from template with valid minimal `harness.yaml`. |
 | E1.5 | `user-docs/` skeleton | **AC:** After install: `README.md`, `getting-started/` (installation, project-setup, first-harness), `reference/cli.md`, `guides/multi-agent-workflow.md`, `guides/testing.md`. **`getting-started/installation.md`** expands [§7.4](#74-user-installation-guide-content-for-readme--phase-1) (prerequisites, effort, disk ranges, optional extras, **updating dependencies**, troubleshooting). Structure per [Architecture §3.5](architecture/02-repository-and-layout.md#35-user-documentation). |

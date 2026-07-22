@@ -5,7 +5,7 @@
 | **Document** | Epic E1 user stories |
 | **File** | `docs/stories/03-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-21 (E1-S01 done) |
+| **Last modified** | 2026-07-22 (E1-S02 done) |
 | **Status** | In progress |
 | **Build order** | **3 of 8** (after E2 + E3 — install/CI need working SDK) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -25,7 +25,7 @@
 
 ### Story implementation order (within this epic)
 
-1. **E1-S01** → **E1-S02** — Install script + wrappers
+1. **E1-S01** → **E1-S02** — Install script + wrappers ✅
 2. **E1-S03** — Scaffolding *(copies E3-S04 templates)*
 3. **E1-S04** — `zaumzeug init`
 4. **E1-S05** → **E1-S06** — User docs + root README
@@ -115,16 +115,16 @@ As a **harness developer**, I want OS-specific install wrappers that delegate to
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `install/client-install.sh` delegates to `client_install.py` with forwarded args
-- [ ] **AC-2** `install/client-install.ps1` delegates to `client_install.py` with forwarded args
-- [ ] **AC-3** All flags from E1-S01 pass through unchanged
-- [ ] **AC-4** Wrappers contain no duplicated install logic
+- [x] **AC-1** `install/client-install.sh` delegates to `client_install.py` with forwarded args
+- [x] **AC-2** `install/client-install.ps1` delegates to `client_install.py` with forwarded args
+- [x] **AC-3** All flags from E1-S01 pass through unchanged
+- [x] **AC-4** Wrappers contain no duplicated install logic
 
 ### Implementation tasks (build)
 
-- [ ] Add `install/client-install.sh` (bash)
-- [ ] Add `install/client-install.ps1` (PowerShell)
-- [ ] Document commands in user-docs (see E1-S05)
+- [x] Add `install/client-install.sh` (bash)
+- [x] Add `install/client-install.ps1` (PowerShell)
+- [x] Document commands in user-docs (see E1-S05) — command table in `user-docs/getting-started/installation.md`; full guide → E1-S05
 
 ### Verification (after build)
 
@@ -136,15 +136,15 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-2 | `tests/unit/install/test_wrappers.py::test_e1_s02_ac2_ps1_delegates_to_python` |
 | AC-3 | `tests/unit/install/test_wrappers.py::test_e1_s02_ac3_flags_forwarded` |
 | AC-4 | `tests/unit/install/test_wrappers.py::test_e1_s02_ac4_no_duplicated_install_logic` |
-| AC-1–4 | **shared:** E1-S07 CI matrix invokes wrappers per OS |
+| AC-1–4 | **shared:** [E1-S07](#e1-s07-cross-platform-ci-matrix) CI matrix invokes wrappers per OS |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/install/test_wrappers.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/install/test_wrappers.py -v` passes
 
 ### Definition of done
 
-- [ ] Wrappers tested on respective OS in CI matrix (E1-S07)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [ ] Wrappers tested on respective OS in CI matrix *(open — carried to [E1-S07](#e1-s07-cross-platform-ci-matrix); closed when matrix invokes `client-install.sh` / `client-install.ps1` (or equivalent per-OS wrapper) green on all three runners)*
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 
@@ -372,7 +372,7 @@ Per [Story verification](00-README.md#story-verification-required). **Docs-only*
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
 | **Prerequisites** | [E1-S01](#e1-s01-cross-platform-install-script) through [E1-S03](#e1-s03-project-scaffolding-on-install) · [E2](../01-epic.md) · [E2-S05](epic-stories/06-story.md#e2-s05-dry-run-on-serve) ✅ · [E3](../02-epic.md) complete |
-| **Closes open from** | [E3-S02 AC-6 · AC-7](epic-stories/13-story.md#acceptance-criteria) · [E3-S07 DoD](epic-stories/16-story.md#definition-of-done) *Green on all three OS in CI matrix* |
+| **Closes open from** | [E1-S02 DoD](epic-stories/19-story.md#definition-of-done) *Wrappers tested on respective OS in CI matrix* · [E3-S02 AC-6 · AC-7](epic-stories/13-story.md#acceptance-criteria) · [E3-S07 DoD](epic-stories/16-story.md#definition-of-done) *Green on all three OS in CI matrix* |
 
 ### User story
 
@@ -384,6 +384,7 @@ As an **SDK maintainer**, I want CI to verify install and mock-model serve on Wi
 - [PRD §11 — Success metrics](../prd.md#11-success-metrics)
 - [Architecture §2.5](../architecture/01-overview-and-principles.md#25-cross-platform-portability)
 - [E3-S07 — OpenAI REST contract](epic-stories/16-story.md#e3-s07-openai-rest-contract-tests) — **Done** (2026-07-21); matrix should run `pytest tests/integration/test_openai_contract.py`
+- [E1-S02 — Install shell wrappers](epic-stories/19-story.md#e1-s02-install-shell-wrappers) — **Done** (2026-07-22); closes [E1-S02 DoD](epic-stories/19-story.md#definition-of-done) when per-OS wrappers run green on matrix
 
 ### Acceptance criteria
 
@@ -425,6 +426,7 @@ Per [Story verification](00-README.md#story-verification-required). **CI orchest
 - [ ] [E2-S05](epic-stories/06-story.md#definition-of-done) DoD *Called by E1-S07 CI matrix* checked off when AC-3 passes on all three runners
 - [ ] [E3-S02 AC-6 · AC-7](epic-stories/13-story.md#acceptance-criteria) checked off when AC-1 and AC-4 pass on all three OS runners
 - [ ] [E3-S07 DoD](epic-stories/16-story.md#definition-of-done) *Green on all three OS in CI matrix* checked off when `pytest tests/integration/test_openai_contract.py` is green on all three OS runners
+- [ ] [E1-S02 DoD](epic-stories/19-story.md#definition-of-done) *Wrappers tested on respective OS in CI matrix* checked off when per-OS wrappers (or documented `client_install.py` fallback) run green on all three OS runners
 
 ---
 

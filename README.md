@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 implementation in progress. Epic E2 (configuration and validation) is **complete** (E2-S00–S07). E3 runtime: **mock model profile** (E3-S05), **config-driven ModelRouter** (E3-S01), and **builtin `web_fetch` tool** (E3-S03) — Phase 1 providers (`mock`, `openrouter`, `openai_compatible` for LM Studio). Next: runtime factory (E3-S00), `zaumzeug serve`. Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 implementation in progress. Epics **E2** (config/validation) and **E3** (runtime/serve/run) are **complete**. Epic **E1** onboarding: **`client_install.py`** (E1-S01) and **install shell wrappers** (E1-S02) are done; next is project scaffolding (E1-S03). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -80,7 +80,10 @@ Full analysis: [Competitive landscape](docs/competitive-landscape.md)
 
 Rough steps to go from zero to a working harness:
 
-1. **Install** — run `install/client_install.py` (or `pip install -e ".[dev]"` once the SDK ships).
+1. **Install** — OS wrapper or Python entrypoint (see [installation](user-docs/getting-started/installation.md)):
+   - Windows (PowerShell): `.\install\client-install.ps1`
+   - macOS / Linux: `./install/client-install.sh`
+   - Any OS: `python install/client_install.py`
 2. **Scaffold** — `zaumzeug init <name>` creates `usr-harnesses/<name>/` with `harness.yaml`, `workflow.yaml`, and starter agents.
 3. **Define the workflow** — edit `workflow.yaml`: set the `entry` agent and ordered `stages` (agent or pipeline steps).
 4. **Configure agents** — under `agents/<name>/`, set prompts and tools in `agent.yaml` and pick models in `agents-models.yaml`.

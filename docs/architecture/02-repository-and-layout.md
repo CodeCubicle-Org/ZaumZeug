@@ -22,7 +22,7 @@ HarnessDevelopment/
 ├── usr-harnesses/<name>/         # USER dev workspace (author, compile, experiment)
 ├── deploy/<name>/            # PRODUCTION bundle (generated)
 ├── config/models.yaml        # Global model registry defaults
-├── install/                  # client_install.py, target_install.py + templates
+├── install/                  # client_install.py, client-install.sh/.ps1, target_install (+ templates)
 ├── user-docs/                # End-user manuals
 ├── docs/                     # PRD, architecture, ideation archive
 └── tests/
@@ -131,6 +131,10 @@ Secrets remain in `.env` only; all model files hold provider + model id + genera
 
 **Updating dependencies (dev machine):** Re-run `client_install.py` after `git pull` (idempotent; refreshes `pip install -e ".[dev]"`). Optional extras and provider plugins use separate `pip install -U` commands. Production targets update via redeploy + bundled `target_install`, not ad hoc upgrades. User-facing summary: [PRD §7.4](../prd.md#74-user-installation-guide-content-for-readme--phase-1).
 
+**Implementation (E1-S01, 2026-07-21):** `install/client_install.py` — creates `.venv` (unless `--skip-venv`), runs `pip install -e ".[dev]"`, parses `--verify` / `--no-example` / `--skip-venv` / `--cursor-mcp`, pathlib OS paths, non-blocking missing-`git` warning. Scaffolding copy rules → [E1-S03](../stories/epic-stories/20-story.md). Tests: `tests/unit/install/test_client_install.py`.
+
+**Implementation (E1-S02, 2026-07-22):** Thin OS wrappers `install/client-install.sh` and `install/client-install.ps1` locate a working Python 3.11+ (`py -3` preferred on Windows to avoid Store stubs) and forward all args to `client_install.py` — no duplicated install logic. User-facing command table: [installation.md](../../user-docs/getting-started/installation.md). Tests: `tests/unit/install/test_wrappers.py`. Per-OS CI invocation → [E1-S07](../stories/epic-stories/24-story.md).
+
 ### 3.5 User documentation
 
 End-user docs live in `user-docs/` (Markdown) — separate from internal `docs/`. Install copies skeleton:
@@ -145,10 +149,12 @@ user-docs/
 └── reference/cli.md
 ```
 
-Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [first-harness.md](../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../user-docs/guides/multi-agent-workflow.md), [testing.md](../user-docs/guides/testing.md).
+Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [testing.md](../../user-docs/guides/testing.md).
 
-**Implementation (E3-S04, 2026-07-20):** [user-docs/getting-started/first-harness.md](../user-docs/getting-started/first-harness.md) documents the shipped `example` research harness (mock-first serve). Install template: `install/templates/user-docs/getting-started/first-harness.md`.
+**Implementation (E1-S02, 2026-07-22):** [user-docs/getting-started/installation.md](../../user-docs/getting-started/installation.md) documents OS install wrappers and flags (command table from [PRD §7.4](../prd.md#74-user-installation-guide-content-for-readme--phase-1)). Full prerequisites / troubleshooting → [E1-S05](../stories/epic-stories/22-story.md). Install template: `install/templates/user-docs/getting-started/installation.md`.
 
-**Implementation (E2-S06, 2026-07-08):** [user-docs/reference/cli.md](../user-docs/reference/cli.md) documents `HARNESS_LOG_LEVEL`, `--verbose` on serve/compile, and related CLI flags. Install template: `install/templates/user-docs/reference/cli.md`.
+**Implementation (E3-S04, 2026-07-20):** [user-docs/getting-started/first-harness.md](../../user-docs/getting-started/first-harness.md) documents the shipped `example` research harness (mock-first serve). Install template: `install/templates/user-docs/getting-started/first-harness.md`.
+
+**Implementation (E2-S06, 2026-07-08):** [user-docs/reference/cli.md](../../user-docs/reference/cli.md) documents `HARNESS_LOG_LEVEL`, `--verbose` on serve/compile, and related CLI flags. Install template: `install/templates/user-docs/reference/cli.md`.
 
 ---
