@@ -5,8 +5,8 @@
 | **Document** | Epic E1 user stories |
 | **File** | `docs/stories/03-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-22 (E1-S07 done) |
-| **Status** | Phase 1 complete (E1-S01–S07); E1-S08 blocked |
+| **Last modified** | 2026-07-22 (open #3 resolved; E1-S08 deferred) |
+| **Status** | Phase 1 complete (E1-S01–S07); E1-S08 deferred until PyPI publish |
 | **Build order** | **3 of 8** (after E2 + E3 — install/CI need working SDK) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -30,7 +30,7 @@
 3. **E1-S04** — `zaumzeug init` ✅
 4. **E1-S05** ✅ → **E1-S06** ✅ — User docs + CONTRIBUTING.md
 5. **E1-S07** — CI matrix **last** (validates full Phase 1 stack) ✅
-6. **E1-S08** — Future: `zaumzeug install-project` *(blocked)*
+6. **E1-S08** — Future: `zaumzeug install-project` *(deferred — decision resolved; implement with PyPI publish)*
 
 ---
 
@@ -439,34 +439,37 @@ Per [Story verification](00-README.md#story-verification-required). **CI orchest
 
 ---
 
-## E1-S08 — Future: `zaumzeug install-project` (blocked)
+## E1-S08 — Future: `zaumzeug install-project` (deferred)
 
 | Field | Value |
 |---|---|
-| **Feature** | E1 future (open #3) |
+| **Feature** | E1 future (was open #3) |
 | **Persona** | PyPI consumer |
 | **Priority** | Deferred |
+| **Status** | Deferred (2026-07-22) — open #3 resolved; implement with PyPI publish |
+
+Canonical story file: [epic-stories/25-story.md](epic-stories/25-story.md).
 
 ### User story
 
 As a **PyPI consumer**, I want to scaffold harness folders in an arbitrary project cwd, so that I do not need a full SDK repo clone.
 
-### References
+### Decision (resolved 2026-07-22)
 
-- [PRD open decision #4](../prd.md#12-open-decisions-blockers-for-some-stories)
-- [PRD §9 — Future commands](../prd.md#9-cli-surface-epic-mapping)
+- **SDK repo:** `install/client_install.py` (+ wrappers) — venv, editable `[dev]`, scaffold.
+- **PyPI consumer (after publish):** `zaumzeug install-project` — scaffold only; reuse logic without editable install; templates in the wheel.
+- **Phase 1–4 v1:** clone + `install/` only. CLI + publish postponed — see [PRD §12](../prd.md#12-open-decisions-blockers-for-some-stories).
 
-### Blocker
+- [x] Resolve `install/` vs `zaumzeug install-project` for PyPI consumers before implementation
 
-- [ ] Resolve `install/` vs `zaumzeug install-project` for PyPI consumers before implementation
+### Implementation tasks (when unblocked — with PyPI publish)
 
-### Implementation tasks (when unblocked)
-
+- [ ] Bundle scaffold templates in the published wheel
 - [ ] Reuse `client_install.py` logic without editable repo install
 - [ ] Scaffold `usr-harnesses/`, `user-docs/`, `.env` in consumer cwd
 
 ### Verification (when unblocked)
 
-Apply [Story verification](00-README.md#story-verification-required) with AC labels and `tests/unit/install/test_install_project.py` mapping when story is split from blocker.
+Apply [Story verification](00-README.md#story-verification-required) with AC labels and `tests/unit/install/test_install_project.py` mapping when implementation starts.
 
 ---

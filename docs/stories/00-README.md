@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-22 (E1-S07 done) |
+| **Last modified** | 2026-07-22 (open #3 resolved; E1-S08 deferred) |
 | **Status** | Active |
 
 ---
@@ -61,8 +61,9 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E1-S05](epic-stories/22-story.md) — User documentation skeleton | Done | 2026-07-22 |
 | [E1-S06](epic-stories/23-story.md) — Root README / CONTRIBUTING.md | Done | 2026-07-22 |
 | [E1-S07](epic-stories/24-story.md) — Cross-platform CI matrix | Done | 2026-07-22 |
+| [E1-S08](epic-stories/25-story.md) — `zaumzeug install-project` (PyPI) | Deferred | 2026-07-22 (decision; implement with publish) |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done; remaining E1 story [E1-S08](epic-stories/25-story.md) is blocked.
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done. [E1-S08](epic-stories/25-story.md) (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved 2026-07-22). Next build: [E4-S01](epic-stories/26-story.md) (Phase 2).
 
 ---
 
@@ -98,7 +99,7 @@ E1-S04  zaumzeug init ✅
 E1-S05  User docs skeleton ✅
 E1-S06  Root README / CONTRIBUTING.md ✅
 E1-S07  CI matrix (last — validates full stack) ✅
-E1-S08  Future: zaumzeug install-project (blocked)
+E1-S08  Future: zaumzeug install-project (deferred — with PyPI publish)
 ```
 
 ## Validation summary (2026-07-05, re-checked)
@@ -136,14 +137,15 @@ Cross-checked against [PRD §8](../prd.md#8-functional-requirements-epics) and [
 | Story `#anchor` slugs drifted from headings | Normalized 27 cross-links to GitHub auto-slugs derived from `## E*-S* — …` titles |
 | Testing tech stack + playbook | [§4.5](../architecture/03-technology-stack.md#45-test-dependencies), [§13.6](../architecture/10-operations-and-reference.md#136-testing-playbook), [user-docs/guides/testing.md](../user-docs/guides/testing.md) |
 
-### Still deferred (PRD open decisions — not missing stories)
+### Still deferred (not missing stories)
 
-| # | Decision | Affected stories |
+| Item | Affected stories | Notes |
 |---|---|---|
-| 3 | `zaumzeug install-project` | E1-S08 |
-| 5 | A2A defer | E8-S04 |
+| `zaumzeug install-project` + PyPI publish | [E1-S08](epic-stories/25-story.md) | Open #3 **resolved** (2026-07-22): dual path; implement with package publish |
+| A2A defer | E8-S04 | PRD open #5 |
+| Haystack GEPA evaluator (Pattern B) | E4-S04 | Deferred Phase 4+ |
 
-**Resolved:** **Production auth (Phase 4)** — Traefik proxy-only; no in-process SDK auth in v1 — [E8-S02](08-epic.md#e8-s02-production-auth). Product name **ZaumZeug** (PyPI `zaumzeug`, CLI `zaumzeug`) — [Architecture §3.2](../architecture/02-repository-and-layout.md#32-package-naming). **GEPA Phase 2 = Pattern A** (`dspy.GEPA` only); **optional input rewrite/clarify templates** at compile time (E4-S03/E4-S05); **`optimize_anything` / Pattern B** deferred to Phase 4+ — [E4-S04](04-epic.md#e4-s04-haystack-gepa-evaluator-wrapper-deferred). **Hayhooks self-hosted** — `zaumzeug serve|mcp` on target host (Docker via E8-S05); Haystack Enterprise Platform not in v1 scope — [Architecture §8.2](../architecture/06-runtime-and-protocols.md#82-harness-vs-raw-hayhooks).
+**Resolved:** **`install/` vs `install-project` (open #3)** — both coexist; clone+`install/` for Phase 1–4 v1; CLI deferred until PyPI publish — [E1-S08](epic-stories/25-story.md). **Production auth (Phase 4)** — Traefik proxy-only; no in-process SDK auth in v1 — [E8-S02](08-epic.md#e8-s02-production-auth). Product name **ZaumZeug** (PyPI `zaumzeug`, CLI `zaumzeug`) — [Architecture §3.2](../architecture/02-repository-and-layout.md#32-package-naming). **GEPA Phase 2 = Pattern A** (`dspy.GEPA` only); **optional input rewrite/clarify templates** at compile time (E4-S03/E4-S05); **`optimize_anything` / Pattern B** deferred to Phase 4+ — [E4-S04](04-epic.md#e4-s04-haystack-gepa-evaluator-wrapper-deferred). **Hayhooks self-hosted** — `zaumzeug serve|mcp` on target host (Docker via E8-S05); Haystack Enterprise Platform not in v1 scope — [Architecture §8.2](../architecture/06-runtime-and-protocols.md#82-harness-vs-raw-hayhooks).
 
 ---
 
@@ -188,7 +190,7 @@ Every story follows **build first, verify second**. A story is **not done** unti
 
 - **Pure documentation** stories (e.g. E1-S06, E7-S08, E8-S02): Verification uses a **manual** checklist mapped to ACs; no pytest required unless link/content assertions are added later. (E1-S05 added path/content tests in `tests/unit/docs/`.)
 - **CI orchestration** (E1-S07): Verification is the workflow itself; individual ACs trace to workflow steps/jobs.
-- **Deferred / blocked** stories (E1-S08, E4-S04, E8-S04): Verification section omitted until unblocked; template still applies when implemented.
+- **Deferred** stories (E1-S08 until PyPI publish, E4-S04, E8-S04): Verification section omitted until implementation starts; template still applies when implemented.
 
 ### Example Verification block
 

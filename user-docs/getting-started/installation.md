@@ -145,7 +145,7 @@ There is **no `zaumzeug update-deps` command in v1**. Updates stay **pip-based**
 | **Refresh SDK + `[dev]` stack manually** | Activate `.venv`, then `pip install -e ".[dev]"`, then `zaumzeug doctor` |
 | **Update optional extras** | `pip install -U "zaumzeug[eval]"`, provider packages, or `hayhooks[chainlit]` as needed |
 | **Production server** | Ship a new `deploy/<name>/` bundle → re-run bundled `target_install` (idempotent); do **not** `pip upgrade` ad hoc on the server |
-| **PyPI consumer project** (future) | `pip install -U zaumzeug` (optionally pin `zaumzeug==x.y.z`) |
+| **PyPI consumer project** (deferred until package publish — [E1-S08](../../docs/stories/epic-stories/25-story.md)) | `pip install -U zaumzeug` then `zaumzeug install-project` (optionally pin `zaumzeug==x.y.z`) |
 
 ### After `git pull` (dev machine)
 

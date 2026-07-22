@@ -38,6 +38,12 @@ See [Project setup](../getting-started/project-setup.md) for layout details.
 
 ---
 
+## `zaumzeug install-project` (deferred)
+
+Scaffold project folders (`usr-harnesses/`, `user-docs/`, `.env`, etc.) in an arbitrary cwd for **PyPI consumers** who do not clone this repo. **Not available yet** — deferred until `zaumzeug` is published on PyPI ([E1-S08](../../docs/stories/epic-stories/25-story.md)). Until then, use [clone + client install](../getting-started/installation.md).
+
+---
+
 ## `zaumzeug serve`
 
 Start Hayhooks for a harness under `usr-harnesses/<name>/` (dev mode), or validate without starting.

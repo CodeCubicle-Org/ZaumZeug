@@ -122,8 +122,11 @@ Secrets remain in `.env` only; all model files hold provider + model id + genera
 | `install/client_install.py` | **Dev machine once** — venv, editable install, `usr-harnesses/example/`, user-docs skeleton, global `config/models.yaml`, `.env.example` | First clone or new dev machine |
 | `install/target_install.py` | **Target machine once per deploy** — runtime `pip install zaumzeug`, optional venv, `zaumzeug doctor --deploy`, `.env` hints | After copying `deploy/<name>/` to desktop PC or server |
 | `zaumzeug init <name>` | **Per harness** — scaffold `usr-harnesses/<name>/` from template | Additional harnesses after project setup |
+| `zaumzeug install-project` | **PyPI consumer cwd** — scaffold only (no editable install); reuses scaffold logic | **Deferred** until `zaumzeug` is published ([E1-S08](../stories/epic-stories/25-story.md); open #3 resolved 2026-07-22) |
 
 **Wrappers:** `client-install.sh` / `client-install.ps1` delegate to `client_install.py`; `target-install.sh` / `target-install.ps1` delegate to `target_install.py`. OS-specific behavior lives only in the Python scripts ([§2.5](01-overview-and-principles.md#25-cross-platform-portability)).
+
+**Dual install paths (PRD open #3 resolved, 2026-07-22):** Phase 1–4 v1 supports **clone + `install/client_install.py`** only. After PyPI publish, consumers use `pip install zaumzeug` then `zaumzeug install-project` (templates must ship in the wheel). Do not treat `install-project` as a Phase 1–4 v1 deliverable.
 
 **Client install flags:** `--verify`, `--no-example`, `--skip-venv` (CI), `--cursor-mcp`. CI matrix **Done** ([PRD E1.7](../prd.md#epic-e1--onboarding-and-project-setup-phase-1) / [E1-S07](../stories/epic-stories/24-story.md), 2026-07-22) — [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml).
 

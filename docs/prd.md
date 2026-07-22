@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-22 (E1-S07 — cross-platform CI matrix)  
-**Status:** Phase 1 core complete (E2 + E3 + E1-S01–S07); E1-S08 blocked; Phase 2+ backlog  
+**Last updated:** 2026-07-22 (open #3 resolved — E1-S08 deferred until PyPI publish)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2+ backlog  
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
 **Document scope:** This PRD defines **what** to build — goals, users, journeys, epics, acceptance criteria, phases, and open decisions. Technical **how** (stack, flows, protocols, repo layout, SDK modules) lives in **[architecture.md](architecture.md)** and topic files under **[architecture/](architecture/00-README.md)**. Cross-reference; do not duplicate.
@@ -208,7 +208,7 @@ There is **no `zaumzeug update-deps` command in v1**. Updates stay **pip-based**
 | **Refresh SDK + `[dev]` stack manually** | Activate `.venv`, then `pip install -e ".[dev]"`, then `zaumzeug doctor` |
 | **Update optional extras** | `pip install -U "zaumzeug[eval]"`, provider packages, or `hayhooks[chainlit]` as needed |
 | **Production server** | Ship new `deploy/<name>/` bundle → re-run bundled `target_install` (idempotent); do not `pip upgrade` ad hoc on server — see [E5.9](#epic-e5--deploy-packaging-phase-2) |
-| **PyPI consumer project** (future, [open #3](#12-open-decisions-blockers-for-some-stories)) | `pip install -U zaumzeug` (optionally pin `zaumzeug==x.y.z`) |
+| **PyPI consumer project** (deferred — [E1-S08](stories/epic-stories/25-story.md); after package publish) | `pip install -U zaumzeug` then `zaumzeug install-project` (optionally pin `zaumzeug==x.y.z`) |
 
 **README commands — dev machine after pull:**
 
@@ -258,7 +258,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E1.6 | Root README / new-contributor guide | **Done** (E1-S06, 2026-07-22) — Short entry point as root [`CONTRIBUTING.md`](../CONTRIBUTING.md) (product [`README.md`](../README.md) kept as overview): vision one-liner; install command table and quick start from [§7.4](#74-user-installation-guide-content-for-readme--phase-1) (prerequisites summary, **< 15 min target** / **~1–2.5 GB** dev venv planning ranges, mock-first serve, optional extras bullet list, **updating dependencies** summary with post-`git pull` re-install commands); first commands (`zaumzeug serve example`); abbreviated project layout; links to `user-docs/getting-started/installation.md` for depth — not a duplicate of user-docs. Tests: `tests/unit/docs/test_contributing_guide.py`. |
 | E1.7 | Cross-platform CI matrix | **Done** (E1-S07, 2026-07-22) — [`.github/workflows/ci-matrix.yml`](../.github/workflows/ci-matrix.yml) runs on `windows-latest`, `ubuntu-latest`, and `macos-latest` (Python 3.11, pip cache, fail-fast, 30m timeout). Each job: OS install wrappers with `--skip-venv --verify`, `zaumzeug doctor`, `zaumzeug serve example --dry-run`, mock serve smoke via `install/ci_serve_smoke.py` (ephemeral port, no live API keys), `pytest tests/integration/test_openai_contract.py`, and unit+integration suite. Story: [24-story.md](stories/epic-stories/24-story.md). |
 
-**Future (open #3):** `zaumzeug install-project` scaffolds `usr-harnesses/`, user-docs/, `.env` in a consumer cwd — reuses `client_install.py` logic without editable repo install.
+**Deferred (E1-S08, decision resolved 2026-07-22):** `zaumzeug install-project` scaffolds `usr-harnesses/`, `user-docs/`, `.env` in a consumer cwd — reuses `client_install.py` scaffold logic without editable repo install. **Not Phase 1–4 v1;** implement when publishing `zaumzeug` to PyPI (templates must ship in the wheel). Until then, the supported path is clone + `install/client_install.py`.
 
 **Story seeds:** Install on Windows; install in CI with `--skip-venv --verify`; init second harness; CI matrix fails fast on path or shell assumptions.
 
@@ -406,7 +406,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 | `zaumzeug eval` | 2 | E6 (optional) |
 | `zaumzeug mcp` / `zaumzeug acp` | 3 | E7 |
 
-**Future commands (not Phase 1–4 v1):** `zaumzeug export <name>` (tarball of `deploy/`); `zaumzeug replay <name> --trace` (trace replay); `zaumzeug install-project` (consumer-project scaffold — [open #3](#12-open-decisions-blockers-for-some-stories)).
+**Future commands (not Phase 1–4 v1):** `zaumzeug export <name>` (tarball of `deploy/`); `zaumzeug replay <name> --trace` (trace replay); `zaumzeug install-project` (PyPI consumer scaffold — [E1-S08](stories/epic-stories/25-story.md); deferred until package publish).
 
 ---
 
@@ -440,12 +440,11 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | 1 | Compile cadence (PR, nightly, on failure) | CI design |
 | 2 | Primary web UI (Chainlit vs Open WebUI vs custom) | E7 docs |
-| 3 | `install/` vs `zaumzeug install-project` for PyPI consumers | E1 |
 | 4 | MCP granularity (per agent vs per pipeline) | E7 |
 | 5 | A2A in Phase 4 or defer | E8.4 |
 | 6 | Multi-tenant Hayhooks | NG1 / future |
 
-**Resolved:** **Production auth (Phase 4)** — **proxy-only via Traefik** in front of `zaumzeug serve --deploy`; TLS + bearer/API-key or ForwardAuth at the edge; **no in-process `serve.auth` in SDK v1** (document patterns, do not build auth into Hayhooks wrapper). **Hayhooks self-hosted** — `zaumzeug serve|mcp` wraps pip-installed Hayhooks on the target host (bare metal, VM, or Docker/Kubernetes via E8.5); Haystack Enterprise Platform is **not** in v1 scope. **Product name ZaumZeug** (PyPI `zaumzeug`, import `zaumzeug`, CLI `zaumzeug`); **GEPA Phase 2 scope = `dspy.GEPA` / Pattern A only** — optional **input rewrite/clarify templates** at compile time (not runtime user-chat optimization); `optimize_anything` / Pattern B deferred to **Phase 4+** (E4.4); example harness = **general research agent** (E3.4); `zaumzeug eval` frameworks (`builtin` \| `deepeval`); `deploy.eval_gate`; builtin tools catalog; multi-tenant deferred (NG1); **dev workspace folder = `usr-harnesses/`** (fixed name in v1); **target runtime install** via `target_install.py` (E5.9); **ModelRouter** = custom Haystack wrapper with optional OpenRouter provider entry ([Architecture §7](architecture/05-configuration.md#7-model-routing)); **config surface** = YAML primary + optional Python in `modules/`, `tools/`, `hooks.py` only — no `harness.py` entry point in v1 ([Architecture §3.3](architecture/02-repository-and-layout.md#33-harness-folder-layout)). Technical rules: [Architecture §2](architecture/01-overview-and-principles.md#2-architectural-principles), [§6.3–6.6](architecture/05-configuration.md#63-zaumzeug-eval-frameworks), [§9](architecture/06-runtime-and-protocols.md#9-client-access-and-protocols).
+**Resolved:** **`install/` vs `zaumzeug install-project` (open #3, 2026-07-22)** — **both paths coexist** with distinct roles: (1) **SDK repo / Phase 1** — `install/client_install.py` (+ wrappers) is the supported path (venv, editable `[dev]`, scaffold from `install/templates/`); (2) **PyPI consumers** — after `zaumzeug` is published, `pip install zaumzeug` then `zaumzeug install-project` scaffolds `usr-harnesses/`, `user-docs/`, `.env` in an arbitrary cwd by reusing scaffold logic **without** editable repo install; templates must ship in the wheel. **Implementation deferred** with PyPI package creation/publishing ([E1-S08](stories/epic-stories/25-story.md)) — not required for Phase 1–4 v1 clone-based workflows. **Production auth (Phase 4)** — **proxy-only via Traefik** in front of `zaumzeug serve --deploy`; TLS + bearer/API-key or ForwardAuth at the edge; **no in-process `serve.auth` in SDK v1** (document patterns, do not build auth into Hayhooks wrapper). **Hayhooks self-hosted** — `zaumzeug serve|mcp` wraps pip-installed Hayhooks on the target host (bare metal, VM, or Docker/Kubernetes via E8.5); Haystack Enterprise Platform is **not** in v1 scope. **Product name ZaumZeug** (PyPI `zaumzeug`, import `zaumzeug`, CLI `zaumzeug`); **GEPA Phase 2 scope = `dspy.GEPA` / Pattern A only** — optional **input rewrite/clarify templates** at compile time (not runtime user-chat optimization); `optimize_anything` / Pattern B deferred to **Phase 4+** (E4.4); example harness = **general research agent** (E3.4); `zaumzeug eval` frameworks (`builtin` \| `deepeval`); `deploy.eval_gate`; builtin tools catalog; multi-tenant deferred (NG1); **dev workspace folder = `usr-harnesses/`** (fixed name in v1); **target runtime install** via `target_install.py` (E5.9); **ModelRouter** = custom Haystack wrapper with optional OpenRouter provider entry ([Architecture §7](architecture/05-configuration.md#7-model-routing)); **config surface** = YAML primary + optional Python in `modules/`, `tools/`, `hooks.py` only — no `harness.py` entry point in v1 ([Architecture §3.3](architecture/02-repository-and-layout.md#33-harness-folder-layout)). Technical rules: [Architecture §2](architecture/01-overview-and-principles.md#2-architectural-principles), [§6.3–6.6](architecture/05-configuration.md#63-zaumzeug-eval-frameworks), [§9](architecture/06-runtime-and-protocols.md#9-client-access-and-protocols).
 
 ---
 

@@ -443,16 +443,16 @@ if (-not $Python) { $Python = Get-Command python3 -ErrorAction Stop }
 & $Python.Source (Join-Path $Root "install\client_install.py") @args
 ```
 
-### Consumer-project variant (future)
+### Consumer-project variant (deferred until PyPI publish)
 
 If the library is published to PyPI, a slimmer path for **other repos**:
 
 ```bash
-pip install harness-dev
-harness install-project               # scaffolds usr-harnesses/, user-docs/, .env.example in cwd
+pip install zaumzeug
+zaumzeug install-project               # scaffolds usr-harnesses/, user-docs/, .env.example in cwd
 ```
 
-`client_install.py` in **this** repo is the superset (editable install + full tree). `harness install-project` reuses the same Python module for downstream projects.
+`client_install.py` in **this** repo is the superset (editable install + full tree). `zaumzeug install-project` reuses the same scaffold logic for downstream projects **without** editable install. **Decision (2026-07-22):** both paths coexist; implement CLI + wheel template packaging with PyPI publish ([E1-S08](stories/epic-stories/25-story.md)). Until then, use clone + `install/client_install.py`.
 
 ---
 
@@ -1983,7 +1983,7 @@ Model choice lives in **config** (`models.yaml`), not in source code.
 7. **Model routing strategy** — custom `ModelRouter` vs OpenRouter vs both?
 8. **Primary web UI** — embedded Chainlit, Open WebUI, or custom frontend?
 9. **Config format** — YAML only, or YAML + optional Python `harness.py` for advanced overrides?
-10. **Install entrypoint** — repo `install/` folder first, or also `harness install-project` for PyPI consumers?
+10. ~~**Install entrypoint**~~ — **Resolved (2026-07-22):** both — repo `install/client_install.py` for SDK clones (Phase 1–4 v1); `zaumzeug install-project` for PyPI consumers after publish (deferred with package creation — [E1-S08](stories/epic-stories/25-story.md)).
 11. **Production auth** — API keys on Hayhooks, OAuth reverse proxy, MCP gateway, or VPN-only?
 12. **MCP granularity** — one tool per harness agent, or granular tools per pipeline?
 13. **A2A exposure** — needed for agent-fleet delegation in Phase 4, or defer?
