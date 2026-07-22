@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/13-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-20 |
+| **Last modified** | 2026-07-22 |
 | **Story ID** | E3-S02 |
 | **Status** | Done |
 | **Epic** | [E3 — Runtime and Local Serve](../02-epic.md) |
@@ -13,7 +13,7 @@
 | **Epic build order** | 2 of 8 |
 | **Story sequence** | 13 of 63 (global build order) |
 | **Source** | Extracted from [`02-epic.md`](../02-epic.md) |
-| **Related** | [Stories index](../00-README.md) · [Epic E3](../../prd.md#epic-e3--runtime-and-local-serve-phase-1) · [Architecture](../../architecture.md) · **Closes open DoD from** [E3-S00](12-story.md#definition-of-done) · **Open ACs/DoD carried to** [E1-S07](24-story.md) · **Closed by** [E3-S04](14-story.md) (*serve example*) |
+| **Related** | [Stories index](../00-README.md) · [Epic E3](../../prd.md#epic-e3--runtime-and-local-serve-phase-1) · [Architecture](../../architecture.md) · **Closes open DoD from** [E3-S00](12-story.md#definition-of-done) · **Open ACs closed by** [E1-S07](24-story.md) · **Closed by** [E3-S04](14-story.md) (*serve example*) |
 
 ---
 
@@ -26,7 +26,8 @@
 | **Priority** | P0 |
 | **Prerequisites** | [E3-S00](12-story.md#e3-s00-runtime-factory-haystack-agent-builder) · [E2-S04a](05.1-story.md#e2-s04a-zaumzeug-doctor-core-checks) |
 | **Carries forward (closed here)** | [E3-S00 DoD](12-story.md#definition-of-done): *Used by `serve/runner.py` — not duplicated in serve layer* (closed 2026-07-20) |
-| **Open — carried forward** | [AC-6](#acceptance-criteria) · [AC-7](#acceptance-criteria) → [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) |
+| **Open — carried forward** | — |
+| **Closed by E1-S07** | [AC-6](#acceptance-criteria) · [AC-7](#acceptance-criteria) → [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) (2026-07-22) |
 | **Closed by E3-S04** | [DoD *serve example*](#definition-of-done) → [E3-S04](14-story.md#e3-s04-example-harness-general-research-agent) (2026-07-20) |
 
 ### User story
@@ -68,8 +69,8 @@ r = httpx.post(f"{base}/v1/chat/completions", json={
 - [x] **AC-3** Binds **localhost** in Phase 1 (no wide-open `0.0.0.0` without explicit config)
 - [x] **AC-4** `/v1/chat/completions` returns valid OpenAI-shaped JSON
 - [x] **AC-5** Also exposes `GET /v1/models` per Architecture §9.4
-- [ ] **AC-6** Identical behavior on Windows, macOS, Linux *(open — carried to [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix))*
-- [ ] **AC-7** Smoke-tested in CI matrix with mock model *(open — carried to [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix))*
+- [x] **AC-6** Identical behavior on Windows, macOS, Linux *(closed by [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) — Done 2026-07-22)*
+- [x] **AC-7** Smoke-tested in CI matrix with mock model *(closed by [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) — Done 2026-07-22)*
 
 ### Implementation tasks (build)
 
@@ -90,8 +91,8 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-3 | `tests/integration/test_serve.py::test_e3_s02_ac3_localhost_bind_default` |
 | AC-4 | `tests/integration/test_openai_contract.py::test_e3_s02_ac4_chat_completions_shape` *(shared E3-S07)* |
 | AC-5 | `tests/integration/test_serve.py::test_e3_s02_ac5_get_v1_models` |
-| AC-6 | **open — carried to** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) (three-OS matrix) |
-| AC-7 | **open — carried to** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) (serve smoke job with mock model) |
+| AC-6 | **closed by** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) (three-OS matrix — Done 2026-07-22) |
+| AC-7 | **closed by** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) (serve smoke via `install/ci_serve_smoke.py` — Done 2026-07-22) |
 
 - [x] Every AC row above has a passing test or documented manual exception
 - [x] `pytest tests/integration/test_serve.py tests/integration/test_openai_contract.py -v -k e3_s02` passes locally

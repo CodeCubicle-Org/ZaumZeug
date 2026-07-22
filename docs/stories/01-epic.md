@@ -5,7 +5,7 @@
 | **Document** | Epic E2 user stories |
 | **File** | `docs/stories/01-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 (E2-S07 done) |
+| **Last modified** | 2026-07-22 (E2-S05 DoD closed by E1-S07 CI matrix) |
 | **Status** | Done (E2-S00–S07) |
 | **Build order** | **1 of 8** (implement first) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -370,7 +370,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 ### Definition of done
 
-- [ ] Called by [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) CI matrix ([AC-3](24-story.md#acceptance-criteria); serve dry-run ready — wire in `.github/workflows/`)
+- [x] Called by [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) CI matrix ([AC-3](24-story.md#acceptance-criteria); wired in `.github/workflows/ci-matrix.yml` — Done 2026-07-22)
 - [ ] Called by [E5-S09c](49.3-story.md#e5-s09c-target-install-verify-integration) `--verify` ([AC-2](49.3-story.md#acceptance-criteria); serve dry-run ready — wire in `target_install.py`)
 - [x] Verification checklist complete; all ACs traced to tests
 

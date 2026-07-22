@@ -42,7 +42,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E3-S06, 2026-07-20):** Test pyramid layout — `tests/unit/` (incl. `export/` placeholder), `tests/integration/`, `tests/usr-harnesses/fixture/` minimal harness, `tests/fixtures/responses/` + `cassettes/`, `tests/e2e/` gated by `HARNESS_LIVE_LLM=1`. Serve enforces localhost bind (`_enforce_localhost_bind`). Docs: `HARNESS_LIVE_LLM` + debugpy + Phase 1 security notes in `user-docs/reference/cli.md` and `user-docs/guides/testing.md`. Tests: `tests/usr-harnesses/fixture/test_fixture_harness.py`, `tests/integration/test_serve.py` (`-k e3_s06`).
 
-**Implementation (E3-S07, 2026-07-21):** OpenAI REST contract on ephemeral port — `tests/integration/conftest.py::ephemeral_serve_url`, `tests/integration/test_openai_contract.py` (`-k e3_s07`); HTTP `model_id` override wired in `serve/runner.py`.
+**Implementation (E3-S07, 2026-07-21):** OpenAI REST contract on ephemeral port — `tests/integration/conftest.py::ephemeral_serve_url`, `tests/integration/test_openai_contract.py` (`-k e3_s07`); HTTP `model_id` override wired in `serve/runner.py`. Cross-OS green closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
 
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
@@ -145,10 +145,12 @@ End-user walkthrough: [user-docs/guides/testing.md](../user-docs/guides/testing.
 
 | Tier | Trigger | Jobs | Epics |
 |---|---|---|---|
-| **Smoke** | Every push; `windows-latest`, `ubuntu-latest`, `macos-latest` | OS install wrappers or `client_install.py --verify`, `zaumzeug doctor`, `serve --dry-run`, mock serve smoke, `pytest tests/integration/test_openai_contract.py` | [E1-S07](../stories/03-epic.md#e1-s07-cross-platform-ci-matrix) *(closes open DoD from [E1-S02](../stories/epic-stories/19-story.md#definition-of-done), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests))* |
+| **Smoke** | Every push; `windows-latest`, `ubuntu-latest`, `macos-latest` | OS install wrappers (`client-install.sh` / `.ps1 --skip-venv --verify`), `zaumzeug doctor`, `serve --dry-run`, `install/ci_serve_smoke.py`, `pytest tests/integration/test_openai_contract.py`, unit+integration suite | [E1-S07](../stories/03-epic.md#e1-s07-cross-platform-ci-matrix) ✅ *(closes DoD from [E1-S02](../stories/epic-stories/19-story.md#definition-of-done), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests))* |
 | **Unit + integration** | Every push (same workflow or dedicated job) | `pytest tests/unit tests/integration tests/usr-harnesses -v` | [E2](../stories/01-epic.md), [E3-S06](../stories/02-epic.md#e3-s06-phase-1-test-infrastructure-and-security-baseline), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests) ✅ |
 | **Eval regression** | PR touching prompts/artifacts; nightly | `deepeval test run` on critical cases; `deploy.eval_gate` on release | [E6](../stories/05-epic.md), [E5-S06](../stories/06-epic.md#e5-s06-deploy-eval-gate) |
 | **Live e2e** | Nightly / manual | `HARNESS_LIVE_LLM=1 pytest tests/e2e -v` | Optional — not Phase 1 CI gate |
+
+**Implementation (E1-S07, 2026-07-22):** Workflow [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml) — Python 3.11, pip cache, fail-fast, 30m timeout; mock-only (no `HARNESS_LIVE_LLM=1`); ephemeral serve smoke via `install/ci_serve_smoke.py` + `zaumzeug serve --port`. Tests: `tests/unit/ci/test_ci_matrix_workflow.py`, `tests/unit/install/test_ci_serve_smoke.py`.
 
 #### Common workflows
 

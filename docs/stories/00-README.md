@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-22 (E1-S06 done) |
+| **Last modified** | 2026-07-22 (E1-S07 done) |
 | **Status** | Active |
 
 ---
@@ -60,8 +60,9 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E1-S04](epic-stories/21-story.md) — `zaumzeug init` command | Done | 2026-07-22 |
 | [E1-S05](epic-stories/22-story.md) — User documentation skeleton | Done | 2026-07-22 |
 | [E1-S06](epic-stories/23-story.md) — Root README / CONTRIBUTING.md | Done | 2026-07-22 |
+| [E1-S07](epic-stories/24-story.md) — Cross-platform CI matrix | Done | 2026-07-22 |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), and new-contributor guide `CONTRIBUTING.md` (E1-S06) are done; remaining E1 stories follow the [build graph](#phase-1-build-graph) below.
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done; remaining E1 story [E1-S08](epic-stories/25-story.md) is blocked.
 
 ---
 
@@ -96,9 +97,9 @@ E1-S03  Project scaffolding on install (copies E3 templates) ✅
 E1-S04  zaumzeug init ✅
 E1-S05  User docs skeleton ✅
 E1-S06  Root README / CONTRIBUTING.md ✅
-E1-S07  CI matrix (last — validates full stack)
+E1-S07  CI matrix (last — validates full stack) ✅
+E1-S08  Future: zaumzeug install-project (blocked)
 ```
----
 
 ## Validation summary (2026-07-05, re-checked)
 
@@ -123,7 +124,7 @@ Cross-checked against [PRD §8](../prd.md#8-functional-requirements-epics) and [
 | No SDK skeleton / `pyproject.toml` story | Added **E2-S00** in [01-epic.md](01-epic.md) |
 | No runtime Agent factory | Added **E3-S00** in [02-epic.md](02-epic.md) |
 | No test fixture harness / localhost security | Added **E3-S06** |
-| PRD E3 story seed (OpenAI contract) | **Done** (E3-S07, 2026-07-21) — contract suite + HTTP `model_id`; open DoD → [E1-S07](epic-stories/24-story.md) |
+| PRD E3 story seed (OpenAI contract) | **Done** (E3-S07, 2026-07-21) — contract suite + HTTP `model_id`; cross-OS green closed by [E1-S07](epic-stories/24-story.md) (2026-07-22) |
 | PRD E4 story seed (artifact rollback) | Added **E4-S07** |
 | E5 before E6 broke eval gate dependency | Swapped files: **05=E6**, **06=E5** |
 | E1 before E2/E3 broke CI/doctor/serve | Moved E1 to **03-epic.md** |

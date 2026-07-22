@@ -43,7 +43,7 @@ See [Project setup](../getting-started/project-setup.md) for layout details.
 Start Hayhooks for a harness under `usr-harnesses/<name>/` (dev mode), or validate without starting.
 
 ```bash
-zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose]
+zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose] [--port N]
 ```
 
 | Flag | Description |
@@ -52,8 +52,11 @@ zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose]
 | `--deploy` | Load harness from `deploy/<name>/` (or set `HARNESS_ROOT=deploy`) |
 | `--json` | Emit machine-readable JSON (dry-run only) |
 | `--verbose` | Enable SDK and Haystack structured debug logging |
+| `--port N` | Override `serve.hayhooks.port` from harness.yaml (CI smoke on an ephemeral free port) |
 
-**Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**). Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`).
+**Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**), or `--port` when set. Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`).
+
+CI mock smoke (E1-S07) uses `python install/ci_serve_smoke.py example` — starts `zaumzeug serve` on an ephemeral port, probes `GET /v1/models`, then stops the process.
 
 | Endpoint | Purpose |
 |---|---|

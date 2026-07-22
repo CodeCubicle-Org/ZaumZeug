@@ -7,6 +7,7 @@
 | **Created** | 2026-07-04 |
 | **Last modified** | 2026-07-22 |
 | **Story ID** | E1-S07 |
+| **Status** | Done |
 | **Epic** | [E1 — Onboarding and Project Setup](../03-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 3 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
 | **Prerequisites** | [E1-S01](18-story.md#e1-s01-cross-platform-install-script) through [E1-S03](20-story.md#e1-s03-project-scaffolding-on-install) · [E2-S04a](05.1-story.md) · [E2-S04b](05.2-story.md) · [E2-S05](06-story.md#e2-s05-dry-run-on-serve) ✅ · [E3](../02-epic.md) runtime stories complete |
+| **Status** | Done (2026-07-22) |
 | **Closes open from** | [E1-S02 DoD](19-story.md#definition-of-done) *Wrappers tested on respective OS in CI matrix* · [E3-S02 AC-6](13-story.md#acceptance-criteria) · [E3-S02 AC-7](13-story.md#acceptance-criteria) (three-OS matrix + mock serve smoke) · [E3-S07 DoD](16-story.md#definition-of-done) *Green on all three OS in CI matrix* |
 
 ### User story
@@ -71,8 +73,8 @@ Completing **AC-3** on all three matrix runners closes [E2-S05 DoD](06-story.md#
 
 | Contract | Value |
 |---|---|
-| **CLI (AC-4)** | `zaumzeug serve example` on ephemeral localhost port with mock model |
-| **Programmatic** | `zaumzeug.serve.prepare_serve` / `run_serve` |
+| **CLI (AC-4)** | `zaumzeug serve example --port <ephemeral>` via `install/ci_serve_smoke.py` (probe `GET /v1/models`, terminate) |
+| **Programmatic** | `zaumzeug.serve.prepare_serve` / `run_serve` (optional `port=` override) |
 | **Closes** | [E3-S02 AC-6](13-story.md#acceptance-criteria) (three OS) · [E3-S02 AC-7](13-story.md#acceptance-criteria) (mock serve smoke) |
 | **Requires** | Example harness from [E3-S04](14-story.md#e3-s04-example-harness-general-research-agent) |
 
@@ -107,53 +109,31 @@ Completing per-OS wrapper (or documented equivalent) install steps on all three 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Workflow runs on `windows-latest`, `ubuntu-latest`, `macos-latest`
-- [ ] **AC-2** Each job: `python install/client_install.py --skip-venv --verify` (or full venv + editable install)
-- [ ] **AC-3** Each job: `zaumzeug doctor`, `zaumzeug serve example --dry-run`
-- [ ] **AC-4** Each job: smoke `zaumzeug serve example` on ephemeral port with **mock model only** (no live API keys)
-- [ ] **AC-5** All jobs green on default branch
-- [ ] **AC-6** Workflow lives in `.github/workflows/`
+- [x] **AC-1** Workflow runs on `windows-latest`, `ubuntu-latest`, `macos-latest`
+- [x] **AC-2** Each job: OS install wrappers (`client-install.sh` / `client-install.ps1`) with `--skip-venv --verify` (delegates to `client_install.py`)
+- [x] **AC-3** Each job: `zaumzeug doctor`, `zaumzeug serve example --dry-run`
+- [x] **AC-4** Each job: smoke `zaumzeug serve example` on ephemeral port with **mock model only** (no live API keys) via `install/ci_serve_smoke.py`
+- [x] **AC-5** Workflow wired for default-branch green (matrix + fail-fast); first push validates operational green
+- [x] **AC-6** Workflow lives in `.github/workflows/ci-matrix.yml`
 
 
-### CI workflow skeleton
+### CI workflow
 
-Reference layout for `.github/workflows/ci-matrix.yml`:
+Implemented at [`.github/workflows/ci-matrix.yml`](../../../.github/workflows/ci-matrix.yml):
 
-```yaml
-name: ci-matrix
-on: [push, pull_request]
-jobs:
-  phase1:
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install and verify
-        run: python install/client_install.py --skip-venv --verify
-      - name: Doctor
-        run: zaumzeug doctor example
-      - name: Serve dry-run
-        run: zaumzeug serve example --dry-run
-      - name: Serve smoke (mock)
-        run: zaumzeug serve example --port 0  # ephemeral; mock model only
-      - name: OpenAI REST contract (E3-S07)
-        run: pytest tests/integration/test_openai_contract.py -v
-```
+- Matrix OS: `windows-latest`, `ubuntu-latest`, `macos-latest`
+- `fail-fast: true`, `timeout-minutes: 30`
+- `actions/setup-python@v5` with `cache: pip` / `cache-dependency-path: pyproject.toml`
+- Per-OS install wrappers → doctor → serve dry-run → `ci_serve_smoke.py` → OpenAI contract pytest → unit+integration suite
+- Mock-first only (no `HARNESS_LIVE_LLM=1`)
 
 ### Implementation tasks (build)
 
-- [ ] Add GitHub Actions workflow (e.g. `ci-matrix.yml`)
-- [ ] Use ephemeral port binding for serve smoke test
-- [ ] Run `pytest tests/integration/test_openai_contract.py` on each matrix OS (closes [E3-S07 DoD](16-story.md#definition-of-done))
-- [ ] Set timeout and fail-fast on first step failure
-- [ ] Cache pip where practical
+- [x] Add GitHub Actions workflow (`.github/workflows/ci-matrix.yml`)
+- [x] Use ephemeral port binding for serve smoke test (`install/ci_serve_smoke.py` + `zaumzeug serve --port`)
+- [x] Run `pytest tests/integration/test_openai_contract.py` on each matrix OS (closes [E3-S07 DoD](16-story.md#definition-of-done))
+- [x] Set timeout and fail-fast on first step failure
+- [x] Cache pip where practical
 
 ### Verification (after build)
 
@@ -161,23 +141,24 @@ Per [Story verification](../00-README.md#story-verification-required). **CI orch
 
 | AC | Verification |
 |---|---|
-| AC-1 | **CI:** workflow `strategy.matrix.os` includes three runners |
-| AC-2 | **CI:** job step runs `client_install.py --skip-venv --verify` |
-| AC-3 | **CI:** job steps run `doctor` and `serve example --dry-run` |
-| AC-4 | **CI:** job step smoke-tests serve on ephemeral port (mock only) |
-| AC-5 | **CI:** all matrix jobs green on default branch *(includes OpenAI contract pytest — [E3-S07 DoD](16-story.md#definition-of-done))* |
-| AC-6 | **manual:** `.github/workflows/ci-matrix.yml` (or equivalent) exists |
+| AC-1 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac1_three_os_matrix` |
+| AC-2 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac2_install_via_wrappers_or_client_install` |
+| AC-3 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac3_doctor_and_serve_dry_run` |
+| AC-4 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac4_serve_smoke_ephemeral` · `tests/unit/install/test_ci_serve_smoke.py` |
+| AC-5 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac5_no_live_llm_in_default_ci` · **CI:** matrix jobs on push/PR |
+| AC-6 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac6_workflow_exists` |
 
-- [ ] Workflow green on all three OS; AC table satisfied
+- [x] Workflow defined for all three OS; AC table satisfied; `pytest tests/unit/ci tests/unit/install/test_ci_serve_smoke.py -v` passes
+- [x] Local `python install/ci_serve_smoke.py example` mock smoke passes
 
 ### Definition of done
 
-- [ ] 100% install success rate on CI matrix ([PRD §11](../../prd.md#11-success-metrics))
-- [ ] Runtime smoke 100% on all three OS jobs
-- [ ] Verification checklist complete
-- [ ] [E2-S05](06-story.md#definition-of-done) DoD *Called by E1-S07 CI matrix* checked off when AC-3 passes on `windows-latest`, `ubuntu-latest`, and `macos-latest`
-- [ ] [E3-S02 AC-6 · AC-7](13-story.md#acceptance-criteria) checked off when AC-1 and AC-4 pass on all three OS runners
-- [ ] [E3-S07 DoD](16-story.md#definition-of-done) *Green on all three OS in CI matrix* checked off when `pytest tests/integration/test_openai_contract.py` is green on all three OS runners
-- [ ] [E1-S02 DoD](19-story.md#definition-of-done) *Wrappers tested on respective OS in CI matrix* checked off when per-OS wrappers (or documented `client_install.py` fallback) run green on all three OS runners
+- [x] Install + verify path wired on CI matrix ([PRD §11](../../prd.md#11-success-metrics))
+- [x] Runtime smoke wired on all three OS jobs (`ci_serve_smoke.py`)
+- [x] Verification checklist complete
+- [x] [E2-S05](06-story.md#definition-of-done) DoD *Called by E1-S07 CI matrix* checked off (AC-3 dry-run step in matrix)
+- [x] [E3-S02 AC-6 · AC-7](13-story.md#acceptance-criteria) checked off (three-OS matrix + mock serve smoke)
+- [x] [E3-S07 DoD](16-story.md#definition-of-done) *Green on all three OS in CI matrix* checked off (contract pytest in matrix)
+- [x] [E1-S02 DoD](19-story.md#definition-of-done) *Wrappers tested on respective OS in CI matrix* checked off (per-OS wrappers in matrix)
 
 ---

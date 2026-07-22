@@ -13,7 +13,7 @@
 | **Epic build order** | 3 of 8 |
 | **Story sequence** | 19 of 63 (global build order) |
 | **Source** | Extracted from [`03-epic.md`](../03-epic.md) |
-| **Related** | [Stories index](../00-README.md) · [Epic E1](../../prd.md#epic-e1--onboarding-and-project-setup-phase-1) · [Architecture](../../architecture.md) · **Open DoD carried to** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) |
+| **Related** | [Stories index](../00-README.md) · [Epic E1](../../prd.md#epic-e1--onboarding-and-project-setup-phase-1) · [Architecture](../../architecture.md) · **DoD closed by** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) |
 
 ---
 
@@ -26,7 +26,8 @@
 | **Priority** | P0 |
 | **Prerequisites** | [E1-S01](18-story.md#e1-s01-cross-platform-install-script) |
 | **Status** | Done (2026-07-22) |
-| **Open — carried forward** | [DoD *Wrappers tested on respective OS in CI matrix*](#definition-of-done) → [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) |
+| **Open — carried forward** | — |
+| **Closed by E1-S07** | [DoD *Wrappers tested on respective OS in CI matrix*](#definition-of-done) → [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) (2026-07-22) |
 
 ### User story
 
@@ -75,7 +76,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 ### Definition of done
 
-- [ ] Wrappers tested on respective OS in CI matrix *(open — carried to [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix); closed when matrix invokes `client-install.sh` / `client-install.ps1` (or equivalent per-OS wrapper) green on all three runners)*
+- [x] Wrappers tested on respective OS in CI matrix *(closed by [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) — `.github/workflows/ci-matrix.yml` invokes `client-install.sh` / `client-install.ps1` — Done 2026-07-22)*
 - [x] Verification checklist complete; all ACs traced to tests
 
 ---

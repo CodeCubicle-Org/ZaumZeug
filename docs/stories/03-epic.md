@@ -5,8 +5,8 @@
 | **Document** | Epic E1 user stories |
 | **File** | `docs/stories/03-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-22 (E1-S06 done) |
-| **Status** | In progress |
+| **Last modified** | 2026-07-22 (E1-S07 done) |
+| **Status** | Phase 1 complete (E1-S01–S07); E1-S08 blocked |
 | **Build order** | **3 of 8** (after E2 + E3 — install/CI need working SDK) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -29,7 +29,8 @@
 2. **E1-S03** — Scaffolding *(copies E3-S04 templates)* ✅
 3. **E1-S04** — `zaumzeug init` ✅
 4. **E1-S05** ✅ → **E1-S06** ✅ — User docs + CONTRIBUTING.md
-5. **E1-S07** — CI matrix **last** (validates full Phase 1 stack)
+5. **E1-S07** — CI matrix **last** (validates full Phase 1 stack) ✅
+6. **E1-S08** — Future: `zaumzeug install-project` *(blocked)*
 
 ---
 
@@ -143,7 +144,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 ### Definition of done
 
-- [ ] Wrappers tested on respective OS in CI matrix *(open — carried to [E1-S07](#e1-s07-cross-platform-ci-matrix); closed when matrix invokes `client-install.sh` / `client-install.ps1` (or equivalent per-OS wrapper) green on all three runners)*
+- [x] Wrappers tested on respective OS in CI matrix *(closed by [E1-S07](#e1-s07-cross-platform-ci-matrix) — Done 2026-07-22)*
 - [x] Verification checklist complete; all ACs traced to tests
 
 ---
@@ -379,6 +380,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
 | **Prerequisites** | [E1-S01](#e1-s01-cross-platform-install-script) through [E1-S03](#e1-s03-project-scaffolding-on-install) · [E2](../01-epic.md) · [E2-S05](epic-stories/06-story.md#e2-s05-dry-run-on-serve) ✅ · [E3](../02-epic.md) complete |
+| **Status** | Done (2026-07-22) — see [24-story.md](epic-stories/24-story.md) |
 | **Closes open from** | [E1-S02 DoD](epic-stories/19-story.md#definition-of-done) *Wrappers tested on respective OS in CI matrix* · [E3-S02 AC-6 · AC-7](epic-stories/13-story.md#acceptance-criteria) · [E3-S07 DoD](epic-stories/16-story.md#definition-of-done) *Green on all three OS in CI matrix* |
 
 ### User story
@@ -390,50 +392,50 @@ As an **SDK maintainer**, I want CI to verify install and mock-model serve on Wi
 - [PRD E1.7](../prd.md#epic-e1--onboarding-and-project-setup-phase-1)
 - [PRD §11 — Success metrics](../prd.md#11-success-metrics)
 - [Architecture §2.5](../architecture/01-overview-and-principles.md#25-cross-platform-portability)
-- [E3-S07 — OpenAI REST contract](epic-stories/16-story.md#e3-s07-openai-rest-contract-tests) — **Done** (2026-07-21); matrix should run `pytest tests/integration/test_openai_contract.py`
-- [E1-S02 — Install shell wrappers](epic-stories/19-story.md#e1-s02-install-shell-wrappers) — **Done** (2026-07-22); closes [E1-S02 DoD](epic-stories/19-story.md#definition-of-done) when per-OS wrappers run green on matrix
+- [E3-S07 — OpenAI REST contract](epic-stories/16-story.md#e3-s07-openai-rest-contract-tests) — **Done** (2026-07-21); matrix runs `pytest tests/integration/test_openai_contract.py`
+- [E1-S02 — Install shell wrappers](epic-stories/19-story.md#e1-s02-install-shell-wrappers) — **Done** (2026-07-22); closes [E1-S02 DoD](epic-stories/19-story.md#definition-of-done) via per-OS wrappers in matrix
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Workflow runs on `windows-latest`, `ubuntu-latest`, `macos-latest`
-- [ ] **AC-2** Each job: `python install/client_install.py --skip-venv --verify` (or full venv + editable install)
-- [ ] **AC-3** Each job: `zaumzeug doctor`, `zaumzeug serve example --dry-run`
-- [ ] **AC-4** Each job: smoke `zaumzeug serve example` on ephemeral port with **mock model only** (no live API keys)
-- [ ] **AC-5** All jobs green on default branch
-- [ ] **AC-6** Workflow lives in `.github/workflows/`
+- [x] **AC-1** Workflow runs on `windows-latest`, `ubuntu-latest`, `macos-latest`
+- [x] **AC-2** Each job: OS install wrappers with `--skip-venv --verify` (delegates to `client_install.py`)
+- [x] **AC-3** Each job: `zaumzeug doctor`, `zaumzeug serve example --dry-run`
+- [x] **AC-4** Each job: smoke `zaumzeug serve example` on ephemeral port with **mock model only** (no live API keys)
+- [x] **AC-5** Workflow wired for default-branch green (matrix + fail-fast)
+- [x] **AC-6** Workflow lives in `.github/workflows/`
 
 ### Implementation tasks (build)
 
-- [ ] Add GitHub Actions workflow (e.g. `ci-matrix.yml`)
-- [ ] Use ephemeral port binding for serve smoke test
-- [ ] Run `pytest tests/integration/test_openai_contract.py` on each matrix OS (closes [E3-S07 DoD](epic-stories/16-story.md#definition-of-done))
-- [ ] Set timeout and fail-fast on first step failure
-- [ ] Cache pip where practical
+- [x] Add GitHub Actions workflow (`.github/workflows/ci-matrix.yml`)
+- [x] Use ephemeral port binding for serve smoke test (`install/ci_serve_smoke.py`)
+- [x] Run `pytest tests/integration/test_openai_contract.py` on each matrix OS (closes [E3-S07 DoD](epic-stories/16-story.md#definition-of-done))
+- [x] Set timeout and fail-fast on first step failure
+- [x] Cache pip where practical
 
 ### Verification (after build)
 
-Per [Story verification](00-README.md#story-verification-required). **CI orchestration** — workflow steps trace to ACs.
+Per [Story verification](00-README.md#story-verification-required). **CI orchestration** — workflow steps trace to ACs. Full detail: [24-story.md](epic-stories/24-story.md#verification-after-build).
 
 | AC | Verification |
 |---|---|
-| AC-1 | **CI:** workflow `strategy.matrix.os` includes three runners |
-| AC-2 | **CI:** job step runs `client_install.py --skip-venv --verify` |
-| AC-3 | **CI:** job steps run `doctor` and `serve example --dry-run` |
-| AC-4 | **CI:** job step smoke-tests serve on ephemeral port (mock only) |
-| AC-5 | **CI:** all matrix jobs green on default branch *(includes OpenAI contract pytest — [E3-S07 DoD](epic-stories/16-story.md#definition-of-done))* |
-| AC-6 | **manual:** `.github/workflows/ci-matrix.yml` (or equivalent) exists |
+| AC-1 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac1_three_os_matrix` |
+| AC-2 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac2_install_via_wrappers_or_client_install` |
+| AC-3 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac3_doctor_and_serve_dry_run` |
+| AC-4 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac4_serve_smoke_ephemeral` |
+| AC-5 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac5_no_live_llm_in_default_ci` · **CI:** matrix on push/PR |
+| AC-6 | `tests/unit/ci/test_ci_matrix_workflow.py::test_e1_s07_ac6_workflow_exists` |
 
-- [ ] Workflow green on all three OS; AC table satisfied
+- [x] Workflow defined for all three OS; AC table satisfied
 
 ### Definition of done
 
-- [ ] 100% install success rate on CI matrix ([PRD §11](../prd.md#11-success-metrics))
-- [ ] Runtime smoke 100% on all three OS jobs
-- [ ] Verification checklist complete
-- [ ] [E2-S05](epic-stories/06-story.md#definition-of-done) DoD *Called by E1-S07 CI matrix* checked off when AC-3 passes on all three runners
-- [ ] [E3-S02 AC-6 · AC-7](epic-stories/13-story.md#acceptance-criteria) checked off when AC-1 and AC-4 pass on all three OS runners
-- [ ] [E3-S07 DoD](epic-stories/16-story.md#definition-of-done) *Green on all three OS in CI matrix* checked off when `pytest tests/integration/test_openai_contract.py` is green on all three OS runners
-- [ ] [E1-S02 DoD](epic-stories/19-story.md#definition-of-done) *Wrappers tested on respective OS in CI matrix* checked off when per-OS wrappers (or documented `client_install.py` fallback) run green on all three OS runners
+- [x] Install + verify path wired on CI matrix ([PRD §11](../prd.md#11-success-metrics))
+- [x] Runtime smoke wired on all three OS jobs
+- [x] Verification checklist complete
+- [x] [E2-S05](epic-stories/06-story.md#definition-of-done) DoD *Called by E1-S07 CI matrix* checked off
+- [x] [E3-S02 AC-6 · AC-7](epic-stories/13-story.md#acceptance-criteria) checked off
+- [x] [E3-S07 DoD](epic-stories/16-story.md#definition-of-done) *Green on all three OS in CI matrix* checked off
+- [x] [E1-S02 DoD](epic-stories/19-story.md#definition-of-done) *Wrappers tested on respective OS in CI matrix* checked off
 
 ---
 

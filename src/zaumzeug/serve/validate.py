@@ -75,13 +75,29 @@ class ServeValidationResult:
         return 0 if self.ok else 1
 
 
+def _resolved_serve_port(
+    harness_config: HarnessConfig | None,
+    port_override: int | None,
+) -> int | None:
+    """Return CLI ``--port`` override when set, else harness ``serve.hayhooks.port``."""
+    if port_override is not None:
+        return port_override
+    if harness_config is None:
+        return None
+    return _serve_port(harness_config)
+
+
 def validate_serve(
     harness_name: str,
     *,
     project_root: Path | str | None = None,
     deploy: bool = False,
+    port: int | None = None,
 ) -> ServeValidationResult:
-    """Validate harness config and resolved serve paths (no server bind, no LLM)."""
+    """Validate harness config and resolved serve paths (no server bind, no LLM).
+
+    Optional ``port`` overrides ``serve.hayhooks.port`` from harness.yaml (CI smoke).
+    """
     root = Path(project_root) if project_root is not None else find_project_root()
     deploy_mode = is_deploy_mode(deploy_flag=deploy)
     harness_path = resolve_harness_dir(root, harness_name, deploy=deploy_mode)
@@ -137,7 +153,7 @@ def validate_serve(
             harness_dir=harness_path,
             checks=checks,
             harness_config=harness_config,
-            port=_serve_port(harness_config),
+            port=_resolved_serve_port(harness_config, port),
         )
 
     if deploy_mode:
@@ -163,7 +179,7 @@ def validate_serve(
             harness_dir=harness_path,
             checks=checks,
             harness_config=harness_config,
-            port=_serve_port(harness_config),
+            port=_resolved_serve_port(harness_config, port),
         )
 
     agent_yaml_path = entry.agent_yaml_path
@@ -191,7 +207,7 @@ def validate_serve(
     merged_models = merged_registries[0] if merged_registries else None
     model_id = merged_models.default_model_id if merged_models is not None else None
     tools = _extract_tools(agent_data)
-    port = _serve_port(harness_config)
+    resolved_port = _resolved_serve_port(harness_config, port)
 
     return ServeValidationResult(
         harness_name=harness_name,
@@ -202,5 +218,5 @@ def validate_serve(
         merged_models=merged_models,
         model_id=model_id,
         tools=tools,
-        port=port,
+        port=resolved_port,
     )

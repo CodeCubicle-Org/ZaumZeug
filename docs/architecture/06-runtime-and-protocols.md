@@ -107,7 +107,7 @@ Clients use OpenAI-shaped requests against your `baseURL` (e.g. `http://127.0.0.
 
 **Request fields:** OpenAI `model` = harness/pipeline name. Optional ZaumZeug extension `model_id` selects the LLM from the entry agent's ModelRouter registry ([Architecture §7](05-configuration.md#7-model-routing)).
 
-**Implementation (E3-S07, 2026-07-21):** Contract tests assert response shape (`choices` / `message` / `role` / `content`), HTTP `model_id` override, and offline CI (mock + `respx`-stubbed `web_fetch`). Fixture: `tests/integration/conftest.py::ephemeral_serve_url`. Tests: `tests/integration/test_openai_contract.py` (`-k e3_s07`). Cross-OS CI green open — carried to [E1-S07](../stories/epic-stories/24-story.md#e1-s07-cross-platform-ci-matrix).
+**Implementation (E3-S07, 2026-07-21):** Contract tests assert response shape (`choices` / `message` / `role` / `content`), HTTP `model_id` override, and offline CI (mock + `respx`-stubbed `web_fetch`). Fixture: `tests/integration/conftest.py::ephemeral_serve_url`. Tests: `tests/integration/test_openai_contract.py` (`-k e3_s07`). Cross-OS CI green — closed by [E1-S07](../stories/epic-stories/24-story.md#e1-s07-cross-platform-ci-matrix) (2026-07-22).
 
 ### 9.5 What does NOT call the harness directly
 

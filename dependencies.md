@@ -45,7 +45,9 @@ Then run story tests as usual, e.g.:
 .\.venv\Scripts\python.exe -m pytest tests/integration/test_runtime_factory.py tests/unit/runtime/test_factory_imports.py -v
 ```
 
-**Follow-ups (not done yet):** pin or relax `litellm` once Phase 2 needs it; consider moving it to a compile/dev extra so Phase 1 installs stay lean; document CI matrix Python versions in E1-S07.
+**Follow-ups (not done yet):** pin or relax `litellm` once Phase 2 needs it; consider moving it to a compile/dev extra so Phase 1 installs stay lean.
+
+**CI Python version (E1-S07, 2026-07-22):** [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml) pins **Python 3.11** on `windows-latest`, `ubuntu-latest`, and `macos-latest` (`actions/setup-python@v5` + pip cache). Local contrib may use 3.11–3.13; CI remains on 3.11 for the Phase 1 smoke matrix.
 
 ## Core runtime
 

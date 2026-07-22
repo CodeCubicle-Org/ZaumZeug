@@ -68,14 +68,15 @@ def _compile_command(args: argparse.Namespace) -> int:
 
 def _serve_command(args: argparse.Namespace) -> int:
     configure_logging(verbose=args.verbose)
+    port: int | None = args.port
     if args.dry_run:
-        result = validate_serve(args.harness_name, deploy=args.deploy)
+        result = validate_serve(args.harness_name, deploy=args.deploy, port=port)
         if args.json:
             print(dry_run_to_json(result))
         else:
             print(format_dry_run(result))
         return result.exit_code
-    return run_serve(args.harness_name, deploy=args.deploy)
+    return run_serve(args.harness_name, deploy=args.deploy, port=port)
 
 
 def _run_command(args: argparse.Namespace) -> int:
@@ -174,6 +175,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--verbose",
         action="store_true",
         help="enable SDK and Haystack debug logging",
+    )
+    serve.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        metavar="N",
+        help=(
+            "override serve.hayhooks.port from harness.yaml "
+            "(use with CI smoke on an ephemeral free port)"
+        ),
     )
     serve.set_defaults(_handler=_serve_command)
 

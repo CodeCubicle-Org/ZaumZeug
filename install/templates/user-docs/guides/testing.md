@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers · SDK contributors |
-| **Last updated** | 2026-07-21 |
+| **Last updated** | 2026-07-22 |
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
@@ -159,7 +159,7 @@ def test_chat_completions_contract(ephemeral_serve_url):
 
 Optional request field **`model_id`** selects a registry LLM (OpenAI `model` stays the harness name). Use **`respx`** to stub outbound `web_fetch` or provider HTTP without hitting the public internet.
 
-Contract suite (E3-S07): `pytest tests/integration/test_openai_contract.py -v` — asserts OpenAI JSON shape, `model_id` override, and offline mock + stubbed fetch. Cross-OS green in CI is tracked under E1-S07.
+Contract suite (E3-S07): `pytest tests/integration/test_openai_contract.py -v` — asserts OpenAI JSON shape, `model_id` override, and offline mock + stubbed fetch. Cross-OS green is covered by E1-S07 (`.github/workflows/ci-matrix.yml`).
 
 ---
 
@@ -221,15 +221,16 @@ Never commit API keys. `.env` is gitignored. Default CI runs mock only — see [
 
 ## CI expectations
 
-Default branch CI (Win / macOS / Linux) runs:
+Default branch CI (Win / macOS / Linux) is `.github/workflows/ci-matrix.yml` (E1-S07):
 
-1. OS install wrapper or `python install/client_install.py --skip-venv --verify`
+1. OS install wrapper with `--skip-venv --verify`
    - Windows: `.\install\client-install.ps1 --skip-venv --verify`
    - macOS / Linux: `./install/client-install.sh --skip-venv --verify`
 2. `zaumzeug doctor`
 3. `zaumzeug serve example --dry-run`
-4. Mock-model serve smoke on ephemeral port
-5. `pytest tests/unit tests/integration tests/usr-harnesses -v`
+4. Mock-model serve smoke on ephemeral port: `python install/ci_serve_smoke.py example`
+5. `pytest tests/integration/test_openai_contract.py -v`
+6. `pytest tests/unit tests/integration tests/usr-harnesses -v`
 
 Eval regression and live e2e are **additional** tiers — nightly or on PRs that touch prompts/artifacts.
 

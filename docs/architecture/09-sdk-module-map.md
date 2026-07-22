@@ -10,7 +10,7 @@ Maps to [PRD epics](../prd.md#8-functional-requirements-epics). Implementation l
 
 | # | Component | Module | Epic | Status (2026-07-22) |
 |---|---|---|---|---|
-| 1 | CLI | `cli.py` | E1–E7 | **Partial** (E2-S00, E2-S05, E2-S06, E3-S02, E3-S08, E1-S04) — `init`, `doctor`, `serve` (Hayhooks + `--dry-run`), `run` (serial workflow), `--verbose` on serve/compile/run; other subcommands stub |
+| 1 | CLI | `cli.py` | E1–E7 | **Partial** (E2-S00, E2-S05, E2-S06, E3-S02, E3-S08, E1-S04, E1-S07) — `init`, `doctor`, `serve` (Hayhooks + `--dry-run` + `--port`), `run` (serial workflow), `--verbose` on serve/compile/run; other subcommands stub |
 | 1a | Logging | `logging.py` | E2 | **Done** (E2-S06) — `configure_logging()`, `log_request()`, secret redaction, `HARNESS_LOG_LEVEL` |
 | 1b | Doctor | `doctor/` | E2 | **Done** (E2-S04a–S04c) — preflight checks, phase-aware warnings, `--deploy`, `--verbose`, `--json` |
 | 1c | Scaffold / init | `scaffold/` | E1 | **Done** (E1-S04, 2026-07-22) — `init_harness()`, name validation, copy from `install/templates/harness/`; CLI `zaumzeug init <name> [--force]` |
@@ -27,6 +27,6 @@ Maps to [PRD epics](../prd.md#8-functional-requirements-epics). Implementation l
 | 12 | DeepEval runner (optional) | `eval/` | E6 | Planned |
 | 13 | ACP adapter | `serve/acp.py` | E7 | Planned |
 | 14 | Integrations (Haystack, DSPy, GEPA, LiteLLM) | `integrations/` | E3, E4 | **Partial** (E3-S01, E3-S05) — `integrations/mock.py`, `integrations/haystack.py` (`PROVIDERS`, `build_chat_generator`); DSPy/GEPA pending E4 |
-| 15 | Client + target install | `install/client_install.py`, `install/target_install.py` | E1, E5 | **Partial** (E1-S01–S03, 2026-07-22) — `client_install.py` + thin wrappers + project scaffolding (`usr-harnesses/example/`, `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`, `.gitignore`); per-harness `zaumzeug init` → row 1c; `target_install` → E5; live `--cursor-mcp` → E7-S03 |
+| 15 | Client + target install | `install/client_install.py`, `install/target_install.py` | E1, E5 | **Partial** (E1-S01–S03, 2026-07-22) — `client_install.py` + thin wrappers + project scaffolding (`usr-harnesses/example/`, `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`, `.gitignore`); per-harness `zaumzeug init` → row 1c; three-OS CI matrix → [E1-S07](../stories/epic-stories/24-story.md) ✅ (2026-07-22); `target_install` → E5; live `--cursor-mcp` → E7-S03 |
 
 ---

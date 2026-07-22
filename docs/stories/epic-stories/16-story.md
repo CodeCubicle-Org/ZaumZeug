@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/16-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-21 |
+| **Last modified** | 2026-07-22 |
 | **Story ID** | E3-S07 |
 | **Status** | Done |
 | **Epic** | [E3 — Runtime and Local Serve](../02-epic.md) |
@@ -13,7 +13,7 @@
 | **Epic build order** | 2 of 8 |
 | **Story sequence** | 16 of 63 (global build order) |
 | **Source** | Extracted from [`02-epic.md`](../02-epic.md) |
-| **Related** | [Stories index](../00-README.md) · [Epic E3](../../prd.md#epic-e3--runtime-and-local-serve-phase-1) · [Architecture](../../architecture.md) · **Open DoD carried to** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) |
+| **Related** | [Stories index](../00-README.md) · [Epic E3](../../prd.md#epic-e3--runtime-and-local-serve-phase-1) · [Architecture](../../architecture.md) · **DoD closed by** [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) |
 
 ---
 
@@ -26,7 +26,8 @@
 | **Priority** | P1 |
 | **Prerequisites** | [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) · [E3-S05](09-story.md#e3-s05-mock-model-profile) |
 | **Status** | Done (2026-07-21) |
-| **Open — carried forward** | [DoD *Green on all three OS*](#definition-of-done) → [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) |
+| **Open — carried forward** | — |
+| **Closed by E1-S07** | [DoD *Green on all three OS*](#definition-of-done) → [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) (2026-07-22) |
 
 ### User story
 
@@ -80,7 +81,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 ### Definition of done
 
-- [ ] Green on all three OS in CI matrix *(open — carried to [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix); closed when matrix runs `pytest tests/integration/test_openai_contract.py` green on all three runners)*
+- [x] Green on all three OS in CI matrix *(closed by [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) — matrix runs `pytest tests/integration/test_openai_contract.py` — Done 2026-07-22)*
 - [x] Verification checklist complete; all ACs traced to tests
 
 ---

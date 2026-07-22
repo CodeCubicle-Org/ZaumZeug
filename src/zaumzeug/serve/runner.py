@@ -157,10 +157,12 @@ def prepare_serve(
     project_root: Path | str | None = None,
     deploy: bool = False,
     host: str = DEFAULT_BIND_HOST,
+    port: int | None = None,
 ) -> ServePrepared:
     """Validate config, build the entry agent via factory, and create Hayhooks app.
 
     Does not bind a socket. Call :func:`run_app` (or :func:`run_serve`) to listen.
+    Optional ``port`` overrides ``serve.hayhooks.port`` from harness.yaml.
     """
     bind_host = _enforce_localhost_bind(host)
     root = Path(project_root) if project_root is not None else find_project_root()
@@ -168,6 +170,7 @@ def prepare_serve(
         harness_name,
         project_root=root,
         deploy=deploy,
+        port=port,
     )
     if not validation.ok:
         raise ServePrepareError(validation)
@@ -225,6 +228,7 @@ def run_serve(
     project_root: Path | str | None = None,
     deploy: bool = False,
     host: str = DEFAULT_BIND_HOST,
+    port: int | None = None,
 ) -> int:
     """Validate, build agent, and start Hayhooks (blocking). Returns process exit code."""
     try:
@@ -233,6 +237,7 @@ def run_serve(
             project_root=project_root,
             deploy=deploy,
             host=host,
+            port=port,
         )
     except ServePrepareError as exc:
         print(format_dry_run(exc.validation), file=sys.stderr)

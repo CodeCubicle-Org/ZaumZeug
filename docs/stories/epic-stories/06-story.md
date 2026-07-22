@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/06-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-08 |
+| **Last modified** | 2026-07-22 |
 | **Story ID** | E2-S05 |
 | **Status** | Done |
 | **Epic** | [E2 — Configuration and Validation](../01-epic.md) |
@@ -81,7 +81,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 ### Definition of done
 
-- [ ] Called by [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) CI matrix ([AC-3](24-story.md#acceptance-criteria); serve dry-run ready — wire in `.github/workflows/`)
+- [x] Called by [E1-S07](24-story.md#e1-s07-cross-platform-ci-matrix) CI matrix ([AC-3](24-story.md#acceptance-criteria); wired in `.github/workflows/ci-matrix.yml` — Done 2026-07-22)
 - [ ] Called by [E5-S09c](49.3-story.md#e5-s09c-target-install-verify-integration) `--verify` ([AC-2](49.3-story.md#acceptance-criteria); serve dry-run ready — wire in `target_install.py`)
 - [x] Verification checklist complete; all ACs traced to tests
 

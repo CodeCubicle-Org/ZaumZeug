@@ -129,6 +129,7 @@ Production targets are updated by **redeploying** a `deploy/<name>/` bundle and 
 | Need | Doc |
 |---|---|
 | Full install / updates / troubleshooting | [user-docs/getting-started/installation.md](user-docs/getting-started/installation.md) |
+| Testing / CI expectations | [user-docs/guides/testing.md](user-docs/guides/testing.md) |
 | User guides hub | [user-docs/README.md](user-docs/README.md) |
 | Product overview (existing root README) | [README.md](README.md) |
 
@@ -137,5 +138,6 @@ Production targets are updated by **redeploying** a `deploy/<name>/` bundle and 
 Internal design and backlog — not required for first serve:
 
 - [PRD](docs/prd.md)
+- Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml)
 - [Architecture](docs/architecture.md)
 - [Stories / backlog](docs/stories/00-README.md)

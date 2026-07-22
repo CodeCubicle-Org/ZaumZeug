@@ -5,8 +5,8 @@
 | **Document** | Epic E3 user stories |
 | **File** | `docs/stories/02-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-21 (E3-S08 done) |
-| **Status** | Backlog |
+| **Last modified** | 2026-07-22 (E1-S07 closed E3-S02 AC-6/7 + E3-S07 DoD) |
+| **Status** | Phase 1 complete |
 | **Build order** | **2 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -32,7 +32,7 @@
 5. **E3-S02** — `zaumzeug serve`
 6. **E3-S04** — Example harness templates ✅ *(unblocks E1 scaffolding)*
 7. **E3-S06** — Test infrastructure + Phase 1 security ✅
-8. **E3-S07** — OpenAI REST contract tests ✅ *(open DoD → [E1-S07](03-epic.md#e1-s07-cross-platform-ci-matrix))*
+8. **E3-S07** — OpenAI REST contract tests ✅ *(DoD closed by [E1-S07](03-epic.md#e1-s07-cross-platform-ci-matrix), 2026-07-22)*
 9. **E3-S08** — `zaumzeug run` (serial workflow) ✅
 
 ---
@@ -277,7 +277,8 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Priority** | P0 |
 | **Prerequisites** | [E3-S00](#e3-s00-runtime-factory-haystack-agent-builder) · [E2-S04a](../01-epic.md#e2-s04--zaumzeug-doctor-split-into-sub-stories) |
 | **Status** | Done (2026-07-20) |
-| **Open — carried forward** | [AC-6](#acceptance-criteria) · [AC-7](#acceptance-criteria) → [E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix) |
+| **Open — carried forward** | — |
+| **Closed by E1-S07** | [AC-6](#acceptance-criteria) · [AC-7](#acceptance-criteria) → [E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix) (2026-07-22) |
 | **Closed by E3-S04** | [DoD *serve example*](#definition-of-done) → [E3-S04](#e3-s04-example-harness-general-research-agent) (2026-07-20) |
 
 ### User story
@@ -299,8 +300,8 @@ As a **harness developer**, I want `zaumzeug serve <name>` to start Hayhooks fro
 - [x] **AC-3** Binds **localhost** in Phase 1 (no wide-open `0.0.0.0` without explicit config)
 - [x] **AC-4** `/v1/chat/completions` returns valid OpenAI-shaped JSON
 - [x] **AC-5** Also exposes `GET /v1/models` per Architecture §9.4
-- [ ] **AC-6** Identical behavior on Windows, macOS, Linux *(open — carried to [E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix))*
-- [ ] **AC-7** Smoke-tested in CI matrix with mock model *(open — carried to [E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix))*
+- [x] **AC-6** Identical behavior on Windows, macOS, Linux *(closed by [E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix) — Done 2026-07-22)*
+- [x] **AC-7** Smoke-tested in CI matrix with mock model *(closed by [E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix) — Done 2026-07-22)*
 
 ### Implementation tasks (build)
 
@@ -321,8 +322,8 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-3 | `tests/integration/test_serve.py::test_e3_s02_ac3_localhost_bind_default` |
 | AC-4 | `tests/integration/test_openai_contract.py::test_e3_s02_ac4_chat_completions_shape` *(shared E3-S07)* |
 | AC-5 | `tests/integration/test_serve.py::test_e3_s02_ac5_get_v1_models` |
-| AC-6 | **open — carried to** [E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix) (three-OS matrix) |
-| AC-7 | **open — carried to** [E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix) (serve smoke job with mock model) |
+| AC-6 | **closed by** [E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix) (three-OS matrix — Done 2026-07-22) |
+| AC-7 | **closed by** [E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix) (serve smoke via `install/ci_serve_smoke.py` — Done 2026-07-22) |
 
 - [x] Every AC row above has a passing test or documented manual exception
 - [x] `pytest tests/integration/test_serve.py tests/integration/test_openai_contract.py -v -k e3_s02` passes locally
@@ -460,7 +461,8 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Priority** | P1 |
 | **Prerequisites** | [E3-S02](#e3-s02-zaumzeug-serve-dev-mode) · [E3-S05](#e3-s05-mock-model-profile) |
 | **Status** | Done (2026-07-21) |
-| **Open — carried forward** | DoD *Green on all three OS in CI matrix* → [E1-S07](03-epic.md#e1-s07-cross-platform-ci-matrix) |
+| **Open — carried forward** | — |
+| **Closed by E1-S07** | DoD *Green on all three OS in CI matrix* → [E1-S07](03-epic.md#e1-s07-cross-platform-ci-matrix) (2026-07-22) |
 
 ### User story
 
@@ -499,7 +501,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 ### Definition of done
 
-- [ ] Green on all three OS in CI matrix *(open — carried to [E1-S07](03-epic.md#e1-s07-cross-platform-ci-matrix); closed when matrix runs `pytest tests/integration/test_openai_contract.py` green on all three runners)*
+- [x] Green on all three OS in CI matrix *(closed by [E1-S07](03-epic.md#e1-s07-cross-platform-ci-matrix) — matrix runs `pytest tests/integration/test_openai_contract.py` — Done 2026-07-22)*
 - [x] Verification checklist complete; all ACs traced to tests
 
 ---

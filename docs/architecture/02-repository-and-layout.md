@@ -125,7 +125,7 @@ Secrets remain in `.env` only; all model files hold provider + model id + genera
 
 **Wrappers:** `client-install.sh` / `client-install.ps1` delegate to `client_install.py`; `target-install.sh` / `target-install.ps1` delegate to `target_install.py`. OS-specific behavior lives only in the Python scripts ([§2.5](01-overview-and-principles.md#25-cross-platform-portability)).
 
-**Client install flags:** `--verify`, `--no-example`, `--skip-venv` (CI), `--cursor-mcp`. CI matrix per [PRD E1.7](../prd.md#epic-e1--onboarding-and-project-setup-phase-1).
+**Client install flags:** `--verify`, `--no-example`, `--skip-venv` (CI), `--cursor-mcp`. CI matrix **Done** ([PRD E1.7](../prd.md#epic-e1--onboarding-and-project-setup-phase-1) / [E1-S07](../stories/epic-stories/24-story.md), 2026-07-22) — [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml).
 
 **Target install flags:** `--deploy-dir` (default: directory containing `harness.yaml` — typically the bundle root when the script is run from `deploy/<name>/`), `--skip-venv`, `--verify` (doctor + serve dry-run). See [PRD E5.9](../prd.md#epic-e5--deploy-packaging-phase-2) and [§10.7](07-deploy-packaging.md#107-target-runtime-install-script).
 
@@ -133,11 +133,13 @@ Secrets remain in `.env` only; all model files hold provider + model id + genera
 
 **Implementation (E1-S01, 2026-07-21):** `install/client_install.py` — creates `.venv` (unless `--skip-venv`), runs `pip install -e ".[dev]"`, parses `--verify` / `--no-example` / `--skip-venv` / `--cursor-mcp`, pathlib OS paths, non-blocking missing-`git` warning. Tests: `tests/unit/install/test_client_install.py`.
 
-**Implementation (E1-S02, 2026-07-22):** Thin OS wrappers `install/client-install.sh` and `install/client-install.ps1` locate a working Python 3.11+ (`py -3` preferred on Windows to avoid Store stubs) and forward all args to `client_install.py` — no duplicated install logic. User-facing command table: [installation.md](../../user-docs/getting-started/installation.md). Tests: `tests/unit/install/test_wrappers.py`. Per-OS CI invocation → [E1-S07](../stories/epic-stories/24-story.md).
+**Implementation (E1-S02, 2026-07-22):** Thin OS wrappers `install/client-install.sh` and `install/client-install.ps1` locate a working Python 3.11+ (`py -3` preferred on Windows to avoid Store stubs) and forward all args to `client_install.py` — no duplicated install logic. User-facing command table: [installation.md](../../user-docs/getting-started/installation.md). Tests: `tests/unit/install/test_wrappers.py`. Per-OS CI invocation closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
 
 **Implementation (E1-S03, 2026-07-22):** `scaffold_project()` in `client_install.py` — copy-if-missing from `install/templates/` for `usr-harnesses/example/` (skip with `--no-example`), `config/models.yaml` (from `models.example.yaml`), `.env.example`, `.cursor/mcp.json.example`, `user-docs/` skeleton; seeds `.env` only when missing; merges `.gitignore` entries (`.venv`, `.env`, `deploy/`, `artifacts/`). Live `.cursor/mcp.json` via `--cursor-mcp` → [E7-S03](../stories/epic-stories/52-story.md). Tests: `tests/unit/install/test_scaffolding.py`.
 
 **Implementation (E1-S04, 2026-07-22):** `zaumzeug init <name>` in `src/zaumzeug/cli.py` + `zaumzeug.scaffold` — scaffolds `usr-harnesses/<name>/` from `install/templates/harness/` (Phase 1 minimal harness with mock agent); safe name validation; fails if exists unless `--force`; prints `doctor` / `serve` hints. Tests: `tests/unit/cli/test_init.py`. Docs: [project-setup.md](../../user-docs/getting-started/project-setup.md).
+
+**Implementation (E1-S07, 2026-07-22):** Cross-platform CI matrix at [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml) — `windows-latest` / `ubuntu-latest` / `macos-latest`, Python **3.11**, pip cache, fail-fast, 30m timeout; per-OS install wrappers → `zaumzeug doctor` → `serve --dry-run` → `install/ci_serve_smoke.py` (ephemeral `--port`, mock only) → OpenAI contract pytest → unit+integration suite. Tests: `tests/unit/ci/test_ci_matrix_workflow.py`, `tests/unit/install/test_ci_serve_smoke.py`.
 
 ### 3.5 User documentation
 

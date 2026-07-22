@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 implementation in progress. Epics **E2** (config/validation) and **E3** (runtime/serve/run) are **complete**. Epic **E1** onboarding: **`client_install.py`** (E1-S01), **install shell wrappers** (E1-S02), and **project scaffolding** (E1-S03) are done; next is `zaumzeug init` (E1-S04). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 core complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. Remaining E1 item **E1-S08** (`zaumzeug install-project`) is blocked. Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 

@@ -11,7 +11,7 @@ Per-story **Implementation resources** sections link library docs, architecture 
 | **DeepEval** | [Docs](https://docs.confident-ai.com/) | E6, E8-S06 |
 | **MCP / ACP** | [MCP](https://modelcontextprotocol.io/) · [ACP](https://agentclientprotocol.com/) · [Cursor MCP](https://docs.cursor.com/context/model-context-protocol) | E7 |
 | **Testing** | [pytest](https://docs.pytest.org/) · [httpx](https://www.python-httpx.org/) · [respx](https://lundberg.github.io/respx/) · [syrupy](https://github.com/syrupy-project/syrupy) | E1-S07, E3-S06/S07, E4-S03a |
-| **Packaging / CI** | [pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/) · [GitHub Actions matrix](https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs) | E2-S00, E1-S01/S02/S07 |
+| **Packaging / CI** | [pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/) · [GitHub Actions matrix](https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs) · [ci-matrix.yml](../../../.github/workflows/ci-matrix.yml) ✅ (E1-S07, 2026-07-22) | E2-S00, E1-S01/S02/S07 |
 | **Deploy / ops** | [Traefik ForwardAuth](https://doc.traefik.io/traefik/middlewares/http/forwardauth/) · [Dockerfile](https://docs.docker.com/reference/dockerfile/) | E5, E8 |
 
 **Canonical config YAML:** [Architecture §6.6](../../architecture/05-configuration.md#66-phase-1-config-schema) · [Ideation archive](../../ideation-stage.md)
