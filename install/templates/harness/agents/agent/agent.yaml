@@ -1,0 +1,6 @@
+name: agent
+default_model_id: mock
+agent:
+  system_prompt: prompts/system.md
+tools:
+  builtin: []

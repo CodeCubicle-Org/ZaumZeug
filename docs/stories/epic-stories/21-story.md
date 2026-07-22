@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/21-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-22 |
 | **Story ID** | E1-S04 |
+| **Status** | Done |
 | **Epic** | [E1 — Onboarding and Project Setup](../03-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 3 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P1 |
 | **Prerequisites** | [E1-S03](20-story.md#e1-s03-project-scaffolding-on-install) · [E2-S00](01-story.md#e2-s00-sdk-package-skeleton-and-cli-foundation) |
+| **Status** | Done (2026-07-22) |
 
 ### User story
 
@@ -46,17 +48,17 @@ As a **harness developer**, I want `zaumzeug init <name>` to scaffold a new harn
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `zaumzeug init <name>` creates `usr-harnesses/<name>/`
-- [ ] **AC-2** Generated `harness.yaml` passes Phase 1 Pydantic validation (E2-S01)
-- [ ] **AC-3** Template includes minimal valid `runtime`, `serve`, and optional `models` reference
-- [ ] **AC-4** Fails fast if harness name already exists (unless `--force` documented)
+- [x] **AC-1** `zaumzeug init <name>` creates `usr-harnesses/<name>/`
+- [x] **AC-2** Generated `harness.yaml` passes Phase 1 Pydantic validation (E2-S01)
+- [x] **AC-3** Template includes minimal valid `runtime`, `serve`, and optional `models` reference
+- [x] **AC-4** Fails fast if harness name already exists (unless `--force` documented)
 
 ### Implementation tasks (build)
 
-- [ ] Add `init` subcommand in `src/zaumzeug/cli.py`
-- [ ] Create harness template under `install/templates/harness/`
-- [ ] Validate name (safe path segment, no traversal)
-- [ ] Print next-step hints (`zaumzeug doctor`, `zaumzeug serve`)
+- [x] Add `init` subcommand in `src/zaumzeug/cli.py`
+- [x] Create harness template under `install/templates/harness/`
+- [x] Validate name (safe path segment, no traversal)
+- [x] Print next-step hints (`zaumzeug doctor`, `zaumzeug serve`)
 
 ### Verification (after build)
 
@@ -70,12 +72,12 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-4 | `tests/unit/cli/test_init.py::test_e1_s04_ac4_fails_if_exists_without_force` |
 | AC-2 | **integration:** `tests/integration/test_doctor.py::test_e1_s04_init_then_doctor_passes` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/cli/test_init.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/cli/test_init.py -v` passes
 
 ### Definition of done
 
-- [ ] Documented in `user-docs/getting-started/project-setup.md`
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Documented in `user-docs/getting-started/project-setup.md`
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---

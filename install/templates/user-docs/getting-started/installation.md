@@ -49,3 +49,9 @@ Examples:
 ```bash
 ./install/client-install.sh --verify
 ```
+
+## Next steps
+
+- Run the shipped example — [Your first harness](first-harness.md)
+- Add another harness — [Project setup](project-setup.md) (`zaumzeug init <name>`)
+- CLI reference — [cli.md](../reference/cli.md)

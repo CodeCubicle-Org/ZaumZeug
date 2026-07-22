@@ -200,9 +200,9 @@ Install verification may use `python -m harness_dev.cli --version` if the consol
 |---|---|---|
 | **`install/client_install.py`** | **Project once** — venv, editable install, `usr-harnesses/example/`, `user-docs/`, global `config/models.yaml`, `.env` | First clone or new machine |
 | **`install/target_install.py`** | **Target once per deploy** — runtime `pip install harness-dev`, optional venv, `harness doctor --deploy`; copied into `deploy/<name>/` by `harness deploy` | Desktop PC or server after copying bundle |
-| **`harness init <name>`** | **One harness** — scaffolds `usr-harnesses/<name>/` from template | Each new agent/harness you add |
+| **`zaumzeug init <name>`** *(shipped E1-S04; was `harness init`)* | **One harness** — scaffolds `usr-harnesses/<name>/` from `install/templates/harness/` | Each new agent/harness you add |
 
-Client-install copies the reference **`example`** harness; `harness init` creates additional named harnesses without re-running install.
+Client-install copies the reference **`example`** harness; `zaumzeug init` creates additional named harnesses without re-running install. See [Architecture §3.4](architecture/02-repository-and-layout.md#34-install-scripts-dev-vs-target).
 
 ---
 
@@ -297,7 +297,7 @@ Optional flags are identical on every platform: `--verify`, `--no-example`, `--s
 | **New machine** / fresh venv | Same (idempotent) |
 | **CI** | `python install/client_install.py --skip-venv --verify` |
 
-Later, **`harness init`** scaffolds individual harnesses; client-install prepares the **project once**.
+**`zaumzeug init`** (E1-S04) scaffolds individual harnesses; client-install prepares the **project once**.
 
 ### What `client_install.py` does (step by step)
 
@@ -1895,9 +1895,9 @@ Bridge Haystack agent runs to DeepEval `LLMTestCase` + metrics — only loaded w
 - Root `README.md` (planned outline in ideation doc; create in Phase 1 with install script)
 - **`install/client_install.py`** — cross-platform install core (Windows, macOS, Linux)
 - **`install/client-install.sh`** + **`install/client-install.ps1`** — thin wrappers
-- **`install/templates/`** — scaffold sources for harness example, user-docs, env files
+- **`install/templates/`** — scaffold sources for harness example, per-harness `harness/` template (`zaumzeug init`), user-docs, env files
 - **`user-docs/`** skeleton (getting-started + reference/cli.md)
-- `harness init` scaffolds `usr-harnesses/<name>/`
+- `zaumzeug init` scaffolds `usr-harnesses/<name>/` *(Done — E1-S04)*
 - `harness doctor` — preflight / smoke check (used by install `--verify`; see CLI checklist)
 - `harness.yaml` schema (runtime, models, tools, serve)
 - Minimal example harness with ModelRouter + one builtin tool

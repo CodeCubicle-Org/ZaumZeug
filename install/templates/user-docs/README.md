@@ -13,6 +13,7 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 | Guide | Description |
 |---|---|
 | [Installation](getting-started/installation.md) | OS install wrappers and optional flags |
+| [Project setup](getting-started/project-setup.md) | Layout and `zaumzeug init` for new harnesses |
 | [Your first harness](getting-started/first-harness.md) | Run the shipped `example` research agent (mock, no API keys) |
 
 ## Guides
@@ -24,6 +25,7 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 
 ## Quick links
 
+- **`zaumzeug init <name>`** — scaffold a new harness under `usr-harnesses/`
 - **`zaumzeug serve <harness>`** — interactive chat with the workflow **entry** agent
 - **`zaumzeug run <harness>`** — run serial workflow stages in order
 - **`zaumzeug compile <harness>`** — optimize agents (Phase 2+) and regenerate `docs/workflow-diagram.md`

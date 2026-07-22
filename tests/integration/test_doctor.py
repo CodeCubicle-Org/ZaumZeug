@@ -402,3 +402,18 @@ def test_e2_s04c_ac4_fails_on_broken_bundle(tmp_path: Path) -> None:
     ]
     assert runtime_fails
     assert broken_dir.exists()
+
+
+# Story: E1-S04 / E1.4
+def test_e1_s04_init_then_doctor_passes(tmp_path: Path) -> None:
+    """AC-2 (integration): ``zaumzeug init`` then ``doctor`` passes on mock."""
+    from zaumzeug.scaffold import init_harness
+
+    project_root = tmp_path / "project"
+    (project_root / "usr-harnesses").mkdir(parents=True)
+
+    harness_dir = init_harness("newbie", project_root=project_root)
+    assert (harness_dir / "harness.yaml").is_file()
+
+    report = run_doctor(harness_name="newbie", project_root=project_root)
+    assert report.exit_code == 0, report.format(verbose=True)

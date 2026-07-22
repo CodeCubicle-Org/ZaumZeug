@@ -9,6 +9,7 @@ from collections.abc import Callable
 from zaumzeug.doctor import run_doctor
 from zaumzeug.logging import configure_logging
 from zaumzeug.runtime.workflow import WorkflowError, run_workflow
+from zaumzeug.scaffold import ScaffoldError, init_harness
 from zaumzeug.serve import format_dry_run, run_serve, validate_serve
 from zaumzeug.serve.dry_run import dry_run_to_json
 
@@ -33,6 +34,21 @@ def _stub_command(name: str) -> Callable[[argparse.Namespace], int]:
         return 0
 
     return _run
+
+
+def _init_command(args: argparse.Namespace) -> int:
+    """Scaffold ``usr-harnesses/<name>/`` from the harness template (E1-S04)."""
+    try:
+        dest = init_harness(args.name, force=args.force)
+    except ScaffoldError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    print(f"Created harness at {dest}")
+    print()
+    print("Next steps:")
+    print(f"  zaumzeug doctor {args.name}")
+    print(f"  zaumzeug serve {args.name}")
+    return 0
 
 
 def _doctor_command(args: argparse.Namespace) -> int:
@@ -91,6 +107,21 @@ def build_parser() -> argparse.ArgumentParser:
         version="%(prog)s 0.1.0",
     )
     sub = parser.add_subparsers(dest="command", required=True)
+
+    init_cmd = sub.add_parser(
+        "init",
+        help="scaffold a new harness under usr-harnesses/",
+    )
+    init_cmd.add_argument(
+        "name",
+        help="harness name (folder under usr-harnesses/)",
+    )
+    init_cmd.add_argument(
+        "--force",
+        action="store_true",
+        help="overwrite an existing harness folder with the same name",
+    )
+    init_cmd.set_defaults(_handler=_init_command)
 
     doctor = sub.add_parser(
         "doctor",
@@ -180,7 +211,7 @@ def build_parser() -> argparse.ArgumentParser:
     run_cmd.set_defaults(_handler=_run_command)
 
     for name in _COMMANDS:
-        if name in {"doctor", "serve", "run", "compile"}:
+        if name in {"init", "doctor", "serve", "run", "compile"}:
             continue
         cmd = sub.add_parser(name, help=f"{name} command (stub)")
         cmd.set_defaults(_handler=_stub_command(name))

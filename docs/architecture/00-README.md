@@ -1,6 +1,6 @@
 # ZaumZeug — Architecture
 
-**Last updated:** 2026-07-22 (E1-S03 — project scaffolding on install)
+**Last updated:** 2026-07-22 (E1-S04 — `zaumzeug init`)
 **Related:** [PRD](prd.md) · [Ideation archive](ideation-stage.md) · [Stories index](stories/00-README.md)
 
 **Document scope:** This document defines **how** the system is built — structure, flows, protocols, and SDK modules. Product **what/why**, epics, acceptance criteria, and phases live in **[prd.md](prd.md)**. Cross-reference; do not duplicate.

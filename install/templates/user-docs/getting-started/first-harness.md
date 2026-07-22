@@ -64,6 +64,7 @@ Global defaults can live in `config/models.yaml`; harness and agent files deep-m
 
 ## Next steps
 
+- Scaffold another harness — see [Project setup](project-setup.md) (`zaumzeug init <name>`).
 - Add stages or agents — see [Multi-agent workflow](../guides/multi-agent-workflow.md).
 - Testing and the mock profile — see [Testing](../guides/testing.md).
 - CLI flags — see [CLI reference](../reference/cli.md).

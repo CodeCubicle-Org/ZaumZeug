@@ -14,6 +14,30 @@ ZaumZeug command-line interface reference for harness developers.
 
 ---
 
+## `zaumzeug init`
+
+Scaffold a new harness folder under `usr-harnesses/<name>/` from the Phase 1 template (minimal `harness.yaml`, `workflow.yaml`, one agent with mock models and a system prompt).
+
+```bash
+zaumzeug init <name> [--force]
+```
+
+| Flag | Description |
+|---|---|
+| `--force` | Overwrite an existing `usr-harnesses/<name>/` folder |
+
+**Name rules:** Single safe path segment — letters, digits, `_`, `-`; no `..` or path separators. Init fails if the folder already exists unless `--force` is set.
+
+```bash
+zaumzeug init my-agent
+zaumzeug doctor my-agent
+zaumzeug serve my-agent
+```
+
+See [Project setup](../getting-started/project-setup.md) for layout details.
+
+---
+
 ## `zaumzeug serve`
 
 Start Hayhooks for a harness under `usr-harnesses/<name>/` (dev mode), or validate without starting.

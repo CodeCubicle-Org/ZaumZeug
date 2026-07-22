@@ -5,7 +5,7 @@
 | **Document** | Epic E1 user stories |
 | **File** | `docs/stories/03-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-22 (E1-S03 done) |
+| **Last modified** | 2026-07-22 (E1-S04 done) |
 | **Status** | In progress |
 | **Build order** | **3 of 8** (after E2 + E3 — install/CI need working SDK) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -27,7 +27,7 @@
 
 1. **E1-S01** → **E1-S02** — Install script + wrappers ✅
 2. **E1-S03** — Scaffolding *(copies E3-S04 templates)* ✅
-3. **E1-S04** — `zaumzeug init`
+3. **E1-S04** — `zaumzeug init` ✅
 4. **E1-S05** → **E1-S06** — User docs + root README
 5. **E1-S07** — CI matrix **last** (validates full Phase 1 stack)
 
@@ -213,6 +213,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E1.4 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
+| **Status** | Done (2026-07-22) |
 
 ### User story
 
@@ -227,17 +228,17 @@ As a **harness developer**, I want `zaumzeug init <name>` to scaffold a new harn
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `zaumzeug init <name>` creates `usr-harnesses/<name>/`
-- [ ] **AC-2** Generated `harness.yaml` passes Phase 1 Pydantic validation (E2-S01)
-- [ ] **AC-3** Template includes minimal valid `runtime`, `serve`, and optional `models` reference
-- [ ] **AC-4** Fails fast if harness name already exists (unless `--force` documented)
+- [x] **AC-1** `zaumzeug init <name>` creates `usr-harnesses/<name>/`
+- [x] **AC-2** Generated `harness.yaml` passes Phase 1 Pydantic validation (E2-S01)
+- [x] **AC-3** Template includes minimal valid `runtime`, `serve`, and optional `models` reference
+- [x] **AC-4** Fails fast if harness name already exists (unless `--force` documented)
 
 ### Implementation tasks (build)
 
-- [ ] Add `init` subcommand in `src/zaumzeug/cli.py`
-- [ ] Create harness template under `install/templates/harness/`
-- [ ] Validate name (safe path segment, no traversal)
-- [ ] Print next-step hints (`zaumzeug doctor`, `zaumzeug serve`)
+- [x] Add `init` subcommand in `src/zaumzeug/cli.py`
+- [x] Create harness template under `install/templates/harness/`
+- [x] Validate name (safe path segment, no traversal)
+- [x] Print next-step hints (`zaumzeug doctor`, `zaumzeug serve`)
 
 ### Verification (after build)
 
@@ -251,13 +252,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-4 | `tests/unit/cli/test_init.py::test_e1_s04_ac4_fails_if_exists_without_force` |
 | AC-2 | **integration:** `tests/integration/test_doctor.py::test_e1_s04_init_then_doctor_passes` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/cli/test_init.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/cli/test_init.py -v` passes
 
 ### Definition of done
 
-- [ ] Documented in `user-docs/getting-started/project-setup.md`
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Documented in `user-docs/getting-started/project-setup.md`
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

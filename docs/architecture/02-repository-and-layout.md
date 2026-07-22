@@ -137,6 +137,8 @@ Secrets remain in `.env` only; all model files hold provider + model id + genera
 
 **Implementation (E1-S03, 2026-07-22):** `scaffold_project()` in `client_install.py` — copy-if-missing from `install/templates/` for `usr-harnesses/example/` (skip with `--no-example`), `config/models.yaml` (from `models.example.yaml`), `.env.example`, `.cursor/mcp.json.example`, `user-docs/` skeleton; seeds `.env` only when missing; merges `.gitignore` entries (`.venv`, `.env`, `deploy/`, `artifacts/`). Live `.cursor/mcp.json` via `--cursor-mcp` → [E7-S03](../stories/epic-stories/52-story.md). Tests: `tests/unit/install/test_scaffolding.py`.
 
+**Implementation (E1-S04, 2026-07-22):** `zaumzeug init <name>` in `src/zaumzeug/cli.py` + `zaumzeug.scaffold` — scaffolds `usr-harnesses/<name>/` from `install/templates/harness/` (Phase 1 minimal harness with mock agent); safe name validation; fails if exists unless `--force`; prints `doctor` / `serve` hints. Tests: `tests/unit/cli/test_init.py`. Docs: [project-setup.md](../../user-docs/getting-started/project-setup.md).
+
 ### 3.5 User documentation
 
 End-user docs live in `user-docs/` (Markdown) — separate from internal `docs/`. Install copies skeleton:
@@ -151,13 +153,13 @@ user-docs/
 └── reference/cli.md
 ```
 
-Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [testing.md](../../user-docs/guides/testing.md).
+Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [project-setup.md](../../user-docs/getting-started/project-setup.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [testing.md](../../user-docs/guides/testing.md).
 
 **Implementation (E1-S03, 2026-07-22):** Install copies `install/templates/user-docs/` into project `user-docs/` (copy-if-missing). Content completeness (installation prerequisites / troubleshooting) → [E1-S05](../stories/epic-stories/22-story.md).
 
 **Implementation (E1-S02, 2026-07-22):** [user-docs/getting-started/installation.md](../../user-docs/getting-started/installation.md) documents OS install wrappers and flags (command table from [PRD §7.4](../prd.md#74-user-installation-guide-content-for-readme--phase-1)). Full prerequisites / troubleshooting → [E1-S05](../stories/epic-stories/22-story.md). Install template: `install/templates/user-docs/getting-started/installation.md`.
 
-**Implementation (E3-S04, 2026-07-20):** [user-docs/getting-started/first-harness.md](../../user-docs/getting-started/first-harness.md) documents the shipped `example` research harness (mock-first serve). Install template: `install/templates/user-docs/getting-started/first-harness.md`.
+**Implementation (E1-S04, 2026-07-22):** [user-docs/getting-started/project-setup.md](../../user-docs/getting-started/project-setup.md) documents `zaumzeug init` and project layout. Install template: `install/templates/user-docs/getting-started/project-setup.md`. Remaining user-docs depth → [E1-S05](../stories/epic-stories/22-story.md).
 
 **Implementation (E2-S06, 2026-07-08):** [user-docs/reference/cli.md](../../user-docs/reference/cli.md) documents `HARNESS_LOG_LEVEL`, `--verbose` on serve/compile, and related CLI flags. Install template: `install/templates/user-docs/reference/cli.md`.
 

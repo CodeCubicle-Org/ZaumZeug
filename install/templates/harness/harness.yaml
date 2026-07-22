@@ -1,0 +1,8 @@
+name: {{name}}
+description: Scaffolded harness — edit agents and workflow as needed
+
+models: models.yaml    # optional harness-wide aliases
+
+serve:
+  hayhooks:
+    port: 1416
