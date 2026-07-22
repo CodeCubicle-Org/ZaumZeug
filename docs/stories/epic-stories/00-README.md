@@ -5,14 +5,14 @@
 | **Document** | Individual user stories (extracted from epic files) |
 | **Folder** | `docs/stories/epic-stories/` |
 | **Created** | 2026-07-05 |
-| **Last modified** | 2026-07-22 (E1-S05 done) |
+| **Last modified** | 2026-07-22 (E1-S06 done) |
 | **Related** | [Epic index](../00-README.md) · [PRD](../../prd.md) · [Implementation resources](00-implementation-resources.md) |
 
 ---
 
 Stories numbered in **global build order**. Split stories use decimal suffixes (e.g. `05.1-story.md`). **Total: 69** story files.
 
-**Implementation progress:** [01-story.md](01-story.md) (E2-S00) **Done**; [02-story.md](02-story.md) (E2-S01) **Done**; [03-story.md](03-story.md) (E2-S02) **Done**; [04-story.md](04-story.md) (E2-S03) **Done**; [05.1-story.md](05.1-story.md) (E2-S04a) **Done**; [05.2-story.md](05.2-story.md) (E2-S04b) **Done**; [05.3-story.md](05.3-story.md) (E2-S04c) **Done**; [06-story.md](06-story.md) (E2-S05) **Done** (2026-07-08); [07-story.md](07-story.md) (E2-S06) **Done** (2026-07-08); [08-story.md](08-story.md) (E2-S07) **Done** (2026-07-08); [09-story.md](09-story.md) (E3-S05) **Done** (2026-07-08); [10-story.md](10-story.md) (E3-S01) **Done** (2026-07-08); [11-story.md](11-story.md) (E3-S03) **Done** (2026-07-08); [12-story.md](12-story.md) (E3-S00) **Done** (2026-07-20); [13-story.md](13-story.md) (E3-S02) **Done** (2026-07-20); [14-story.md](14-story.md) (E3-S04) **Done** (2026-07-20); [15-story.md](15-story.md) (E3-S06) **Done** (2026-07-20); [16-story.md](16-story.md) (E3-S07) **Done** (2026-07-21); [17-story.md](17-story.md) (E3-S08) **Done** (2026-07-21); [18-story.md](18-story.md) (E1-S01) **Done** (2026-07-21); [19-story.md](19-story.md) (E1-S02) **Done** (2026-07-22); [20-story.md](20-story.md) (E1-S03) **Done** (2026-07-22); [21-story.md](21-story.md) (E1-S04) **Done** (2026-07-22); [22-story.md](22-story.md) (E1-S05) **Done** (2026-07-22). Next: [23-story.md](23-story.md) (E1-S06).
+**Implementation progress:** [01-story.md](01-story.md) (E2-S00) **Done**; [02-story.md](02-story.md) (E2-S01) **Done**; [03-story.md](03-story.md) (E2-S02) **Done**; [04-story.md](04-story.md) (E2-S03) **Done**; [05.1-story.md](05.1-story.md) (E2-S04a) **Done**; [05.2-story.md](05.2-story.md) (E2-S04b) **Done**; [05.3-story.md](05.3-story.md) (E2-S04c) **Done**; [06-story.md](06-story.md) (E2-S05) **Done** (2026-07-08); [07-story.md](07-story.md) (E2-S06) **Done** (2026-07-08); [08-story.md](08-story.md) (E2-S07) **Done** (2026-07-08); [09-story.md](09-story.md) (E3-S05) **Done** (2026-07-08); [10-story.md](10-story.md) (E3-S01) **Done** (2026-07-08); [11-story.md](11-story.md) (E3-S03) **Done** (2026-07-08); [12-story.md](12-story.md) (E3-S00) **Done** (2026-07-20); [13-story.md](13-story.md) (E3-S02) **Done** (2026-07-20); [14-story.md](14-story.md) (E3-S04) **Done** (2026-07-20); [15-story.md](15-story.md) (E3-S06) **Done** (2026-07-20); [16-story.md](16-story.md) (E3-S07) **Done** (2026-07-21); [17-story.md](17-story.md) (E3-S08) **Done** (2026-07-21); [18-story.md](18-story.md) (E1-S01) **Done** (2026-07-21); [19-story.md](19-story.md) (E1-S02) **Done** (2026-07-22); [20-story.md](20-story.md) (E1-S03) **Done** (2026-07-22); [21-story.md](21-story.md) (E1-S04) **Done** (2026-07-22); [22-story.md](22-story.md) (E1-S05) **Done** (2026-07-22); [23-story.md](23-story.md) (E1-S06) **Done** (2026-07-22). Next: [24-story.md](24-story.md) (E1-S07).
 
 | File | Story | Phase | Epic |
 |---|---|---|---|
@@ -40,7 +40,7 @@ Stories numbered in **global build order**. Split stories use decimal suffixes (
 | [20-story.md](20-story.md) | E1-S03 — Project scaffolding on install ✅ | 1 | [E1](../03-epic.md) |
 | [21-story.md](21-story.md) | E1-S04 — `zaumzeug init` command ✅ | 1 | [E1](../03-epic.md) |
 | [22-story.md](22-story.md) | E1-S05 — User documentation skeleton ✅ | 1 | [E1](../03-epic.md) |
-| [23-story.md](23-story.md) | E1-S06 — Root README | 1 | [E1](../03-epic.md) |
+| [23-story.md](23-story.md) | E1-S06 — Root README / CONTRIBUTING.md ✅ | 1 | [E1](../03-epic.md) |
 | [24-story.md](24-story.md) | E1-S07 — Cross-platform CI matrix | 1 | [E1](../03-epic.md) |
 | [25-story.md](25-story.md) | E1-S08 — Future: `zaumzeug install-project` (blocked) | 1 | [E1](../03-epic.md) |
 | [26-story.md](26-story.md) | E4-S01 — DSPy module loader | 2 | [E4](../04-epic.md) |

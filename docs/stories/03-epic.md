@@ -5,7 +5,7 @@
 | **Document** | Epic E1 user stories |
 | **File** | `docs/stories/03-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-22 (E1-S05 done) |
+| **Last modified** | 2026-07-22 (E1-S06 done) |
 | **Status** | In progress |
 | **Build order** | **3 of 8** (after E2 + E3 — install/CI need working SDK) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -28,7 +28,7 @@
 1. **E1-S01** → **E1-S02** — Install script + wrappers ✅
 2. **E1-S03** — Scaffolding *(copies E3-S04 templates)* ✅
 3. **E1-S04** — `zaumzeug init` ✅
-4. **E1-S05** ✅ → **E1-S06** — User docs + root README
+4. **E1-S05** ✅ → **E1-S06** ✅ — User docs + CONTRIBUTING.md
 5. **E1-S07** — CI matrix **last** (validates full Phase 1 stack)
 
 ---
@@ -323,6 +323,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E1.6 |
 | **Persona** | Harness developer · SDK maintainer |
 | **Priority** | P1 |
+| **Status** | Done (2026-07-22) — delivered as [`CONTRIBUTING.md`](../../CONTRIBUTING.md) |
 
 ### User story
 
@@ -336,36 +337,37 @@ As a **new contributor**, I want a short root README, so that I understand visio
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Root `README.md` created in Phase 1 alongside install path
-- [ ] **AC-2** Includes vision one-liner, install command table, mock-first quick start
-- [ ] **AC-3** States < 15 min target and ~1–2.5 GB dev venv planning range
-- [ ] **AC-4** Includes updating-dependencies summary with post-`git pull` commands
-- [ ] **AC-5** Links to `user-docs/getting-started/installation.md` for depth — not a duplicate
+- [x] **AC-1** Short new-contributor guide created in Phase 1 alongside install path — [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (product `README.md` unchanged)
+- [x] **AC-2** Includes vision one-liner, install command table, mock-first quick start
+- [x] **AC-3** States < 15 min target and ~1–2.5 GB dev venv planning range
+- [x] **AC-4** Includes updating-dependencies summary with post-`git pull` commands
+- [x] **AC-5** Links to `user-docs/getting-started/installation.md` for depth — not a duplicate
 
 ### Implementation tasks (build)
 
-- [ ] Author root `README.md` from PRD §7.4 checklist
-- [ ] Add abbreviated project layout (`usr-harnesses/`, `deploy/`, `config/`)
-- [ ] Cross-link `docs/prd.md` and `docs/architecture.md` for maintainers only
+- [x] Author root `CONTRIBUTING.md` from PRD §7.4 checklist
+- [x] Add abbreviated project layout (`usr-harnesses/`, `deploy/`, `config/`)
+- [x] Cross-link `docs/prd.md` and `docs/architecture.md` for maintainers only
 
 ### Verification (after build)
 
-Per [Story verification](00-README.md#story-verification-required). **Docs-only** — manual checklist.
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E1-S06 / E1.6`.
 
-| AC | Verification |
+| AC | Test |
 |---|---|
-| AC-1 | **manual:** `README.md` exists at repo root |
-| AC-2 | **manual:** vision, install table, mock quick start present |
-| AC-3 | **manual:** time and disk range stated |
-| AC-4 | **manual:** dependency update commands present |
-| AC-5 | **manual:** link to installation.md; no full duplicate of user-docs |
+| AC-1 | `tests/unit/docs/test_contributing_guide.py::test_e1_s06_ac1_contributing_exists` |
+| AC-2 | `tests/unit/docs/test_contributing_guide.py::test_e1_s06_ac2_vision_install_mock_quick_start` |
+| AC-3 | `tests/unit/docs/test_contributing_guide.py::test_e1_s06_ac3_time_and_disk_ranges` |
+| AC-4 | `tests/unit/docs/test_contributing_guide.py::test_e1_s06_ac4_updating_dependencies_after_pull` |
+| AC-5 | `tests/unit/docs/test_contributing_guide.py::test_e1_s06_ac5_links_installation_not_full_duplicate` |
 
-- [ ] Manual checklist completed; no contradiction with PRD §11 success metrics
+- [x] Every AC row above has a passing test
+- [x] `pytest tests/unit/docs/test_contributing_guide.py -v` passes
 
 ### Definition of done
 
-- [ ] README review: no contradiction with PRD §11 success metrics
-- [ ] Verification checklist complete
+- [x] Guide review: no contradiction with PRD §11 success metrics
+- [x] Verification checklist complete
 
 ---
 

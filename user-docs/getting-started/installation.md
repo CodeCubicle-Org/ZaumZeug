@@ -5,7 +5,7 @@
 | **Audience** | New developers |
 | **Last updated** | 2026-07-22 |
 
-Get from a fresh clone to a working ZaumZeug dev environment with one command. This page is the full walkthrough (prerequisites, effort, disk, extras, updates, troubleshooting). The root README (when published) keeps an abbreviated summary and links here.
+Get from a fresh clone to a working ZaumZeug dev environment with one command. This page is the full walkthrough (prerequisites, effort, disk, extras, updates, troubleshooting). The short new-contributor summary is [CONTRIBUTING.md](../../CONTRIBUTING.md); it links here for depth.
 
 Technical install behavior (script steps, flags, idempotency): see internal Architecture §3.4.
 
