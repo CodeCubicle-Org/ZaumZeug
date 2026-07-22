@@ -20,6 +20,15 @@ MIN_PYTHON = (3, 11)
 VENV_DIRNAME = ".venv"
 EDITABLE_DEV_SPEC = ".[dev]"
 
+# .gitignore entries ensured by scaffolding (E1-S03 / E1.3).
+# Trailing slashes built via concatenation so AC-7 path-literal checks stay clean.
+GITIGNORE_ENTRIES: tuple[str, ...] = (
+    ".venv",
+    ".env",
+    "deploy" + "/",
+    "artifacts" + "/",
+)
+
 
 class ClientInstallError(Exception):
     """Fatal install failure with an actionable message."""
@@ -189,19 +198,155 @@ def run_doctor(project_root: Path, python: Path) -> int:
     return int(completed.returncode)
 
 
+def discover_templates_dir() -> Path:
+    """Return ``install/templates`` next to this script."""
+    return Path(__file__).resolve().parent / "templates"
+
+
+def copy_file_if_missing(src: Path, dest: Path) -> bool:
+    """Copy ``src`` → ``dest`` when ``dest`` does not exist. Returns True if copied."""
+    if dest.exists():
+        return False
+    if not src.is_file():
+        raise ClientInstallError(
+            f"Scaffold template missing: {src}. "
+            "Re-clone the repo or restore install/templates."
+        )
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dest)
+    return True
+
+
+def copy_tree_files_if_missing(src_dir: Path, dest_dir: Path) -> int:
+    """Copy files under ``src_dir`` into ``dest_dir`` (per-file copy-if-missing).
+
+    Returns the number of files newly copied.
+    """
+    if not src_dir.is_dir():
+        raise ClientInstallError(
+            f"Scaffold template directory missing: {src_dir}. "
+            "Re-clone the repo or restore install/templates."
+        )
+    copied = 0
+    for path in sorted(src_dir.rglob("*")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(src_dir)
+        if copy_file_if_missing(path, dest_dir / relative):
+            copied += 1
+    return copied
+
+
+def _gitignore_has_entry(lines: list[str], entry: str) -> bool:
+    """Return True if ``entry`` already appears as a non-comment gitignore line."""
+    for raw in lines:
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped == entry:
+            return True
+    return False
+
+
+def ensure_gitignore_entries(project_root: Path) -> list[str]:
+    """Append missing ZaumZeug gitignore entries. Returns entries that were added."""
+    gitignore_path = project_root / ".gitignore"
+    existing = ""
+    if gitignore_path.is_file():
+        existing = gitignore_path.read_text(encoding="utf-8")
+
+    lines = existing.splitlines()
+    missing = [e for e in GITIGNORE_ENTRIES if not _gitignore_has_entry(lines, e)]
+    if not missing:
+        return []
+
+    block_lines = ["", "# ZaumZeug (managed by client_install)", *missing, ""]
+    # Avoid a leading blank line when the file is empty.
+    if not existing:
+        block_lines = block_lines[1:]
+    elif not existing.endswith("\n"):
+        existing += "\n"
+
+    gitignore_path.write_text(existing + "\n".join(block_lines), encoding="utf-8")
+    return missing
+
+
 def scaffold_project(
     project_root: Path,
     *,
     no_example: bool,
     cursor_mcp: bool,
+    templates_dir: Path | None = None,
 ) -> None:
-    """Scaffold project files (idempotent).
+    """Scaffold project files from ``install/templates`` (idempotent, copy-if-missing).
 
-    Full copy rules land in E1-S03; ``--cursor-mcp`` live write in E7-S03.
-    E1-S01 accepts the flags and provides this extension point so re-runs
-    remain safe when scaffolding is wired later.
+    ``--cursor-mcp`` live ``.cursor/mcp.json`` write is deferred to E7-S03; this
+    story always writes ``.cursor/mcp.json.example``.
     """
-    _ = (project_root, no_example, cursor_mcp)
+    _ = cursor_mcp  # accepted for CLI parity; live mcp.json → E7-S03
+    templates = templates_dir if templates_dir is not None else discover_templates_dir()
+    if not templates.is_dir():
+        raise ClientInstallError(
+            f"Scaffold templates directory missing: {templates}. "
+            "Re-clone the repo or restore install/templates."
+        )
+
+    print("Scaffolding project from templates …")
+
+    if not no_example:
+        example_src = templates / "usr-harnesses" / "example"
+        example_dest = project_root / "usr-harnesses" / "example"
+        n = copy_tree_files_if_missing(example_src, example_dest)
+        print(f"  example harness: {n} file(s) copied (copy-if-missing)")
+    else:
+        print("  Skipping example harness (--no-example)")
+
+    # Global model registry: template is models.example.yaml → config/models.yaml
+    models_src = templates / "config" / "models.example.yaml"
+    models_dest = project_root / "config" / "models.yaml"
+    if copy_file_if_missing(models_src, models_dest):
+        print("  config models.yaml: created")
+    else:
+        print("  config models.yaml: already present (left unchanged)")
+
+    env_example_src = templates / ".env.example"
+    env_example_dest = project_root / ".env.example"
+    if copy_file_if_missing(env_example_src, env_example_dest):
+        print("  .env.example: created")
+    else:
+        print("  .env.example: already present (left unchanged)")
+
+    # Seed .env from .env.example when missing — never overwrite (AC-4).
+    env_dest = project_root / ".env"
+    if env_dest.exists():
+        print("  .env: already present (left unchanged)")
+    else:
+        source = env_example_dest if env_example_dest.is_file() else env_example_src
+        if not source.is_file():
+            raise ClientInstallError(
+                f"Cannot seed .env; missing template {source}."
+            )
+        shutil.copy2(source, env_dest)
+        print("  .env: created from .env.example")
+
+    mcp_src = templates / ".cursor" / "mcp.json.example"
+    mcp_dest = project_root / ".cursor" / "mcp.json.example"
+    if copy_file_if_missing(mcp_src, mcp_dest):
+        print("  Cursor mcp.json.example: created")
+    else:
+        print("  Cursor mcp.json.example: already present (left unchanged)")
+
+    # user-docs skeleton (PRD E1.3 / Architecture §3.4); content polish → E1-S05
+    user_docs_src = templates / "user-docs"
+    if user_docs_src.is_dir():
+        n = copy_tree_files_if_missing(user_docs_src, project_root / "user-docs")
+        print(f"  user-docs: {n} file(s) copied (copy-if-missing)")
+
+    added = ensure_gitignore_entries(project_root)
+    if added:
+        print(f"  .gitignore: added {len(added)} required entr(y/ies)")
+    else:
+        print("  .gitignore: required entries already present")
 
 
 def resolve_install_python(

@@ -5,7 +5,7 @@
 | **Document** | Epic E1 user stories |
 | **File** | `docs/stories/03-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-22 (E1-S02 done) |
+| **Last modified** | 2026-07-22 (E1-S03 done) |
 | **Status** | In progress |
 | **Build order** | **3 of 8** (after E2 + E3 — install/CI need working SDK) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -26,7 +26,7 @@
 ### Story implementation order (within this epic)
 
 1. **E1-S01** → **E1-S02** — Install script + wrappers ✅
-2. **E1-S03** — Scaffolding *(copies E3-S04 templates)*
+2. **E1-S03** — Scaffolding *(copies E3-S04 templates)* ✅
 3. **E1-S04** — `zaumzeug init`
 4. **E1-S05** → **E1-S06** — User docs + root README
 5. **E1-S07** — CI matrix **last** (validates full Phase 1 stack)
@@ -155,6 +155,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E1.3 |
 | **Persona** | Harness developer |
 | **Priority** | P0 |
+| **Status** | Done (2026-07-22) |
 
 ### User story
 
@@ -169,17 +170,17 @@ As a **harness developer**, I want the install script to scaffold a working proj
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Copies `usr-harnesses/example/` from install templates
-- [ ] **AC-2** Copies `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`
-- [ ] **AC-3** Updates `.gitignore` for `.venv`, `artifacts/`, `deploy/`, `.env`
-- [ ] **AC-4** Never overwrites an existing `.env`
-- [ ] **AC-5** `--no-example` skips example harness copy
+- [x] **AC-1** Copies `usr-harnesses/example/` from install templates
+- [x] **AC-2** Copies `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`
+- [x] **AC-3** Updates `.gitignore` for `.venv`, `artifacts/`, `deploy/`, `.env`
+- [x] **AC-4** Never overwrites an existing `.env`
+- [x] **AC-5** `--no-example` skips example harness copy
 
 ### Implementation tasks (build)
 
-- [ ] Create `install/templates/` from [E3-S04](../02-epic.md#e3-s04-example-harness-general-research-agent) example harness
-- [ ] Implement copy-if-missing / merge rules for `.gitignore`
-- [ ] Ensure example harness uses `default_model_id: mock` per §6.6
+- [x] Create `install/templates/` from [E3-S04](../02-epic.md#e3-s04-example-harness-general-research-agent) example harness
+- [x] Implement copy-if-missing / merge rules for `.gitignore`
+- [x] Ensure example harness uses `default_model_id: mock` per §6.6
 
 ### Verification (after build)
 
@@ -192,16 +193,16 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-3 | `tests/unit/install/test_scaffolding.py::test_e1_s03_ac3_gitignore_entries` |
 | AC-4 | `tests/unit/install/test_scaffolding.py::test_e1_s03_ac4_preserves_existing_env` |
 | AC-5 | `tests/unit/install/test_scaffolding.py::test_e1_s03_ac5_no_example_flag_skips_copy` |
-| AC-1 | **integration:** `tests/integration/test_serve.py::test_e3_s04_ac3_serve_example_without_env` *(post-scaffold)* |
+| AC-1 | **integration:** `tests/integration/test_serve.py::test_e3_s04_ac4_serve_example_without_env` *(post-scaffold)* |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/install/test_scaffolding.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/install/test_scaffolding.py -v` passes
 
 ### Definition of done
 
-- [ ] Fresh install yields runnable `zaumzeug serve example` (mock, no API keys)
-- [ ] Re-install does not clobber user `.env`
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Fresh install yields runnable `zaumzeug serve example` (mock, no API keys)
+- [x] Re-install does not clobber user `.env`
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 
@@ -286,8 +287,9 @@ As a **harness developer**, I want a structured `user-docs/` tree after install,
 
 ### Implementation tasks (build)
 
-- [ ] Add template files under `install/templates/user-docs/` (include `guides/testing.md` per [Architecture §13.6](../architecture/10-operations-and-reference.md#136-testing-playbook))
-- [ ] Copy skeleton during `client_install.py`
+- [ ] Add / complete template files under `install/templates/user-docs/` (include `guides/testing.md` per [Architecture §13.6](../architecture/10-operations-and-reference.md#136-testing-playbook); ensure `getting-started/project-setup.md` exists for AC-1)
+- [x] Copy skeleton during `client_install.py` — **done in [E1-S03](#e1-s03-project-scaffolding-on-install)** (`scaffold_project` copy-if-missing of `install/templates/user-docs/`)
+- [ ] Expand `installation.md` to full PRD §7.4 topics (prerequisites, effort, disk, extras, updates, troubleshooting)
 - [ ] Link to Architecture only for “technical behavior” footnotes
 
 ### Verification (after build)

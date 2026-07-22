@@ -26,6 +26,6 @@ Maps to [PRD epics](../prd.md#8-functional-requirements-epics). Implementation l
 | 12 | DeepEval runner (optional) | `eval/` | E6 | Planned |
 | 13 | ACP adapter | `serve/acp.py` | E7 | Planned |
 | 14 | Integrations (Haystack, DSPy, GEPA, LiteLLM) | `integrations/` | E3, E4 | **Partial** (E3-S01, E3-S05) — `integrations/mock.py`, `integrations/haystack.py` (`PROVIDERS`, `build_chat_generator`); DSPy/GEPA pending E4 |
-| 15 | Client + target install | `install/client_install.py`, `install/target_install.py` | E1, E5 | **Partial** (E1-S01/S02, 2026-07-22) — `client_install.py` + thin `client-install.sh` / `client-install.ps1` wrappers (forward args; prefer `py -3` on Windows); scaffolding copy rules → E1-S03; `target_install` → E5 |
+| 15 | Client + target install | `install/client_install.py`, `install/target_install.py` | E1, E5 | **Partial** (E1-S01–S03, 2026-07-22) — `client_install.py` + thin wrappers + scaffolding (`usr-harnesses/example/`, `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`, `.gitignore`); `target_install` → E5; live `--cursor-mcp` → E7-S03 |
 
 ---

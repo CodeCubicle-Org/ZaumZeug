@@ -1,6 +1,6 @@
 # AI Harness — Ideation & Research (archive)
 
-**Last updated:** 2026-06-24 *(wrapper section marked Done — E1-S02, 2026-07-22)*
+**Last updated:** 2026-06-24 *(scaffolding marked Done — E1-S03, 2026-07-22; wrappers Done — E1-S02, 2026-07-22)*
 
 > **Structured outputs:** Requirement-level content from this archive is mirrored in **[prd.md](prd.md)** and **[architecture.md](architecture.md)**. This file retains full YAML examples, install script walkthroughs, and protocol essays.
 
@@ -319,16 +319,19 @@ Later, **`harness init`** scaffolds individual harnesses; client-install prepare
    ├─ {venv_python} -m pip install -e ".[dev]"
    └─ {venv_python} -m harness_dev.cli --version  (or `harness --version` when script on PATH)
 
-4. Project scaffolding (idempotent — copy from install/templates/)
-   ├─ usr-harnesses/example/     from install/templates/usr-harnesses/example/
-   ├─ user-docs/             from install/templates/user-docs/ (if missing)
+4. Project scaffolding (idempotent — copy from install/templates/) *(Done — E1-S03, 2026-07-22)*
+   ├─ usr-harnesses/example/     from install/templates/usr-harnesses/example/ (--no-example skips)
+   ├─ user-docs/             from install/templates/user-docs/ (copy-if-missing)
    ├─ config/models.yaml     from install/templates/config/models.example.yaml
-   ├─ .env                   from install/templates/.env.example (never overwrite)
+   ├─ .env.example           from install/templates/.env.example
+   ├─ .env                   from .env.example when missing (never overwrite)
+   ├─ .cursor/mcp.json.example from install/templates/.cursor/
    └─ ensure .gitignore      entries for .venv, artifacts/, deploy/, .env
 
 5. Environment hints (OS-aware)
    ├─ Print API keys to set in .env
-   ├─ Write .cursor/mcp.json.example from install/templates/
+   ├─ Write .cursor/mcp.json.example from install/templates/ *(Done — E1-S03)*
+   ├─ Optional `--cursor-mcp` live mcp.json → E7-S03
    └─ Print activation hint:
    │     Windows:  .venv\Scripts\Activate.ps1
    │     macOS/Linux:  source .venv/bin/activate
@@ -412,6 +415,10 @@ python install/client_install.py
 | `--no-example` | Do not scaffold `usr-harnesses/example/` |
 | `--verify` | Run `harness doctor` at end |
 | `--cursor-mcp` | Write `.cursor/mcp.json` from template (not just `.example`) |
+
+### Scaffolding implementation *(Done — E1-S03, 2026-07-22)*
+
+Shipped in `install/client_install.py` → `scaffold_project()`: copy-if-missing from `install/templates/` for example harness, `config/models.yaml`, `.env.example`, seeded `.env` (never overwrite), `.cursor/mcp.json.example`, `user-docs/`, and `.gitignore` merge. Flag `--no-example` skips the harness tree. Tests: `tests/unit/install/test_scaffolding.py`. See [Architecture §3.4](architecture/02-repository-and-layout.md#34-install-scripts-dev-vs-target).
 
 ### Wrapper implementation *(Done — E1-S02, 2026-07-22)*
 

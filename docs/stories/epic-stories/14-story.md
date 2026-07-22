@@ -79,7 +79,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 ### Definition of done
 
-- [x] `zaumzeug doctor example` passes (exit 0; Phase 1 warnings only) with committed `usr-harnesses/example/` — install scaffolding copy path remains [E1-S03](20-story.md)
+- [x] `zaumzeug doctor example` passes (exit 0; Phase 1 warnings only) with committed `usr-harnesses/example/` — install scaffolding copy path **closed** by [E1-S03](20-story.md) (2026-07-22)
 - [x] Closes [E3-S02 DoD](13-story.md#definition-of-done): *`zaumzeug serve example` works with templates* (mock, no `.env`)
 - [x] Verification checklist complete; all ACs traced to tests
 

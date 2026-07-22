@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "zaumzeug": {
+      "url": "http://localhost:1417/mcp"
+    }
+  }
+}

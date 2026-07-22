@@ -1,6 +1,6 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-22 (E1-S02 — install shell wrappers)  
+**Last updated:** 2026-07-22 (E1-S03 — project scaffolding on install)  
 **Status:** Phase 1 implementation in progress  
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -140,7 +140,7 @@ Users do **not** manually install Haystack, DSPy, GEPA, or LiteLLM for the defau
 |---|---|
 | Is setup complicated? | **No** — one install script, one venv, one editable install; idempotent re-run |
 | How long to first harness? | **Target < 15 minutes** on CI and typical broadband (mock model, no API keys); **up to ~30 minutes** on slow networks — see [§11](#11-success-metrics) |
-| What does install do? | Creates `.venv`, editable `[dev]` install, scaffolds `usr-harnesses/example/`, config templates, `.env.example`; optional `--verify` runs `zaumzeug doctor` |
+| What does install do? | Creates `.venv`, editable `[dev]` install, scaffolds `usr-harnesses/example/`, `user-docs/`, `config/models.yaml`, `.env.example` / seeded `.env` (never overwrite), `.cursor/mcp.json.example`, and `.gitignore` entries; optional `--verify` runs `zaumzeug doctor` |
 
 **Install commands (must appear in README install table):**
 
@@ -252,7 +252,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 |---|---|---|
 | E1.1 | Cross-platform install | **Done** (E1-S01, 2026-07-21) — `install/client_install.py` runs on Win/macOS/Linux with Python 3.11+; creates `.venv`; `pip install -e ".[dev]"` succeeds per [Architecture §4.4](architecture/03-technology-stack.md#44-pyprojecttoml-dependency-groups-phase-1-stub); idempotent re-run. Supports flags: `--verify`, `--no-example`, `--skip-venv`, `--cursor-mcp` (see [Architecture §3.4](architecture/02-repository-and-layout.md#34-install-scripts-dev-vs-target)). Three-OS CI matrix open → [E1-S07](stories/epic-stories/24-story.md). |
 | E1.2 | Install wrappers | **Done** (E1-S02, 2026-07-22) — `client-install.sh` and `client-install.ps1` delegate to `client_install.py` with forwarded flags; no duplicated install logic. Command table: [user-docs/getting-started/installation.md](../user-docs/getting-started/installation.md). Per-OS CI wrapper invocation open → [E1-S07](stories/epic-stories/24-story.md). |
-| E1.3 | Project scaffolding | **AC:** Install copies `usr-harnesses/example/`, `user-docs/` skeleton, `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`; updates `.gitignore` for `.venv`, `artifacts/`, `deploy/`, `.env`. Never overwrites existing `.env`. |
+| E1.3 | Project scaffolding | **Done** (E1-S03, 2026-07-22) — Install copies `usr-harnesses/example/`, `user-docs/` skeleton, `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`; updates `.gitignore` for `.venv`, `artifacts/`, `deploy/`, `.env`. Never overwrites existing `.env`. `--no-example` skips harness copy. Tests: `tests/unit/install/test_scaffolding.py`. |
 | E1.4 | `zaumzeug init` | **AC:** `zaumzeug init <name>` creates `usr-harnesses/<name>/` from template with valid minimal `harness.yaml`. |
 | E1.5 | `user-docs/` skeleton | **AC:** After install: `README.md`, `getting-started/` (installation, project-setup, first-harness), `reference/cli.md`, `guides/multi-agent-workflow.md`, `guides/testing.md`. **`getting-started/installation.md`** expands [§7.4](#74-user-installation-guide-content-for-readme--phase-1) (prerequisites, effort, disk ranges, optional extras, **updating dependencies**, troubleshooting). Structure per [Architecture §3.5](architecture/02-repository-and-layout.md#35-user-documentation). |
 | E1.6 | Root README (planned) | **AC:** Short entry point created in Phase 1 alongside install script: vision one-liner; install command table and quick start from [§7.4](#74-user-installation-guide-content-for-readme--phase-1) (prerequisites summary, **< 15 min target** / **~1–2.5 GB** dev venv planning ranges, mock-first serve, optional extras bullet list, **updating dependencies** summary with post-`git pull` re-install commands); first commands (`zaumzeug serve example`); abbreviated project layout; links to `user-docs/getting-started/installation.md` for depth — not a duplicate of user-docs. |

@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/22-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-22 |
 | **Story ID** | E1-S05 |
 | **Epic** | [E1 — Onboarding and Project Setup](../03-epic.md) |
 | **Phase** | 1 |
@@ -52,8 +52,9 @@ As a **harness developer**, I want a structured `user-docs/` tree after install,
 
 ### Implementation tasks (build)
 
-- [ ] Add template files under `install/templates/user-docs/` (include `guides/testing.md` per [Architecture §13.6](../../architecture/10-operations-and-reference.md#136-testing-playbook))
-- [ ] Copy skeleton during `client_install.py`
+- [ ] Add / complete template files under `install/templates/user-docs/` (include `guides/testing.md` per [Architecture §13.6](../../architecture/10-operations-and-reference.md#136-testing-playbook); ensure `getting-started/project-setup.md` exists for AC-1)
+- [x] Copy skeleton during `client_install.py` — **done in [E1-S03](20-story.md)** (`scaffold_project` copy-if-missing of `install/templates/user-docs/`)
+- [ ] Expand `installation.md` to full PRD §7.4 topics (prerequisites, effort, disk, extras, updates, troubleshooting)
 - [ ] Link to Architecture only for “technical behavior” footnotes
 
 ### Verification (after build)

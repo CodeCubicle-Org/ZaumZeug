@@ -73,6 +73,8 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 | **Release tags** | Optionally commit `deploy/<name>/` for audited releases |
 | **CI** | Build `deploy/` in pipeline; upload as deployment artifact |
 
+**Implementation (E1-S03, 2026-07-22):** `client_install.py` ensures `.gitignore` includes `.venv`, `.env`, `deploy/`, and `artifacts/` (copy/merge, idempotent). Narrower `usr-harnesses/*/artifacts/` pattern remains an [E5-S07](../stories/epic-stories/47-story.md) extension. Tests: `tests/unit/install/test_scaffolding.py` (`test_e1_s03_ac3_gitignore_entries`).
+
 ### 10.5 Production server dependencies
 
 | Component | Dev machine | Production server |

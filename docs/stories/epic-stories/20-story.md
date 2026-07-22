@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/20-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-22 |
 | **Story ID** | E1-S03 |
+| **Status** | Done |
 | **Epic** | [E1 — Onboarding and Project Setup](../03-epic.md) |
 | **Phase** | 1 |
 | **Epic build order** | 3 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P0 |
 | **Prerequisites** | [E1-S01](18-story.md#e1-s01-cross-platform-install-script) · [E3-S04](14-story.md#e3-s04-example-harness-general-research-agent) |
+| **Status** | Done (2026-07-22) |
 
 ### User story
 
@@ -47,17 +49,17 @@ As a **harness developer**, I want the install script to scaffold a working proj
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Copies `usr-harnesses/example/` from install templates
-- [ ] **AC-2** Copies `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`
-- [ ] **AC-3** Updates `.gitignore` for `.venv`, `artifacts/`, `deploy/`, `.env`
-- [ ] **AC-4** Never overwrites an existing `.env`
-- [ ] **AC-5** `--no-example` skips example harness copy
+- [x] **AC-1** Copies `usr-harnesses/example/` from install templates
+- [x] **AC-2** Copies `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`
+- [x] **AC-3** Updates `.gitignore` for `.venv`, `artifacts/`, `deploy/`, `.env`
+- [x] **AC-4** Never overwrites an existing `.env`
+- [x] **AC-5** `--no-example` skips example harness copy
 
 ### Implementation tasks (build)
 
-- [ ] Create `install/templates/` from [E3-S04](14-story.md#e3-s04-example-harness-general-research-agent) example harness
-- [ ] Implement copy-if-missing / merge rules for `.gitignore`
-- [ ] Ensure example harness uses `default_model_id: mock` per §6.6
+- [x] Create `install/templates/` from [E3-S04](14-story.md#e3-s04-example-harness-general-research-agent) example harness
+- [x] Implement copy-if-missing / merge rules for `.gitignore`
+- [x] Ensure example harness uses `default_model_id: mock` per §6.6
 
 ### Verification (after build)
 
@@ -70,15 +72,15 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-3 | `tests/unit/install/test_scaffolding.py::test_e1_s03_ac3_gitignore_entries` |
 | AC-4 | `tests/unit/install/test_scaffolding.py::test_e1_s03_ac4_preserves_existing_env` |
 | AC-5 | `tests/unit/install/test_scaffolding.py::test_e1_s03_ac5_no_example_flag_skips_copy` |
-| AC-1 | **integration:** `tests/integration/test_serve.py::test_e3_s04_ac3_serve_example_without_env` *(post-scaffold)* |
+| AC-1 | **integration:** `tests/integration/test_serve.py::test_e3_s04_ac4_serve_example_without_env` *(post-scaffold)* |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/install/test_scaffolding.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/install/test_scaffolding.py -v` passes
 
 ### Definition of done
 
-- [ ] Fresh install yields runnable `zaumzeug serve example` (mock, no API keys)
-- [ ] Re-install does not clobber user `.env`
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Fresh install yields runnable `zaumzeug serve example` (mock, no API keys)
+- [x] Re-install does not clobber user `.env`
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
