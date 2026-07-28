@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-28 (E4-S03a export contract + manifest done)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4-S01–S03a done; next E4-S03b)  
+**Last updated:** 2026-07-28 (E4-S03b runtime `input_rewrite` preprocess done)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4-S01–S03b done; next E4-S05)  
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -308,7 +308,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 |---|---|---|
 | E4.1 | DSPy module loader | **Done** (E4-S01, 2026-07-28) — `zaumzeug.compile.module_loader.load_dspy_module()` loads `compile.module` (`module.path:ClassName`) from `agents/<name>/agent.yaml`; safe agent-dir `sys.path`; validates `dspy.Module` subclass; compile-only (not on serve/runtime import graph). Tests: `tests/unit/compile/test_module_loader.py`. |
 | E4.2 | GEPA compile | **Done** (E4-S02a+b, 2026-07-28) — Phase 2 `CompileConfig`; `zaumzeug compile` loads modules, preflights LMs, runs `dspy.GEPA` (stub for mock/CI), writes `artifacts/<run_id>/` + `current`. Tests: `-k e4_s02`. |
-| E4.3 | Export contract | **AC:** `dump_state()` maps to Haystack `system_prompt`, tool descriptions, pipeline Jinja templates; `artifact-manifest.json` per run; golden snapshot tests. Optional input rewrite template per agent. **E4-S03a Done** (2026-07-28); runtime preprocess remains **E4-S03b**. |
+| E4.3 | Export contract | **AC:** `dump_state()` maps to Haystack `system_prompt`, tool descriptions, pipeline Jinja templates; `artifact-manifest.json` per run; golden snapshot tests. Optional input rewrite template per agent. **E4-S03a Done** (2026-07-28); **E4-S03b Done** (2026-07-28) — runtime preprocess. |
 | E4.4 | Haystack GEPA evaluator *(deferred — Phase 4+)* | **AC (when shipped):** `optimize_anything` evaluator wrapper. **Not Phase 2 v1.** |
 | E4.5 | Post-compile serve | **AC:** After compile, serve/run use per-agent artifact over `system_prompt`. |
 | E4.6 | `--dry-run` on compile | **AC:** Validates config, resolves module imports, prints merged registries — no GEPA, no LLM calls. |
@@ -316,7 +316,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 **Phase 2 v1 compile scope (resolved):** **`dspy.GEPA` only** (Architecture Pattern A) — optimize prompts/signatures via DSPy modules, export to Haystack artifacts. **Optional within Pattern A:** compile-time GEPA on **input rewrite/clarify templates** (how the harness preprocesses user messages — not optimization of end-user chat at runtime). **`optimize_anything`** (Pattern B: pipeline YAML, direct artifact mutation) is **deferred to Phase 4+**; E4.4 remains specified but not required for Phase 2 ship.
 
-**Story seeds:** DSPy module loader **Done** (E4-S01). Compile CLI + GEPA runner + artifacts **Done** (E4-S02a/b, 2026-07-28). Export contract **Done** (E4-S03a, 2026-07-28). Remaining: runtime `input_rewrite` preprocess (E4-S03b); rollback to pinned `artifacts/<run_id>` (E4-S07); workflow diagram golden snapshot (E4-S08).
+**Story seeds:** DSPy module loader **Done** (E4-S01). Compile CLI + GEPA runner + artifacts **Done** (E4-S02a/b, 2026-07-28). Export contract **Done** (E4-S03a, 2026-07-28). Runtime `input_rewrite` preprocess **Done** (E4-S03b, 2026-07-28). Remaining: post-compile serve artifact preference (E4-S05); rollback to pinned `artifacts/<run_id>` (E4-S07); workflow diagram golden snapshot (E4-S08).
 
 ---
 
@@ -417,7 +417,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4-S01–S03a **Done** 2026-07-28; next E4-S03b |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4-S01–S03b **Done** 2026-07-28; next E4-S05 |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A; optional **`optimize_anything`** compile (E4.4 / Pattern B) | E8 (+ deferred E4.4) |
 

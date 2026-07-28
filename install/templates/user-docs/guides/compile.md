@@ -27,8 +27,11 @@ Each run writes immutable `agents/<name>/artifacts/<run_id>/` and updates `artif
 
 Live task/reflection models need API keys in `.env`. The shipped `example` harness uses `provider: mock` and a stub GEPA path for offline compile.
 
+## Runtime input rewrite
+
+When an artifact manifest lists `input_rewrite`, serve and `zaumzeug run` apply that **fixed** template to user messages before the agent loop (Jinja `{{ user_input }}`, `str.format`, or plain instruction text prepended). There is still no live GEPA call per message.
+
 ## Next
 
-- Runtime apply of `input_rewrite` — later Phase 2 story (E4-S03b)
 - Point `agent.artifact` at `artifacts/current` for serve — E4-S05
 - [CLI reference](../reference/cli.md#zaumzeug-compile)

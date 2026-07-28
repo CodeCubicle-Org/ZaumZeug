@@ -82,6 +82,8 @@ At `zaumzeug compile <harness> --agent <agent-name>` (offline):
 
 **Implementation (E4-S03a, 2026-07-28):** `compile/export.py` maps `dump_state()` → `prompts/system.md`, optional `prompts/input_rewrite.md`, `agent.json`, and `artifact-manifest.json` (legacy `manifest.json` accepted when resolving). Wired from `write_artifact_run` before `current` update.
 
+**Implementation (E4-S03b, 2026-07-28):** When the artifact manifest lists `input_rewrite`, `runtime/preprocess.py` loads the fixed template and serve/`run_workflow` apply it to user messages before `Agent.run` (Jinja / format / plain prepend). Factory `build_agent_bundle()` exposes the template; no DSPy on the request path.
+
 ### 5.3 Artifact layout
 
 Per-agent under `agents/<agent-name>/artifacts/`:

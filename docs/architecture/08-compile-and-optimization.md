@@ -27,6 +27,8 @@ DSPy and GEPA never run in production. End-user chat is never a GEPA optimizatio
 
 **Implementation (E4-S03a, 2026-07-28):** Export contract (`compile/export.py`) — `dump_state()` → Haystack `prompts/system.md`, optional `input_rewrite.md`, `agent.json`, `artifact-manifest.json`. GEPA optimizes the **template** only; runtime applies fixed exported text.
 
+**Implementation (E4-S03b, 2026-07-28):** Runtime preprocess (`runtime/preprocess.py`) — load manifest `paths.input_rewrite`, apply Jinja/`str.format`/plain prepend before `Agent.run` on serve and `zaumzeug run`.
+
 ### Pattern B — `optimize_anything` *(deferred — Phase 4+)*
 
 Optimize Haystack-native artifacts (pipeline YAML, prompt files) directly:

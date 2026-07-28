@@ -19,8 +19,9 @@ from zaumzeug.config.harness_root import harness_dir as resolve_harness_dir
 from zaumzeug.config.harness_root import is_deploy_mode
 from zaumzeug.config.schemas import WorkflowConfig, WorkflowStage
 from zaumzeug.doctor.project import find_project_root
-from zaumzeug.runtime.factory import RuntimeFactoryError, build_agent
+from zaumzeug.runtime.factory import RuntimeFactoryError, build_agent_bundle
 from zaumzeug.runtime.model_router import ModelRouter, ModelRouterError
+from zaumzeug.runtime.preprocess import preprocess_openai_messages
 
 
 class WorkflowError(RuntimeError):
@@ -207,21 +208,24 @@ def run_workflow(
                 agent_name=agent_name,
             )
             router = ModelRouter(merged, project_root=root)
-            agent = build_agent(
+            built = build_agent_bundle(
                 harness_path,
                 harness_name=harness_name,
                 agent_name=agent_name,
                 router=router,
             )
-            openai_messages = build_stage_messages(
-                user_input,
-                prior_output=prior_output,
+            openai_messages = preprocess_openai_messages(
+                built.input_rewrite_template,
+                build_stage_messages(
+                    user_input,
+                    prior_output=prior_output,
+                ),
             )
             chat_messages = [
                 ChatMessage.from_openai_dict_format(message)
                 for message in openai_messages
             ]
-            run_result = agent.run(messages=chat_messages)
+            run_result = built.agent.run(messages=chat_messages)
             output = _assistant_text(run_result)
         except AgentResolutionError as exc:
             raise WorkflowError(

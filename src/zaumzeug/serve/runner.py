@@ -17,8 +17,9 @@ from hayhooks.server.utils.deploy_utils import add_pipeline_api_route
 from hayhooks.settings import settings as hayhooks_settings
 
 from zaumzeug.doctor.project import find_project_root
-from zaumzeug.runtime.factory import build_agent
+from zaumzeug.runtime.factory import build_agent_bundle
 from zaumzeug.runtime.model_router import ModelRouter
+from zaumzeug.runtime.preprocess import preprocess_openai_messages, preprocess_user_text
 from zaumzeug.serve.dry_run import format_dry_run
 from zaumzeug.serve.validate import ServeValidationResult, validate_serve
 
@@ -51,17 +52,25 @@ def _request_model_id(body: dict[str, Any] | None) -> str | None:
 class AgentPipelineWrapper(BasePipelineWrapper):
     """Hayhooks wrapper around a factory-built Haystack ``Agent``."""
 
-    def __init__(self, agent: Agent, *, router: ModelRouter) -> None:
+    def __init__(
+        self,
+        agent: Agent,
+        *,
+        router: ModelRouter,
+        input_rewrite_template: str | None = None,
+    ) -> None:
         super().__init__()
         self._agent = agent
         self._router = router
+        self._input_rewrite_template = input_rewrite_template
 
     def setup(self) -> None:
         self.pipeline = self._agent
 
     def run_api(self, question: str) -> str:
         """Handle ``POST /{pipeline}/run``."""
-        result = self._agent.run(messages=[ChatMessage.from_user(question)])
+        text = preprocess_user_text(self._input_rewrite_template, question)
+        result = self._agent.run(messages=[ChatMessage.from_user(text)])
         return _assistant_text(result)
 
     def run_chat_completion(
@@ -74,10 +83,12 @@ class AgentPipelineWrapper(BasePipelineWrapper):
 
         OpenAI ``model`` is the harness/pipeline identity. Optional request
         ``model_id`` selects the LLM from the stage-scoped ModelRouter registry.
+        Applies optional artifact ``input_rewrite`` before ``Agent.run`` (E4-S03b).
         """
         del model
+        rewritten = preprocess_openai_messages(self._input_rewrite_template, messages)
         chat_messages = [
-            ChatMessage.from_openai_dict_format(message) for message in messages
+            ChatMessage.from_openai_dict_format(message) for message in rewritten
         ]
         override = _request_model_id(body)
         previous = self._agent.chat_generator
@@ -126,12 +137,17 @@ def _register_agent_pipeline(
     pipeline_name: str,
     agent: Agent,
     router: ModelRouter,
+    input_rewrite_template: str | None = None,
 ) -> AgentPipelineWrapper:
     """Register a factory-built agent as a Hayhooks pipeline (OpenAI + /run)."""
     if registry.get(pipeline_name) is not None:
         registry.remove(pipeline_name)
 
-    wrapper = AgentPipelineWrapper(agent, router=router)
+    wrapper = AgentPipelineWrapper(
+        agent,
+        router=router,
+        input_rewrite_template=input_rewrite_template,
+    )
     wrapper.setup()
     wrapper._is_run_api_implemented = True
     wrapper._is_run_chat_completion_implemented = True
@@ -180,7 +196,7 @@ def prepare_serve(
     assert validation.port is not None
 
     router = ModelRouter(validation.merged_models, project_root=root)
-    agent = build_agent(
+    built = build_agent_bundle(
         validation.harness_dir,
         harness_name=validation.harness_name,
         agent_name=validation.entry.agent_name,
@@ -197,8 +213,9 @@ def prepare_serve(
     _register_agent_pipeline(
         app,
         pipeline_name=validation.harness_name,
-        agent=agent,
+        agent=built.agent,
         router=router,
+        input_rewrite_template=built.input_rewrite_template,
     )
 
     return ServePrepared(
@@ -208,7 +225,7 @@ def prepare_serve(
         host=bind_host,
         port=validation.port,
         app=app,
-        agent=agent,
+        agent=built.agent,
         router=router,
         validation=validation,
     )

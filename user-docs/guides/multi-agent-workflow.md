@@ -80,7 +80,7 @@ stages:
   - agent: researcher
 ```
 
-After **`zaumzeug compile`**, each agent's GEPA run writes **`artifacts/<run_id>/`** (and updates **`artifacts/current`**) with Haystack export files (`artifact-manifest.json`, `prompts/system.md`, optional `input_rewrite.md`). GEPA optimizes the **template**, not end-user chat — see [Compile and export](compile.md). Harness **`docs/workflow-diagram.md`** regeneration is a later E4 story (E4-S08).
+After **`zaumzeug compile`**, each agent's GEPA run writes **`artifacts/<run_id>/`** (and updates **`artifacts/current`**) with Haystack export files (`artifact-manifest.json`, `prompts/system.md`, optional `input_rewrite.md`). GEPA optimizes the **template**, not end-user chat — see [Compile and export](compile.md). When `input_rewrite` is listed, serve/`run` apply that fixed template before the agent loop. Harness **`docs/workflow-diagram.md`** regeneration is a later E4 story (E4-S08).
 
 ---
 

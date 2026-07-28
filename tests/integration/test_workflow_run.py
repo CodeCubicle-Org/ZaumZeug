@@ -160,20 +160,20 @@ def test_e3_s08_ac3_stage_output_forwarded(tmp_path: Path) -> None:
     captured: list[list[ChatMessage]] = []
     import zaumzeug.runtime.workflow as workflow_mod
 
-    original_build = workflow_mod.build_agent
+    original_build = workflow_mod.build_agent_bundle
 
     def _tracking_build(*args: Any, **kwargs: Any) -> Any:
-        agent = original_build(*args, **kwargs)
-        original_run = agent.run
+        built = original_build(*args, **kwargs)
+        original_run = built.agent.run
 
         def _tracked_run(messages: list[ChatMessage], **run_kwargs: Any) -> Any:
             captured.append(list(messages))
             return original_run(messages, **run_kwargs)
 
-        agent.run = _tracked_run  # type: ignore[method-assign]
-        return agent
+        built.agent.run = _tracked_run  # type: ignore[method-assign]
+        return built
 
-    with patch.object(workflow_mod, "build_agent", _tracking_build):
+    with patch.object(workflow_mod, "build_agent_bundle", _tracking_build):
         run_workflow(
             "example",
             user_input="workflow input",

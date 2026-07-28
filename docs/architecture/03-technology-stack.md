@@ -11,6 +11,7 @@
 | Library | Layer | Package | Responsibility |
 |---|---|---|---|
 | [Haystack](https://github.com/deepset-ai/haystack) | Runtime | `haystack-ai`, `hayhooks` | Agent loop, RAG, tools, MCP client, REST/MCP serve |
+| [Jinja2](https://jinja.palletsprojects.com/) | Runtime | `jinja2` | Optional artifact `input_rewrite` template render before `Agent.run` ([E4-S03b](../stories/epic-stories/28.2-story.md) ✅) |
 | [DSPy](https://dspy.ai/) | Specification | `dspy-ai` | Modules, signatures — compile-time only |
 | [GEPA](https://github.com/gepa-ai/gepa) | Optimization | `gepa` | `dspy.GEPA`, `optimize_anything` — offline |
 | [DeepEval](https://github.com/confident-ai/deepeval) | Dev eval (optional) | `deepeval` via `[eval]` extra | Regression tests; not required for deploy |

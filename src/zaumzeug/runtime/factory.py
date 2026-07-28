@@ -1,7 +1,12 @@
-"""Runtime factory — build Haystack agents from resolved harness config (E3-S00)."""
+"""Runtime factory — build Haystack agents from resolved harness config (E3-S00).
+
+Optional Pattern A ``input_rewrite`` preprocess is loaded here (E4-S03b) and applied
+by serve/run callers before ``Agent.run`` — no DSPy on this path.
+"""
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +20,7 @@ from zaumzeug.config.resolver import (
     resolve_agent_serve,
 )
 from zaumzeug.runtime.model_router import ModelRouter
+from zaumzeug.runtime.preprocess import PreprocessError, load_input_rewrite_template
 from zaumzeug.runtime.tools.catalog import build_builtin_tools
 
 _ARTIFACT_SYSTEM_PROMPT = Path("prompts") / "system.md"
@@ -22,6 +28,15 @@ _ARTIFACT_SYSTEM_PROMPT = Path("prompts") / "system.md"
 
 class RuntimeFactoryError(RuntimeError):
     """Raised when the runtime factory cannot build an agent."""
+
+
+@dataclass(frozen=True, slots=True)
+class BuiltAgent:
+    """Factory output: Haystack agent plus optional input-rewrite template."""
+
+    agent: Agent
+    resolution: ServeResolution
+    input_rewrite_template: str | None = None
 
 
 def _builtin_tool_ids(agent_data: dict[str, Any]) -> list[str]:
@@ -60,9 +75,56 @@ def load_system_prompt(resolution: ServeResolution) -> str:
     raise RuntimeFactoryError(f"unsupported runtime source: {resolution.source!r}")
 
 
+def load_input_rewrite(resolution: ServeResolution) -> str | None:
+    """Load optional ``input_rewrite`` template when serving from an artifact (E4-S03b).
+
+    Returns ``None`` when the source is not an artifact or the manifest omits rewrite.
+    Raises :class:`RuntimeFactoryError` when the manifest lists rewrite but the file
+    is missing.
+    """
+    if resolution.source is not RuntimeSource.ARTIFACT:
+        return None
+    try:
+        return load_input_rewrite_template(resolution.path)
+    except PreprocessError as exc:
+        raise RuntimeFactoryError(str(exc)) from exc
+
+
 def build_agent_tools(agent_data: dict[str, Any]) -> list[Any]:
     """Build Haystack tools from ``tools.builtin`` in agent config."""
     return build_builtin_tools(_builtin_tool_ids(agent_data))
+
+
+def build_agent_bundle(
+    harness_dir: Path | str,
+    *,
+    harness_name: str,
+    agent_name: str,
+    router: ModelRouter,
+) -> BuiltAgent:
+    """Build a Haystack ``Agent`` and load optional input-rewrite template (E4-S03b)."""
+    harness_dir = Path(harness_dir)
+    resolution = resolve_agent_serve(
+        harness_dir,
+        harness_name=harness_name,
+        agent_name=agent_name,
+    )
+    agent_config = load_agent_config(resolution.agent_yaml_path)
+    tools = build_agent_tools(agent_config.model_dump(exclude_none=True))
+    system_prompt = load_system_prompt(resolution)
+    input_rewrite_template = load_input_rewrite(resolution)
+    chat_generator = router.build_generator(agent_config.default_model_id)
+
+    agent = Agent(
+        chat_generator=chat_generator,
+        tools=tools or None,
+        system_prompt=system_prompt,
+    )
+    return BuiltAgent(
+        agent=agent,
+        resolution=resolution,
+        input_rewrite_template=input_rewrite_template,
+    )
 
 
 def build_agent(
@@ -76,20 +138,11 @@ def build_agent(
 
     Shared by serve, MCP, and ACP (E3-S02+) — one factory, no nested agent loops.
     Uses ``resolve_agent_serve()`` (E2-S03) and the builtin tool catalog (E3-S03).
+    Prefer :func:`build_agent_bundle` when the caller needs ``input_rewrite``.
     """
-    harness_dir = Path(harness_dir)
-    resolution = resolve_agent_serve(
+    return build_agent_bundle(
         harness_dir,
         harness_name=harness_name,
         agent_name=agent_name,
-    )
-    agent_config = load_agent_config(resolution.agent_yaml_path)
-    tools = build_agent_tools(agent_config.model_dump(exclude_none=True))
-    system_prompt = load_system_prompt(resolution)
-    chat_generator = router.build_generator(agent_config.default_model_id)
-
-    return Agent(
-        chat_generator=chat_generator,
-        tools=tools or None,
-        system_prompt=system_prompt,
-    )
+        router=router,
+    ).agent

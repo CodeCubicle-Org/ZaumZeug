@@ -5,8 +5,8 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E4-S03a done; next E4-S03b) |
-| **Status** | In progress (E4-S01–S03a done) |
+| **Last modified** | 2026-07-28 (E4-S03b done; next E4-S05) |
+| **Status** | In progress (E4-S01–S03b done) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -28,7 +28,7 @@
 
 1. **E4-S01** — DSPy module loader ✅ (2026-07-28)
 2. **E4-S02a** → **E4-S02b** — Compile schema + GEPA runner ✅ (2026-07-28)
-3. **E4-S03a** ✅ → **E4-S03b** — Export contract + runtime preprocess
+3. **E4-S03a** ✅ → **E4-S03b** ✅ — Export contract + runtime preprocess
 4. **E4-S05** — Post-compile serve uses artifact
 5. **E4-S06** — Compile `--dry-run`
 6. **E4-S07** — Artifact rollback to pinned run
@@ -111,11 +111,13 @@ See [epic-stories/27.1-story.md](epic-stories/27.1-story.md) and [27.2-story.md]
 
 ## E4-S03 — Export contract *(split into sub-stories)*
 
-> **Canonical story files:** [E4-S03a — export/manifest](epic-stories/28.1-story.md) ✅ (2026-07-28) · [E4-S03b — runtime preprocess](epic-stories/28.2-story.md)
+> **Canonical story files:** [E4-S03a — export/manifest](epic-stories/28.1-story.md) ✅ (2026-07-28) · [E4-S03b — runtime preprocess](epic-stories/28.2-story.md) ✅ (2026-07-28)
 
-See epic-stories for full AC → test mapping. Runtime `input_rewrite` preprocess is **E4-S03b**, consumed by [E4-S05](#e4-s05-post-compile-serve-uses-artifact).
+See epic-stories for full AC → test mapping. Runtime `input_rewrite` preprocess is **E4-S03b** ✅, consumed by [E4-S05](#e4-s05-post-compile-serve-uses-artifact).
 
-**E4-S03a Done (2026-07-28):** `compile/export.py` maps `dump_state()` → Haystack prompts / `agent.json` / `artifact-manifest.json`; optional `input_rewrite`; legacy `manifest.json` accepted. Tests: `pytest … -k e4_s03` (7 passed). Next: [E4-S03b](epic-stories/28.2-story.md).
+**E4-S03a Done (2026-07-28):** `compile/export.py` maps `dump_state()` → Haystack prompts / `agent.json` / `artifact-manifest.json`; optional `input_rewrite`; legacy `manifest.json` accepted. Tests: `pytest … -k e4_s03` (7 passed).
+
+**E4-S03b Done (2026-07-28):** `runtime/preprocess.py` + `build_agent_bundle()` apply fixed `input_rewrite` before `Agent.run` on serve/run (no DSPy). Tests: `pytest … -k e4_s03b` (7 passed). Next: [E4-S05](epic-stories/30-story.md).
 
 ---
 

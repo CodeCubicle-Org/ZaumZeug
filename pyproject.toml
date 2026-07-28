@@ -24,6 +24,7 @@ dependencies = [
   "haystack-ai",
   "hayhooks",
   "httpx",
+  "jinja2",
   "litellm",
   "pydantic>=2",
   "pyyaml",
