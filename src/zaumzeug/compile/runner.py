@@ -3,6 +3,7 @@
 E4-S02a: schema + module load + LM preflight.
 E4-S02b: invoke GEPA and write ``artifacts/<run_id>/`` + ``current``.
 E4-S03a: Haystack export (``artifact-manifest.json``, prompts) via ``export.py``.
+E4-S06: ``--dry-run`` — same validation path without GEPA or artifact writes.
 """
 
 from __future__ import annotations
@@ -36,6 +37,8 @@ __all__ = [
     "CompileError",
     "CompileAgentResult",
     "CompileResult",
+    "format_compile_dry_run",
+    "format_compile_result",
     "run_compile",
 ]
 
@@ -92,6 +95,7 @@ def run_compile(
     agent_name: str | None = None,
     project_root: Path | str | None = None,
     deploy: bool = False,
+    dry_run: bool = False,
     gepa_cls: Any | None = None,
     stub_gepa: bool | None = None,
 ) -> CompileResult:
@@ -99,6 +103,9 @@ def run_compile(
 
     Failures raise :class:`CompileError` before or during the optimizer call.
     Pass *gepa_cls* (or ``stub_gepa=True``) to inject a CI stub without live API keys.
+
+    When *dry_run* is True, validates schema, resolves module imports, and
+    preflights task/reflection LM ids — no GEPA, no LLM API calls, no artifacts.
     """
     root = Path(project_root) if project_root is not None else find_project_root()
     harness_path = resolve_harness_dir(root, harness_name, deploy=deploy)
@@ -212,6 +219,18 @@ def run_compile(
                 suggestion=exc.suggestion,
             ) from exc
 
+        if dry_run:
+            results.append(
+                CompileAgentResult(
+                    agent_name=name,
+                    module_ref=resolution.compile_module,
+                    lm_plan=lm_plan,
+                    module_instance=module_instance,
+                    gepa_invoked=False,
+                )
+            )
+            continue
+
         agent_dir = resolution.agent_yaml_path.parent
         try:
             gepa_result = invoke_gepa(
@@ -323,4 +342,24 @@ def format_compile_result(result: CompileResult) -> str:
             f"run_id={agent.run_id}{stub}"
         )
         lines.append(f"    artifacts: {artifact}")
+    return "\n".join(lines)
+
+
+def format_compile_dry_run(result: CompileResult) -> str:
+    """Human-readable ``compile --dry-run`` summary (no GEPA / artifacts)."""
+    lines: list[str] = [
+        f"Compile dry-run: {result.harness_name}",
+        f"  agents: {len(result.agents)}",
+    ]
+    for agent in result.agents:
+        lines.append(
+            f"  - {agent.agent_name}: module={agent.module_ref} "
+            f"task={agent.lm_plan.task_model_id} "
+            f"({agent.lm_plan.task_entry.provider}/{agent.lm_plan.task_entry.model}) "
+            f"reflection={agent.lm_plan.reflection_model_id} "
+            f"({agent.lm_plan.reflection_entry.provider}/"
+            f"{agent.lm_plan.reflection_entry.model})"
+        )
+    lines.append("  gepa: skipped")
+    lines.append("  status: ok")
     return "\n".join(lines)

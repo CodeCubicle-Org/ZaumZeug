@@ -62,19 +62,28 @@ def _doctor_command(args: argparse.Namespace) -> int:
 
 def _compile_command(args: argparse.Namespace) -> int:
     configure_logging(verbose=args.verbose)
-    from zaumzeug.compile import CompileError, format_compile_result, run_compile
+    from zaumzeug.compile import (
+        CompileError,
+        format_compile_dry_run,
+        format_compile_result,
+        run_compile,
+    )
 
     try:
         result = run_compile(
             args.harness_name,
             agent_name=args.agent,
+            dry_run=args.dry_run,
         )
     except CompileError as exc:
         print(str(exc), file=sys.stderr)
         if exc.suggestion:
             print(f"Suggestion: {exc.suggestion}", file=sys.stderr)
         return 1
-    print(format_compile_result(result))
+    if args.dry_run:
+        print(format_compile_dry_run(result))
+    else:
+        print(format_compile_result(result))
     return result.exit_code
 
 
@@ -241,7 +250,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     compile_cmd = sub.add_parser(
         "compile",
-        help="validate compile config and load DSPy modules (GEPA in E4-S02b)",
+        help="run GEPA per agent (or --dry-run to validate without optimizing)",
     )
     compile_cmd.add_argument(
         "harness_name",
@@ -252,6 +261,14 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="NAME",
         help="compile a single agent (default: all agents with compile.module)",
+    )
+    compile_cmd.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=(
+            "validate Phase 2 compile config, resolve module imports and "
+            "task/reflection models without running GEPA or calling an LLM"
+        ),
     )
     compile_cmd.add_argument(
         "--verbose",

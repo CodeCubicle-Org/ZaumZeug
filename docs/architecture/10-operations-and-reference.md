@@ -34,6 +34,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run [--deploy] [--json]` — `validate_serve()` in `src/zaumzeug/serve/validate.py`; prints port, entry agent, model id, runtime path, and tools; exit 1 on validation failure. No port bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
 
+**Implementation (E4-S06, 2026-07-28):** `zaumzeug compile <harness> --dry-run` — same validation path as full compile (`run_compile(..., dry_run=True)`): Phase 2 schema, module import, LM registry preflight; prints task/reflection models; no GEPA, no LLM API calls, no artifacts. Tests: `tests/integration/compile/test_compile_dry_run.py`.
+
 **Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` sets SDK (`zaumzeug`) and Haystack loggers to DEBUG when `zaumzeug serve|compile --verbose` or `HARNESS_LOG_LEVEL=DEBUG`. `log_request()` emits structured per-request context (`model_id`, `tool`, `artifact_path`). `SecretRedactingFilter` redacts API keys and bearer tokens. CLI reference: `user-docs/reference/cli.md`. Tests: `tests/unit/test_logging.py`.
 
 **Implementation (E2-S07, 2026-07-08):** `workflow.yaml` schema validation via `load_workflow()` — `workflow_config` check in doctor; `validate_serve()` fails fast on invalid workflow before entry resolution. Tests: `tests/unit/config/test_workflow_schema.py`.
@@ -51,7 +53,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
 | `zaumzeug serve` (dev) | **Done** (E3-S02, 2026-07-20) — Hayhooks runner, OpenAI REST, localhost bind |
-| `--dry-run` on compile | Validate without GEPA/LLM (E4-S06) |
+| `--dry-run` on compile | **Done** (E4-S06, 2026-07-28) — validate without GEPA/LLM |
 | `--verbose` on serve/compile | **Done** (E2-S06) — SDK + Haystack structured debug logging |
 | `HARNESS_LOG_LEVEL=DEBUG` | **Done** (E2-S06) — equivalent to `--verbose`; SDK + Haystack request logging |
 | `install --verify` | Doctor + optional dry-run serve |
@@ -107,7 +109,7 @@ Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/
 | Phase | Debug/test deliverables |
 |---|---|
 | 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06), OpenAI REST contract ✅ (E3-S07) |
-| 2 | compile `--dry-run`, export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), trace → `LLMTestCase`, optional `zaumzeug eval` |
+| 2 | compile `--dry-run` (**E4-S06 Done** — `tests/integration/compile/test_compile_dry_run.py`), export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), trace → `LLMTestCase`, optional `zaumzeug eval` |
 | 3 | MCP integration tests, tool correctness eval when DeepEval present |
 | 4 | `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
 
@@ -134,7 +136,7 @@ End-user walkthrough: [user-docs/guides/testing.md](../user-docs/guides/testing.
 |---|---|---|
 | SDK maintainer | `tests/unit/`, `tests/integration/`, `tests/usr-harnesses/fixture/` | `pytest` from repo root |
 | Harness developer | `usr-harnesses/<name>/eval/test_*.py` | `deepeval test run` or `zaumzeug eval` |
-| Harness developer (quick) | `zaumzeug doctor`, `zaumzeug serve --dry-run` | CLI — no pytest required |
+| Harness developer (quick) | `zaumzeug doctor`, `zaumzeug serve --dry-run`, `zaumzeug compile --dry-run` | CLI — no pytest required |
 
 #### Environment gates
 

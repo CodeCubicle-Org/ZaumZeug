@@ -30,6 +30,7 @@ For SDK design detail, see internal `docs/architecture/10-operations-and-referen
 # Preflight — no server, no LLM
 zaumzeug doctor example
 zaumzeug serve example --dry-run
+zaumzeug compile example --dry-run
 
 # SDK test suite (repo root; contributors)
 pytest tests/unit tests/integration tests/usr-harnesses -v
@@ -43,6 +44,7 @@ zaumzeug eval example
 HARNESS_LIVE_LLM=1 pytest tests/e2e -v
 ```
 
+Use serve `--dry-run` to check harness/workflow/runtime paths without starting Hayhooks. Use compile `--dry-run` to check Phase 2 module imports and task/reflection models without running GEPA.
 ---
 
 ## Mock model (default)
@@ -250,6 +252,7 @@ python -m debugpy --listen 5678 -m zaumzeug.cli serve example
 # Isolate Haystack vs config
 zaumzeug doctor example --verbose
 zaumzeug serve example --dry-run
+zaumzeug compile example --dry-run
 # escape hatch: hayhooks run ...  (low-level Haystack only)
 ```
 
@@ -260,7 +263,7 @@ zaumzeug serve example --dry-run
 | Phase | Testing deliverables |
 |---|---|
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
-| **2** | Compile `--dry-run`, export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), trace → eval case, optional `zaumzeug eval` |
+| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), trace → eval case, optional `zaumzeug eval` |
 | **3** | MCP integration tests, tool-correctness eval |
 | **4** | Production trace ratchet, `@observe` / Confident AI sync |
 
@@ -269,4 +272,4 @@ zaumzeug serve example --dry-run
 ## Related guides
 
 - [Multi-agent workflow](multi-agent-workflow.md) — `workflow.yaml` and stage routing under test
-- [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_LIVE_LLM`, debugpy, `--dry-run`, `doctor`, `eval` flags, Phase 1 security notes
+- [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_LIVE_LLM`, debugpy, serve/compile `--dry-run`, `doctor`, `eval` flags, Phase 1 security notes

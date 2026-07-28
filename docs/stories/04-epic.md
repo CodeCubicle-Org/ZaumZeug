@@ -5,8 +5,8 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E4-S05 done; next E4-S06) |
-| **Status** | In progress (E4-S01–S05 done) |
+| **Last modified** | 2026-07-28 (E4-S06 done; next E4-S07) |
+| **Status** | In progress (E4-S01–S06 done) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -31,7 +31,7 @@
 3. **E4-S03a** ✅ → **E4-S03b** ✅ — Export contract + runtime preprocess
 4. **E4-S04** — Haystack GEPA evaluator / Pattern B ✅ (2026-07-28)
 5. **E4-S05** — Post-compile serve uses artifact ✅ (2026-07-28)
-6. **E4-S06** — Compile `--dry-run`
+6. **E4-S06** — Compile `--dry-run` ✅ (2026-07-28)
 7. **E4-S07** — Artifact rollback to pinned run
 8. **E4-S08** — Workflow diagram at compile
 
@@ -116,7 +116,7 @@ See epic-stories for full AC → test mapping. Runtime `input_rewrite` preproces
 
 **E4-S03a Done (2026-07-28):** `compile/export.py` maps `dump_state()` → Haystack prompts / `agent.json` / `artifact-manifest.json`; optional `input_rewrite`; legacy `manifest.json` accepted. Tests: `pytest … -k e4_s03` (7 passed).
 
-**E4-S03b Done (2026-07-28):** `runtime/preprocess.py` + `build_agent_bundle()` apply fixed `input_rewrite` before `Agent.run` on serve/run (no DSPy). Tests: `pytest … -k e4_s03b` (7 passed). **E4-S04 Done (2026-07-28):** Pattern B `compile/gepa_adapter.py` + `CompileConfig` mode/seed_artifact. Tests: `pytest tests/unit/compile/test_gepa_adapter.py -v` (5 passed, 0 skipped). **E4-S05 Done (2026-07-28):** Post-compile serve prefers artifact; doctor stale `source_hash` warn. Tests: **12 passed, 0 skipped** (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). Next: [E4-S06](epic-stories/31-story.md).
+**E4-S03b Done (2026-07-28):** `runtime/preprocess.py` + `build_agent_bundle()` apply fixed `input_rewrite` before `Agent.run` on serve/run (no DSPy). Tests: `pytest … -k e4_s03b` (7 passed). **E4-S04 Done (2026-07-28):** Pattern B `compile/gepa_adapter.py` + `CompileConfig` mode/seed_artifact. Tests: `pytest tests/unit/compile/test_gepa_adapter.py -v` (5 passed, 0 skipped). **E4-S05 Done (2026-07-28):** Post-compile serve prefers artifact; doctor stale `source_hash` warn. Tests: **12 passed, 0 skipped** (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). **E4-S06 Done (2026-07-28):** `compile --dry-run`. Tests: **5 passed, 0 skipped** (`test_compile_dry_run.py`). Next: [E4-S07](epic-stories/32-story.md).
 
 ---
 
@@ -229,6 +229,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E4.6 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
+| **Status** | Done (2026-07-28) |
 
 ### User story
 
@@ -237,20 +238,21 @@ As a **harness developer**, I want `zaumzeug compile --dry-run`, so that I can v
 ### References
 
 - [PRD E4.6](../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2)
+- Canonical: [31-story.md](epic-stories/31-story.md)
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Validates compile config and Phase 2 schema
-- [ ] **AC-2** Resolves module imports successfully
-- [ ] **AC-3** Prints resolved model registry (task/reflection LM)
-- [ ] **AC-4** No GEPA run; no LLM API calls
-- [ ] **AC-5** Exit 0 on success
+- [x] **AC-1** Validates compile config and Phase 2 schema
+- [x] **AC-2** Resolves module imports successfully
+- [x] **AC-3** Prints resolved model registry (task/reflection LM)
+- [x] **AC-4** No GEPA run; no LLM API calls
+- [x] **AC-5** Exit 0 on success
 
 ### Implementation tasks (build)
 
-- [ ] Add `--dry-run` to compile CLI
-- [ ] Reuse module loader + config validation
-- [ ] Human-readable summary output
+- [x] Add `--dry-run` to compile CLI
+- [x] Reuse module loader + config validation
+- [x] Human-readable summary output
 
 ### Verification (after build)
 
@@ -264,13 +266,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-4 | `tests/integration/compile/test_compile_dry_run.py::test_e4_s06_ac4_no_gepa_no_llm_calls` |
 | AC-5 | `tests/integration/compile/test_compile_dry_run.py::test_e4_s06_ac5_exit_zero_on_success` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/compile/test_compile_dry_run.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/compile/test_compile_dry_run.py -v` passes (5 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Documented alongside serve dry-run in CLI reference
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Documented alongside serve dry-run in CLI reference
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

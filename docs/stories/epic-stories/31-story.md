@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/31-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-28 |
 | **Story ID** | E4-S06 |
+| **Status** | Done |
 | **Epic** | [E4 — Compile and GEPA Pipeline](../04-epic.md) |
 | **Phase** | 2 |
 | **Epic build order** | 4 of 8 |
@@ -23,7 +24,8 @@
 | **Feature** | E4.6 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
-| **Prerequisites** | [E4-S02a](27.1-story.md#e4-s02a-compile-cli-and-phase-2-schema) · [E4-S01](26-story.md#e4-s01-dspy-module-loader) |
+| **Status** | Done (2026-07-28) |
+| **Prerequisites** | [E4-S02a](27.1-story.md#e4-s02a-compile-cli-and-phase-2-schema) ✅ · [E4-S01](26-story.md#e4-s01-dspy-module-loader) ✅ |
 
 ### User story
 
@@ -42,17 +44,17 @@ As a **harness developer**, I want `zaumzeug compile --dry-run`, so that I can v
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Validates compile config and Phase 2 schema
-- [ ] **AC-2** Resolves module imports successfully
-- [ ] **AC-3** Prints resolved model registry (task/reflection LM)
-- [ ] **AC-4** No GEPA run; no LLM API calls
-- [ ] **AC-5** Exit 0 on success
+- [x] **AC-1** Validates compile config and Phase 2 schema
+- [x] **AC-2** Resolves module imports successfully
+- [x] **AC-3** Prints resolved model registry (task/reflection LM)
+- [x] **AC-4** No GEPA run; no LLM API calls
+- [x] **AC-5** Exit 0 on success
 
 ### Implementation tasks (build)
 
-- [ ] Add `--dry-run` to compile CLI
-- [ ] Reuse module loader + config validation
-- [ ] Human-readable summary output
+- [x] Add `--dry-run` to compile CLI
+- [x] Reuse module loader + config validation
+- [x] Human-readable summary output
 
 ### Verification (after build)
 
@@ -66,12 +68,19 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-4 | `tests/integration/compile/test_compile_dry_run.py::test_e4_s06_ac4_no_gepa_no_llm_calls` |
 | AC-5 | `tests/integration/compile/test_compile_dry_run.py::test_e4_s06_ac5_exit_zero_on_success` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/compile/test_compile_dry_run.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/compile/test_compile_dry_run.py -v` passes (5 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Documented alongside serve dry-run in CLI reference
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Documented alongside serve dry-run in CLI reference
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-07-28)
+
+- `run_compile(..., dry_run=True)` reuses the E4-S02a path (harness/workflow load, `resolve_agent_compile`, module import, LM preflight) and skips `invoke_gepa` / artifact writes.
+- CLI: `zaumzeug compile <harness> --dry-run` prints `format_compile_dry_run()` (module + task/reflection registry, `gepa: skipped`).
+- Docs: [CLI reference — compile](../../user-docs/reference/cli.md#zaumzeug-compile), [guides/compile.md](../../user-docs/guides/compile.md).
+- Verification: **5 passed, 0 skipped** (`test_compile_dry_run.py`).
 
 ---

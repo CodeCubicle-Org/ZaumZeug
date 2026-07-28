@@ -166,6 +166,8 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E4-S02a, 2026-07-28):** Phase 2 `CompileConfig` on `agent.yaml` (`src/zaumzeug/config/schemas.py`). `zaumzeug compile <harness> [--agent]` via `compile/runner.py` validates schema, loads the DSPy module, and preflights task/reflection LM ids against the merged registry + `.env` (`compile/gepa_runner.preflight_compile_lms`).
 
+**Implementation (E4-S06, 2026-07-28):** `zaumzeug compile --dry-run` — same Phase 2 validation + module import + LM preflight without GEPA or artifact writes. Docs: [CLI reference](../user-docs/reference/cli.md#zaumzeug-compile).
+
 **Implementation (E4-S02b, 2026-07-28):** `invoke_gepa()` runs GEPA, wires LiteLLM strings, respects budget, writes `artifacts/<run_id>/` + `current`. Tests: `pytest … -k e4_s02` (8 passed).
 
 **Implementation (E4-S04, 2026-07-28):** Pattern B schema on the same `CompileConfig` — `optimizer: optimize_anything` requires `mode` + `seed_artifact` (and train/val rules per mode). Runtime entry: `zaumzeug.compile.gepa_adapter.optimize_haystack_artifact`. `zaumzeug compile` rejects Pattern B with an actionable error (CLI stays Pattern A). Tests: `tests/unit/compile/test_gepa_adapter.py` (5 passed, 0 skipped).

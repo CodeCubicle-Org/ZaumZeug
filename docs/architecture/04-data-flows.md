@@ -78,6 +78,8 @@ At `zaumzeug compile <harness> --agent <agent-name>` (offline):
 
 **Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile` wires the loader + LM preflight (`compile/runner.py`, `compile/gepa_runner.py`). Fails fast on missing `compile.module`, unimportable modules, or missing registry/`.env` keys for task/reflection LMs — before any GEPA call.
 
+**Implementation (E4-S06, 2026-07-28):** `zaumzeug compile --dry-run` stops after that validation (prints task/reflection registry) — no GEPA, no LLM API calls, no artifacts. Tests: `tests/integration/compile/test_compile_dry_run.py`.
+
 **Implementation (E4-S02b, 2026-07-28):** After preflight, `invoke_gepa()` runs `dspy.GEPA` (stub when `provider: mock` or injected for CI), writes `agents/<name>/artifacts/<run_id>/`, and updates `artifacts/current` (symlink or copy).
 
 **Implementation (E4-S03a, 2026-07-28):** `compile/export.py` maps `dump_state()` → `prompts/system.md`, optional `prompts/input_rewrite.md`, `agent.json`, and `artifact-manifest.json` (legacy `manifest.json` accepted when resolving). Wired from `write_artifact_run` before `current` update.

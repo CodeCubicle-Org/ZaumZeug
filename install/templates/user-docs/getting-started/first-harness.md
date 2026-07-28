@@ -59,6 +59,7 @@ Then open an OpenAI-compatible client against `http://127.0.0.1:1416` (port from
 Optional Phase 2 compile (offline with mock → stub GEPA; live models need API keys):
 
 ```bash
+zaumzeug compile example --dry-run --agent researcher   # validate module + models, no GEPA
 zaumzeug compile example --agent researcher
 ```
 

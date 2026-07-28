@@ -51,6 +51,7 @@ from zaumzeug.compile.runner import (
     CompileAgentResult,
     CompileError,
     CompileResult,
+    format_compile_dry_run,
     format_compile_result,
     run_compile,
 )
@@ -81,6 +82,7 @@ __all__ = [
     "default_haystack_score",
     "export_optimized_module",
     "find_artifact_manifest",
+    "format_compile_dry_run",
     "format_compile_result",
     "gepa_budget_kwargs",
     "infer_optimize_mode",

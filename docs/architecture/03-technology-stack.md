@@ -33,6 +33,8 @@ GEPA requires **task LM** and **reflection LM** as separate config roles (LiteLL
 
 **Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile` loads modules and preflights LMs without invoking GEPA.
 
+**Implementation (E4-S06, 2026-07-28):** `zaumzeug compile --dry-run` exposes that validate-only path on the CLI (no GEPA, no LLM calls, no artifacts).
+
 **Implementation (E4-S02b, 2026-07-28):** `invoke_gepa()` runs `dspy.GEPA` (or `StubGEPA` for mock/CI), wires LiteLLM strings from the agent registry, respects budget config, and writes `artifacts/<run_id>/` + `artifacts/current`.
 
 ### 4.3 Languages and key packages

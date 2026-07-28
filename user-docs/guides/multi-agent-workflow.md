@@ -219,6 +219,7 @@ Full **pipeline exposure** ships in **Phase 4** (RAG and production hardening). 
 | **`zaumzeug run <harness>`** | Runs all **`stages`** in order (agents + pipelines) |
 | **`zaumzeug run <harness> --from <stage>`** | Partial run from a given stage (debug) |
 | **`zaumzeug compile <harness>`** | Runs GEPA per agent with a `compile:` block; writes `artifacts/<run_id>/` + `current` with Haystack export. Live models need API keys in `.env`. See [Compile and export](compile.md). Workflow diagram generation is a later E4 story |
+| **`zaumzeug compile <harness> --dry-run`** | Validates Phase 2 compile config, module imports, and task/reflection models — no GEPA, no LLM calls, no artifacts |
 | **`zaumzeug doctor <harness>`** | Validates `workflow.yaml` (schema + agent refs), `harness.yaml`, models, runtime paths; warns on stale diagram |
 | **`zaumzeug serve <harness> --dry-run`** | Same workflow validation path as doctor before resolving the entry agent |
 
