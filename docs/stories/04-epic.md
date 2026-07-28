@@ -5,8 +5,8 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E4-S04 done; next E4-S05) |
-| **Status** | In progress (E4-S01–S04 done) |
+| **Last modified** | 2026-07-28 (E4-S05 done; next E4-S06) |
+| **Status** | In progress (E4-S01–S05 done) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -30,7 +30,7 @@
 2. **E4-S02a** → **E4-S02b** — Compile schema + GEPA runner ✅ (2026-07-28)
 3. **E4-S03a** ✅ → **E4-S03b** ✅ — Export contract + runtime preprocess
 4. **E4-S04** — Haystack GEPA evaluator / Pattern B ✅ (2026-07-28)
-5. **E4-S05** — Post-compile serve uses artifact
+5. **E4-S05** — Post-compile serve uses artifact ✅ (2026-07-28)
 6. **E4-S06** — Compile `--dry-run`
 7. **E4-S07** — Artifact rollback to pinned run
 8. **E4-S08** — Workflow diagram at compile
@@ -116,7 +116,7 @@ See epic-stories for full AC → test mapping. Runtime `input_rewrite` preproces
 
 **E4-S03a Done (2026-07-28):** `compile/export.py` maps `dump_state()` → Haystack prompts / `agent.json` / `artifact-manifest.json`; optional `input_rewrite`; legacy `manifest.json` accepted. Tests: `pytest … -k e4_s03` (7 passed).
 
-**E4-S03b Done (2026-07-28):** `runtime/preprocess.py` + `build_agent_bundle()` apply fixed `input_rewrite` before `Agent.run` on serve/run (no DSPy). Tests: `pytest … -k e4_s03b` (7 passed). **E4-S04 Done (2026-07-28):** Pattern B `compile/gepa_adapter.py` + `CompileConfig` mode/seed_artifact. Tests: `pytest tests/unit/compile/test_gepa_adapter.py -v` (5 passed, 0 skipped). Next: [E4-S05](epic-stories/30-story.md).
+**E4-S03b Done (2026-07-28):** `runtime/preprocess.py` + `build_agent_bundle()` apply fixed `input_rewrite` before `Agent.run` on serve/run (no DSPy). Tests: `pytest … -k e4_s03b` (7 passed). **E4-S04 Done (2026-07-28):** Pattern B `compile/gepa_adapter.py` + `CompileConfig` mode/seed_artifact. Tests: `pytest tests/unit/compile/test_gepa_adapter.py -v` (5 passed, 0 skipped). **E4-S05 Done (2026-07-28):** Post-compile serve prefers artifact; doctor stale `source_hash` warn. Tests: **12 passed, 0 skipped** (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). Next: [E4-S06](epic-stories/31-story.md).
 
 ---
 
@@ -174,6 +174,7 @@ As an **SDK maintainer**, I want a Haystack adapter for GEPA `optimize_anything`
 | **Feature** | E4.5 |
 | **Persona** | Harness developer |
 | **Priority** | P0 |
+| **Status** | Done (2026-07-28) — see [30-story.md](epic-stories/30-story.md) |
 
 ### User story
 
@@ -186,16 +187,16 @@ As a **harness developer**, I want serve to prefer compiled artifacts over hand-
 
 ### Acceptance criteria
 
-- [ ] **AC-1** After compile, `zaumzeug serve` uses artifact path
-- [ ] **AC-2** Ignores `compile.module` at serve/run time
-- [ ] **AC-3** Ignores hand-edited `system_prompt` when valid artifact present
-- [ ] **AC-4** When artifact includes optional `input_rewrite`, applies preprocess before agent loop (E4-S03) — no GEPA at runtime
-- [ ] **AC-5** Doctor warns if artifact stale vs module hash (optional warn)
+- [x] **AC-1** After compile, `zaumzeug serve` uses artifact path
+- [x] **AC-2** Ignores `compile.module` at serve/run time
+- [x] **AC-3** Ignores hand-edited `system_prompt` when valid artifact present
+- [x] **AC-4** When artifact includes optional `input_rewrite`, applies preprocess before agent loop (E4-S03) — no GEPA at runtime
+- [x] **AC-5** Doctor warns if artifact stale vs module hash (optional warn)
 
 ### Implementation tasks (build)
 
-- [ ] Ensure runtime factory honors resolver priority
-- [ ] If `artifact-manifest.json` lists `input_rewrite`, run preprocess step then pass result to agent
+- [x] Ensure runtime factory honors resolver priority
+- [x] If `artifact-manifest.json` lists `input_rewrite`, run preprocess step then pass result to agent
 
 ### Verification (after build)
 
@@ -209,13 +210,15 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-4 | `tests/integration/compile/test_compile_serve.py::test_e4_s05_ac4_input_rewrite_preprocess_no_dspy` |
 | AC-5 | `tests/integration/test_doctor.py::test_e4_s05_ac5_stale_artifact_warn` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/compile/test_compile_serve.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/compile/test_compile_serve.py -v` passes (11 passed, 0 skipped)
+- [x] `pytest tests/integration/test_doctor.py::test_e4_s05_ac5_stale_artifact_warn -v` passes (1 passed, 0 skipped)
+- [x] Combined E4-S05 verification: **12 passed, 0 skipped** (2026-07-28)
 
 ### Definition of done
 
-- [ ] Compile → serve happy path documented in user-docs
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Compile → serve happy path documented in user-docs
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

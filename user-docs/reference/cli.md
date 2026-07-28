@@ -164,7 +164,9 @@ zaumzeug compile <harness> [--agent NAME] [--verbose]
 
 **API keys:** Live task/reflection models need provider keys in `.env` (or the environment) before GEPA runs — the same keys `zaumzeug doctor` checks. Missing registry ids or keys fail fast with an actionable suggestion. The shipped `example` harness uses `provider: mock` and a stub GEPA path so you can exercise compile offline without keys; switch to live model ids in `agents-models.yaml` for real optimization.
 
-**Artifacts:** Each run writes immutable `agents/<name>/artifacts/<run_id>/` and updates `artifacts/current` (symlink when possible, otherwise a copy). Export maps `dump_state()` to Haystack files: `prompts/system.md`, optional `prompts/input_rewrite.md`, `agent.json`, and **`artifact-manifest.json`** (not the deploy bundle’s `manifest.json`). Legacy `manifest.json` inside an artifact folder is accepted during migration. **GEPA optimizes the template offline; runtime applies fixed exported text only** — never end-user chat as an optimization target. When the manifest lists `input_rewrite`, `zaumzeug serve` / `zaumzeug run` preprocess user messages with that template before `Agent.run` (no DSPy). See [Compile and export](../guides/compile.md).
+**Artifacts:** Each run writes immutable `agents/<name>/artifacts/<run_id>/` and updates `artifacts/current` (symlink when possible, otherwise a copy). Export maps `dump_state()` to Haystack files: `prompts/system.md`, optional `prompts/input_rewrite.md`, `agent.json`, and **`artifact-manifest.json`** (includes `module_hash` + `source_hash` of the `compile.module` `.py`; not the deploy bundle’s `manifest.json`). Legacy `manifest.json` inside an artifact folder is accepted during migration. **GEPA optimizes the template offline; runtime applies fixed exported text only** — never end-user chat as an optimization target. When the manifest lists `input_rewrite`, `zaumzeug serve` / `zaumzeug run` preprocess user messages with that template before `Agent.run` (no DSPy).
+
+**Serve after compile:** Point `agent.artifact` at `artifacts/current` so serve loads the exported prompts (hand-edited `system_prompt` is ignored; `compile.module` is not imported). See [Compile and export — Serve after compile](../guides/compile.md#serve-after-compile).
 
 **Fail-fast (before GEPA):** missing `compile.module`, unimportable module, model id absent from the merged registry, or missing provider API keys in `.env` / the environment.
 
@@ -189,7 +191,7 @@ zaumzeug doctor [<harness>] [--deploy] [--verbose] [--json]
 | `--json` | Emit machine-readable JSON report |
 | `--deploy` | Validate deploy bundle under `deploy/` |
 
-**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml`, **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, and port availability. Warnings (non-blocking): `eval` in Phase 1, MCP without `uv`, stale `workflow-diagram.md`.
+**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml`, **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, and port availability. Warnings (non-blocking): `eval` in Phase 1, MCP without `uv`, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`).
 
 Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack debug logs on serve or compile, use `--verbose` on those commands or `HARNESS_LOG_LEVEL=DEBUG`.
 

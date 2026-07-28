@@ -1,7 +1,8 @@
 # Story: E2-S04a / E2.4
 # Story: E2-S04b / E2.4
 # Story: E2-S04c / E2.4
-"""E2-S04 — `zaumzeug doctor` checks (integration)."""
+# Story: E4-S05 / E4.5
+"""E2-S04 — `zaumzeug doctor` checks (integration); E4-S05 stale artifact warn."""
 
 from __future__ import annotations
 
@@ -13,6 +14,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+from zaumzeug.compile.export import compute_source_file_hash
 from zaumzeug.config.harness_root import harness_dir
 from zaumzeug.config.resolver import ARTIFACT_MANIFEST
 from zaumzeug.doctor.runner import run_doctor
@@ -417,3 +419,94 @@ def test_e1_s04_init_then_doctor_passes(tmp_path: Path) -> None:
 
     report = run_doctor(harness_name="newbie", project_root=project_root)
     assert report.exit_code == 0, report.format(verbose=True)
+
+
+def test_e4_s05_ac5_stale_artifact_warn(tmp_path: Path) -> None:
+    """AC-5 (E4-S05): doctor warns when artifact source_hash mismatches compile.module."""
+    project_root = tmp_path / "project"
+    harness_path = project_root / "usr-harnesses" / "example"
+    agent_dir = harness_path / "agents" / "researcher"
+    module_path = agent_dir / "modules" / "researcher.py"
+    module_path.parent.mkdir(parents=True, exist_ok=True)
+    (module_path.parent / "__init__.py").write_text("", encoding="utf-8")
+    module_path.write_text(
+        "import dspy\n\nclass ResearchModule(dspy.Module):\n    pass\n",
+        encoding="utf-8",
+    )
+    matching_hash = compute_source_file_hash(module_path)
+
+    artifact_dir = agent_dir / "artifacts" / "current"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    (artifact_dir / "prompts").mkdir(parents=True, exist_ok=True)
+    (artifact_dir / "prompts" / "system.md").write_text("from artifact\n", encoding="utf-8")
+    (artifact_dir / ARTIFACT_MANIFEST).write_text(
+        json.dumps(
+            {
+                "export_version": 1,
+                "run_id": "test-run",
+                "module_hash": "deadbeef",
+                "source_hash": matching_hash,
+                "paths": {"system_prompt": "prompts/system.md"},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    _write_yaml(
+        harness_path / "harness.yaml",
+        {"name": "example", "serve": {"hayhooks": {"port": 1416}}},
+    )
+    _write_yaml(
+        harness_path / "workflow.yaml",
+        {"entry": "researcher", "stages": [{"agent": "researcher"}]},
+    )
+    _write_yaml(
+        agent_dir / "agent.yaml",
+        {
+            "name": "researcher",
+            "default_model_id": "mock",
+            "agent": {"artifact": "artifacts/current"},
+            "compile": {
+                "module": "modules.researcher:ResearchModule",
+                "task_model_id": "mock",
+                "reflection_model_id": "mock",
+                "auto": "light",
+            },
+        },
+    )
+    _write_yaml(
+        agent_dir / "agents-models.yaml",
+        {
+            "default_model_id": "mock",
+            "models": {
+                "mock": {"provider": "mock", "model": "harness-fixture"},
+            },
+        },
+    )
+
+    fresh = run_doctor(harness_name="example", project_root=project_root)
+    fresh_pass = [
+        c
+        for c in fresh.checks
+        if c.name == "artifact_module" and c.severity == "pass"
+    ]
+    assert fresh_pass
+    assert "source_hash matches" in fresh_pass[0].message
+    assert fresh.exit_code == 0
+
+    module_path.write_text(
+        "import dspy\n\nclass ResearchModule(dspy.Module):\n    # edited after compile\n    pass\n",
+        encoding="utf-8",
+    )
+    stale = run_doctor(harness_name="example", project_root=project_root)
+    stale_warns = [
+        c
+        for c in stale.checks
+        if c.name == "artifact_module" and c.severity == "warn"
+    ]
+    assert stale_warns
+    assert "stale" in stale_warns[0].message.lower()
+    assert "module_hash=deadbeef" in stale_warns[0].message
+    assert "compile" in stale_warns[0].message
+    assert stale.exit_code == 0

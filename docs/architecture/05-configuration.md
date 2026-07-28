@@ -198,7 +198,9 @@ compile:
 
 **Implementation (E2-S04b, 2026-07-08):** Phase-aware warn checks: `eval` section in Phase 1 (`eval_section`), MCP without `uv` on PATH (`mcp_uv`), stale or missing `docs/workflow-diagram.md` (`workflow_diagram`). `load_harness_for_doctor()` strips warned keys before validation so exit code stays 0 when only warnings fire.
 
-**Implementation (E2-S04c, 2026-07-08):** `zaumzeug doctor --deploy` (or `HARNESS_ROOT=deploy`) resolves harnesses under `deploy/<name>/`. Validates deploy `manifest.json` (§10.3 schema) and pinned `artifact-manifest.json` paths when `artifact_run_id` is a per-agent map; reuses E2-S04a core checks (config, models, runtime paths, port). Dev-only warnings (`mcp_uv`, `workflow_diagram`) are skipped in deploy mode. Root resolution: `src/zaumzeug/config/harness_root.py`.
+**Implementation (E2-S04c, 2026-07-08):** `zaumzeug doctor --deploy` (or `HARNESS_ROOT=deploy`) resolves harnesses under `deploy/<name>/`. Validates deploy `manifest.json` (§10.3 schema) and pinned `artifact-manifest.json` paths when `artifact_run_id` is a per-agent map; reuses E2-S04a core checks (config, models, runtime paths, port). Dev-only warnings (`mcp_uv`, `workflow_diagram`, `artifact_module`) are skipped in deploy mode. Root resolution: `src/zaumzeug/config/harness_root.py`.
+
+**Implementation (E4-S05, 2026-07-28):** Dev-mode warn check `artifact_module` (`check_artifact_module_staleness`) compares `compile.module` source SHA-256 to `source_hash` in `artifact-manifest.json`. Mismatch → warn (exit 0) suggesting re-compile. Export records `source_hash` via `compile/export.py`. Tests: `tests/integration/test_doctor.py::test_e4_s05_ac5_stale_artifact_warn`.
 
 **Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run` in `src/zaumzeug/serve/` — `validate_serve()` uses strict `load_harness()` and `load_workflow()`, `resolve_serve_entry()`, and doctor model/runtime checks; optional `--deploy` and `--json`. No Hayhooks bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
 

@@ -84,6 +84,8 @@ At `zaumzeug compile <harness> --agent <agent-name>` (offline):
 
 **Implementation (E4-S03b, 2026-07-28):** When the artifact manifest lists `input_rewrite`, `runtime/preprocess.py` loads the fixed template and serve/`run_workflow` apply it to user messages before `Agent.run` (Jinja / format / plain prepend). Factory `build_agent_bundle()` exposes the template; no DSPy on the request path.
 
+**Implementation (E4-S05, 2026-07-28):** After compile, serve prefers `agent.artifact` (valid `artifact-manifest.json`) over hand-edited `system_prompt` and never imports `compile.module`. Export records `source_hash` (SHA-256 of the module `.py`); `zaumzeug doctor` warns when that hash drifts (`check_artifact_module_staleness`). Happy path: [user-docs/guides/compile.md](../user-docs/guides/compile.md#serve-after-compile).
+
 ### 5.3 Artifact layout
 
 Per-agent under `agents/<agent-name>/artifacts/`:
@@ -105,7 +107,7 @@ Deploy pins **each agent's** selected run under `deploy/<harness>/agents/<agent-
 
 | File | Scope | Written by | Purpose |
 |---|---|---|---|
-| **`agents/.../artifacts/<run_id>/artifact-manifest.json`** | Per-agent compile export | `zaumzeug compile --agent <name>` | Export version, module hash, GEPA run metadata |
+| **`agents/.../artifacts/<run_id>/artifact-manifest.json`** | Per-agent compile export | `zaumzeug compile --agent <name>` | Export version, `module_hash`, `source_hash` (module `.py`), GEPA run metadata |
 | **`deploy/<harness>/manifest.json`** | Deploy bundle | `zaumzeug deploy` | Build id, git sha, yaml hash, per-agent `artifact_run_id` map ([§10.3](07-deploy-packaging.md#103-deploy-manifestjson)) |
 
 Legacy alias: compile / serve accept `manifest.json` during migration (**implemented** E4-S03a via `find_artifact_manifest` / resolver); v1 canonical name is **`artifact-manifest.json`**.

@@ -26,10 +26,12 @@ __all__ = [
     "LEGACY_MANIFEST_NAME",
     "SYSTEM_PROMPT_REL",
     "compute_module_hash",
+    "compute_source_file_hash",
     "dump_module_state",
     "export_optimized_module",
     "find_artifact_manifest",
     "map_dump_state_to_haystack",
+    "resolve_module_source_path",
 ]
 
 ARTIFACT_MANIFEST_NAME = "artifact-manifest.json"
@@ -137,6 +139,47 @@ def compute_module_hash(state: dict[str, Any]) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def compute_source_file_hash(path: Path | str) -> str:
+    """SHA-256 of a compile.module source file (for doctor staleness, E4-S05)."""
+    data = Path(path).read_bytes()
+    return hashlib.sha256(data).hexdigest()
+
+
+def resolve_module_source_path(
+    agent_dir: Path | str,
+    module_ref: str,
+) -> Path | None:
+    """Resolve ``compile.module`` (``path:Class``) to a ``.py`` file under the agent dir.
+
+    Does not import the module or DSPy — safe for doctor / serve-adjacent checks.
+    """
+    raw = module_ref.strip()
+    if ":" not in raw:
+        return None
+    module_name, _class_name = raw.split(":", 1)
+    module_name = module_name.strip()
+    if (
+        not module_name
+        or module_name.startswith(".")
+        or ".." in module_name
+        or "/" in module_name
+        or "\\" in module_name
+    ):
+        return None
+    parts = module_name.split(".")
+    if not parts or any(not part.isidentifier() for part in parts):
+        return None
+    path = Path(agent_dir).joinpath(*parts).with_suffix(".py")
+    return path if path.is_file() else None
+
+
+def _infer_agent_dir_from_artifact(artifact_dir: Path) -> Path | None:
+    """``agents/<name>/artifacts/<run_id>`` → ``agents/<name>``."""
+    if artifact_dir.parent.name == "artifacts":
+        return artifact_dir.parent.parent
+    return None
+
+
 def map_dump_state_to_haystack(
     state: dict[str, Any],
     *,
@@ -217,12 +260,17 @@ def export_optimized_module(
     agent_name: str | None = None,
     gepa_metadata: dict[str, Any] | None = None,
     write_legacy_alias: bool = False,
+    source_hash: str | None = None,
 ) -> ExportResult:
     """Write Haystack export files into ``artifacts/<run_id>/``.
 
     Always writes canonical ``artifact-manifest.json``. When *write_legacy_alias* is
     true, also writes ``manifest.json`` (migration aid). Loaders accept either name
     via :func:`find_artifact_manifest`.
+
+    When ``module_ref`` points at a ``.py`` under the agent folder, records
+    ``source_hash`` (file SHA-256) so ``zaumzeug doctor`` can warn on stale
+    artifacts (E4-S05). Pass *source_hash* explicitly to override auto-detection.
     """
     artifact_dir = Path(artifact_dir)
     artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -260,6 +308,14 @@ def export_optimized_module(
     if paths.input_rewrite is not None:
         path_map["input_rewrite"] = paths.input_rewrite
 
+    resolved_source_hash = source_hash
+    if resolved_source_hash is None and module_ref:
+        agent_dir = _infer_agent_dir_from_artifact(artifact_dir)
+        if agent_dir is not None:
+            source_path = resolve_module_source_path(agent_dir, module_ref)
+            if source_path is not None:
+                resolved_source_hash = compute_source_file_hash(source_path)
+
     manifest: dict[str, Any] = {
         "export_version": EXPORT_VERSION,
         "run_id": run_id,
@@ -273,6 +329,8 @@ def export_optimized_module(
         "optimization_target": "template",
         "legacy_manifest_alias": LEGACY_MANIFEST_NAME,
     }
+    if resolved_source_hash:
+        manifest["source_hash"] = resolved_source_hash
     if gepa_metadata:
         manifest["gepa"] = gepa_metadata
 

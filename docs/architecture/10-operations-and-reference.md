@@ -30,6 +30,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E2-S04c, 2026-07-08):** `--deploy` flag (or `HARNESS_ROOT=deploy`) validates production bundles under `deploy/<name>/`. Checks deploy `manifest.json`, pinned artifact runs (`deploy_manifest`, `deploy_artifact`), and reuses E2-S04a core checks; skips dev-only warnings. Tests: `tests/integration/test_doctor.py` (`-k e2_s04c`).
 
+**Implementation (E4-S05, 2026-07-28):** Warn-only `artifact_module` check — when a valid artifact is resolved and `compile.module` is set, compares current module `.py` SHA-256 to manifest `source_hash`. Drift suggests `zaumzeug compile <harness> --agent <name>` (exit code stays 0). Skipped in `--deploy` mode. Tests: `tests/integration/test_doctor.py::test_e4_s05_ac5_stale_artifact_warn`.
+
 **Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run [--deploy] [--json]` — `validate_serve()` in `src/zaumzeug/serve/validate.py`; prints port, entry agent, model id, runtime path, and tools; exit 1 on validation failure. No port bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
 
 **Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` sets SDK (`zaumzeug`) and Haystack loggers to DEBUG when `zaumzeug serve|compile --verbose` or `HARNESS_LOG_LEVEL=DEBUG`. `log_request()` emits structured per-request context (`model_id`, `tool`, `artifact_path`). `SecretRedactingFilter` redacts API keys and bearer tokens. CLI reference: `user-docs/reference/cli.md`. Tests: `tests/unit/test_logging.py`.

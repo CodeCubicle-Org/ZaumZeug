@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-28 (E4-S04 Pattern B / Haystack GEPA evaluator shipped)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4-S01–S04 done; next E4-S05)  
+**Last updated:** 2026-07-28 (E4-S05 post-compile serve uses artifact)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4-S01–S05 done; next E4-S06)  
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -274,7 +274,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E2.1 | Pydantic config schemas | **AC:** Invalid yaml fails with field-level errors; [Architecture §6.6](architecture/05-configuration.md#66-phase-1-config-schema) Phase 1 example passes; unknown sections/fields for current phase fail with phase hint. **Implemented** (E2-S01, 2026-07-08): `zaumzeug.config.load_harness`, `HarnessConfig`; tests in `tests/unit/config/test_schemas.py`. |
 | E2.2 | Model registry merge | **AC:** Three-tier merge per [Architecture §6.1](architecture/05-configuration.md#61-model-registry-merge): global → harness `models.yaml` → per-agent `agents-models.yaml`; recursive dict merge; list replace; missing `default_model_id` per agent fails validation. |
 | E2.3 | Runtime resolution | **AC:** Per-agent: serve loads `artifact` > `system_prompt` > error; compile requires `compile.module` in `agent.yaml`. Workflow `entry` agent used for interactive serve. ([Architecture §5.2](architecture/04-data-flows.md#52-runtime-agent-resolution).) |
-| E2.4 | `zaumzeug doctor` | **AC:** Checks Python version, install, `.env`, config validity (including `eval` section when present — warn), every agent runtime path, every `agents-models.yaml`, workflow.yaml consistency, stale workflow diagram warn, ports (warn), uv when MCP configured. Supports `--verbose`, `--json`; optional harness name or project-wide. |
+| E2.4 | `zaumzeug doctor` | **AC:** Checks Python version, install, `.env`, config validity (including `eval` section when present — warn), every agent runtime path, every `agents-models.yaml`, workflow.yaml consistency, stale workflow diagram warn, ports (warn), uv when MCP configured. **Also (E4-S05):** warn when compiled artifact `source_hash` drifts from `compile.module` source. Supports `--verbose`, `--json`; optional harness name or project-wide. |
 | E2.5 | `--dry-run` on serve | **AC:** Validates and prints resolved config without starting server or calling LLM. |
 | E2.6 | Logging | **AC:** `--verbose` on serve/compile/run and `HARNESS_LOG_LEVEL=DEBUG` enable SDK + Haystack structured logging (harness, agent, model_id, tool, artifact path per request). |
 | E2.7 | `workflow.yaml` schema | **AC:** Validates serial `stages` list (`agent` or `pipeline` refs); unique agent folder names; `entry` stage exists; rejects unknown agent refs. Parallelism field rejected in Phase 1 (phase hint). |
@@ -310,13 +310,13 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E4.2 | GEPA compile | **Done** (E4-S02a+b, 2026-07-28) — Phase 2 `CompileConfig`; `zaumzeug compile` loads modules, preflights LMs, runs `dspy.GEPA` (stub for mock/CI), writes `artifacts/<run_id>/` + `current`. Tests: `-k e4_s02`. |
 | E4.3 | Export contract | **AC:** `dump_state()` maps to Haystack `system_prompt`, tool descriptions, pipeline Jinja templates; `artifact-manifest.json` per run; golden snapshot tests. Optional input rewrite template per agent. **E4-S03a Done** (2026-07-28); **E4-S03b Done** (2026-07-28) — runtime preprocess. |
 | E4.4 | Haystack GEPA evaluator (Pattern B) | **Done** (E4-S04, 2026-07-28) — `compile/gepa_adapter.py`: `HaystackGepaAdapter` + `optimize_haystack_artifact`; modes `single-task` \| `multi-task` \| `generalization`; `CompileConfig` `optimizer`/`mode`/`seed_artifact`. CLI `zaumzeug compile` remains Pattern A. Tests: `tests/unit/compile/test_gepa_adapter.py` (5 passed, 0 skipped). |
-| E4.5 | Post-compile serve | **AC:** After compile, serve/run use per-agent artifact over `system_prompt`. |
+| E4.5 | Post-compile serve | **Done** (E4-S05, 2026-07-28) — After compile, serve/run prefer valid `agent.artifact` over hand-edited `system_prompt`; `compile.module` not imported at serve; optional `input_rewrite` preprocess; doctor warns on stale `source_hash`. Tests: 12 passed, 0 skipped (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). Docs: [guides/compile.md — Serve after compile](user-docs/guides/compile.md#serve-after-compile). |
 | E4.6 | `--dry-run` on compile | **AC:** Validates config, resolves module imports, prints merged registries — no GEPA, no LLM calls. |
 | E4.7 | Workflow diagram | **AC:** Every `zaumzeug compile` regenerates `docs/workflow-diagram.md` (Mermaid) from `workflow.yaml` + resolved agents/models; `--workflow-diagram-only` skips GEPA; doctor warns if stale; deploy copies to `deploy/<harness>/docs/`. ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-compile).) |
 
 **Phase 2 compile scope (resolved):** **Pattern A** (`dspy.GEPA`) is the default `zaumzeug compile` path — optimize prompts/signatures via DSPy modules, export to Haystack artifacts. **Optional within Pattern A:** compile-time GEPA on **input rewrite/clarify templates** (how the harness preprocesses user messages — not optimization of end-user chat at runtime). **Pattern B** (`optimize_anything` / Haystack evaluator) **shipped early** (E4-S04, 2026-07-28) as a programmatic adapter + schema; not wired into the CLI compile path yet.
 
-**Story seeds:** DSPy module loader **Done** (E4-S01). Compile CLI + GEPA runner + artifacts **Done** (E4-S02a/b, 2026-07-28). Export contract **Done** (E4-S03a, 2026-07-28). Runtime `input_rewrite` preprocess **Done** (E4-S03b, 2026-07-28). Haystack GEPA evaluator / Pattern B **Done** (E4-S04, 2026-07-28). Remaining: post-compile serve artifact preference (E4-S05); rollback to pinned `artifacts/<run_id>` (E4-S07); workflow diagram golden snapshot (E4-S08).
+**Story seeds:** DSPy module loader **Done** (E4-S01). Compile CLI + GEPA runner + artifacts **Done** (E4-S02a/b, 2026-07-28). Export contract **Done** (E4-S03a, 2026-07-28). Runtime `input_rewrite` preprocess **Done** (E4-S03b, 2026-07-28). Haystack GEPA evaluator / Pattern B **Done** (E4-S04, 2026-07-28). Post-compile serve uses artifact **Done** (E4-S05, 2026-07-28). Remaining: rollback to pinned `artifacts/<run_id>` (E4-S07); workflow diagram golden snapshot (E4-S08).
 
 ---
 
@@ -417,7 +417,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4-S01–S04 **Done** 2026-07-28; next E4-S05 |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4-S01–S05 **Done** 2026-07-28; next E4-S06 |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A | E8 |
 

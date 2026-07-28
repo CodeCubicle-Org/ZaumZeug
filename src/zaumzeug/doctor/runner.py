@@ -9,6 +9,7 @@ from zaumzeug.config.harness_root import harness_root_segment, is_deploy_mode
 from zaumzeug.config import load_harness_for_doctor
 from zaumzeug.doctor.checks import (
     _live_providers,
+    check_artifact_module_staleness,
     check_deploy_manifest,
     check_env_for_live_models,
     check_harness_config,
@@ -112,6 +113,12 @@ def run_doctor(
         checks.extend(
             check_runtime_paths(name, harness_dir, agent_names=runtime_targets)
         )
+        if not deploy_mode:
+            checks.extend(
+                check_artifact_module_staleness(
+                    name, harness_dir, agent_names=runtime_targets
+                )
+            )
 
         port = 1416
         if harness_yaml.is_file():

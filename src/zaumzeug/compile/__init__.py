@@ -7,9 +7,11 @@ from zaumzeug.compile.export import (
     ExportResult,
     LEGACY_MANIFEST_NAME,
     compute_module_hash,
+    compute_source_file_hash,
     export_optimized_module,
     find_artifact_manifest,
     map_dump_state_to_haystack,
+    resolve_module_source_path,
 )
 from zaumzeug.compile.gepa_adapter import (
     DEFAULT_COMPONENT_KEY,
@@ -74,6 +76,7 @@ __all__ = [
     "OptimizeAnythingResult",
     "StubGEPA",
     "compute_module_hash",
+    "compute_source_file_hash",
     "default_gepa_metric",
     "default_haystack_score",
     "export_optimized_module",
@@ -92,6 +95,7 @@ __all__ = [
     "parse_compile_module_ref",
     "preflight_compile_lms",
     "resolve_compile_lm_ids",
+    "resolve_module_source_path",
     "resolve_optimize_mode",
     "run_compile",
     "validate_mode_datasets",

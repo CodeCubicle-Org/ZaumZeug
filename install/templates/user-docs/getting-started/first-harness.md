@@ -62,7 +62,7 @@ Optional Phase 2 compile (offline with mock → stub GEPA; live models need API 
 zaumzeug compile example --agent researcher
 ```
 
-Writes `agents/researcher/artifacts/<run_id>/` (including `artifact-manifest.json`, `prompts/system.md`, `agent.json`) and updates `artifacts/current`. GEPA optimizes the **template**, not end-user chat; optional `input_rewrite` is applied at serve/run — see [Compile and export](../guides/compile.md).
+Writes `agents/researcher/artifacts/<run_id>/` (including `artifact-manifest.json`, `prompts/system.md`, `agent.json`) and updates `artifacts/current`. To serve the compiled prompts, set `agent.artifact: artifacts/current` in `agent.yaml` (hand-edited `system_prompt` is then ignored). GEPA optimizes the **template**, not end-user chat; optional `input_rewrite` is applied at serve/run — see [Compile and export](../guides/compile.md).
 
 ---
 

@@ -20,7 +20,7 @@ At serve time the runtime loads fixed exported files from `artifacts/<run_id>/` 
 | System prompt | `prompts/system.md` | Haystack `Agent` system prompt |
 | Input rewrite *(optional)* | `prompts/input_rewrite.md` | Fixed preprocess template before the agent loop |
 | Agent contract | `agent.json` | Tool descriptions + pipeline Jinja field templates |
-| Manifest | `artifact-manifest.json` | Paths, module hash, run metadata |
+| Manifest | `artifact-manifest.json` | Paths, `module_hash`, `source_hash`, run metadata |
 
 Modules without a clarify/rewrite predictor omit `input_rewrite` — that is normal.
 
@@ -70,11 +70,36 @@ Each run writes immutable `agents/<name>/artifacts/<run_id>/` and updates `artif
 
 Live task/reflection models need API keys in `.env`. The shipped `example` harness uses `provider: mock` and a stub GEPA path for offline compile.
 
+## Serve after compile
+
+After a successful compile, point the agent at the exported artifact so serve ships what GEPA optimized:
+
+```yaml
+# agents/<name>/agent.yaml
+agent:
+  artifact: artifacts/current
+  # system_prompt is ignored when a valid artifact-manifest.json is present
+  system_prompt: prompts/system.md
+```
+
+Resolution priority (Architecture §5.2): **artifact** → hand-edited `system_prompt` → error.
+
+```bash
+zaumzeug compile example --agent researcher
+# ensure agent.artifact: artifacts/current
+zaumzeug doctor example   # warns if compile.module source changed since last compile
+zaumzeug serve example
+```
+
+At serve/run time:
+
+- `compile.module` is **not** imported (DSPy stays offline).
+- The agent system prompt comes from `artifacts/.../prompts/system.md`.
+- Optional `input_rewrite` from the manifest is applied as a fixed preprocess before the agent loop.
+- `zaumzeug doctor` warns (exit 0) when the current `compile.module` `.py` hash no longer matches `source_hash` in the artifact manifest — re-run compile.
+
 ## Runtime input rewrite
 
 When an artifact manifest lists `input_rewrite`, serve and `zaumzeug run` apply that **fixed** template to user messages before the agent loop (Jinja `{{ user_input }}`, `str.format`, or plain instruction text prepended). There is still no live GEPA call per message.
 
-## Next
-
-- Point `agent.artifact` at `artifacts/current` for serve — E4-S05
-- [CLI reference](../reference/cli.md#zaumzeug-compile)
+See also [CLI reference](../reference/cli.md#zaumzeug-compile).

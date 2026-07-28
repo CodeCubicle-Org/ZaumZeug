@@ -438,6 +438,129 @@ def check_workflow_diagram_staleness(harness_name: str, harness_dir: Path) -> Ch
     )
 
 
+def check_artifact_module_staleness(
+    harness_name: str,
+    harness_dir: Path,
+    *,
+    agent_names: Iterable[str],
+) -> list[CheckResult]:
+    """AC-5 (E4-S05): Warn when artifact ``source_hash`` no longer matches compile.module.
+
+    Compares the SHA-256 of the current ``compile.module`` ``.py`` file to
+    ``source_hash`` recorded in ``artifact-manifest.json`` at compile time.
+    Warn-only — exit code stays 0. Skips agents without a valid artifact or
+    without a recorded ``source_hash``.
+    """
+    # Lazy import: export helpers are DSPy-free (hash / path only).
+    from zaumzeug.compile.export import (
+        compute_source_file_hash,
+        find_artifact_manifest,
+        resolve_module_source_path,
+    )
+    from zaumzeug.config.resolver import RuntimeSource, load_agent_yaml
+
+    checks: list[CheckResult] = []
+    for agent_name in agent_names:
+        try:
+            resolution = resolve_agent_serve(
+                harness_dir,
+                harness_name=harness_name,
+                agent_name=agent_name,
+            )
+        except AgentResolutionError:
+            continue
+
+        if resolution.source is not RuntimeSource.ARTIFACT:
+            continue
+
+        try:
+            _path, data = load_agent_yaml(harness_dir, agent_name)
+        except AgentResolutionError:
+            continue
+
+        compile_section = data.get("compile")
+        if not isinstance(compile_section, dict):
+            continue
+        module_ref = compile_section.get("module")
+        if not isinstance(module_ref, str) or not module_ref.strip():
+            continue
+
+        agent_dir = resolution.agent_yaml_path.parent
+        source_path = resolve_module_source_path(agent_dir, module_ref)
+        if source_path is None:
+            checks.append(
+                CheckResult(
+                    name="artifact_module",
+                    severity="pass",
+                    message=(
+                        f"agent '{agent_name}' artifact present; "
+                        "compile.module source file not found for hash compare"
+                    ),
+                    harness=harness_name,
+                )
+            )
+            continue
+
+        manifest_path = find_artifact_manifest(resolution.path)
+        if manifest_path is None:
+            continue
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(manifest, dict):
+            continue
+
+        recorded = manifest.get("source_hash")
+        if not isinstance(recorded, str) or not recorded:
+            checks.append(
+                CheckResult(
+                    name="artifact_module",
+                    severity="pass",
+                    message=(
+                        f"agent '{agent_name}' artifact has no source_hash "
+                        "(re-compile to enable staleness check)"
+                    ),
+                    harness=harness_name,
+                )
+            )
+            continue
+
+        current_hash = compute_source_file_hash(source_path)
+        module_hash = manifest.get("module_hash")
+        module_hash_note = (
+            f" (module_hash={module_hash})"
+            if isinstance(module_hash, str) and module_hash
+            else ""
+        )
+        if current_hash != recorded:
+            checks.append(
+                CheckResult(
+                    name="artifact_module",
+                    severity="warn",
+                    message=(
+                        f"agent '{agent_name}' artifact is stale vs compile.module "
+                        f"source at {source_path.name}{module_hash_note}; "
+                        f"re-run `zaumzeug compile {harness_name} --agent {agent_name}`"
+                    ),
+                    harness=harness_name,
+                )
+            )
+        else:
+            checks.append(
+                CheckResult(
+                    name="artifact_module",
+                    severity="pass",
+                    message=(
+                        f"agent '{agent_name}' artifact source_hash matches "
+                        f"compile.module{module_hash_note}"
+                    ),
+                    harness=harness_name,
+                )
+            )
+    return checks
+
+
 def check_deploy_manifest(harness_name: str, harness_dir: Path) -> list[CheckResult]:
     """AC-2 (E2-S04c): Validate deploy ``manifest.json`` and pinned artifact runs."""
     manifest_path = harness_dir / DEPLOY_MANIFEST

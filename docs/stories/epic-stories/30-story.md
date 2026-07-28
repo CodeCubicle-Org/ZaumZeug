@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/30-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-28 |
 | **Story ID** | E4-S05 |
+| **Status** | Done |
 | **Epic** | [E4 — Compile and GEPA Pipeline](../04-epic.md) |
 | **Phase** | 2 |
 | **Epic build order** | 4 of 8 |
@@ -23,6 +24,7 @@
 | **Feature** | E4.5 |
 | **Persona** | Harness developer |
 | **Priority** | P0 |
+| **Status** | Done (2026-07-28) |
 | **Prerequisites** | [E4-S03a](28.1-story.md#e4-s03a-export-contract-and-manifest) ✅ (2026-07-28) · [E4-S03b](28.2-story.md#e4-s03b-runtime-input_rewrite-preprocess) ✅ (2026-07-28) · [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) ✅ |
 
 ### User story
@@ -44,16 +46,17 @@ As a **harness developer**, I want serve to prefer compiled artifacts over hand-
 
 ### Acceptance criteria
 
-- [ ] **AC-1** After compile, `zaumzeug serve` uses artifact path
-- [ ] **AC-2** Ignores `compile.module` at serve/run time
-- [ ] **AC-3** Ignores hand-edited `system_prompt` when valid artifact present
-- [ ] **AC-4** When artifact includes optional `input_rewrite`, applies preprocess before agent loop (E4-S03b) — no GEPA at runtime
-- [ ] **AC-5** Doctor warns if artifact stale vs module hash (optional warn)
+- [x] **AC-1** After compile, `zaumzeug serve` uses artifact path
+- [x] **AC-2** Ignores `compile.module` at serve/run time
+- [x] **AC-3** Ignores hand-edited `system_prompt` when valid artifact present
+- [x] **AC-4** When artifact includes optional `input_rewrite`, applies preprocess before agent loop (E4-S03b) — no GEPA at runtime
+- [x] **AC-5** Doctor warns if artifact stale vs module hash (optional warn)
 
 ### Implementation tasks (build)
 
-- [ ] Ensure runtime factory honors resolver priority
-- [ ] If `artifact-manifest.json` lists `input_rewrite`, run preprocess step then pass result to agent
+- [x] Ensure runtime factory honors resolver priority
+- [x] If `artifact-manifest.json` lists `input_rewrite`, run preprocess step then pass result to agent
+- [x] Record `source_hash` in artifact manifest; doctor `check_artifact_module_staleness` warns on drift
 
 ### Verification (after build)
 
@@ -67,12 +70,21 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-4 | `tests/integration/compile/test_compile_serve.py::test_e4_s05_ac4_input_rewrite_preprocess_no_dspy` |
 | AC-5 | `tests/integration/test_doctor.py::test_e4_s05_ac5_stale_artifact_warn` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/compile/test_compile_serve.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/compile/test_compile_serve.py -v` passes (11 passed, 0 skipped)
+- [x] `pytest tests/integration/test_doctor.py::test_e4_s05_ac5_stale_artifact_warn -v` passes (1 passed, 0 skipped)
+- [x] Combined E4-S05 verification: **12 passed, 0 skipped** (2026-07-28)
 
 ### Definition of done
 
-- [ ] Compile → serve happy path documented in user-docs
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Compile → serve happy path documented in user-docs
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-07-28)
+
+- Resolver/factory already preferred valid artifacts (E2-S03 / E4-S03b); E4-S05 locks the post-compile serve contract with integration tests.
+- Export writes `source_hash` (SHA-256 of `compile.module` `.py`) into `artifact-manifest.json`; `zaumzeug doctor` warns when the source drifts (`check_artifact_module_staleness`) — exit code stays 0.
+- Verification: **12 passed, 0 skipped** (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`).
+- User docs: [guides/compile.md — Serve after compile](../../user-docs/guides/compile.md#serve-after-compile).
 
 ---

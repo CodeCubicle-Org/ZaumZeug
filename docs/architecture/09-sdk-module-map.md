@@ -10,9 +10,9 @@ Maps to [PRD epics](../prd.md#8-functional-requirements-epics). Implementation l
 
 | # | Component | Module | Epic | Status (2026-07-28) |
 |---|---|---|---|---|
-| 1 | CLI | `cli.py` | E1–E7 | **Partial** (E2-S00, E2-S05, E2-S06, E3-S02, E3-S08, E1-S04, E1-S07, E4-S02a/b, E4-S03a/b) — `init`, `doctor`, `serve` (Hayhooks + `--dry-run` + `--port` + optional `input_rewrite`), `run` (serial workflow + optional `input_rewrite`), `compile` (GEPA + Haystack export), `--verbose` on serve/compile/run; other subcommands stub |
+| 1 | CLI | `cli.py` | E1–E7 | **Partial** (E2-S00, E2-S05, E2-S06, E3-S02, E3-S08, E1-S04, E1-S07, E4-S02a/b, E4-S03a/b, E4-S05) — `init`, `doctor` (incl. artifact `source_hash` warn), `serve` (Hayhooks + `--dry-run` + `--port` + optional `input_rewrite`), `run` (serial workflow + optional `input_rewrite`), `compile` (GEPA + Haystack export), `--verbose` on serve/compile/run; other subcommands stub |
 | 1a | Logging | `logging.py` | E2 | **Done** (E2-S06) — `configure_logging()`, `log_request()`, secret redaction, `HARNESS_LOG_LEVEL` |
-| 1b | Doctor | `doctor/` | E2 | **Done** (E2-S04a–S04c) — preflight checks, phase-aware warnings, `--deploy`, `--verbose`, `--json` |
+| 1b | Doctor | `doctor/` | E2 | **Done** (E2-S04a–S04c, E4-S05) — preflight checks, phase-aware warnings, artifact `source_hash` staleness warn, `--deploy`, `--verbose`, `--json` |
 | 1c | Scaffold / init | `scaffold/` | E1 | **Done** (E1-S04, 2026-07-22) — `init_harness()`, name validation, copy from `install/templates/harness/`; CLI `zaumzeug init <name> [--force]`. **`install-project` deferred** ([E1-S08](../stories/epic-stories/25-story.md); open #3 resolved) until PyPI publish |
 | 2 | Config loader + Pydantic schemas | `config/` | E2 | **Done** (E2-S01–S03, S04c, S07) + Phase 2 `CompileConfig` (E4-S02a, 2026-07-28) — `harness.yaml`, `workflow.yaml`, `models.yaml` merge, agent resolver, harness root resolution, agent `compile` section |
 | 3 | ModelRouter | `runtime/model_router.py` | E3 | **Done** (E3-S01, 2026-07-08) — config-driven router; Phase 1 providers: `mock`, `openrouter`, `openai_compatible`; lazy cache per provider+endpoint; phase-gated native cloud providers; HTTP `model_id` override via serve (E3-S07) |
@@ -20,7 +20,7 @@ Maps to [PRD epics](../prd.md#8-functional-requirements-epics). Implementation l
 | 5 | Serve / Hayhooks wrapper | `serve/` | E3, E7 | **Partial** (E2-S05, E3-S02, E3-S06, E3-S07, E4-S03b, 2026-07-28) — `validate_serve()`, `--dry-run`, `runner.py` (`prepare_serve` / `run_serve`) builds entry agent via factory and starts Hayhooks on **enforced** localhost; OpenAI contract + request `model_id` → ModelRouter; applies artifact `input_rewrite` before agent loop; MCP/ACP pending E7 |
 | 6 | DSPy module loader | `compile/module_loader.py` | E4 | **Done** (E4-S01, 2026-07-28) — `load_dspy_module()` resolves `compile.module` (`module.path:ClassName`), safe agent-dir `sys.path`, `dspy.Module` validation; not on serve/runtime import graph |
 | 6a | Compile CLI / GEPA runner | `compile/runner.py`, `compile/gepa_runner.py`, `compile/gepa_adapter.py` | E4 | **Done** (E4-S02a/b, E4-S04, 2026-07-28) — `run_compile()` Pattern A; Pattern B via `optimize_haystack_artifact` |
-| 7 | Export contract | `compile/export.py` | E4 | **Done** (E4-S03a, 2026-07-28) — `dump_state()` → prompts / `agent.json` / `artifact-manifest.json` |
+| 7 | Export contract | `compile/export.py` | E4 | **Done** (E4-S03a + E4-S05 `source_hash`, 2026-07-28) — `dump_state()` → prompts / `agent.json` / `artifact-manifest.json` (+ source file hash for doctor) |
 | 8 | Workflow diagram generator | `compile/workflow_diagram.py` | E4 | Planned |
 | 9 | Serial workflow runner | `runtime/workflow.py` | E3, E4 | **Done** (E3-S08, 2026-07-21; E4-S03b, 2026-07-28) — `run_workflow()` serial stages, stage-scoped ModelRouter, `--from`, prior-output context; optional `input_rewrite` preprocess; pipeline stages Phase-1 stub |
 | 10 | Haystack GEPA evaluator | `compile/gepa_adapter.py` | E4.4 | **Done** (E4-S04, 2026-07-28) — Pattern B `optimize_anything` wrapper + modes; CLI remains Pattern A |

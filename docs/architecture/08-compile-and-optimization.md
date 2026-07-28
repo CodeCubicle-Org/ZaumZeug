@@ -29,6 +29,8 @@ DSPy and GEPA never run in production. End-user chat is never a GEPA optimizatio
 
 **Implementation (E4-S03b, 2026-07-28):** Runtime preprocess (`runtime/preprocess.py`) — load manifest `paths.input_rewrite`, apply Jinja/`str.format`/plain prepend before `Agent.run` on serve and `zaumzeug run`.
 
+**Implementation (E4-S05, 2026-07-28):** Post-compile serve prefers valid `agent.artifact` over hand-edited `system_prompt` and never imports `compile.module`. Manifest records `source_hash` of the module `.py`; doctor warns on drift. Happy path: [user-docs/guides/compile.md](../user-docs/guides/compile.md#serve-after-compile).
+
 ### Pattern B — `optimize_anything` *(deferred — Phase 4+)*
 
 > **Shipped early (E4-S04, 2026-07-28):** adapter + schema are available; see implementation note below. Originally scoped to Phase 4+.
