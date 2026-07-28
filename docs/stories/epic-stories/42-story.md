@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/42-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-28 (E6-S04 early `eval/` exclude slice) |
 | **Story ID** | E5-S02 |
 | **Epic** | [E5 — Deploy Packaging](../06-epic.md) |
 | **Phase** | 2 |
@@ -62,6 +62,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC | Test |
 |---|---|
 | AC-1 | `tests/unit/deploy/test_copy_rules.py::test_e5_s02_ac1_excludes_dev_only_dirs` |
+| AC-1 (`eval/` slice) | **shared early:** `tests/unit/deploy/test_copy_rules.py::test_e5_s02_excludes_eval` *(policy landed with [E6-S04](37-story.md), 2026-07-28)* |
 | AC-2 | `tests/unit/deploy/test_copy_rules.py::test_e5_s02_ac2_includes_referenced_runtime_assets` |
 | AC-3 | `tests/unit/deploy/test_copy_rules.py::test_e5_s02_ac3_pins_per_agent_artifact_runs` |
 | AC-4 | `tests/unit/deploy/test_copy_rules.py::test_e5_s02_ac4_includes_workflow_and_diagram` |
@@ -76,4 +77,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 - [ ] Golden test: example zaumzeug deploy contents match matrix
 - [ ] Verification checklist complete; all ACs traced to tests
 
+### Early slice (E6-S04, 2026-07-28)
+
+`deploy/copy_rules.py` + `test_e5_s02_excludes_eval` assert `eval/` (and other §10.1 dev-only paths) are marked excluded. Full packager copy/include/pin matrix remains this story.
 ---

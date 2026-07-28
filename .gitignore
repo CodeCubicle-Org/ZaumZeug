@@ -221,3 +221,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# DeepEval local CLI state
+.deepeval/
+
+usr-harnesses/*/eval/.results/
+

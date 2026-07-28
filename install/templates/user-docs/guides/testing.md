@@ -7,7 +7,7 @@
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
-DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra.
+DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra. Optional harness `eval/` pytest files (`zaumzeug init --with-eval` or the example harness) run with `deepeval test run` (**Done** E6-S04).
 
 For SDK design detail, see internal `docs/architecture/10-operations-and-reference.md` §13 and `docs/architecture/03-technology-stack.md` §4.5.
 
@@ -202,23 +202,69 @@ zaumzeug eval example --agent researcher
 
 **Builtin** loads the valset and checks exact/substring match on `expected_output` when present (no DeepEval). **DeepEval** builds `LLMTestCase` rows from agent output and runs configured metrics. Missing `eval:` exits with a clear error. See [CLI — zaumzeug eval](../reference/cli.md#zaumzeug-eval).
 
-### DeepEval pytest files
+### DeepEval pytest scaffold
 
-DeepEval treats LLM checks like pytest tests. Start with **20–50 cases from real failures** — not a thousand synthetic prompts on day one.
+DeepEval treats LLM checks like pytest tests. Put optional files under `usr-harnesses/<name>/eval/` (Architecture §3.3) — **dev only**; the deploy packager excludes `eval/` (Architecture §10.1).
+
+Scaffold a new harness with the template:
+
+```bash
+zaumzeug init my-harness --with-eval
+pip install "zaumzeug[eval]"
+deepeval test run usr-harnesses/my-harness/eval/
+```
+
+Or add the same layout by hand (the example harness already ships it):
+
+```text
+usr-harnesses/my-harness/
+└── eval/
+    ├── metrics.py           # custom BaseMetric subclasses (optional)
+    └── test_researcher.py   # deepeval assert_test cases
+```
+
+Start with **20–50 cases from real failures** — not a thousand synthetic prompts on day one. Custom metrics live in `eval/metrics.py` and import like any local module when you run from the `eval/` directory:
 
 ```python
-import pytest
+# eval/metrics.py — deterministic example (no LLM judge / API key)
+from deepeval.metrics import BaseMetric
+from deepeval.test_case import LLMTestCase
+
+class ContainsSubstringMetric(BaseMetric):
+    def __init__(self, substring: str, *, threshold: float = 1.0) -> None:
+        self.substring = substring
+        self.threshold = threshold
+        self.score = None
+        self.success = None
+        self.reason = None
+        self.error = None
+
+    def measure(self, test_case: LLMTestCase) -> float:
+        found = self.substring.lower() in (test_case.actual_output or "").lower()
+        self.score = 1.0 if found else 0.0
+        self.success = self.score >= self.threshold
+        self.reason = "found" if found else "missing"
+        return self.score
+
+    async def a_measure(self, test_case: LLMTestCase) -> float:
+        return self.measure(test_case)
+
+    def is_successful(self) -> bool:
+        return bool(self.success)
+
+    @property
+    def __name__(self) -> str:
+        return "Contains Substring"
+```
+
+```python
+# eval/test_researcher.py
 from deepeval import assert_test
-from deepeval.metrics import GEval
-from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+from deepeval.test_case import LLMTestCase
+from metrics import ContainsSubstringMetric
 
 def test_researcher_stays_on_topic():
-    metric = GEval(
-        name="Relevance",
-        criteria="Answer must address the user question without unrelated topics.",
-        evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.INPUT],
-        threshold=0.7,
-    )
+    metric = ContainsSubstringMetric("ZaumZeug")
     case = LLMTestCase(
         input="Summarize ZaumZeug workflow.yaml",
         actual_output="...",  # from zaumzeug run or captured trace
@@ -229,8 +275,19 @@ def test_researcher_stays_on_topic():
 Run:
 
 ```bash
+deepeval test run usr-harnesses/example/eval/
+# or after init --with-eval:
 deepeval test run usr-harnesses/my-harness/eval/
 ```
+
+On Windows, if DeepEval’s progress UI fails with a UnicodeEncodeError, run with UTF-8:
+
+```bash
+# PowerShell
+$env:PYTHONUTF8="1"; deepeval test run usr-harnesses/example/eval/
+```
+
+`deepeval test run` is a thin wrapper over pytest with DeepEval reporting. Use a custom non-LLM metric (like the scaffold’s `ContainsSubstringMetric`) for local smoke without API keys; add judge metrics (`GEval`, `AnswerRelevancyMetric`, …) when you want semantic scoring.
 
 For deploy gates, set `deploy.eval_gate` in `harness.yaml` so `zaumzeug deploy` runs eval first (Architecture §6.4 / E5-S06 / E6-S03):
 
@@ -304,7 +361,7 @@ zaumzeug compile example --dry-run
 | Phase | Testing deliverables |
 |---|---|
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
-| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), trace → eval case (E6-S05) |
+| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (E6-S05) |
 | **3** | MCP integration tests, tool-correctness eval |
 | **4** | Production trace ratchet, `@observe` / Confident AI sync |
 

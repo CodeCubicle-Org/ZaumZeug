@@ -128,6 +128,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC | Test |
 |---|---|
 | AC-1 | `tests/unit/deploy/test_copy_rules.py::test_e5_s02_ac1_excludes_dev_only_dirs` |
+| AC-1 (`eval/` slice) | **shared early:** `tests/unit/deploy/test_copy_rules.py::test_e5_s02_excludes_eval` *(policy landed with [E6-S04](epic-stories/37-story.md), 2026-07-28)* |
 | AC-2 | `tests/unit/deploy/test_copy_rules.py::test_e5_s02_ac2_includes_referenced_runtime_assets` |
 | AC-3 | `tests/unit/deploy/test_copy_rules.py::test_e5_s02_ac3_pins_per_agent_artifact_runs` |
 | AC-4 | `tests/unit/deploy/test_copy_rules.py::test_e5_s02_ac4_includes_workflow_and_diagram` |
@@ -142,6 +143,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 - [ ] Golden test: example zaumzeug deploy contents match matrix
 - [ ] Verification checklist complete; all ACs traced to tests
 
+**Early slice (E6-S04, 2026-07-28):** `deploy/copy_rules.py` + `test_e5_s02_excludes_eval` assert `eval/` exclusion policy; full packager copy matrix remains this story.
 ---
 
 ## E5-S03 — `zaumzeug serve --deploy`

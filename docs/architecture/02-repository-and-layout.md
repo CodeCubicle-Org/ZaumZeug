@@ -15,7 +15,7 @@ HarnessDevelopment/
 │   ├── runtime/              # ModelRouter (E3-S01, E3-S05), factory (E3-S00), tools/ (E3-S03), input_rewrite preprocess (E4-S03b)
 │   ├── compile/              # DSPy loader; CLI + GEPA + --dry-run; export; workflow diagram; immutable runs (E4-S01–S08)
 │   ├── deploy/               # Eval gate ✅ (E6-S03 / E5-S06); full usr-harnesses/ → deploy/ packager → E5-S01
-│   ├── eval/                 # Optional DeepEval bridge — [eval] extra + require_deepeval() (E6-S01); zaumzeug eval runner (E6-S02); invoked by deploy gate (E6-S03)
+│   ├── eval/                 # Optional DeepEval bridge — [eval] extra + require_deepeval() (E6-S01); zaumzeug eval runner (E6-S02); invoked by deploy gate (E6-S03); harness eval/ pytest scaffold (E6-S04)
 │   ├── serve/                # validate_serve + dry-run (E2-S05); Hayhooks runner (E3-S02; input_rewrite on request path E4-S03b)
 │   ├── integrations/         # mock (E3-S05), haystack provider map (E3-S01); DSPy, GEPA, LiteLLM adapters
 │   └── fixtures/responses/   # bundled mock LLM fixtures (pip install; mirrors tests/fixtures/responses/)
@@ -79,11 +79,12 @@ usr-harnesses/<harness-name>/
 ├── pipelines/                # Haystack YAML — deterministic steps, orchestration (Phase 4+)
 ├── data/                     # shared queue, context, train/val JSONL (dev)
 ├── docs/                     # generated harness docs (workflow-diagram.md at compile)
-└── eval/                     # harness-level optional DeepEval pytest (dev only)
+└── eval/                     # harness-level optional DeepEval pytest (dev only; E6-S04 scaffold)
     ├── test_*.py
     └── metrics.py
 ```
 
+**Implementation (E6-S04, 2026-07-28):** Optional `eval/` scaffold via `zaumzeug init --with-eval` (template under `install/templates/harness/eval/`); example harness ships `eval/metrics.py` + `test_researcher.py`. Excluded from deploy by `deploy/copy_rules.py`. Run with `deepeval test run usr-harnesses/<name>/eval/` after `pip install "zaumzeug[eval]"`.
 **Agent naming:** `<agent-name>` must be unique within the harness (e.g. `recon-analyst`, `vuln-hunter`, `finding-validator`). Used in `workflow.yaml` stage references and CLI (`zaumzeug compile <harness> --agent <agent-name>`).
 
 **Extension points** (user folder only — never in `src/zaumzeug/`). Configuration is YAML-first; optional Python lives under `agents/<agent-name>/modules/`, `tools/`, or `hooks.py` — no top-level `harness.py` bootstrap file.

@@ -89,6 +89,8 @@ Or set eval.framework: builtin for JSONL checks without DeepEval.
 
 **Implementation (E6-S02, 2026-07-28):** `zaumzeug.eval.runner.run_eval()` — `EvalConfig` on `HarnessConfig`; builtin JSONL exact/substring checks; DeepEval metrics via `.measure()`; CLI `zaumzeug eval <name> [--framework builtin|deepeval]`. `eval` unblocked from `PHASE_GATED_FIELDS` (doctor no longer Phase-warns). Tests: `tests/unit/eval/test_runner.py`.
 
+**Implementation (E6-S04, 2026-07-28):** Optional harness-level DeepEval pytest under `usr-harnesses/<name>/eval/` — `zaumzeug init --with-eval` + example scaffold; run with `deepeval test run`. Custom metrics in `eval/metrics.py`. Excluded from deploy via `deploy/copy_rules.py`. See [§3.3](02-repository-and-layout.md#33-harness-folder-layout) and [user-docs/guides/testing.md](../user-docs/guides/testing.md#deepeval-pytest-scaffold).
+
 CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 
 **`eval` config fields (deepeval):**

@@ -56,4 +56,5 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 markers = [
   "live_llm: live provider e2e — requires HARNESS_LIVE_LLM=1 (not default CI)",
+  "eval: optional DeepEval tests — requires pip install \"zaumzeug[eval]\"",
 ]

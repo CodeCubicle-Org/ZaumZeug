@@ -14,7 +14,7 @@
 | [Jinja2](https://jinja.palletsprojects.com/) | Runtime | `jinja2` | Optional artifact `input_rewrite` template render before `Agent.run` ([E4-S03b](../stories/epic-stories/28.2-story.md) ✅) |
 | [DSPy](https://dspy.ai/) | Specification | `dspy-ai` | Modules, signatures — compile-time only |
 | [GEPA](https://github.com/gepa-ai/gepa) | Optimization | `gepa` | `dspy.GEPA`, `optimize_anything` — offline |
-| [DeepEval](https://github.com/confident-ai/deepeval) | Dev eval (optional) | `deepeval` via `[eval]` extra ✅ (E6-S01); `zaumzeug eval` ✅ (E6-S02); deploy gate ✅ (E6-S03 / E5-S06) | Regression tests; not required for production serve |
+| [DeepEval](https://github.com/confident-ai/deepeval) | Dev eval (optional) | `deepeval` via `[eval]` extra ✅ (E6-S01); `zaumzeug eval` ✅ (E6-S02); deploy gate ✅ (E6-S03 / E5-S06); `eval/` pytest scaffold ✅ (E6-S04) | Regression tests; not required for production serve |
 
 Optional: `mcp-haystack` only if a specific Haystack MCP integration requires it — **primary MCP serving** is via Hayhooks (`zaumzeug mcp`).
 
@@ -76,6 +76,8 @@ Canonical package layout. Root `pyproject.toml` exists as of E2-S00 (2026-07-08)
 
 **Implementation (E6-S03 / E5-S06, 2026-07-28):** Deploy eval gate in `deploy/packager.py` — `deploy.eval_gate` (`skip` \| `warn` \| `block`) + CLI `--eval-gate`; invokes `run_eval` when configured. Tests: `tests/unit/deploy/test_eval_gate.py`.
 
+**Implementation (E6-S04, 2026-07-28):** Harness `eval/` pytest scaffold — `zaumzeug init --with-eval`, example `usr-harnesses/example/eval/`, `deepeval test run`; `deploy/copy_rules.py` excludes `eval/`. Tests: `tests/integration/eval/test_deepeval_scaffold.py`, `tests/unit/deploy/test_copy_rules.py`.
+
 **Provider integrations** (`openai-haystack`, `anthropic-haystack`, `openrouter-haystack`, …): **not** in core or `[dev]`. Install only providers referenced in `models.yaml`. `ModelRouter` fails at startup with an actionable message if a configured provider package is missing.
 
 **`[project]` fragment (matches repo `pyproject.toml`):**
@@ -123,7 +125,7 @@ Test libraries ship in **`[dev]`** (SDK repo) and **`[eval]`** (optional harness
 | **debugpy** | Local debug | 1+ | IDE attach to `zaumzeug serve` ([§13.2](10-operations-and-reference.md#132-mechanisms)) |
 | **syrupy** *(optional)* | Unit | 2+ | Golden snapshots for compile export / `artifact-manifest.json` ([E4-S03a](../stories/epic-stories/28.1-story.md) ✅ uses checked-in golden JSON under `tests/compile/golden/` without requiring syrupy) |
 | **pytest-recording** *(optional)* | Integration | 2+ | VCR cassettes for re-recordable provider HTTP when mock profile is insufficient |
-| **deepeval** | Harness eval | 2+ (`[eval]`) ✅ E6-S01 / CLI ✅ E6-S02 / deploy gate ✅ E6-S03 | Optional LLM regression via `zaumzeug eval` or `usr-harnesses/<name>/eval/test_*.py` ([E6](../stories/05-epic.md)); import guard in `zaumzeug.eval`; `deploy.eval_gate` on release ([E5-S06](../stories/epic-stories/46-story.md)) |
+| **deepeval** | Harness eval | 2+ (`[eval]`) ✅ E6-S01 / CLI ✅ E6-S02 / deploy gate ✅ E6-S03 / pytest scaffold ✅ E6-S04 | Optional LLM regression via `zaumzeug eval` or `usr-harnesses/<name>/eval/test_*.py` ([E6](../stories/05-epic.md)); import guard in `zaumzeug.eval`; `deploy.eval_gate` on release ([E5-S06](../stories/epic-stories/46-story.md)); `init --with-eval` scaffold |
 
 **Not in v1 `[dev]` pins (bring your own if needed):** `pytest-cov` (coverage signal), `freezegun` (time determinism), MCP stub transports (Phase 3 — see [E7-S01](../stories/07-epic.md#e7-s01-mcp-tool-configuration)).
 

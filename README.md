@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 in progress: epic **E4** ([E4-S01](docs/stories/epic-stories/26-story.md)–[E4-S08](docs/stories/epic-stories/33-story.md)) **done** (2026-07-28); **E6-S01**–**E6-S03** ([34-story.md](docs/stories/epic-stories/34-story.md)–[36-story.md](docs/stories/epic-stories/36-story.md)) **done** (2026-07-28) — optional `[eval]` extra, `zaumzeug eval`, and deploy eval gate ([E5-S06](docs/stories/epic-stories/46-story.md) shipped early with E6-S03). Next: [E6-S04](docs/stories/epic-stories/37-story.md) (`eval/` pytest scaffold). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 in progress: epic **E4** ([E4-S01](docs/stories/epic-stories/26-story.md)–[E4-S08](docs/stories/epic-stories/33-story.md)) **done** (2026-07-28); **E6-S01**–**E6-S04** ([34-story.md](docs/stories/epic-stories/34-story.md)–[37-story.md](docs/stories/epic-stories/37-story.md)) **done** (2026-07-28) — optional `[eval]` extra, `zaumzeug eval`, deploy eval gate ([E5-S06](docs/stories/epic-stories/46-story.md) early with E6-S03), and `eval/` pytest scaffold (`zaumzeug init --with-eval` / `deepeval test run`). Next: [E6-S05](docs/stories/epic-stories/38-story.md) (trace → test case). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -85,7 +85,7 @@ Rough steps to go from zero to a working harness:
    - macOS / Linux: `./install/client-install.sh`
    - Any OS: `python install/client_install.py`
    - Install also scaffolds `usr-harnesses/example/`, `config/models.yaml`, `.env.example`, and related project files (idempotent; never overwrites an existing `.env`).
-2. **Scaffold more harnesses** — `zaumzeug init <name>` creates additional `usr-harnesses/<name>/` trees (coming next). After install you can already `zaumzeug serve example` with the mock model (no API keys).
+2. **Scaffold more harnesses** — `zaumzeug init <name>` creates additional `usr-harnesses/<name>/` trees; add `--with-eval` for an optional DeepEval pytest scaffold under `eval/`. After install you can already `zaumzeug serve example` with the mock model (no API keys).
 3. **Define the workflow** — edit `workflow.yaml`: set the `entry` agent and ordered `stages` (agent or pipeline steps).
 4. **Configure agents** — under `agents/<name>/`, set prompts and tools in `agent.yaml` and pick models in `agents-models.yaml`.
 5. **Add code only if needed** — custom tools, pipelines, or DSPy modules when YAML is not enough.
@@ -103,7 +103,7 @@ Once scaffolded, you iterate in `usr-harnesses/<name>/`:
 2. **Validate** — `zaumzeug doctor <name>` after each meaningful change.
 3. **Run locally** — `zaumzeug run <name>` executes all workflow stages in order; `zaumzeug serve <name>` opens interactive chat with the entry agent.
 4. **Compile** *(Phase 2+)* — `zaumzeug compile <name>` runs DSPy/GEPA offline and writes optimized artifacts under each agent.
-5. **Test** — `pytest` for SDK contributors; harness developers can add optional `eval/` tests with DeepEval (`pip install "zaumzeug[eval]"` — E6-S01). Default dev uses the **mock** model profile — no API keys required.
+5. **Test** — `pytest` for SDK contributors; harness developers can add optional `eval/` tests with DeepEval (`pip install "zaumzeug[eval]"` — E6-S01; scaffold via `zaumzeug init --with-eval` or the example harness — E6-S04; run `deepeval test run usr-harnesses/<name>/eval/`). Default dev uses the **mock** model profile — no API keys required.
 6. **Deploy** — `zaumzeug deploy <name>` packages `usr-harnesses/<name>/` into `deploy/<name>/` for production. Ops validates with `zaumzeug doctor <name> --deploy`, then runs `zaumzeug serve --deploy` on the target host.
 
 Never edit `deploy/` by hand — it is regenerated on each deploy. See [Testing](user-docs/guides/testing.md) for mock vs live test tiers.
@@ -117,7 +117,7 @@ Never edit `deploy/` by hand — it is regenerated on each deploy. See [Testing]
 | Runtime | [Haystack](https://github.com/deepset-ai/haystack) + Hayhooks | Agent loop, tools, RAG, REST/MCP serve |
 | Specification | [DSPy](https://dspy.ai/) | Signatures and modules (compile-time only) |
 | Optimization | [GEPA](https://github.com/gepa-ai/gepa) | Offline prompt and module optimization |
-| Evaluation | [DeepEval](https://github.com/confident-ai/deepeval) *(optional `[eval]` extra)* | Dev regression — install with `pip install "zaumzeug[eval]"` (E6-S01); `zaumzeug eval` **Done** (E6-S02); deploy eval gate **Done** (E6-S03 / E5-S06) |
+| Evaluation | [DeepEval](https://github.com/confident-ai/deepeval) *(optional `[eval]` extra)* | Dev regression — install with `pip install "zaumzeug[eval]"` (E6-S01); `zaumzeug eval` **Done** (E6-S02); deploy eval gate **Done** (E6-S03 / E5-S06); `eval/` pytest scaffold **Done** (E6-S04) |
 
 Model routing is configuration-driven via `models.yaml` — swap providers without changing agent code. See [dependencies.md](dependencies.md) for the full list of external tools and libraries, including [Python version notes](dependencies.md#python-version-and-local-install).
 
@@ -144,8 +144,10 @@ zaumzeug serve <harness> --verbose    # SDK + Haystack debug logging (or HARNESS
 zaumzeug compile <harness> --verbose  # Same logging for compile (Phase 2+)
 zaumzeug compile <harness> --workflow-diagram-only  # Refresh docs/workflow-diagram.md without GEPA
 zaumzeug eval <harness>               # Builtin JSONL or DeepEval regression (E6-S02)
+deepeval test run usr-harnesses/<name>/eval/   # Optional pytest scaffold (E6-S04; needs [eval])
 zaumzeug deploy <harness>             # Eval gate then pack (gate Done E6-S03/E5-S06; full bundle E5-S01)
 zaumzeug deploy <harness> --eval-gate block  # Override deploy.eval_gate for one run
+zaumzeug init <name> --with-eval      # Scaffold harness + optional eval/ DeepEval tests (E6-S04)
 ```
 
 **Planned:**

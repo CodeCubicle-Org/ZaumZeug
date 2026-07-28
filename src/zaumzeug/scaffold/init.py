@@ -60,9 +60,13 @@ def init_harness(
     *,
     project_root: Path | str | None = None,
     force: bool = False,
+    with_eval: bool = False,
     templates_dir: Path | str | None = None,
 ) -> Path:
     """Create ``usr-harnesses/<name>/`` from the harness template.
+
+    When *with_eval* is True, also copies optional ``eval/`` DeepEval scaffold
+    (metrics + ``test_*.py``). Eval files are skipped by default.
 
     Returns the created harness directory. Raises :class:`ScaffoldError` on
     invalid names, missing templates, or an existing harness without *force*.
@@ -99,21 +103,43 @@ def init_harness(
         )
 
     usr_root.mkdir(parents=True, exist_ok=True)
-    _copy_template_tree(template, dest, name=name)
+    _copy_template_tree(template, dest, name=name, with_eval=with_eval)
 
     harness_yaml = dest / "harness.yaml"
     if not harness_yaml.is_file():
         raise ScaffoldError(f"Scaffold failed: missing {harness_yaml}")
 
+    if with_eval and not (dest / "eval" / "metrics.py").is_file():
+        raise ScaffoldError(
+            f"Scaffold failed: --with-eval requested but missing {dest / 'eval' / 'metrics.py'}"
+        )
+
     return dest
 
 
-def _copy_template_tree(src: Path, dest: Path, *, name: str) -> None:
-    """Copy *src* → *dest*, substituting ``{{name}}`` in text files."""
+def _is_eval_template_path(rel: Path) -> bool:
+    """True when *rel* is under the optional ``eval/`` scaffold tree."""
+    parts = rel.parts
+    return bool(parts) and parts[0] == "eval"
+
+
+def _copy_template_tree(
+    src: Path,
+    dest: Path,
+    *,
+    name: str,
+    with_eval: bool = False,
+) -> None:
+    """Copy *src* → *dest*, substituting ``{{name}}`` in text files.
+
+    Optional ``eval/`` files are omitted unless *with_eval* is True (E6-S04).
+    """
     for path in sorted(src.rglob("*")):
         if not path.is_file():
             continue
         rel = path.relative_to(src)
+        if not with_eval and _is_eval_template_path(rel):
+            continue
         target = dest / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         if path.suffix.lower() in _TEXT_SUFFIXES or path.name in {

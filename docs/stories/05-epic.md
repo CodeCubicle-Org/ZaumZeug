@@ -5,7 +5,7 @@
 | **Document** | Epic E6 user stories |
 | **File** | `docs/stories/05-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E6-S03 / E5-S06 done) |
+| **Last modified** | 2026-07-28 (E6-S04 done) |
 | **Status** | In progress |
 | **Build order** | **5 of 8** (before E5 — deploy eval gate needs `zaumzeug eval`) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -28,7 +28,8 @@
 1. **E6-S01** — `[eval]` extra ✅ (2026-07-28)
 2. **E6-S02** — `zaumzeug eval` *(blocks E5-S06)* ✅ (2026-07-28)
 3. **E6-S03** — Eval gate cross-reference ✅ (2026-07-28; owner [E5-S06](../06-epic.md#e5-s06-deploy-eval-gate) ✅)
-4. **E6-S04** → **E6-S07** — pytest scaffold, trace, HTTP mode, GEPA bridge
+4. **E6-S04** — `eval/` pytest scaffold ✅ (2026-07-28)
+5. **E6-S05** → **E6-S07** — trace, HTTP mode, GEPA bridge
 
 ---
 
@@ -193,6 +194,7 @@ Per [Story verification](00-README.md#story-verification-required). **Cross-stor
 | **Feature** | E6.4 |
 | **Persona** | Harness developer |
 | **Priority** | P2 |
+| **Status** | Done (2026-07-28) |
 
 ### User story
 
@@ -205,33 +207,34 @@ As a **harness developer**, I want optional pytest files under `eval/`, so that 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Optional `usr-harnesses/<name>/eval/test_*.py` runs via `deepeval test run`
-- [ ] **AC-2** Custom metrics in `eval/metrics.py` importable
-- [ ] **AC-3** `eval/` excluded from deploy bundle (E5-S02)
+- [x] **AC-1** Optional `usr-harnesses/<name>/eval/test_*.py` runs via `deepeval test run`
+- [x] **AC-2** Custom metrics in `eval/metrics.py` importable
+- [x] **AC-3** `eval/` excluded from deploy bundle (E5-S02)
 
 ### Implementation tasks (build)
 
-- [ ] Add eval template in zaumzeug init (optional flag)
-- [ ] Document `deepeval test run` workflow in user-docs
+- [x] Add eval template in zaumzeug init (optional flag)
+- [x] Document `deepeval test run` workflow in user-docs
 
 ### Verification (after build)
 
-Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E6-S04 / E6.4`.
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E6-S04 / E6.4`. Canonical: [37-story.md](epic-stories/37-story.md).
 
 | AC | Test |
 |---|---|
-| AC-1 | `tests/integration/eval/test_deepeval_scaffold.py::test_e6_s04_ac1_deepeval_test_run` *(requires [eval] extra in CI job)* |
+| AC-1 | `tests/integration/eval/test_deepeval_scaffold.py::test_e6_s04_ac1_deepeval_test_run` *(requires [eval] extra)* |
 | AC-2 | `tests/integration/eval/test_deepeval_scaffold.py::test_e6_s04_ac2_custom_metrics_importable` |
 | AC-3 | **shared:** `tests/unit/deploy/test_copy_rules.py::test_e5_s02_excludes_eval` *(E5-S02)* |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/eval/test_deepeval_scaffold.py -v` passes (with eval extra)
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/eval/test_deepeval_scaffold.py tests/unit/deploy/test_copy_rules.py tests/unit/cli/test_init_eval.py -v` passes (9 passed with eval extra for AC-1/AC-2)
 
 ### Definition of done
 
-- [ ] Example metric file in example harness (optional, dev-only)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Example metric file in example harness (optional, dev-only)
+- [x] Verification checklist complete; all ACs traced to tests
 
+**E6-S04 Done (2026-07-28):** `zaumzeug init --with-eval`; example `eval/metrics.py` + `test_researcher.py`; `deploy/copy_rules.py` excludes `eval/`; docs in testing.md / cli.md.
 ---
 
 ## E6-S05 — Trace → test case

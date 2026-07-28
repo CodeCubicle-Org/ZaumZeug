@@ -39,7 +39,11 @@ def _stub_command(name: str) -> Callable[[argparse.Namespace], int]:
 def _init_command(args: argparse.Namespace) -> int:
     """Scaffold ``usr-harnesses/<name>/`` from the harness template (E1-S04)."""
     try:
-        dest = init_harness(args.name, force=args.force)
+        dest = init_harness(
+            args.name,
+            force=args.force,
+            with_eval=bool(getattr(args, "with_eval", False)),
+        )
     except ScaffoldError as exc:
         print(str(exc), file=sys.stderr)
         return 1
@@ -48,6 +52,9 @@ def _init_command(args: argparse.Namespace) -> int:
     print("Next steps:")
     print(f"  zaumzeug doctor {args.name}")
     print(f"  zaumzeug serve {args.name}")
+    if getattr(args, "with_eval", False):
+        print(f"  # optional eval (needs pip install \"zaumzeug[eval]\"):")
+        print(f"  deepeval test run usr-harnesses/{args.name}/eval/")
     return 0
 
 
@@ -186,6 +193,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--force",
         action="store_true",
         help="overwrite an existing harness folder with the same name",
+    )
+    init_cmd.add_argument(
+        "--with-eval",
+        action="store_true",
+        dest="with_eval",
+        help="include optional eval/ DeepEval pytest scaffold (dev-only)",
     )
     init_cmd.set_defaults(_handler=_init_command)
 

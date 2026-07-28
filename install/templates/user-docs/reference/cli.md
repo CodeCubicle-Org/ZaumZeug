@@ -19,22 +19,30 @@ ZaumZeug command-line interface reference for harness developers.
 Scaffold a new harness folder under `usr-harnesses/<name>/` from the Phase 1 template (minimal `harness.yaml`, `workflow.yaml`, one agent with mock models and a system prompt).
 
 ```bash
-zaumzeug init <name> [--force]
+zaumzeug init <name> [--force] [--with-eval]
 ```
 
 | Flag | Description |
 |---|---|
 | `--force` | Overwrite an existing `usr-harnesses/<name>/` folder |
+| `--with-eval` | Include optional `eval/` DeepEval pytest scaffold (`metrics.py` + `test_*.py`; dev-only, excluded from deploy) |
 
 **Name rules:** Single safe path segment — letters, digits, `_`, `-`; no `..` or path separators. Init fails if the folder already exists unless `--force` is set.
 
 ```bash
 zaumzeug init my-agent
+zaumzeug init my-agent --with-eval   # optional DeepEval pytest scaffold
 zaumzeug doctor my-agent
 zaumzeug serve my-agent
 ```
 
-See [Project setup](../getting-started/project-setup.md) for layout details.
+With `--with-eval`, after `pip install "zaumzeug[eval]"`:
+
+```bash
+deepeval test run usr-harnesses/my-agent/eval/
+```
+
+See [Project setup](../getting-started/project-setup.md) for layout details and [Testing](../guides/testing.md#deepeval-pytest-scaffold) for the eval workflow.
 
 ---
 

@@ -1,6 +1,6 @@
 # ZaumZeug — Architecture
 
-**Last updated:** 2026-07-28 (E6-S03 / E5-S06 deploy eval gate)
+**Last updated:** 2026-07-28 (E6-S04 `eval/` pytest scaffold)
 **Related:** [PRD](prd.md) · [Ideation archive](ideation-stage.md) · [Stories index](stories/00-README.md)
 
 **Document scope:** This document defines **how** the system is built — structure, flows, protocols, and SDK modules. Product **what/why**, epics, acceptance criteria, and phases live in **[prd.md](prd.md)**. Cross-reference; do not duplicate.
@@ -78,15 +78,15 @@ flowchart TB
 | # | Topic | File | Contents |
 |---|---|---|---|
 | 01 | Overview and principles | [01-overview-and-principles.md](architecture/01-overview-and-principles.md) | System context detail, golden rules, harness vs agent, guides/sensors, portability |
-| 02 | Repository and layout | [02-repository-and-layout.md](architecture/02-repository-and-layout.md) | Repo tree, harness folders, `eval/` SDK bridge (E6-S01/S02), model files, install scripts, user-docs |
-| 03 | Technology stack | [03-technology-stack.md](architecture/03-technology-stack.md) | Haystack/DSPy/GEPA/Jinja2 boundaries, `pyproject.toml` groups, `[eval]` extra ✅ (E6-S01), `zaumzeug eval` ✅ (E6-S02), deploy eval gate ✅ (E6-S03 / E5-S06), test dependencies |
+| 02 | Repository and layout | [02-repository-and-layout.md](architecture/02-repository-and-layout.md) | Repo tree, harness folders, `eval/` SDK bridge (E6-S01–S04), model files, install scripts, user-docs |
+| 03 | Technology stack | [03-technology-stack.md](architecture/03-technology-stack.md) | Haystack/DSPy/GEPA/Jinja2 boundaries, `pyproject.toml` groups, `[eval]` extra ✅ (E6-S01), `zaumzeug eval` ✅ (E6-S02), deploy eval gate ✅ (E6-S03 / E5-S06), `eval/` pytest scaffold ✅ (E6-S04), test dependencies |
 | 04 | Data flows | [04-data-flows.md](architecture/04-data-flows.md) | compile → deploy → serve, artifacts, workflow diagram ✅ (E4-S08); post-compile serve ✅ (E4-S05); compile `--dry-run` ✅ (E4-S06); rollback / pin ✅ (E4-S07) |
-| 05 | Configuration | [05-configuration.md](architecture/05-configuration.md) | YAML schema, model merge, eval frameworks (§6.3 ✅ E6-S01/S02), deploy eval gate (§6.4 ✅ E6-S03 / E5-S06); doctor `source_hash` warn (E4-S05) |
+| 05 | Configuration | [05-configuration.md](architecture/05-configuration.md) | YAML schema, model merge, eval frameworks (§6.3 ✅ E6-S01/S02), deploy eval gate (§6.4 ✅ E6-S03 / E5-S06); doctor `source_hash` warn (E4-S05); harness `eval/` pytest (E6-S04) |
 | 06 | Runtime and protocols | [06-runtime-and-protocols.md](architecture/06-runtime-and-protocols.md) | CLI layering, MCP/ACP/REST, web layouts |
-| 07 | Deploy packaging | [07-deploy-packaging.md](architecture/07-deploy-packaging.md) | Packager (eval gate ✅ E6-S03/E5-S06; full copy E5-S01), manifest, target install, platform matrix |
+| 07 | Deploy packaging | [07-deploy-packaging.md](architecture/07-deploy-packaging.md) | Packager (eval gate ✅ E6-S03/E5-S06; `eval/` exclude policy ✅ E6-S04; full copy E5-S01/S02), manifest, target install, platform matrix |
 | 08 | Compile and optimization | [08-compile-and-optimization.md](architecture/08-compile-and-optimization.md) | GEPA patterns A/B/C; Pattern A CLI; Pattern B adapter ✅ (E4-S04); optional runtime `input_rewrite` (E4-S03b ✅); post-compile serve ✅ (E4-S05); compile `--dry-run` ✅ (E4-S06); immutable runs + rollback ✅ (E4-S07); workflow diagram ✅ (E4-S08) |
-| 09 | SDK module map | [09-sdk-module-map.md](architecture/09-sdk-module-map.md) | Epic → module table; `[eval]` + `zaumzeug eval` ✅ (E6-S01/S02); deploy packager partial ✅ (E6-S03/E5-S06) |
-| 10 | Operations and reference | [10-operations-and-reference.md](architecture/10-operations-and-reference.md) | Debug/test pyramid, testing playbook, optional `[eval]` + `zaumzeug eval` + deploy gate (E6-S01–S03 / E5-S06), doctor `artifact_module` + `pinned_artifact` + workflow diagram (E4-S05 / E4-S07 / E4-S08), serve/compile `--dry-run` (E2-S05 / E4-S06), security, anti-patterns, ecosystem, links |
+| 09 | SDK module map | [09-sdk-module-map.md](architecture/09-sdk-module-map.md) | Epic → module table; `[eval]` + `zaumzeug eval` + `eval/` scaffold ✅ (E6-S01–S04); deploy packager partial ✅ (E6-S03/E5-S06 + copy_rules) |
+| 10 | Operations and reference | [10-operations-and-reference.md](architecture/10-operations-and-reference.md) | Debug/test pyramid, testing playbook, optional `[eval]` + `zaumzeug eval` + deploy gate + `eval/` scaffold (E6-S01–S04 / E5-S06), doctor `artifact_module` + `pinned_artifact` + workflow diagram (E4-S05 / E4-S07 / E4-S08), serve/compile `--dry-run` (E2-S05 / E4-S06), security, anti-patterns, ecosystem, links |
 
 **Reader paths:**
 

@@ -32,6 +32,7 @@ From the project root (where `usr-harnesses/` lives):
 
 ```bash
 zaumzeug init my-agent
+zaumzeug init my-agent --with-eval   # optional DeepEval pytest under eval/
 ```
 
 This creates `usr-harnesses/my-agent/` from the Phase 1 template:
@@ -42,6 +43,7 @@ This creates `usr-harnesses/my-agent/` from the Phase 1 template:
 | **`workflow.yaml`** | Single `agent` stage as `entry` |
 | **`agents/agent/`** | Runtime via `system_prompt`, mock `agents-models.yaml` |
 | **`models.yaml`** | Optional harness-wide aliases (comments by default) |
+| **`eval/`** *(with `--with-eval`)* | Optional DeepEval `metrics.py` + `test_*.py` (dev-only; not shipped in deploy) |
 
 The harness name must be a single safe path segment (letters, digits, `_`, `-`; no `..` or separators). If the folder already exists, init fails unless you pass `--force` (overwrites the folder).
 
@@ -54,9 +56,11 @@ zaumzeug init my-agent --force
 ```bash
 zaumzeug doctor my-agent
 zaumzeug serve my-agent
+# optional (needs pip install "zaumzeug[eval]"):
+# deepeval test run usr-harnesses/my-agent/eval/
 ```
 
-Edit `agents/agent/prompts/system.md`, tools, and models as needed. For a fuller research-oriented layout, copy patterns from `usr-harnesses/example/` or start from [Your first harness](first-harness.md).
+Edit `agents/agent/prompts/system.md`, tools, and models as needed. For a fuller research-oriented layout (including a sample `eval/`), copy patterns from `usr-harnesses/example/` or start from [Your first harness](first-harness.md). See [Testing — DeepEval pytest scaffold](../guides/testing.md#deepeval-pytest-scaffold).
 
 ---
 

@@ -51,6 +51,8 @@ Idempotent — overwrites `deploy/<name>/`. Future: `zaumzeug export` tarball of
 
 **Implementation (E6-S03 / E5-S06, 2026-07-28):** Step 2 (eval gate) is live in `src/zaumzeug/deploy/packager.py` (`apply_eval_gate` → `package_harness`); CLI `zaumzeug deploy --eval-gate`. Steps 1 and 3–6 (doctor preflight, stripped yaml, pin/copy, manifest, target install scripts) remain [E5-S01](../stories/epic-stories/41-story.md).
 
+**Implementation (E6-S04, 2026-07-28):** `deploy/copy_rules.py` exports `is_excluded_from_deploy()` so `eval/` (and other §10.1 dev-only paths) are marked excluded before full E5-S02 packager copy lands. Shared test: `tests/unit/deploy/test_copy_rules.py::test_e5_s02_excludes_eval`.
+
 ### 10.3 Deploy `manifest.json`
 
 Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`artifact-manifest.json`** under `artifacts/` — [§5.3](04-data-flows.md#53-artifact-layout)).
