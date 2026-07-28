@@ -1,12 +1,16 @@
-# Story: E5-S05 / E5.5 · E5-S09a / E5.9
-"""E5-S05 / E5-S09a — Target ship workflow + target_install core (Architecture §10.5 / §10.7)."""
+# Story: E5-S05 / E5.5 · E5-S09a / E5.9 · E5-S09b / E5.9
+"""E5-S05 / E5-S09a / E5-S09b — Target ship workflow, install core, shell wrappers."""
 
 from __future__ import annotations
 
 import ast
 import importlib.util
 import io
+import json
 import re
+import shutil
+import stat
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -22,11 +26,63 @@ from tests.integration.deploy.test_deploy import _seed_deploy_harness
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PYPROJECT = REPO_ROOT / "pyproject.toml"
-TARGET_INSTALL = REPO_ROOT / "install" / "target_install.py"
+INSTALL_DIR = REPO_ROOT / "install"
+TARGET_INSTALL = INSTALL_DIR / "target_install.py"
+TARGET_SH_WRAPPER = INSTALL_DIR / "target-install.sh"
+TARGET_PS1_WRAPPER = INSTALL_DIR / "target-install.ps1"
 README_DEPLOY_TEMPLATE = (
     REPO_ROOT / "install" / "templates" / "deploy" / "README.deploy.md"
 )
 SHIP_GUIDE = REPO_ROOT / "user-docs" / "guides" / "deploy.md"
+
+_GIT_BASH_CANDIDATES = (
+    Path(r"C:\Program Files\Git\bin\bash.exe"),
+    Path(r"C:\Program Files (x86)\Git\bin\bash.exe"),
+)
+
+
+def _resolve_bash() -> str | None:
+    """Prefer Git Bash on Windows; skip WSL ``bash.exe`` (cannot use Win paths)."""
+    for candidate in _GIT_BASH_CANDIDATES:
+        if candidate.is_file():
+            return str(candidate)
+    which = shutil.which("bash")
+    if which is None:
+        return None
+    normalized = which.replace("/", "\\").lower()
+    if normalized.endswith(r"system32\bash.exe"):
+        return None
+    return which
+
+
+def _stub_target_install(target: Path, *, exit_code: int = 0) -> None:
+    """Write a stub that records argv and exits with ``exit_code``."""
+    target.write_text(
+        "\n".join(
+            [
+                "#!/usr/bin/env python3",
+                "import json, sys",
+                "from pathlib import Path",
+                "out = Path(__file__).resolve().parent / '_wrapper_argv.json'",
+                "out.write_text(json.dumps(sys.argv[1:]), encoding='utf-8')",
+                f"raise SystemExit({exit_code})",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _sandbox_target_wrappers(tmp_path: Path, *, exit_code: int = 0) -> Path:
+    """Copy target wrappers into a temp dir with a stub ``target_install.py``."""
+    sandbox = tmp_path / "bundle"
+    sandbox.mkdir(parents=True)
+    shutil.copy2(TARGET_SH_WRAPPER, sandbox / "target-install.sh")
+    shutil.copy2(TARGET_PS1_WRAPPER, sandbox / "target-install.ps1")
+    _stub_target_install(sandbox / "target_install.py", exit_code=exit_code)
+    sh = sandbox / "target-install.sh"
+    sh.chmod(sh.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    return sandbox
 
 
 def _load_target_install() -> ModuleType:
@@ -405,3 +461,120 @@ def test_e5_s09a_preflight_requires_manifest_and_harness(
 
     code = target_install.main(["--deploy-dir", str(tmp_path / "missing")])
     assert code == 1
+
+
+# --- E5-S09b / E5.9 — target install shell wrappers -----------------------
+
+
+def test_e5_s09b_ac1_wrappers_invoke_python(tmp_path: Path) -> None:
+    """AC-1: ``target-install.sh`` / ``.ps1`` invoke ``target_install.py`` with forwarded args."""
+    assert TARGET_SH_WRAPPER.is_file(), f"missing wrapper: {TARGET_SH_WRAPPER}"
+    assert TARGET_PS1_WRAPPER.is_file(), f"missing wrapper: {TARGET_PS1_WRAPPER}"
+
+    sh_text = TARGET_SH_WRAPPER.read_text(encoding="utf-8")
+    ps1_text = TARGET_PS1_WRAPPER.read_text(encoding="utf-8")
+    assert "target_install.py" in sh_text
+    assert "target_install.py" in ps1_text
+    assert '"$@"' in sh_text, 'bash wrapper must forward all args via "$@"'
+    assert "@args" in ps1_text, "PowerShell wrapper must forward all args via @args"
+    assert "pip install" not in sh_text.lower()
+    assert "pip install" not in ps1_text.lower()
+    # Sibling script path — works under install/ and inside deploy/<name>/.
+    assert "${HERE}/target_install.py" in sh_text or 'HERE}/target_install.py' in sh_text
+    assert "$PSScriptRoot" in ps1_text
+    assert "client_install.py" not in sh_text
+    assert "client_install.py" not in ps1_text
+
+    sandbox = _sandbox_target_wrappers(tmp_path)
+    forwarded = ("--skip-venv", "--deploy-dir", str(sandbox))
+    ran = False
+
+    bash = _resolve_bash()
+    if bash is not None:
+        result = subprocess.run(
+            [bash, str(sandbox / "target-install.sh"), *forwarded],
+            check=False,
+            capture_output=True,
+            text=True,
+            cwd=sandbox,
+        )
+        assert result.returncode == 0, f"stderr={result.stderr!r} stdout={result.stdout!r}"
+        argv = json.loads((sandbox / "_wrapper_argv.json").read_text(encoding="utf-8"))
+        assert argv == list(forwarded)
+        ran = True
+        (sandbox / "_wrapper_argv.json").unlink(missing_ok=True)
+
+    shell = shutil.which("pwsh") or shutil.which("powershell")
+    if shell is not None:
+        result = subprocess.run(
+            [
+                shell,
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(sandbox / "target-install.ps1"),
+                *forwarded,
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            cwd=sandbox,
+        )
+        assert result.returncode == 0, f"stderr={result.stderr!r} stdout={result.stdout!r}"
+        argv = json.loads((sandbox / "_wrapper_argv.json").read_text(encoding="utf-8"))
+        assert argv == list(forwarded)
+        ran = True
+
+    if not ran:
+        pytest.skip("neither bash nor PowerShell available for wrapper runtime check")
+
+
+def test_e5_s09b_ac3_wrapper_exit_code_parity(tmp_path: Path) -> None:
+    """AC-3: Wrappers return the same exit code as the underlying Python script."""
+    for expected in (0, 2, 7):
+        sandbox = _sandbox_target_wrappers(tmp_path / f"exit_{expected}", exit_code=expected)
+        ran = False
+
+        bash = _resolve_bash()
+        if bash is not None:
+            result = subprocess.run(
+                [bash, str(sandbox / "target-install.sh"), "--skip-venv"],
+                check=False,
+                capture_output=True,
+                text=True,
+                cwd=sandbox,
+            )
+            assert result.returncode == expected, (
+                f"bash exit mismatch: got {result.returncode}, want {expected}; "
+                f"stderr={result.stderr!r}"
+            )
+            ran = True
+
+        shell = shutil.which("pwsh") or shutil.which("powershell")
+        if shell is not None:
+            result = subprocess.run(
+                [
+                    shell,
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(sandbox / "target-install.ps1"),
+                    "--skip-venv",
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+                cwd=sandbox,
+            )
+            assert result.returncode == expected, (
+                f"ps1 exit mismatch: got {result.returncode}, want {expected}; "
+                f"stderr={result.stderr!r}"
+            )
+            ran = True
+
+        if not ran:
+            pytest.skip("neither bash nor PowerShell available for exit-code parity check")

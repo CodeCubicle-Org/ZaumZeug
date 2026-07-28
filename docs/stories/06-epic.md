@@ -5,8 +5,8 @@
 | **Document** | Epic E5 user stories |
 | **File** | `docs/stories/06-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-29 (E5-S09a target install core Done) |
-| **Status** | In progress (E5-S01–S08 + E5-S09a Done; next E5-S09b wrappers) |
+| **Last modified** | 2026-07-29 (E5-S09b target install wrappers Done) |
+| **Status** | In progress (E5-S01–S08 + E5-S09a/b Done; next E5-S09c `--verify`) |
 | **Build order** | **6 of 8** (after E4 compile + E6-S02 eval for eval gate) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -459,6 +459,6 @@ Per [Story verification](00-README.md#story-verification-required). See [48-stor
 
 ## E5-S09 — Target runtime install *(split into sub-stories)*
 
-> **Canonical story files:** [E5-S09a — core script](epic-stories/49.1-story.md) ✅ · [E5-S09b — wrappers](epic-stories/49.2-story.md) · [E5-S09c — verify](epic-stories/49.3-story.md)
+> **Canonical story files:** [E5-S09a — core script](epic-stories/49.1-story.md) ✅ · [E5-S09b — wrappers](epic-stories/49.2-story.md) ✅ · [E5-S09c — verify](epic-stories/49.3-story.md)
 
-See epic-stories for full AC → test mapping. Core script **Done** ([E5-S09a](epic-stories/49.1-story.md), 2026-07-29). `--verify` depends on [E2-S04c](../01-epic.md#e2-s04--zaumzeug-doctor-split-into-sub-stories) ✅ and [E2-S05](../01-epic.md#e2-s05-dry-run-on-serve) ✅ ([E5-S09c](epic-stories/49.3-story.md#e5-s09c-target-install-verify-integration) wires both in `target_install.py`). CI matrix dry-run ([E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix) ✅, 2026-07-22) closed [E2-S05 DoD](epic-stories/06-story.md#definition-of-done) via AC-3.
+See epic-stories for full AC → test mapping. Core script **Done** ([E5-S09a](epic-stories/49.1-story.md), 2026-07-29). Wrappers **Done** ([E5-S09b](epic-stories/49.2-story.md), 2026-07-29). `--verify` depends on [E2-S04c](../01-epic.md#e2-s04--zaumzeug-doctor-split-into-sub-stories) ✅ and [E2-S05](../01-epic.md#e2-s05-dry-run-on-serve) ✅ ([E5-S09c](epic-stories/49.3-story.md#e5-s09c-target-install-verify-integration) wires both in `target_install.py`). CI matrix dry-run ([E1-S07](../03-epic.md#e1-s07-cross-platform-ci-matrix) ✅, 2026-07-22) closed [E2-S05 DoD](epic-stories/06-story.md#definition-of-done) via AC-3.

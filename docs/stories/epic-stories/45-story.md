@@ -89,5 +89,5 @@ Per [Story verification](../00-README.md#story-verification-required). **Docs + 
 
 - Ship path authored in bundle `README.deploy.md` template and [user-docs/guides/deploy.md](../../../user-docs/guides/deploy.md); root README production note links the guide.
 - Runtime-only contract asserted via pyproject core deps + `target_install` / docs wording; `.env` exclusion covered by packager integration test (explicit plant of secrets under project + harness).
-- Target install core **Done** ([E5-S09a](49.1-story.md), 2026-07-29) — venv / `pip install zaumzeug` / `.env` seed. Wrappers → [E5-S09b](49.2-story.md); `--verify` → [E5-S09c](49.3-story.md).
+- Target install core **Done** ([E5-S09a](49.1-story.md), 2026-07-29) — venv / `pip install zaumzeug` / `.env` seed. Wrappers **Done** ([E5-S09b](49.2-story.md), 2026-07-29). `--verify` → [E5-S09c](49.3-story.md).
 ---

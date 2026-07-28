@@ -10,7 +10,7 @@ Prepares a production host after ops copies ``deploy/<name>/``:
 5. Seed ``.env`` from ``.env.example`` when missing (never overwrite)
 
 ``--verify`` (doctor ``--deploy`` + serve ``--deploy --dry-run``) lands in E5-S09c.
-Shell wrappers land in E5-S09b.
+Shell wrappers: ``target-install.sh`` / ``target-install.ps1`` (E5-S09b).
 
 Usage (from the deploy bundle directory)::
 

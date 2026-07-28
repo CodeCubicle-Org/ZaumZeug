@@ -1,4 +1,4 @@
-# Story: E5-S01 / E5.1
+# Story: E5-S01 / E5.1 · E5-S09b / E5.9
 """E5-S01 — ``zaumzeug deploy`` full bundle write (Architecture §10.2 / §10.3)."""
 
 from __future__ import annotations
@@ -236,6 +236,21 @@ def test_e5_s01_ac3_readme_deploy_md_present(
     assert "Linux" in readme
 
 
+def _assert_target_install_scripts_in_bundle(bundle: Path) -> None:
+    """Shared assertion: E5-S01 AC-4 / E5-S09b AC-2."""
+    assert (bundle / "target_install.py").is_file()
+    assert (bundle / "target-install.sh").is_file()
+    assert (bundle / "target-install.ps1").is_file()
+    script = (bundle / "target_install.py").read_text(encoding="utf-8")
+    assert "preflight_bundle" in script or "manifest.json" in script
+    sh = (bundle / "target-install.sh").read_text(encoding="utf-8")
+    ps1 = (bundle / "target-install.ps1").read_text(encoding="utf-8")
+    assert "target_install.py" in sh
+    assert "target_install.py" in ps1
+    assert '"$@"' in sh
+    assert "@args" in ps1
+
+
 def test_e5_s01_ac4_target_install_scripts_in_bundle(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -252,11 +267,26 @@ def test_e5_s01_ac4_target_install_scripts_in_bundle(
     )
     bundle = result.bundle_dir
     assert bundle is not None
-    assert (bundle / "target_install.py").is_file()
-    assert (bundle / "target-install.sh").is_file()
-    assert (bundle / "target-install.ps1").is_file()
-    script = (bundle / "target_install.py").read_text(encoding="utf-8")
-    assert "preflight_bundle" in script or "manifest.json" in script
+    _assert_target_install_scripts_in_bundle(bundle)
+
+
+def test_e5_s09_ac7_scripts_in_bundle(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """E5-S09b AC-2 (shared E5-S01): wrappers bundled inside each ``deploy/<name>/``."""
+    monkeypatch.chdir(tmp_path)
+    _seed_deploy_harness(tmp_path)
+
+    result = package_harness(
+        "example",
+        project_root=tmp_path,
+        run_doctor_fn=_ok_doctor,
+        output=io.StringIO(),
+    )
+    bundle = result.bundle_dir
+    assert bundle is not None
+    _assert_target_install_scripts_in_bundle(bundle)
 
 
 def test_e5_s01_ac5_idempotent_overwrite(

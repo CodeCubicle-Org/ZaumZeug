@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Ops / platform · Harness developers |
-| **Last updated** | 2026-07-29 |
+| **Last updated** | 2026-07-29 (E5-S09b shell wrappers) |
 
 Ship a production harness to a clean server **without** DSPy, GEPA, or DeepEval on the target. Compile and eval stay on the developer machine (or CI); the target only runs Haystack via `zaumzeug`.
 
@@ -57,7 +57,7 @@ After the bundle is on the host, run install **from inside** `deploy/<name>/` (o
 | **Any OS** | `python target_install.py` |
 | **From repo `install/`** | `python install/target_install.py --deploy-dir deploy/<name>` |
 
-What install does (Architecture §10.7; core script **Done** E5-S09a):
+What install does (Architecture §10.7; core **Done** E5-S09a; wrappers **Done** E5-S09b):
 
 1. Preflight — require Python 3.11+, `harness.yaml`, and `manifest.json`
 2. Optional `.venv` beside the bundle (unless `--skip-venv`)
@@ -66,7 +66,7 @@ What install does (Architecture §10.7; core script **Done** E5-S09a):
 5. Optional `--verify` — `zaumzeug doctor <name> --deploy` then `zaumzeug serve <name> --deploy --dry-run` (E5-S09c)
 6. Print serve next steps
 
-Shell wrappers (`target-install.sh` / `.ps1`) are polished in E5-S09b.
+Shell wrappers (`target-install.sh` / `.ps1`) forward all flags to `target_install.py` and return the same exit code.
 
 ---
 
