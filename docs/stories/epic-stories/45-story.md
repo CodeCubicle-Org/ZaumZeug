@@ -49,7 +49,7 @@ As **ops**, I want a documented copy → install → serve workflow, so that I c
 - `install/templates/deploy/README.deploy.md` — ship workflow + OS table (rendered into every bundle)
 - `user-docs/guides/deploy.md` (+ install template mirror)
 - Root `README.md` production note (abbreviated)
-- `install/target_install.py` — next-steps print runtime-only contract (full install → E5-S09)
+- `install/target_install.py` — next-steps print runtime-only contract; core install **Done** ([E5-S09a](49.1-story.md), 2026-07-29)
 
 ### Acceptance criteria
 
@@ -89,5 +89,5 @@ Per [Story verification](../00-README.md#story-verification-required). **Docs + 
 
 - Ship path authored in bundle `README.deploy.md` template and [user-docs/guides/deploy.md](../../../user-docs/guides/deploy.md); root README production note links the guide.
 - Runtime-only contract asserted via pyproject core deps + `target_install` / docs wording; `.env` exclusion covered by packager integration test (explicit plant of secrets under project + harness).
-- Full automated `pip install` / venv / `--verify` remains [E5-S09](49.1-story.md); stub already prints the documented next steps.
+- Target install core **Done** ([E5-S09a](49.1-story.md), 2026-07-29) — venv / `pip install zaumzeug` / `.env` seed. Wrappers → [E5-S09b](49.2-story.md); `--verify` → [E5-S09c](49.3-story.md).
 ---

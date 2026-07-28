@@ -53,7 +53,7 @@ Idempotent — overwrites `deploy/<name>/`. Future: `zaumzeug export` tarball of
 
 **Implementation (E5-S02, 2026-07-28):** `resolve_deploy_copy_plan` / `assert_required_paths` encode the §10.1 include matrix; packager validates before writing `deploy/<name>/`. Tests: `tests/unit/deploy/test_copy_rules.py` (`e5_s02`), golden `tests/integration/deploy/test_deploy_golden.py`.
 
-**Implementation (E5-S01, 2026-07-28):** Steps 1 and 3–6 are live: doctor preflight → `write_deploy_bundle` (stripped yaml, pin/copy, merged harness `models.yaml`, `manifest.json`, `README.deploy.md` from `install/templates/deploy/`, target install scripts from `install/`). Tests: `tests/integration/deploy/test_deploy.py` (`e5_s01`). Full `target_install` behaviour remains [E5-S09](../stories/epic-stories/49.1-story.md).
+**Implementation (E5-S01, 2026-07-28):** Steps 1 and 3–6 are live: doctor preflight → `write_deploy_bundle` (stripped yaml, pin/copy, merged harness `models.yaml`, `manifest.json`, `README.deploy.md` from `install/templates/deploy/`, target install scripts from `install/`). Tests: `tests/integration/deploy/test_deploy.py` (`e5_s01`). Target install core **Done** ([E5-S09a](../stories/epic-stories/49.1-story.md), 2026-07-29); wrappers / `--verify` remain E5-S09b/c.
 
 **Implementation (E6-S04, 2026-07-28):** `deploy/copy_rules.py` exports `is_excluded_from_deploy()` so `eval/` (and other §10.1 dev-only paths) are marked excluded. Strip helpers (`strip_harness_yaml` / `strip_agent_yaml`) landed with E5-S01. Shared test: `tests/unit/deploy/test_copy_rules.py::test_e5_s02_excludes_eval`.
 
@@ -166,7 +166,7 @@ Runs on the **target machine** after the user copies `deploy/<name>/` — deskto
 
 Bundled copy lives at `deploy/<name>/target_install.py` so the folder is self-describing when copied alone.
 
-**Implementation (E5-S01, 2026-07-28):** `install/target_install.py` + `target-install.sh` / `target-install.ps1` exist and are copied into every bundle. The scripts currently preflight `harness.yaml` + `manifest.json` and print next steps (runtime-only `pip install zaumzeug`; no DSPy/GEPA/DeepEval); full venv / pip / doctor `--deploy` / `--verify` remains [E5-S09](../stories/epic-stories/49.1-story.md).
+**Implementation (E5-S09a, 2026-07-29):** `install/target_install.py` creates optional `.venv`, runs `pip install zaumzeug` (runtime only), seeds `.env` from `.env.example` when missing, and preflights `harness.yaml` + `manifest.json`. Shell wrappers → [E5-S09b](../stories/epic-stories/49.2-story.md); `--verify` → [E5-S09c](../stories/epic-stories/49.3-story.md). Tests: `tests/integration/deploy/test_target_install.py` (`e5_s09_*`).
 
 **Implementation (E5-S05, 2026-07-28):** Documented ship workflow for this script — [user-docs/guides/deploy.md](../user-docs/guides/deploy.md) + bundle `README.deploy.md` (Win/macOS/Linux table, Python 3.11+, `.env` never in bundle). Tests: `tests/integration/deploy/test_target_install.py`.
 

@@ -87,5 +87,5 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 - `deploy/packager.py`: doctor preflight → eval gate → `write_deploy_bundle` (strip yaml, pin artifacts, merge harness models, `manifest.json`, README, target install scripts).
 - `deploy/copy_rules.py`: `strip_harness_yaml` / `strip_agent_yaml` helpers; full include/pin golden matrix completed in [E5-S02](42-story.md) ✅ (2026-07-28).
-- Templates: `install/templates/deploy/README.deploy.md`; scripts: `install/target_install.py` (+ wrappers) — full target install behaviour is [E5-S09](49.1-story.md).
+- Templates: `install/templates/deploy/README.deploy.md`; scripts: `install/target_install.py` (+ wrappers) — target install core **Done** ([E5-S09a](49.1-story.md), 2026-07-29); wrappers → [E5-S09b](49.2-story.md); `--verify` → [E5-S09c](49.3-story.md).
 - CLI: `zaumzeug deploy <name> [--eval-gate …]`.

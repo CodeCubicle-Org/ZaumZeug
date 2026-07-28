@@ -139,7 +139,7 @@ Secrets remain in `.env` only; all model files hold provider + model id + genera
 | Script | Scope | When |
 |---|---|---|
 | `install/client_install.py` | **Dev machine once** — venv, editable install, `usr-harnesses/example/`, user-docs skeleton, global `config/models.yaml`, `.env.example` | First clone or new dev machine |
-| `install/target_install.py` | **Target machine once per deploy** — runtime `pip install zaumzeug`, optional venv, `zaumzeug doctor --deploy`, `.env` hints | After copying `deploy/<name>/` to desktop PC or server. **E5-S01 (2026-07-28):** stub + wrappers ship in each bundle (preflight `harness.yaml` + `manifest.json`); **E5-S05 (2026-07-28):** ship workflow docs ([deploy.md](../../user-docs/guides/deploy.md), `README.deploy.md`); full install → [E5-S09](../stories/epic-stories/49.1-story.md) |
+| `install/target_install.py` | **Target machine once per deploy** — runtime `pip install zaumzeug`, optional `.venv`, seed `.env` from `.env.example` (never overwrite), preflight `harness.yaml` + `manifest.json` | After copying `deploy/<name>/` to desktop PC or server. **E5-S01 (2026-07-28):** scripts + wrappers ship in each bundle; **E5-S05 (2026-07-28):** ship workflow docs ([deploy.md](../../user-docs/guides/deploy.md), `README.deploy.md`); **E5-S09a (2026-07-29):** full venv / pip / `.env` core ✅ — wrappers polish → [E5-S09b](../stories/epic-stories/49.2-story.md); `--verify` → [E5-S09c](../stories/epic-stories/49.3-story.md) |
 | `zaumzeug init <name>` | **Per harness** — scaffold `usr-harnesses/<name>/` from template | Additional harnesses after project setup |
 | `zaumzeug install-project` | **PyPI consumer cwd** — scaffold only (no editable install); reuses scaffold logic | **Deferred** until `zaumzeug` is published ([E1-S08](../stories/epic-stories/25-story.md); open #3 resolved 2026-07-22) |
 
@@ -149,13 +149,15 @@ Secrets remain in `.env` only; all model files hold provider + model id + genera
 
 **Client install flags:** `--verify`, `--no-example`, `--skip-venv` (CI), `--cursor-mcp`. CI matrix **Done** ([PRD E1.7](../prd.md#epic-e1--onboarding-and-project-setup-phase-1) / [E1-S07](../stories/epic-stories/24-story.md), 2026-07-22) — [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml).
 
-**Target install flags:** `--deploy-dir` (default: directory containing `harness.yaml` — typically the bundle root when the script is run from `deploy/<name>/`), `--skip-venv`, `--verify` (doctor + serve dry-run). See [PRD E5.9](../prd.md#epic-e5--deploy-packaging-phase-2) and [§10.7](07-deploy-packaging.md#107-target-runtime-install-script).
+**Target install flags:** `--deploy-dir` (default: cwd — typically the bundle root when run from `deploy/<name>/`), `--skip-venv`, `--verify` (doctor + serve dry-run; wired in [E5-S09c](../stories/epic-stories/49.3-story.md)). Core install **Done** ([E5-S09a](../stories/epic-stories/49.1-story.md), 2026-07-29). See [PRD E5.9](../prd.md#epic-e5--deploy-packaging-phase-2) and [§10.7](07-deploy-packaging.md#107-target-runtime-install-script).
 
 **Updating dependencies (dev machine):** Re-run `client_install.py` after `git pull` (idempotent; refreshes `pip install -e ".[dev]"`). Optional extras and provider plugins use separate `pip install -U` commands. Production targets update via redeploy + bundled `target_install`, not ad hoc upgrades. User-facing summary: [PRD §7.4](../prd.md#74-user-installation-guide-content-for-readme--phase-1).
 
 **Implementation (E1-S01, 2026-07-21):** `install/client_install.py` — creates `.venv` (unless `--skip-venv`), runs `pip install -e ".[dev]"`, parses `--verify` / `--no-example` / `--skip-venv` / `--cursor-mcp`, pathlib OS paths, non-blocking missing-`git` warning. Tests: `tests/unit/install/test_client_install.py`.
 
 **Implementation (E1-S02, 2026-07-22):** Thin OS wrappers `install/client-install.sh` and `install/client-install.ps1` locate a working Python 3.11+ (`py -3` preferred on Windows to avoid Store stubs) and forward all args to `client_install.py` — no duplicated install logic. User-facing command table: [installation.md](../../user-docs/getting-started/installation.md). Tests: `tests/unit/install/test_wrappers.py`. Per-OS CI invocation closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
+
+**Implementation (E5-S09a, 2026-07-29):** `install/target_install.py` — Python 3.11+ gate, optional `.venv` beside the bundle (`--skip-venv`), `pip install zaumzeug` (runtime only — no `[dev]`/`[eval]`/DSPy/GEPA/DeepEval), `zaumzeug --version` smoke, seed `.env` from `.env.example` at bundle or project root (never overwrite), preflight `harness.yaml` + `manifest.json`, idempotent. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s09_*`). Wrappers → E5-S09b; `--verify` → E5-S09c.
 
 **Implementation (E1-S03, 2026-07-22):** `scaffold_project()` in `client_install.py` — copy-if-missing from `install/templates/` for `usr-harnesses/example/` (skip with `--no-example`), `config/models.yaml` (from `models.example.yaml`), `.env.example`, `.cursor/mcp.json.example`, `user-docs/` skeleton; seeds `.env` only when missing; merges `.gitignore` entries (`.venv`, `.env`, `deploy/`, `artifacts/`). Live `.cursor/mcp.json` via `--cursor-mcp` → [E7-S03](../stories/epic-stories/52-story.md). Tests: `tests/unit/install/test_scaffolding.py`.
 
@@ -176,7 +178,7 @@ user-docs/
 ├── guides/
 │   ├── multi-agent-workflow.md   # workflow.yaml, agents vs pipelines, control flow
 │   ├── compile.md                # GEPA compile / export / rollback
-│   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05); git policy (E5-S07); platforms (E5-S08)
+│   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05); git policy (E5-S07); platforms (E5-S08); target install core (E5-S09a)
 │   └── testing.md                # unit, integration, eval; mock profile; CI tiers
 └── reference/cli.md
 ```

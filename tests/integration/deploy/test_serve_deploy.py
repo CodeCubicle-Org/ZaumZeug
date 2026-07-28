@@ -301,7 +301,7 @@ def test_e5_s03_ac4_after_target_install_clean_venv(
     assert not (tmp_path / "usr-harnesses").exists()
     assert (tmp_path / "deploy" / "example" / "harness.yaml").is_file()
 
-    # target_install stub preflight (full install is E5-S09).
+    # target_install preflight (E5-S09a core; wrappers E5-S09b; --verify E5-S09c).
     assert (bundle / "target_install.py").is_file()
     target_install = _load_bundle_target_install(bundle)
     assert target_install.preflight_bundle(bundle) == []

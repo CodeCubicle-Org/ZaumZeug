@@ -44,6 +44,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E5-S05, 2026-07-28):** Ops ship path documented — copy → `target_install` → `.env` → `zaumzeug serve --deploy`. Docs: `README.deploy.md`, [user-docs/guides/deploy.md](../user-docs/guides/deploy.md), root README production note. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s05`) + `test_e5_s05_ac5_no_env_in_bundle`.
 
+**Implementation (E5-S09a, 2026-07-29):** `install/target_install.py` core — optional `.venv`, `pip install zaumzeug` (runtime only), `.env` seed, preflight. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s09_*`). Wrappers → E5-S09b; `--verify` → E5-S09c.
+
 **Implementation (E5-S07, 2026-07-28):** Deploy git policy — scaffolding ensures `/deploy/` + `usr-harnesses/*/artifacts/`; release force-add and CI upload documented. See [§10.4](07-deploy-packaging.md#104-git-and-gitignore); tests `test_e5_s07_ac1_gitignore_deploy_and_artifacts`.
 
 **Implementation (E5-S08, 2026-07-29):** Deploy platform policy — Linux-first matrix + OS-neutral bundle tests (`test_e5_s08_*`) + Linux CI `deploy` → `serve --deploy` smoke. See [§10.6](07-deploy-packaging.md#106-deploy-platform-targets).

@@ -57,15 +57,16 @@ After the bundle is on the host, run install **from inside** `deploy/<name>/` (o
 | **Any OS** | `python target_install.py` |
 | **From repo `install/`** | `python install/target_install.py --deploy-dir deploy/<name>` |
 
-What install does (Architecture §10.7; full automation lands in E5-S09):
+What install does (Architecture §10.7; core script **Done** E5-S09a):
 
 1. Preflight — require Python 3.11+, `harness.yaml`, and `manifest.json`
 2. Optional `.venv` beside the bundle (unless `--skip-venv`)
 3. `pip install zaumzeug` — **not** `zaumzeug[dev]` or `zaumzeug[eval]`
-4. Optional `--verify` — `zaumzeug doctor <name> --deploy` then `zaumzeug serve <name> --deploy --dry-run` (E5-S09c)
-5. Print `.env` setup hints and the serve command
+4. Seed `.env` from `.env.example` when missing (**never** overwrite an existing `.env`)
+5. Optional `--verify` — `zaumzeug doctor <name> --deploy` then `zaumzeug serve <name> --deploy --dry-run` (E5-S09c)
+6. Print serve next steps
 
-Until E5-S09 completes, the bundled script **preflights** the bundle and prints these next steps so you can run `pip install zaumzeug` manually.
+Shell wrappers (`target-install.sh` / `.ps1`) are polished in E5-S09b.
 
 ---
 
