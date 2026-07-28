@@ -274,7 +274,7 @@ If `eval:` is absent, `warn` / `block` are a no-op. Gate logic lives only in `de
 
 **Bundle contents** (`deploy/<name>/`): stripped `harness.yaml` (no `eval`/`deploy`/`compile`), `workflow.yaml`, per-agent runtime files (`prompts/` / `tools/` / `hooks.py` / `agents-models.yaml` when referenced) + pinned `artifacts/<run_id>/`, `docs/workflow-diagram.md`, `manifest.json`, `README.deploy.md`, and `target_install.py` (+ `.sh` / `.ps1` wrappers). **Never** copies `modules/`, `skills/`, `data/`, or `eval/` (Architecture §10.1 / E5-S02). Missing required runtime paths abort deploy before writing. Idempotent — overwrites an existing bundle. Full target-install behaviour is E5-S09; the scripts are stubbed so the folder is self-describing when copied alone.
 
-**After deploy:** from a project root that contains `deploy/<name>/`, ops runs `zaumzeug serve <name> --deploy` (**Done** E5-S03) or `HARNESS_ROOT=deploy zaumzeug serve <name>` (**Done** E5-S04) — same OpenAI REST as dev serve; `usr-harnesses/` is not required. See [serve](#zaumzeug-serve), [Global environment](#global-environment), and the bundle `README.deploy.md`.
+**After deploy:** copy `deploy/<name>/` to the target → run bundled `target_install` → create `.env` on the target → `zaumzeug serve <name> --deploy` (**Done** E5-S03) or `HARNESS_ROOT=deploy zaumzeug serve <name>` (**Done** E5-S04). Ship workflow docs **Done** E5-S05 — see [Deploy and ship](../guides/deploy.md) and the bundle `README.deploy.md`. Same OpenAI REST as dev serve; `usr-harnesses/` is not required. See also [serve](#zaumzeug-serve) and [Global environment](#global-environment).
 
 ```bash
 zaumzeug deploy example

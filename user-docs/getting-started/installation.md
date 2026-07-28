@@ -115,7 +115,7 @@ Sizes are **approximate ranges**, not guarantees. The first `pip install` usuall
 | **Repo + harness folders** (excluding artifacts) | **< 50 MB** |
 | **Compile artifacts** (`usr-harnesses/*/artifacts/`) | Variable over time |
 
-**Production target install** (after copying `deploy/<name>/` to a server or desktop): runtime `zaumzeug` only — **no** DSPy, GEPA, or DeepEval — about **~500 MB–1.5 GB** for the venv. Python 3.11+ must already be on the target (Phase 2 `target_install`). After install, run from a project root that contains `deploy/<name>/`:
+**Production target install** (after copying `deploy/<name>/` to a server or desktop): runtime `zaumzeug` only — **no** DSPy, GEPA, or DeepEval — about **~500 MB–1.5 GB** for the venv. Python 3.11+ must already be on the target. Full ship workflow (copy → install → `.env` → serve): [Deploy and ship](../guides/deploy.md). After install, run from a project root that contains `deploy/<name>/`:
 
 ```bash
 zaumzeug doctor <name> --deploy
@@ -124,7 +124,7 @@ zaumzeug serve <name> --deploy
 HARNESS_ROOT=deploy zaumzeug serve <name>
 ```
 
-(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required. `HARNESS_ROOT=deploy` is **Done** E5-S04 — env equivalent for serve/mcp/acp.)
+(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required. `HARNESS_ROOT=deploy` is **Done** E5-S04 — env equivalent for serve/mcp/acp. Ship docs **Done** E5-S05.)
 
 ---
 

@@ -139,7 +139,7 @@ Secrets remain in `.env` only; all model files hold provider + model id + genera
 | Script | Scope | When |
 |---|---|---|
 | `install/client_install.py` | **Dev machine once** — venv, editable install, `usr-harnesses/example/`, user-docs skeleton, global `config/models.yaml`, `.env.example` | First clone or new dev machine |
-| `install/target_install.py` | **Target machine once per deploy** — runtime `pip install zaumzeug`, optional venv, `zaumzeug doctor --deploy`, `.env` hints | After copying `deploy/<name>/` to desktop PC or server. **E5-S01 (2026-07-28):** stub + wrappers ship in each bundle (preflight `harness.yaml` + `manifest.json`); full install → [E5-S09](../stories/epic-stories/49.1-story.md) |
+| `install/target_install.py` | **Target machine once per deploy** — runtime `pip install zaumzeug`, optional venv, `zaumzeug doctor --deploy`, `.env` hints | After copying `deploy/<name>/` to desktop PC or server. **E5-S01 (2026-07-28):** stub + wrappers ship in each bundle (preflight `harness.yaml` + `manifest.json`); **E5-S05 (2026-07-28):** ship workflow docs ([deploy.md](../../user-docs/guides/deploy.md), `README.deploy.md`); full install → [E5-S09](../stories/epic-stories/49.1-story.md) |
 | `zaumzeug init <name>` | **Per harness** — scaffold `usr-harnesses/<name>/` from template | Additional harnesses after project setup |
 | `zaumzeug install-project` | **PyPI consumer cwd** — scaffold only (no editable install); reuses scaffold logic | **Deferred** until `zaumzeug` is published ([E1-S08](../stories/epic-stories/25-story.md); open #3 resolved 2026-07-22) |
 
@@ -173,15 +173,19 @@ user-docs/
 ├── getting-started/   # installation, project-setup, first-harness
 ├── guides/
 │   ├── multi-agent-workflow.md   # workflow.yaml, agents vs pipelines, control flow
+│   ├── compile.md                # GEPA compile / export / rollback
+│   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05)
 │   └── testing.md                # unit, integration, eval; mock profile; CI tiers
 └── reference/cli.md
 ```
 
-Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [project-setup.md](../../user-docs/getting-started/project-setup.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [testing.md](../../user-docs/guides/testing.md).
+Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [project-setup.md](../../user-docs/getting-started/project-setup.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [compile.md](../../user-docs/guides/compile.md), [deploy.md](../../user-docs/guides/deploy.md), [testing.md](../../user-docs/guides/testing.md).
 
 **Implementation (E1-S03, 2026-07-22):** Install copies `install/templates/user-docs/` into project `user-docs/` (copy-if-missing). Content completeness (installation prerequisites / troubleshooting) → [E1-S05](../stories/epic-stories/22-story.md).
 
 **Implementation (E1-S05, 2026-07-22):** Full `user-docs/` skeleton per §3.5 — `getting-started/installation.md` expands [PRD §7.4](../prd.md#74-user-installation-guide-content-for-readme--phase-1) (prerequisites, effort, disk, extras, updates, troubleshooting); Architecture §3.4 linked for technical install behavior only. Tests: `tests/unit/docs/test_user_docs_skeleton.py`.
+
+**Implementation (E5-S05, 2026-07-28):** [user-docs/guides/deploy.md](../../user-docs/guides/deploy.md) — target ship workflow (copy → `target_install` → `.env` → `zaumzeug serve --deploy`); Win/macOS/Linux table; runtime-only deps. Bundle mirror: `install/templates/deploy/README.deploy.md`. Tests: `tests/integration/deploy/test_target_install.py`.
 
 **Implementation (E1-S06, 2026-07-22):** Short new-contributor onboarding guide at root [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (product `README.md` unchanged) — vision, install table, `< 15 min` / `~1–2.5 GB` planning ranges, mock-first serve, optional extras, updating dependencies, abbreviated layout; links to [installation.md](../../user-docs/getting-started/installation.md) for depth. Tests: `tests/unit/docs/test_contributing_guide.py`.
 

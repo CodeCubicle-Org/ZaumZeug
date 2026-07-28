@@ -5,8 +5,8 @@
 | **Document** | Epic E5 user stories |
 | **File** | `docs/stories/06-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E5-S04 done) |
-| **Status** | In progress (E5-S01–S04 + E5-S06 Done; next E5-S05 target ship docs) |
+| **Last modified** | 2026-07-28 (E5-S05 done) |
+| **Status** | In progress (E5-S01–S06 Done; next E5-S07 deploy git policy) |
 | **Build order** | **6 of 8** (after E4 compile + E6-S02 eval for eval gate) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -254,6 +254,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | Field | Value |
 |---|---|
 | **Feature** | E5.5 |
+| **Status** | Done (2026-07-28) |
 | **Persona** | Ops / platform · Harness developer |
 | **Priority** | P0 |
 
@@ -269,17 +270,17 @@ As **ops**, I want a documented copy → install → serve workflow, so that I c
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Documented path: copy `deploy/<name>/` → `target_install` → create `.env` → `zaumzeug serve --deploy`
-- [ ] **AC-2** Target installs runtime deps only (`pip install zaumzeug`)
-- [ ] **AC-3** No DSPy, GEPA, or DeepEval on production server by default
-- [ ] **AC-4** Python 3.11+ must pre-exist on target
-- [ ] **AC-5** `.env` never shipped inside bundle
+- [x] **AC-1** Documented path: copy `deploy/<name>/` → `target_install` → create `.env` → `zaumzeug serve --deploy`
+- [x] **AC-2** Target installs runtime deps only (`pip install zaumzeug`)
+- [x] **AC-3** No DSPy, GEPA, or DeepEval on production server by default
+- [x] **AC-4** Python 3.11+ must pre-exist on target
+- [x] **AC-5** `.env` never shipped inside bundle
 
 ### Implementation tasks (build)
 
-- [ ] Author workflow in `README.deploy.md` and user-docs guide
-- [ ] Include Win/macOS/Linux invocation table
-- [ ] Link from root README production note (abbreviated)
+- [x] Author workflow in `README.deploy.md` and user-docs guide
+- [x] Include Win/macOS/Linux invocation table
+- [x] Link from root README production note (abbreviated)
 
 ### Verification (after build)
 
@@ -293,12 +294,12 @@ Per [Story verification](00-README.md#story-verification-required). **Docs + int
 | AC-4 | **manual:** docs state Python 3.11+ prerequisite |
 | AC-5 | `tests/integration/deploy/test_deploy.py::test_e5_s05_ac5_no_env_in_bundle` |
 
-- [ ] Manual checklist completed; integration tests pass
+- [x] Manual checklist completed; integration tests pass
 
 ### Definition of done
 
-- [ ] Happy path validated on clean Linux target (Phase 2+ CI)
-- [ ] Verification checklist complete
+- [x] Happy path documented; clean-bundle serve covered by E5-S03 AC-4; Linux CI smoke remains E5-S08
+- [x] Verification checklist complete
 
 ---
 

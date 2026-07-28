@@ -363,3 +363,46 @@ def test_write_deploy_bundle_direct_api(tmp_path: Path) -> None:
     )
     assert dest == tmp_path / "deploy" / "example"
     assert (dest / "README.deploy.md").is_file()
+
+
+def test_e5_s05_ac5_no_env_in_bundle(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-5 (E5-S05): ``.env`` is never shipped inside the deploy bundle."""
+    monkeypatch.chdir(tmp_path)
+    _seed_deploy_harness(tmp_path)
+
+    # Plant secrets where a careless packager might pick them up.
+    (tmp_path / ".env").write_text("OPENAI_API_KEY=sk-secret-project\n", encoding="utf-8")
+    (tmp_path / "usr-harnesses" / "example" / ".env").write_text(
+        "OPENAI_API_KEY=sk-secret-harness\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "usr-harnesses" / "example" / "agents" / "researcher" / ".env").write_text(
+        "OPENAI_API_KEY=sk-secret-agent\n",
+        encoding="utf-8",
+    )
+
+    result = package_harness(
+        "example",
+        project_root=tmp_path,
+        run_doctor_fn=_ok_doctor,
+        output=io.StringIO(),
+    )
+    assert result.bundle_dir is not None
+    bundle = result.bundle_dir
+
+    assert not (bundle / ".env").exists()
+    env_leaks = [p for p in bundle.rglob(".env") if p.is_file()]
+    assert env_leaks == [], f".env must not appear in deploy bundle: {env_leaks}"
+
+    # Bundle text must not contain planted secret values.
+    for path in bundle.rglob("*"):
+        if path.is_file() and path.suffix in {".md", ".yaml", ".yml", ".json", ".py", ".txt"}:
+            content = path.read_text(encoding="utf-8", errors="ignore")
+            assert "sk-secret" not in content, f"secret leaked into {path.relative_to(bundle)}"
+
+    readme = (bundle / "README.deploy.md").read_text(encoding="utf-8")
+    assert ".env" in readme
+    assert "never" in readme.lower()

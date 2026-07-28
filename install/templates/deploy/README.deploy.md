@@ -12,6 +12,46 @@ This folder is **self-describing**. Copy it alone to a target host — you do no
 
 ---
 
+## Ship workflow (copy → install → serve)
+
+On a **clean target** (desktop PC or server):
+
+1. **Copy** this entire `deploy/{{harness_name}}/` folder to the host (scp, rsync, CI artifact, USB, …).
+2. **Install** runtime deps with the bundled target install (once per host / after each redeploy):
+
+   | OS | Command (from inside this folder) |
+   |---|---|
+   | **Windows (PowerShell)** | `.\target-install.ps1` |
+   | **macOS / Linux** | `./target-install.sh` |
+   | **Any OS** | `python target_install.py` |
+
+   Or from a checkout that already has `install/`:  
+   `python install/target_install.py --deploy-dir /path/to/deploy/{{harness_name}}`
+
+3. **Create `.env`** on the target from `.env.example` if present — **never** ship secrets inside this bundle. Put provider API keys in `.env` only.
+4. **Serve** from the **project root** that contains `deploy/{{harness_name}}/` (not from inside the bundle folder):
+
+   ```bash
+   zaumzeug doctor {{harness_name}} --deploy
+   zaumzeug serve {{harness_name}} --deploy
+   # containers / systemd (no --deploy flag):
+   HARNESS_ROOT=deploy zaumzeug serve {{harness_name}}
+   ```
+
+**Redeploy:** ship a new `deploy/{{harness_name}}/` → re-run `target_install` → serve. Do **not** `pip upgrade` ad hoc on the server.
+
+---
+
+## Prerequisites
+
+| Requirement | Notes |
+|---|---|
+| **Python 3.11+** | Must already be on PATH — `target_install` does **not** install Python |
+| **Runtime package** | `pip install zaumzeug` only (Haystack / Hayhooks via the SDK) |
+| **Not installed by default** | DSPy, GEPA, DeepEval, `[dev]`, `[eval]` — compile and eval stay on the **dev/CI** machine |
+
+---
+
 ## Supported platforms
 
 | Role | Windows | macOS | Linux |
@@ -33,7 +73,7 @@ Python **3.11+** must already be on PATH. From this directory:
 | **macOS / Linux** | `./target-install.sh` |
 | **Any OS** | `python target_install.py` |
 
-`target_install` creates an optional `.venv`, runs `pip install zaumzeug` (**runtime only** — no `[dev]`, `[eval]`, DSPy, or GEPA), and verifies `manifest.json` + `harness.yaml`.
+`target_install` creates an optional `.venv`, runs `pip install zaumzeug` (**runtime only** — no `[dev]`, `[eval]`, DSPy, GEPA, or DeepEval), and verifies `manifest.json` + `harness.yaml`. Full venv / doctor / `--verify` behaviour is completed in E5-S09; the script always prints the serve next steps after preflight.
 
 ---
 
@@ -44,8 +84,8 @@ Python **3.11+** must already be on PATH. From this directory:
 | `HARNESS_ROOT` | `deploy` | Force production root (`deploy/`) for `serve` / `mcp` / `acp` (and other root-aware CLIs) without passing `--deploy` — intended for containers and systemd |
 | Provider keys | (see `.env.example`) | Put API keys in `.env` only — never in YAML or this bundle |
 
-1. Copy `.env.example` → `.env` if present (never commit secrets).
-2. Put provider API keys in `.env` only — never in YAML or this bundle.
+1. Copy `.env.example` → `.env` if present (never commit secrets; never overwrite an existing `.env`).
+2. Put provider API keys in `.env` only — never in YAML or this bundle. **`.env` is never packaged into `deploy/`.**
 3. In container/systemd unit files, prefer `HARNESS_ROOT=deploy` so ops does not need `--deploy` on every command.
 
 ---
@@ -87,5 +127,8 @@ zaumzeug serve {{harness_name}} --deploy --dry-run
 | `docs/workflow-diagram.md` | Workflow diagram from compile |
 | `agents/<name>/` | Runtime agent files + pinned artifacts |
 | `target_install.py` (+ wrappers) | Target host bootstrap |
+| `README.deploy.md` | This ops guide |
+
+**Never included:** `.env`, `modules/`, `skills/`, `data/`, `eval/`, DSPy/GEPA sources.
 
 Do **not** edit this folder by hand for releases — re-run `zaumzeug deploy {{harness_name}}` after compile.

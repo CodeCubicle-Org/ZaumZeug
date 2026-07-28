@@ -42,6 +42,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` is the env equivalent of `--deploy` for serve / mcp / acp (and doctor / run) via `config/harness_root.resolve_harness_path()`. Docs: `README.deploy.md`, CLI reference. Tests: `tests/unit/deploy/test_harness_root.py` (`e5_s04`).
 
+**Implementation (E5-S05, 2026-07-28):** Ops ship path documented — copy → `target_install` → `.env` → `zaumzeug serve --deploy`. Docs: `README.deploy.md`, [user-docs/guides/deploy.md](../user-docs/guides/deploy.md), root README production note. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s05`) + `test_e5_s05_ac5_no_env_in_bundle`.
+
 **Implementation (E4-S06, 2026-07-28):** `zaumzeug compile <harness> --dry-run` — same validation path as full compile (`run_compile(..., dry_run=True)`): Phase 2 schema, module import, LM registry preflight; prints task/reflection models; no GEPA, no LLM API calls, no artifacts. Tests: `tests/integration/compile/test_compile_dry_run.py`.
 
 **Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` sets SDK (`zaumzeug`) and Haystack loggers to DEBUG when `zaumzeug serve|compile --verbose` or `HARNESS_LOG_LEVEL=DEBUG`. `log_request()` emits structured per-request context (`model_id`, `tool`, `artifact_path`). `SecretRedactingFilter` redacts API keys and bearer tokens. CLI reference: `user-docs/reference/cli.md`. Tests: `tests/unit/test_logging.py`.

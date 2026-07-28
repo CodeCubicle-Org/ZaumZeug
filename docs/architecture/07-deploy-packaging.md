@@ -107,6 +107,8 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 
 **Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` is the env equivalent of `--deploy` for serve / mcp / acp (and doctor / run) via `config/harness_root.resolve_harness_path()`. Docs: `README.deploy.md`, CLI reference. Tests: `tests/unit/deploy/test_harness_root.py` (`e5_s04`). Linux CI smoke remains [E5-S08](../stories/epic-stories/48-story.md).
 
+**Implementation (E5-S05, 2026-07-28):** Target ship workflow documented — copy `deploy/<name>/` → `target_install` → create `.env` → `zaumzeug serve --deploy`. Runtime-only `pip install zaumzeug` (no DSPy/GEPA/DeepEval); Python 3.11+ prerequisite; `.env` never in bundle. Docs: `install/templates/deploy/README.deploy.md`, [user-docs/guides/deploy.md](../user-docs/guides/deploy.md), root README production note. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s05`) + `test_deploy.py::test_e5_s05_ac5_no_env_in_bundle`.
+
 ### 10.6 Deploy platform targets
 
 Requirements: **[PRD E5.8](../prd.md#epic-e5--deploy-packaging-phase-2)**.
@@ -160,6 +162,8 @@ Runs on the **target machine** after the user copies `deploy/<name>/` — deskto
 
 Bundled copy lives at `deploy/<name>/target_install.py` so the folder is self-describing when copied alone.
 
-**Implementation (E5-S01, 2026-07-28):** `install/target_install.py` + `target-install.sh` / `target-install.ps1` exist and are copied into every bundle. The scripts currently preflight `harness.yaml` + `manifest.json` and print next steps; full venv / `pip install zaumzeug` / doctor `--deploy` / `--verify` remains [E5-S09](../stories/epic-stories/49.1-story.md).
+**Implementation (E5-S01, 2026-07-28):** `install/target_install.py` + `target-install.sh` / `target-install.ps1` exist and are copied into every bundle. The scripts currently preflight `harness.yaml` + `manifest.json` and print next steps (runtime-only `pip install zaumzeug`; no DSPy/GEPA/DeepEval); full venv / pip / doctor `--deploy` / `--verify` remains [E5-S09](../stories/epic-stories/49.1-story.md).
+
+**Implementation (E5-S05, 2026-07-28):** Documented ship workflow for this script — [user-docs/guides/deploy.md](../user-docs/guides/deploy.md) + bundle `README.deploy.md` (Win/macOS/Linux table, Python 3.11+, `.env` never in bundle). Tests: `tests/integration/deploy/test_target_install.py`.
 
 ---

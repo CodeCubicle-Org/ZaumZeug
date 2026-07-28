@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/45-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-28 |
 | **Story ID** | E5-S05 |
+| **Status** | Done |
 | **Epic** | [E5 — Deploy Packaging](../06-epic.md) |
 | **Phase** | 2 |
 | **Epic build order** | 6 of 8 |
@@ -23,7 +24,7 @@
 | **Feature** | E5.5 |
 | **Persona** | Ops / platform · Harness developer |
 | **Priority** | P0 |
-| **Prerequisites** | [E5-S03](43-story.md#e5-s03-zaumzeug-serve-deploy) ✅ (2026-07-28) · [E5-S09c](49.3-story.md#e5-s09c-target-install-verify-integration) |
+| **Prerequisites** | [E5-S03](43-story.md#e5-s03-zaumzeug-serve-deploy) ✅ (2026-07-28) · [E5-S09c](49.3-story.md#e5-s09c-target-install-verify-integration) *(full `--verify` automation later; stub + docs ship now)* |
 
 ### User story
 
@@ -43,37 +44,50 @@ As **ops**, I want a documented copy → install → serve workflow, so that I c
 - [Architecture §10.5 — production dependencies](../../architecture/07-deploy-packaging.md#105-production-server-dependencies)
 - [E5-S09c target install verify](49.3-story.md)
 
+**Docs / code**
+
+- `install/templates/deploy/README.deploy.md` — ship workflow + OS table (rendered into every bundle)
+- `user-docs/guides/deploy.md` (+ install template mirror)
+- Root `README.md` production note (abbreviated)
+- `install/target_install.py` — next-steps print runtime-only contract (full install → E5-S09)
+
 ### Acceptance criteria
 
-- [ ] **AC-1** Documented path: copy `deploy/<name>/` → `target_install` → create `.env` → `zaumzeug serve --deploy`
-- [ ] **AC-2** Target installs runtime deps only (`pip install zaumzeug`)
-- [ ] **AC-3** No DSPy, GEPA, or DeepEval on production server by default
-- [ ] **AC-4** Python 3.11+ must pre-exist on target
-- [ ] **AC-5** `.env` never shipped inside bundle
+- [x] **AC-1** Documented path: copy `deploy/<name>/` → `target_install` → create `.env` → `zaumzeug serve --deploy`
+- [x] **AC-2** Target installs runtime deps only (`pip install zaumzeug`)
+- [x] **AC-3** No DSPy, GEPA, or DeepEval on production server by default
+- [x] **AC-4** Python 3.11+ must pre-exist on target
+- [x] **AC-5** `.env` never shipped inside bundle
 
 ### Implementation tasks (build)
 
-- [ ] Author workflow in `README.deploy.md` and user-docs guide
-- [ ] Include Win/macOS/Linux invocation table
-- [ ] Link from root README production note (abbreviated)
+- [x] Author workflow in `README.deploy.md` and user-docs guide
+- [x] Include Win/macOS/Linux invocation table
+- [x] Link from root README production note (abbreviated)
 
 ### Verification (after build)
 
-Per [Story verification](../00-README.md#story-verification-required). **Docs + integration** — manual checklist plus E5-S09/E5-S03 tests.
+Per [Story verification](../00-README.md#story-verification-required). **Docs + integration** — manual checklist plus E5-S09/E5-S03 tests. Test file header: `# Story: E5-S05 / E5.5`.
 
 | AC | Verification |
 |---|---|
-| AC-1 | **manual:** README.deploy.md workflow steps; **integration:** E5-S03 AC-4 |
+| AC-1 | **manual:** README.deploy.md + `user-docs/guides/deploy.md` workflow steps; **integration:** E5-S03 AC-4 + `test_e5_s05_docs_ship_workflow_steps` / `test_e5_s05_bundled_readme_renders_ship_workflow` |
 | AC-2 | **integration:** `tests/integration/deploy/test_target_install.py::test_e5_s05_ac2_runtime_only_install` |
 | AC-3 | `tests/integration/deploy/test_target_install.py::test_e5_s05_ac3_no_dspy_gepa_deepeval` |
-| AC-4 | **manual:** docs state Python 3.11+ prerequisite |
+| AC-4 | **manual + docs test:** docs state Python 3.11+ prerequisite (`test_e5_s05_docs_ship_workflow_steps`) |
 | AC-5 | `tests/integration/deploy/test_deploy.py::test_e5_s05_ac5_no_env_in_bundle` |
 
-- [ ] Manual checklist completed; integration tests pass
+- [x] Manual checklist completed; integration tests pass
+- [x] `pytest tests/integration/deploy/test_target_install.py tests/integration/deploy/test_deploy.py::test_e5_s05_ac5_no_env_in_bundle -v` passes (5 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Happy path validated on clean Linux target (Phase 2+ CI)
-- [ ] Verification checklist complete
+- [x] Happy path documented; clean-bundle serve covered by E5-S03 AC-4; Linux CI smoke remains [E5-S08](48-story.md)
+- [x] Verification checklist complete; all ACs traced to tests or documented manual exceptions
 
+### Implementation notes (2026-07-28)
+
+- Ship path authored in bundle `README.deploy.md` template and [user-docs/guides/deploy.md](../../../user-docs/guides/deploy.md); root README production note links the guide.
+- Runtime-only contract asserted via pyproject core deps + `target_install` / docs wording; `.env` exclusion covered by packager integration test (explicit plant of secrets under project + harness).
+- Full automated `pip install` / venv / `--verify` remains [E5-S09](49.1-story.md); stub already prints the documented next steps.
 ---

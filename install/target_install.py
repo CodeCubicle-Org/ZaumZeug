@@ -78,7 +78,10 @@ def main(argv: list[str] | None = None) -> int:
     print()
     print("Next steps:")
     print("  1. Ensure Python 3.11+ is on PATH")
-    print("  2. pip install zaumzeug   # runtime only — no [dev]/[eval]")
+    print(
+        "  2. pip install zaumzeug   # runtime only — no [dev]/[eval]; "
+        "no DSPy, GEPA, or DeepEval on the target"
+    )
     print("  3. Create .env from .env.example if present (never overwrite .env)")
     print(f"  4. zaumzeug doctor {harness_name} --deploy")
     print(f"  5. zaumzeug serve {harness_name} --deploy")

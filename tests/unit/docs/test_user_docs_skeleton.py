@@ -18,6 +18,7 @@ REQUIRED_RELATIVE_PATHS = (
     "reference/cli.md",
     "guides/multi-agent-workflow.md",
     "guides/testing.md",
+    "guides/deploy.md",
 )
 
 # AC-2 / DoD — installation.md must cover PRD §7.4 topics
