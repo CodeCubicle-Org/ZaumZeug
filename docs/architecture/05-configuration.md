@@ -204,6 +204,8 @@ compile:
 
 **Implementation (E4-S05, 2026-07-28):** Dev-mode warn check `artifact_module` (`check_artifact_module_staleness`) compares `compile.module` source SHA-256 to `source_hash` in `artifact-manifest.json`. Mismatch → warn (exit 0) suggesting re-compile. Export records `source_hash` via `compile/export.py`. Tests: `tests/integration/test_doctor.py::test_e4_s05_ac5_stale_artifact_warn`.
 
+**Implementation (E4-S07, 2026-07-28):** `check_pinned_artifact` — fail when `agent.artifact` pin lacks a valid `artifact-manifest.json`; warn when explicit `<run_id>` pin differs from `artifacts/current`. Tests: `tests/integration/test_doctor.py::test_e4_s07_ac2_doctor_validates_pinned_manifest`. Deploy `artifact_run_id` pin contract: `tests/integration/deploy/test_deploy_pin.py` (shared E5-S01).
+
 **Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run` in `src/zaumzeug/serve/` — `validate_serve()` uses strict `load_harness()` and `load_workflow()`, `resolve_serve_entry()`, and doctor model/runtime checks; optional `--deploy` and `--json`. No Hayhooks bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
 
 **Implementation (E3-S02, 2026-07-20):** `zaumzeug serve <harness>` via `serve/runner.py` — same `validate_serve()`, then `build_agent()`, Hayhooks on `127.0.0.1` / `serve.hayhooks.port`. Tests: `tests/integration/test_serve.py`, `tests/integration/test_openai_contract.py` (AC-4).

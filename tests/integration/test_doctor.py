@@ -2,7 +2,8 @@
 # Story: E2-S04b / E2.4
 # Story: E2-S04c / E2.4
 # Story: E4-S05 / E4.5
-"""E2-S04 — `zaumzeug doctor` checks (integration); E4-S05 stale artifact warn."""
+# Story: E4-S07
+"""E2-S04 — `zaumzeug doctor` checks (integration); E4-S05/S07 artifact checks."""
 
 from __future__ import annotations
 
@@ -510,3 +511,114 @@ def test_e4_s05_ac5_stale_artifact_warn(tmp_path: Path) -> None:
     assert "module_hash=deadbeef" in stale_warns[0].message
     assert "compile" in stale_warns[0].message
     assert stale.exit_code == 0
+
+
+def test_e4_s07_ac2_doctor_validates_pinned_manifest(tmp_path: Path) -> None:
+    """AC-2 (E4-S07): doctor validates pinned run manifest; warns when pin ≠ current."""
+    project_root = tmp_path / "project"
+    harness_path = project_root / "usr-harnesses" / "example"
+    agent_dir = harness_path / "agents" / "researcher"
+    run_a = "20260728T100001Z"
+    run_b = "20260728T100002Z"
+
+    def _write_run(run_id: str, *, system: str) -> Path:
+        artifact_dir = agent_dir / "artifacts" / run_id
+        artifact_dir.mkdir(parents=True, exist_ok=True)
+        (artifact_dir / "prompts").mkdir(parents=True, exist_ok=True)
+        (artifact_dir / "prompts" / "system.md").write_text(system, encoding="utf-8")
+        (artifact_dir / ARTIFACT_MANIFEST).write_text(
+            json.dumps(
+                {
+                    "export_version": 1,
+                    "run_id": run_id,
+                    "paths": {"system_prompt": "prompts/system.md"},
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return artifact_dir
+
+    _write_run(run_a, system="first compile\n")
+    _write_run(run_b, system="second compile\n")
+
+    # Point ``current`` at the newer run (symlink preferred; copy fallback ok).
+    current = agent_dir / "artifacts" / "current"
+    try:
+        current.symlink_to(run_b, target_is_directory=True)
+    except OSError:
+        import shutil
+
+        shutil.copytree(agent_dir / "artifacts" / run_b, current)
+
+    _write_yaml(
+        harness_path / "harness.yaml",
+        {"name": "example", "serve": {"hayhooks": {"port": 1416}}},
+    )
+    _write_yaml(
+        harness_path / "workflow.yaml",
+        {"entry": "researcher", "stages": [{"agent": "researcher"}]},
+    )
+    _write_yaml(
+        agent_dir / "agent.yaml",
+        {
+            "name": "researcher",
+            "default_model_id": "mock",
+            "agent": {"artifact": f"artifacts/{run_a}"},
+        },
+    )
+    _write_yaml(
+        agent_dir / "agents-models.yaml",
+        {
+            "default_model_id": "mock",
+            "models": {
+                "mock": {"provider": "mock", "model": "harness-fixture"},
+            },
+        },
+    )
+
+    report = run_doctor(harness_name="example", project_root=project_root)
+    pin_warns = [
+        c for c in report.checks if c.name == "pinned_artifact" and c.severity == "warn"
+    ]
+    assert pin_warns
+    assert run_a in pin_warns[0].message
+    assert run_b in pin_warns[0].message
+    assert report.exit_code == 0
+
+    # Broken pin (no manifest) fails doctor.
+    broken_run = "20260728T999999Z"
+    broken_dir = agent_dir / "artifacts" / broken_run
+    broken_dir.mkdir(parents=True, exist_ok=True)
+    _write_yaml(
+        agent_dir / "agent.yaml",
+        {
+            "name": "researcher",
+            "default_model_id": "mock",
+            "agent": {"artifact": f"artifacts/{broken_run}"},
+        },
+    )
+    broken = run_doctor(harness_name="example", project_root=project_root)
+    pin_fails = [
+        c for c in broken.checks if c.name == "pinned_artifact" and c.severity == "fail"
+    ]
+    assert pin_fails
+    assert broken_run in pin_fails[0].message or ARTIFACT_MANIFEST in pin_fails[0].message
+    assert broken.exit_code != 0
+
+    # Valid pin matching current passes.
+    _write_yaml(
+        agent_dir / "agent.yaml",
+        {
+            "name": "researcher",
+            "default_model_id": "mock",
+            "agent": {"artifact": f"artifacts/{run_b}"},
+        },
+    )
+    aligned = run_doctor(harness_name="example", project_root=project_root)
+    pin_pass = [
+        c for c in aligned.checks if c.name == "pinned_artifact" and c.severity == "pass"
+    ]
+    assert pin_pass
+    assert run_b in pin_pass[0].message
+    assert aligned.exit_code == 0

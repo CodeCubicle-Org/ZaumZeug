@@ -32,6 +32,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E4-S05, 2026-07-28):** Warn-only `artifact_module` check — when a valid artifact is resolved and `compile.module` is set, compares current module `.py` SHA-256 to manifest `source_hash`. Drift suggests `zaumzeug compile <harness> --agent <name>` (exit code stays 0). Skipped in `--deploy` mode. Tests: `tests/integration/test_doctor.py::test_e4_s05_ac5_stale_artifact_warn`.
 
+**Implementation (E4-S07, 2026-07-28):** `check_pinned_artifact` — fail when `agent.artifact` pin lacks a valid `artifact-manifest.json`; warn when explicit `<run_id>` pin differs from `artifacts/current`. Tests: `tests/integration/test_doctor.py::test_e4_s07_ac2_doctor_validates_pinned_manifest`.
+
 **Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run [--deploy] [--json]` — `validate_serve()` in `src/zaumzeug/serve/validate.py`; prints port, entry agent, model id, runtime path, and tools; exit 1 on validation failure. No port bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
 
 **Implementation (E4-S06, 2026-07-28):** `zaumzeug compile <harness> --dry-run` — same validation path as full compile (`run_compile(..., dry_run=True)`): Phase 2 schema, module import, LM registry preflight; prints task/reflection models; no GEPA, no LLM API calls, no artifacts. Tests: `tests/integration/compile/test_compile_dry_run.py`.

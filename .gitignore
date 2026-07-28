@@ -159,6 +159,7 @@ venv.bak/
 
 # ZaumZeug (managed by client_install)
 deploy/
+!tests/integration/deploy/
 artifacts/
 
 # Spyder project settings

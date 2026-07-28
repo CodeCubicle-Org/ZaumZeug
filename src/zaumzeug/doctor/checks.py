@@ -438,6 +438,194 @@ def check_workflow_diagram_staleness(harness_name: str, harness_dir: Path) -> Ch
     )
 
 
+def check_pinned_artifact(
+    harness_name: str,
+    harness_dir: Path,
+    *,
+    agent_names: Iterable[str],
+) -> list[CheckResult]:
+    """AC-2 (E4-S07): Validate pinned ``agent.artifact`` has a valid manifest.
+
+    Fail when the pin points at a directory without a readable
+    ``artifact-manifest.json`` (legacy ``manifest.json`` accepted). Warn when
+    the pin is an explicit ``artifacts/<run_id>/`` that differs from
+    ``artifacts/current``.
+    """
+    from zaumzeug.compile.export import find_artifact_manifest
+    from zaumzeug.config.resolver import RuntimeSource, load_agent_yaml
+
+    checks: list[CheckResult] = []
+    for agent_name in agent_names:
+        try:
+            _agent_yaml_path, data = load_agent_yaml(harness_dir, agent_name)
+        except AgentResolutionError:
+            continue
+
+        artifact_ref = _agent_artifact_ref(data)
+        if artifact_ref is None:
+            continue
+
+        try:
+            resolution = resolve_agent_serve(
+                harness_dir,
+                harness_name=harness_name,
+                agent_name=agent_name,
+            )
+        except AgentResolutionError as exc:
+            checks.append(
+                CheckResult(
+                    name="pinned_artifact",
+                    severity="fail",
+                    message=str(exc),
+                    harness=harness_name,
+                )
+            )
+            continue
+
+        if resolution.source is not RuntimeSource.ARTIFACT:
+            continue
+
+        agent_dir = resolution.agent_yaml_path.parent
+        artifacts_root = agent_dir / "artifacts"
+        pin_dir = resolution.path
+        manifest_path = find_artifact_manifest(pin_dir)
+        if manifest_path is None:
+            checks.append(
+                CheckResult(
+                    name="pinned_artifact",
+                    severity="fail",
+                    message=(
+                        f"agent '{agent_name}' pin '{artifact_ref}' is missing "
+                        f"{ARTIFACT_MANIFEST} at {pin_dir}"
+                    ),
+                    harness=harness_name,
+                )
+            )
+            continue
+
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            checks.append(
+                CheckResult(
+                    name="pinned_artifact",
+                    severity="fail",
+                    message=(
+                        f"agent '{agent_name}' pin '{artifact_ref}' has invalid "
+                        f"JSON in {manifest_path.name}: {exc}"
+                    ),
+                    harness=harness_name,
+                )
+            )
+            continue
+
+        if not isinstance(manifest, dict):
+            checks.append(
+                CheckResult(
+                    name="pinned_artifact",
+                    severity="fail",
+                    message=(
+                        f"agent '{agent_name}' pin '{artifact_ref}' "
+                        f"{manifest_path.name} must be a JSON object"
+                    ),
+                    harness=harness_name,
+                )
+            )
+            continue
+
+        pin_run_id = _artifact_dir_run_id(pin_dir, manifest)
+        current_run_id = _resolve_current_run_id(artifacts_root)
+        pin_is_current = pin_dir.name == "current" or (
+            current_run_id is not None and pin_run_id == current_run_id
+        )
+
+        if (
+            current_run_id is not None
+            and pin_run_id is not None
+            and not pin_is_current
+            and pin_dir.name != "current"
+        ):
+            checks.append(
+                CheckResult(
+                    name="pinned_artifact",
+                    severity="warn",
+                    message=(
+                        f"agent '{agent_name}' pins run '{pin_run_id}' "
+                        f"({artifact_ref}) while artifacts/current points to "
+                        f"'{current_run_id}'; serve uses the pin — update "
+                        f"`agent.artifact` or retarget current to roll forward"
+                    ),
+                    harness=harness_name,
+                )
+            )
+        else:
+            checks.append(
+                CheckResult(
+                    name="pinned_artifact",
+                    severity="pass",
+                    message=(
+                        f"agent '{agent_name}' pin '{artifact_ref}' has valid "
+                        f"{manifest_path.name}"
+                        + (
+                            f" (run_id={pin_run_id})"
+                            if isinstance(pin_run_id, str) and pin_run_id
+                            else ""
+                        )
+                    ),
+                    harness=harness_name,
+                )
+            )
+    return checks
+
+
+def _agent_artifact_ref(data: dict[str, Any]) -> str | None:
+    value = data.get("artifact")
+    if value is None:
+        agent = data.get("agent")
+        if isinstance(agent, dict):
+            value = agent.get("artifact")
+    if value is None or value == "":
+        return None
+    return str(value)
+
+
+def _artifact_dir_run_id(artifact_dir: Path, manifest: dict[str, Any]) -> str | None:
+    """Prefer directory name; fall back to manifest ``run_id`` for ``current`` copies."""
+    if artifact_dir.name != "current":
+        return artifact_dir.name
+    recorded = manifest.get("run_id")
+    return recorded if isinstance(recorded, str) and recorded else None
+
+
+def _resolve_current_run_id(artifacts_root: Path) -> str | None:
+    """Resolve which ``<run_id>`` ``artifacts/current`` points at, if any."""
+    from zaumzeug.compile.export import find_artifact_manifest
+
+    current = artifacts_root / "current"
+    if not current.exists() and not current.is_symlink():
+        return None
+    if current.is_symlink():
+        try:
+            target = Path(os.readlink(current))
+        except OSError:
+            target = current.resolve()
+        # Symlink is typically relative ``<run_id>``.
+        name = target.name
+        return name if name and name != "current" else None
+
+    manifest_path = find_artifact_manifest(current)
+    if manifest_path is None:
+        return None
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(manifest, dict):
+        return None
+    recorded = manifest.get("run_id")
+    return recorded if isinstance(recorded, str) and recorded else None
+
+
 def check_artifact_module_staleness(
     harness_name: str,
     harness_dir: Path,

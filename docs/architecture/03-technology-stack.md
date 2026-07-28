@@ -37,6 +37,8 @@ GEPA requires **task LM** and **reflection LM** as separate config roles (LiteLL
 
 **Implementation (E4-S02b, 2026-07-28):** `invoke_gepa()` runs `dspy.GEPA` (or `StubGEPA` for mock/CI), wires LiteLLM strings from the agent registry, respects budget config, and writes `artifacts/<run_id>/` + `artifacts/current`.
 
+**Implementation (E4-S07, 2026-07-28):** Existing `<run_id>/` directories are immutable (never overwritten); pin/rollback via `agent.artifact` or retargeting `current`. Doctor validates pins (`check_pinned_artifact`). Docs: [user-docs/guides/compile.md](../user-docs/guides/compile.md#rollback-to-a-pinned-run).
+
 ### 4.3 Languages and key packages
 
 | Layer | Format | Notes |

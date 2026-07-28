@@ -88,6 +88,8 @@ At `zaumzeug compile <harness> --agent <agent-name>` (offline):
 
 **Implementation (E4-S05, 2026-07-28):** After compile, serve prefers `agent.artifact` (valid `artifact-manifest.json`) over hand-edited `system_prompt` and never imports `compile.module`. Export records `source_hash` (SHA-256 of the module `.py`); `zaumzeug doctor` warns when that hash drifts (`check_artifact_module_staleness`). Happy path: [user-docs/guides/compile.md](../user-docs/guides/compile.md#serve-after-compile).
 
+**Implementation (E4-S07, 2026-07-28):** Pin/rollback via `agent.artifact: artifacts/<run_id>/` or retargeting `artifacts/current`. Compile never overwrites an existing `<run_id>/` (`write_artifact_run`). Doctor `check_pinned_artifact` validates the pin manifest and warns when pin ≠ `current`. Rollback steps: [user-docs/guides/compile.md](../user-docs/guides/compile.md#rollback-to-a-pinned-run).
+
 ### 5.3 Artifact layout
 
 Per-agent under `agents/<agent-name>/artifacts/`:

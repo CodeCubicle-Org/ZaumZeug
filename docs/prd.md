@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-28 (E4-S06 compile `--dry-run`)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4-S01–S06 done; next E4-S07)  
+**Last updated:** 2026-07-28 (E4-S07 artifact rollback / pin)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4-S01–S07 done; next E4-S08)  
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -316,7 +316,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 **Phase 2 compile scope (resolved):** **Pattern A** (`dspy.GEPA`) is the default `zaumzeug compile` path — optimize prompts/signatures via DSPy modules, export to Haystack artifacts. **Optional within Pattern A:** compile-time GEPA on **input rewrite/clarify templates** (how the harness preprocesses user messages — not optimization of end-user chat at runtime). **Pattern B** (`optimize_anything` / Haystack evaluator) **shipped early** (E4-S04, 2026-07-28) as a programmatic adapter + schema; not wired into the CLI compile path yet.
 
-**Story seeds:** DSPy module loader **Done** (E4-S01). Compile CLI + GEPA runner + artifacts **Done** (E4-S02a/b, 2026-07-28). Export contract **Done** (E4-S03a, 2026-07-28). Runtime `input_rewrite` preprocess **Done** (E4-S03b, 2026-07-28). Haystack GEPA evaluator / Pattern B **Done** (E4-S04, 2026-07-28). Post-compile serve uses artifact **Done** (E4-S05, 2026-07-28). Compile `--dry-run` **Done** (E4-S06, 2026-07-28). Remaining: rollback to pinned `artifacts/<run_id>` (E4-S07); workflow diagram golden snapshot (E4-S08).
+**Story seeds:** DSPy module loader **Done** (E4-S01). Compile CLI + GEPA runner + artifacts **Done** (E4-S02a/b, 2026-07-28). Export contract **Done** (E4-S03a, 2026-07-28). Runtime `input_rewrite` preprocess **Done** (E4-S03b, 2026-07-28). Haystack GEPA evaluator / Pattern B **Done** (E4-S04, 2026-07-28). Post-compile serve uses artifact **Done** (E4-S05, 2026-07-28). Compile `--dry-run` **Done** (E4-S06, 2026-07-28). Rollback to pinned `artifacts/<run_id>` **Done** (E4-S07, 2026-07-28) — immutable runs, doctor pin check, [rollback guide](user-docs/guides/compile.md#rollback-to-a-pinned-run). Remaining: workflow diagram golden snapshot (E4-S08).
 
 ---
 
@@ -417,7 +417,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4-S01–S06 **Done** 2026-07-28; next E4-S07 |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4-S01–S07 **Done** 2026-07-28; next E4-S08 |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A | E8 |
 

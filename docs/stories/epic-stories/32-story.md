@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/32-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-28 |
 | **Story ID** | E4-S07 |
+| **Status** | Done |
 | **Epic** | [E4 — Compile and GEPA Pipeline](../04-epic.md) |
 | **Phase** | 2 |
 | **Epic build order** | 4 of 8 |
@@ -23,7 +24,8 @@
 | **Feature** | PRD E4 story seed |
 | **Persona** | Harness developer |
 | **Priority** | P2 |
-| **Prerequisites** | [E4-S02b](27.2-story.md#e4-s02b-gepa-runner-and-artifacts) · [E4-S03a](28.1-story.md#e4-s03a-export-contract-and-manifest) |
+| **Status** | Done (2026-07-28) |
+| **Prerequisites** | [E4-S02b](27.2-story.md#e4-s02b-gepa-runner-and-artifacts) ✅ · [E4-S03a](28.1-story.md#e4-s03a-export-contract-and-manifest) ✅ |
 
 ### User story
 
@@ -44,16 +46,16 @@ As a **harness developer**, I want to pin or rollback to a specific `artifacts/<
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Document/manual path: set `agents/<name>/agent.yaml` `runtime.artifact` to `artifacts/<run_id>/` or update `artifacts/current` pointer
-- [ ] **AC-2** `zaumzeug doctor` validates pinned run has valid `artifact-manifest.json`
-- [ ] **AC-3** Deploy can pin a specific `artifact_run_id` in deploy `manifest.json` ([E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command))
-- [ ] **AC-4** Immutable `<run_id>/` directories are never overwritten by new compile
+- [x] **AC-1** Document/manual path: set `agents/<name>/agent.yaml` `runtime.artifact` to `artifacts/<run_id>/` or update `artifacts/current` pointer
+- [x] **AC-2** `zaumzeug doctor` validates pinned run has valid `artifact-manifest.json`
+- [x] **AC-3** Deploy can pin a specific `artifact_run_id` in deploy `manifest.json` ([E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command))
+- [x] **AC-4** Immutable `<run_id>/` directories are never overwritten by new compile
 
 ### Implementation tasks (build)
 
-- [ ] Ensure compile writes immutable `artifacts/<run_id>/` and updates `artifacts/current` separately
-- [ ] Add doctor check comparing `current` vs explicitly pinned path
-- [ ] Document rollback steps in user-docs compile guide
+- [x] Ensure compile writes immutable `artifacts/<run_id>/` and updates `artifacts/current` separately
+- [x] Add doctor check comparing `current` vs explicitly pinned path
+- [x] Document rollback steps in user-docs compile guide
 
 ### Verification (after build)
 
@@ -63,15 +65,23 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 |---|---|
 | AC-1 | **manual:** user-docs rollback steps; config pin path documented |
 | AC-2 | `tests/integration/test_doctor.py::test_e4_s07_ac2_doctor_validates_pinned_manifest` |
-| AC-3 | `tests/integration/deploy/test_deploy_pin.py::test_e4_s07_ac3_deploy_manifest_artifact_run_id` *(shared E5-S01)* |
+| AC-3 | `tests/integration/deploy/test_deploy_pin.py::test_e4_s07_ac3_deploy_manifest_artifact_run_id` *(shared E5-S01 — contract via doctor `--deploy`; packager write lands in E5-S01)* |
 | AC-4 | `tests/integration/compile/test_rollback.py::test_e4_s07_ac4_compile_twice_pin_first_serve_first` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/compile/test_rollback.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/compile/test_rollback.py -v` passes (1 passed, 0 skipped)
+- Verification: **3 passed, 0 skipped** (`test_rollback.py`, `test_e4_s07_ac2_*`, `test_deploy_pin.py`).
 
 ### Definition of done
 
-- [ ] Rollback procedure documented; no hand-editing of exported prompt files ([Architecture §15](../../architecture/10-operations-and-reference.md#15-anti-patterns))
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Rollback procedure documented; no hand-editing of exported prompt files ([Architecture §15](../../architecture/10-operations-and-reference.md#15-anti-patterns))
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-07-28)
+
+- Immutable writes already in `write_artifact_run` (refuse existing `<run_id>/`); only `artifacts/current` is replaced.
+- Doctor: `check_pinned_artifact` — fail on missing/invalid pin manifest; warn when explicit pin ≠ `current`.
+- Docs: [user-docs/guides/compile.md — Rollback](../../user-docs/guides/compile.md#rollback-to-a-pinned-run).
+- AC-3: deploy `artifact_run_id` contract validated by doctor `--deploy` (packager write shared with E5-S01).
 
 ---

@@ -1,6 +1,6 @@
 # ZaumZeug — Architecture
 
-**Last updated:** 2026-07-28 (E4-S06 compile `--dry-run`)
+**Last updated:** 2026-07-28 (E4-S07 artifact rollback / pin)
 **Related:** [PRD](prd.md) · [Ideation archive](ideation-stage.md) · [Stories index](stories/00-README.md)
 
 **Document scope:** This document defines **how** the system is built — structure, flows, protocols, and SDK modules. Product **what/why**, epics, acceptance criteria, and phases live in **[prd.md](prd.md)**. Cross-reference; do not duplicate.
@@ -80,13 +80,13 @@ flowchart TB
 | 01 | Overview and principles | [01-overview-and-principles.md](architecture/01-overview-and-principles.md) | System context detail, golden rules, harness vs agent, guides/sensors, portability |
 | 02 | Repository and layout | [02-repository-and-layout.md](architecture/02-repository-and-layout.md) | Repo tree, harness folders, model files, install scripts, user-docs |
 | 03 | Technology stack | [03-technology-stack.md](architecture/03-technology-stack.md) | Haystack/DSPy/GEPA/Jinja2 boundaries, `pyproject.toml` groups, test dependencies |
-| 04 | Data flows | [04-data-flows.md](architecture/04-data-flows.md) | compile → deploy → serve, artifacts, workflow diagram; post-compile serve ✅ (E4-S05); compile `--dry-run` ✅ (E4-S06) |
+| 04 | Data flows | [04-data-flows.md](architecture/04-data-flows.md) | compile → deploy → serve, artifacts, workflow diagram; post-compile serve ✅ (E4-S05); compile `--dry-run` ✅ (E4-S06); rollback / pin ✅ (E4-S07) |
 | 05 | Configuration | [05-configuration.md](architecture/05-configuration.md) | YAML schema, model merge, eval, ModelRouter; doctor `source_hash` warn (E4-S05) |
 | 06 | Runtime and protocols | [06-runtime-and-protocols.md](architecture/06-runtime-and-protocols.md) | CLI layering, MCP/ACP/REST, web layouts |
 | 07 | Deploy packaging | [07-deploy-packaging.md](architecture/07-deploy-packaging.md) | Packager, manifest, target install, platform matrix |
-| 08 | Compile and optimization | [08-compile-and-optimization.md](architecture/08-compile-and-optimization.md) | GEPA patterns A/B/C; Pattern A CLI; Pattern B adapter ✅ (E4-S04); optional runtime `input_rewrite` (E4-S03b ✅); post-compile serve ✅ (E4-S05); compile `--dry-run` ✅ (E4-S06) |
+| 08 | Compile and optimization | [08-compile-and-optimization.md](architecture/08-compile-and-optimization.md) | GEPA patterns A/B/C; Pattern A CLI; Pattern B adapter ✅ (E4-S04); optional runtime `input_rewrite` (E4-S03b ✅); post-compile serve ✅ (E4-S05); compile `--dry-run` ✅ (E4-S06); immutable runs + rollback ✅ (E4-S07) |
 | 09 | SDK module map | [09-sdk-module-map.md](architecture/09-sdk-module-map.md) | Epic → module table |
-| 10 | Operations and reference | [10-operations-and-reference.md](architecture/10-operations-and-reference.md) | Debug/test pyramid, testing playbook, doctor `artifact_module` warn (E4-S05), serve/compile `--dry-run` (E2-S05 / E4-S06), security, anti-patterns, ecosystem, links |
+| 10 | Operations and reference | [10-operations-and-reference.md](architecture/10-operations-and-reference.md) | Debug/test pyramid, testing playbook, doctor `artifact_module` + `pinned_artifact` (E4-S05 / E4-S07), serve/compile `--dry-run` (E2-S05 / E4-S06), security, anti-patterns, ecosystem, links |
 
 **Reader paths:**
 

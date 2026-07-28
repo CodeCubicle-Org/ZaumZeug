@@ -33,6 +33,8 @@ DSPy and GEPA never run in production. End-user chat is never a GEPA optimizatio
 
 **Implementation (E4-S06, 2026-07-28):** `zaumzeug compile --dry-run` — same validation path as E4-S02a (schema, module load, LM registry preflight) without GEPA, LLM calls, or artifact writes. Summary prints task/reflection model ids. Tests: `tests/integration/compile/test_compile_dry_run.py`.
 
+**Implementation (E4-S07, 2026-07-28):** Immutable `artifacts/<run_id>/` (never overwritten); pin/rollback via `agent.artifact` or `current`; doctor validates pins. Docs: [user-docs/guides/compile.md](../user-docs/guides/compile.md#rollback-to-a-pinned-run).
+
 ### Pattern B — `optimize_anything` *(deferred — Phase 4+)*
 
 > **Shipped early (E4-S04, 2026-07-28):** adapter + schema are available; see implementation note below. Originally scoped to Phase 4+.

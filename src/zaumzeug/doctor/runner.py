@@ -16,6 +16,7 @@ from zaumzeug.doctor.checks import (
     check_mcp_uv_presence,
     check_model_registry,
     check_package_import,
+    check_pinned_artifact,
     check_port_conflict,
     check_python_version,
     check_runtime_paths,
@@ -112,6 +113,9 @@ def run_doctor(
         runtime_targets = agent_names or list_agent_names(harness_dir)
         checks.extend(
             check_runtime_paths(name, harness_dir, agent_names=runtime_targets)
+        )
+        checks.extend(
+            check_pinned_artifact(name, harness_dir, agent_names=runtime_targets)
         )
         if not deploy_mode:
             checks.extend(

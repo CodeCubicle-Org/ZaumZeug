@@ -65,6 +65,8 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 
 `target_install` preflight verifies this file plus `harness.yaml` in the bundle directory.
 
+**Implementation (E4-S07, 2026-07-28):** Pin contract — `artifact_run_id` (string or per-agent map) selects an immutable compile run; `zaumzeug doctor --deploy` validates the pinned `artifact-manifest.json`. Writing this field via `zaumzeug deploy` is [E5-S01](../stories/epic-stories/41-story.md). Dev-side rollback (pin `agent.artifact` without re-GEPA): [user-docs/guides/compile.md](../user-docs/guides/compile.md#rollback-to-a-pinned-run). Tests: `tests/integration/deploy/test_deploy_pin.py`.
+
 ### 10.4 Git and `.gitignore`
 
 | Policy | Recommendation |

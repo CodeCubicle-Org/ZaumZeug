@@ -434,7 +434,11 @@ def write_artifact_run(
     payload: dict[str, Any],
     optimized_module: Any | None = None,
 ) -> tuple[Path, Path]:
-    """Write ``artifacts/<run_id>/`` and update ``artifacts/current`` (symlink or copy)."""
+    """Write immutable ``artifacts/<run_id>/`` and update ``artifacts/current``.
+
+    Existing ``<run_id>/`` directories are never overwritten (E4-S07). Only the
+    ``current`` pointer (symlink or copy) is replaced on each successful compile.
+    """
     agent_dir = Path(agent_dir)
     artifacts_root = agent_dir / "artifacts"
     run_dir = artifacts_root / run_id
@@ -442,7 +446,10 @@ def write_artifact_run(
         raise GepaRunError(
             f"Artifact run_id {run_id!r} already exists at {run_dir} (immutable)",
             path=run_dir,
-            suggestion="Re-run compile to allocate a new run_id, or remove the stale folder",
+            suggestion=(
+                "Re-run compile to allocate a new run_id, or pin "
+                f"`agent.artifact: artifacts/{run_id}` to keep using this run"
+            ),
         )
 
     run_dir.mkdir(parents=True, exist_ok=False)

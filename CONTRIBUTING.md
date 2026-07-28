@@ -73,7 +73,7 @@ Useful next commands: `zaumzeug doctor`, `zaumzeug init <name>`, `zaumzeug run <
 
 Not required for mock serve:
 
-- **Compile / GEPA** — included in `[dev]` (`zaumzeug compile`, Phase 2; `--dry-run` validates modules/registry without GEPA; writes Haystack export under `artifacts/<run_id>/`; optional `input_rewrite` applied at serve/run; mock/stub offline, live models need `.env` keys). See [user-docs/guides/compile.md](user-docs/guides/compile.md).
+- **Compile / GEPA** — included in `[dev]` (`zaumzeug compile`, Phase 2; `--dry-run` validates modules/registry without GEPA; writes immutable Haystack export under `artifacts/<run_id>/`; pin/rollback to a prior run without re-GEPA; optional `input_rewrite` applied at serve/run; mock/stub offline, live models need `.env` keys). See [user-docs/guides/compile.md](user-docs/guides/compile.md).
 - **DeepEval** — `pip install "zaumzeug[eval]"` (dev regression, Phase 2+)
 - **Provider plugins** — e.g. `openai-haystack`, `anthropic-haystack` (live models only)
 - **MCP in Cursor** — `uv` + install `--cursor-mcp` (Phase 3)

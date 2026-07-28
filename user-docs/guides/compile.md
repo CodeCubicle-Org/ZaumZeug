@@ -100,6 +100,25 @@ At serve/run time:
 - Optional `input_rewrite` from the manifest is applied as a fixed preprocess before the agent loop.
 - `zaumzeug doctor` warns (exit 0) when the current `compile.module` `.py` hash no longer matches `source_hash` in the artifact manifest — re-run compile.
 
+## Rollback to a pinned run
+
+Compile never overwrites an existing `artifacts/<run_id>/` folder — only `artifacts/current` moves forward. To recover from a bad compile **without** re-running GEPA:
+
+1. List runs under `agents/<name>/artifacts/` (each `<run_id>/` is immutable).
+2. Pin serve to a known-good run in `agent.yaml` (do **not** hand-edit exported prompts — [Architecture §15](../../docs/architecture/10-operations-and-reference.md#15-anti-patterns)):
+
+```yaml
+# agents/<name>/agent.yaml
+agent:
+  artifact: artifacts/20260728T100001Z   # known-good run_id
+```
+
+3. Or retarget the pointer only: replace `artifacts/current` so it again points at that `<run_id>/` (symlink or copy), and keep `agent.artifact: artifacts/current`.
+4. Run `zaumzeug doctor <harness>` — it validates the pin has a readable `artifact-manifest.json` and **warns** when the pin differs from `artifacts/current`.
+5. `zaumzeug serve <harness>` loads the pinned run.
+
+Deploy bundles pin the same way via `deploy/<name>/manifest.json` → `artifact_run_id` (per-agent map). Writing that field is `zaumzeug deploy` ([E5-S01](../../docs/stories/epic-stories/41-story.md)); `zaumzeug doctor --deploy` already validates the pinned run.
+
 ## Runtime input rewrite
 
 When an artifact manifest lists `input_rewrite`, serve and `zaumzeug run` apply that **fixed** template to user messages before the agent loop (Jinja `{{ user_input }}`, `str.format`, or plain instruction text prepended). There is still no live GEPA call per message.

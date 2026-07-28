@@ -5,8 +5,8 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E4-S06 done; next E4-S07) |
-| **Status** | In progress (E4-S01–S06 done) |
+| **Last modified** | 2026-07-28 (E4-S07 done; next E4-S08) |
+| **Status** | In progress (E4-S01–S07 done) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -32,7 +32,7 @@
 4. **E4-S04** — Haystack GEPA evaluator / Pattern B ✅ (2026-07-28)
 5. **E4-S05** — Post-compile serve uses artifact ✅ (2026-07-28)
 6. **E4-S06** — Compile `--dry-run` ✅ (2026-07-28)
-7. **E4-S07** — Artifact rollback to pinned run
+7. **E4-S07** — Artifact rollback to pinned run ✅ (2026-07-28)
 8. **E4-S08** — Workflow diagram at compile
 
 ---
@@ -116,7 +116,7 @@ See epic-stories for full AC → test mapping. Runtime `input_rewrite` preproces
 
 **E4-S03a Done (2026-07-28):** `compile/export.py` maps `dump_state()` → Haystack prompts / `agent.json` / `artifact-manifest.json`; optional `input_rewrite`; legacy `manifest.json` accepted. Tests: `pytest … -k e4_s03` (7 passed).
 
-**E4-S03b Done (2026-07-28):** `runtime/preprocess.py` + `build_agent_bundle()` apply fixed `input_rewrite` before `Agent.run` on serve/run (no DSPy). Tests: `pytest … -k e4_s03b` (7 passed). **E4-S04 Done (2026-07-28):** Pattern B `compile/gepa_adapter.py` + `CompileConfig` mode/seed_artifact. Tests: `pytest tests/unit/compile/test_gepa_adapter.py -v` (5 passed, 0 skipped). **E4-S05 Done (2026-07-28):** Post-compile serve prefers artifact; doctor stale `source_hash` warn. Tests: **12 passed, 0 skipped** (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). **E4-S06 Done (2026-07-28):** `compile --dry-run`. Tests: **5 passed, 0 skipped** (`test_compile_dry_run.py`). Next: [E4-S07](epic-stories/32-story.md).
+**E4-S03b Done (2026-07-28):** `runtime/preprocess.py` + `build_agent_bundle()` apply fixed `input_rewrite` before `Agent.run` on serve/run (no DSPy). Tests: `pytest … -k e4_s03b` (7 passed). **E4-S04 Done (2026-07-28):** Pattern B `compile/gepa_adapter.py` + `CompileConfig` mode/seed_artifact. Tests: `pytest tests/unit/compile/test_gepa_adapter.py -v` (5 passed, 0 skipped). **E4-S05 Done (2026-07-28):** Post-compile serve prefers artifact; doctor stale `source_hash` warn. Tests: **12 passed, 0 skipped** (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). **E4-S06 Done (2026-07-28):** `compile --dry-run`. Tests: **5 passed, 0 skipped** (`test_compile_dry_run.py`). **E4-S07 Done (2026-07-28):** Immutable `<run_id>/` + doctor `pinned_artifact` + rollback docs; deploy `artifact_run_id` contract shared with E5-S01. Tests: `test_rollback.py`, `test_e4_s07_ac2_*`, `test_deploy_pin.py`. Next: [E4-S08](epic-stories/33-story.md).
 
 ---
 
@@ -283,6 +283,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | PRD E4 story seed |
 | **Persona** | Harness developer |
 | **Priority** | P2 |
+| **Status** | Done (2026-07-28) |
 | **Prerequisites** | [E4-S02](#e4-s02-gepa-compile-command) · [E4-S03](#e4-s03-export-contract-haystack-artifacts) |
 
 ### User story
@@ -296,16 +297,16 @@ As a **harness developer**, I want to pin or rollback to a specific `artifacts/<
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Document/manual path: set `agents/<name>/agent.yaml` `runtime.artifact` to `artifacts/<run_id>/` or update `artifacts/current` pointer
-- [ ] **AC-2** `zaumzeug doctor` validates pinned run has valid `artifact-manifest.json`
-- [ ] **AC-3** Deploy can pin a specific `artifact_run_id` in deploy `manifest.json` ([E5-S01](../06-epic.md#e5-s01-zaumzeug-deploy-command))
-- [ ] **AC-4** Immutable `<run_id>/` directories are never overwritten by new compile
+- [x] **AC-1** Document/manual path: set `agents/<name>/agent.yaml` `runtime.artifact` to `artifacts/<run_id>/` or update `artifacts/current` pointer
+- [x] **AC-2** `zaumzeug doctor` validates pinned run has valid `artifact-manifest.json`
+- [x] **AC-3** Deploy can pin a specific `artifact_run_id` in deploy `manifest.json` ([E5-S01](../06-epic.md#e5-s01-zaumzeug-deploy-command))
+- [x] **AC-4** Immutable `<run_id>/` directories are never overwritten by new compile
 
 ### Implementation tasks (build)
 
-- [ ] Ensure compile writes immutable `artifacts/<run_id>/` and updates `artifacts/current` separately
-- [ ] Add doctor check comparing `current` vs explicitly pinned path
-- [ ] Document rollback steps in user-docs compile guide
+- [x] Ensure compile writes immutable `artifacts/<run_id>/` and updates `artifacts/current` separately
+- [x] Add doctor check comparing `current` vs explicitly pinned path
+- [x] Document rollback steps in user-docs compile guide
 
 ### Verification (after build)
 
@@ -318,13 +319,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-3 | `tests/integration/deploy/test_deploy_pin.py::test_e4_s07_ac3_deploy_manifest_artifact_run_id` *(shared E5-S01)* |
 | AC-4 | `tests/integration/compile/test_rollback.py::test_e4_s07_ac4_compile_twice_pin_first_serve_first` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/compile/test_rollback.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/compile/test_rollback.py -v` passes (1 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Rollback procedure documented; no hand-editing of exported prompt files ([Architecture §15](../architecture/10-operations-and-reference.md#15-anti-patterns))
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Rollback procedure documented; no hand-editing of exported prompt files ([Architecture §15](../architecture/10-operations-and-reference.md#15-anti-patterns))
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 
