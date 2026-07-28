@@ -87,7 +87,7 @@ def test_e1_s03_ac3_gitignore_entries(
     client_install: ModuleType,
     tmp_path: Path,
 ) -> None:
-    """AC-3: Updates ``.gitignore`` for ``.venv``, ``artifacts/``, ``deploy/``, ``.env``."""
+    """AC-3: Updates ``.gitignore`` for ``.venv``, ``artifacts/``, ``/deploy/``, ``.env``."""
     (tmp_path / ".gitignore").write_text("# existing\n__pycache__/\n", encoding="utf-8")
 
     client_install.scaffold_project(tmp_path, no_example=True, cursor_mcp=False)
@@ -96,7 +96,7 @@ def test_e1_s03_ac3_gitignore_entries(
     lines = {line.strip() for line in text.splitlines() if line.strip() and not line.strip().startswith("#")}
     assert ".venv" in lines
     assert ".env" in lines
-    assert "deploy/" in lines
+    assert "/deploy/" in lines or "deploy/" in lines
     assert "artifacts/" in lines
     assert "__pycache__/" in lines  # pre-existing preserved
 

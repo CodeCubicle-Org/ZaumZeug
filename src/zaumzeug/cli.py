@@ -139,6 +139,29 @@ def _eval_command(args: argparse.Namespace) -> int:
     return result.exit_code
 
 
+def _deploy_command(args: argparse.Namespace) -> int:
+    """Package harness for production — eval gate (E5-S06 / E6-S03); bundle E5-S01."""
+    configure_logging(verbose=args.verbose)
+    from zaumzeug.deploy.packager import DeployError, package_harness
+
+    try:
+        result = package_harness(
+            args.harness_name,
+            eval_gate=args.eval_gate,
+            output=sys.stdout,
+        )
+    except DeployError as exc:
+        print(str(exc), file=sys.stderr)
+        if exc.suggestion:
+            print(f"Suggestion: {exc.suggestion}", file=sys.stderr)
+        return 1
+    if result.eval_gate.blocked:
+        return result.exit_code
+    if result.bundle_dir is not None:
+        print(f"Deploy bundle written to {result.bundle_dir}")
+    return result.exit_code
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="zaumzeug",
@@ -264,10 +287,31 @@ def build_parser() -> argparse.ArgumentParser:
     run_cmd.set_defaults(_handler=_run_command)
 
     for name in _COMMANDS:
-        if name in {"init", "doctor", "serve", "run", "compile", "eval"}:
+        if name in {"init", "doctor", "serve", "run", "compile", "deploy", "eval"}:
             continue
         cmd = sub.add_parser(name, help=f"{name} command (stub)")
         cmd.set_defaults(_handler=_stub_command(name))
+
+    deploy_cmd = sub.add_parser(
+        "deploy",
+        help="package a harness for production (eval gate; full packager E5-S01)",
+    )
+    deploy_cmd.add_argument(
+        "harness_name",
+        help="harness name under usr-harnesses/",
+    )
+    deploy_cmd.add_argument(
+        "--eval-gate",
+        choices=("skip", "warn", "block"),
+        default=None,
+        help="override deploy.eval_gate from harness.yaml for this run",
+    )
+    deploy_cmd.add_argument(
+        "--verbose",
+        action="store_true",
+        help="enable SDK and Haystack debug logging",
+    )
+    deploy_cmd.set_defaults(_handler=_deploy_command)
 
     eval_cmd = sub.add_parser(
         "eval",

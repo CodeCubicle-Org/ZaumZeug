@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/41-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-28 |
 | **Story ID** | E5-S01 |
 | **Epic** | [E5 — Deploy Packaging](../06-epic.md) |
 | **Phase** | 2 |
@@ -13,6 +13,7 @@
 | **Story sequence** | 41 of 63 (global build order) |
 | **Source** | Extracted from [`06-epic.md`](../06-epic.md) |
 | **Related** | [Stories index](../00-README.md) · [Epic E5](../../prd.md#epic-e5--deploy-packaging-phase-2) · [Architecture](../../architecture.md) |
+| **Notes** | Eval gate pre-step already Done ([E5-S06](46-story.md) / [E6-S03](36-story.md), 2026-07-28); this story owns full bundle write. |
 
 ---
 
@@ -54,9 +55,9 @@ As a **harness developer**, I want `zaumzeug deploy <name>` to produce a product
 
 ### Implementation tasks (build)
 
-- [ ] Implement `src/zaumzeug/deploy/packager.py`
+- [ ] Implement full `src/zaumzeug/deploy/packager.py` copy rules *(module + eval gate exist from [E5-S06](46-story.md) / [E6-S03](36-story.md))*
 - [ ] Run preflight doctor before pack
-- [ ] Apply eval gate (E5-S06)
+- [x] Apply eval gate (E5-S06) ✅ (2026-07-28)
 - [ ] Generate `README.deploy.md` from template
 
 ### Verification (after build)

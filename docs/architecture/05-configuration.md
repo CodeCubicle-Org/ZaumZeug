@@ -54,7 +54,7 @@ Requirements: [PRD E2.2](../prd.md#epic-e2--configuration-and-validation-phase-1
 | `tools.custom` | `agent.yaml` | 3 | `agents/<name>/tools/*.py` | E7 |
 | `compile` | `agent.yaml` | 2 | DSPy + GEPA → agent `artifacts/` | E4 |
 | `eval` | `harness.yaml` | 2 | Optional eval (`builtin` or `deepeval`) | E6 |
-| `deploy` | `harness.yaml` | 2 | Eval gate on `zaumzeug deploy` | E5 |
+| `deploy` | `harness.yaml` | 2 | Eval gate on `zaumzeug deploy` ✅ (E6-S03 / E5-S06) | E5 |
 | `serve` | `harness.yaml` | 1+ | Hayhooks ports, Chainlit, MCP, ACP, A2A | E3, E7, E8 |
 
 Full schema examples: Phase 1 canonical examples in [§6.6](05-configuration.md#66-phase-1-config-schema); full multi-phase reference in [ideation-stage.md](../ideation-stage.md) until `user-docs/reference/harness-yaml.md` exists.
@@ -137,6 +137,8 @@ If `eval:` absent, `eval_gate: block` is a no-op (nothing to run).
 
 Requirements: [PRD E5.6](../prd.md#epic-e5--deploy-packaging-phase-2), [E6.3](../prd.md#epic-e6--evaluation-and-quality-phase-2-optional).
 
+**Implementation (E5-S06 / E6-S03, 2026-07-28):** Single source of truth in [`deploy/packager.py`](../../src/zaumzeug/deploy/packager.py) — `apply_eval_gate()` / `package_harness()`; `DeployConfig` on `HarnessConfig`; CLI `zaumzeug deploy --eval-gate`. Tests: `tests/unit/deploy/test_eval_gate.py` (7 passed). Full stripped-bundle copy rules remain [E5-S01](../stories/epic-stories/41-story.md).
+
 ### 6.5 Builtin tools catalog
 
 SDK-provided tools referenced by `tools.builtin` in `harness.yaml`:
@@ -158,7 +160,7 @@ Custom tools use `tools.custom` (user Python), not this catalog — [PRD E7.2](.
 
 Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validation-phase-1), [E3.4](../prd.md#epic-e3--runtime-and-local-serve-phase-1), [E3.5](../prd.md#epic-e3--runtime-and-local-serve-phase-1).
 
-**Implementation (E2-S01, 2026-07-08):** Phase 1 `harness.yaml` root fields are validated by `zaumzeug.config.load_harness()` → `HarnessConfig` (`src/zaumzeug/config/schemas.py`, `loader.py`). Phase-gated keys (`compile`, `deploy`, `serve.acp`, …) fail with a phase hint. **`eval` unblocked by E6-S02** (validated as `EvalConfig` when present).
+**Implementation (E2-S01, 2026-07-08):** Phase 1 `harness.yaml` root fields are validated by `zaumzeug.config.load_harness()` → `HarnessConfig` (`src/zaumzeug/config/schemas.py`, `loader.py`). Phase-gated keys (`compile`, `serve.acp`, …) fail with a phase hint. **`eval` unblocked by E6-S02** (validated as `EvalConfig` when present). **`deploy` unblocked by E6-S03 / E5-S06** (validated as `DeployConfig` with `eval_gate`).
 
 **Implementation (E2-S02, 2026-07-08):** Per-agent model registries merge via `zaumzeug.config.load_merged_agent_models()` (`models.py`).
 

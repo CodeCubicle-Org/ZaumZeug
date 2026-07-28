@@ -19,7 +19,7 @@ from zaumzeug.config.constants import CURRENT_SDK_PHASE
 PHASE_GATED_FIELDS: dict[tuple[str, ...], int] = {
     ("compile",): 2,
     # ``eval`` unblocked by E6-S02 (``zaumzeug eval``); still Phase 2 in the PRD.
-    ("deploy",): 2,
+    # ``deploy`` unblocked by E6-S03 / E5-S06 (``deploy.eval_gate``); still Phase 2 in the PRD.
     ("parallelism",): 2,
     ("serve", "acp"): 3,
     ("serve", "a2a"): 4,
@@ -368,6 +368,20 @@ class EvalConfig(BaseModel):
         return value.strip()
 
 
+EvalGateMode = Literal["skip", "warn", "block"]
+
+
+class DeployConfig(BaseModel):
+    """Optional ``deploy`` section of ``harness.yaml`` (Architecture §6.4 / E5-S06).
+
+    Controls whether ``zaumzeug deploy`` runs eval first. Default gate is ``skip``.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    eval_gate: EvalGateMode = "skip"
+
+
 class HarnessConfig(BaseModel):
     """Root schema for ``harness.yaml`` (Architecture §6.6 Phase 1+)."""
 
@@ -378,6 +392,7 @@ class HarnessConfig(BaseModel):
     models: str | None = None
     serve: ServeConfig | None = None
     eval: EvalConfig | None = None
+    deploy: DeployConfig | None = None
 
     @model_validator(mode="before")
     @classmethod

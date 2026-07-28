@@ -5,7 +5,7 @@
 | **Document** | Epic E6 user stories |
 | **File** | `docs/stories/05-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E6-S02 done) |
+| **Last modified** | 2026-07-28 (E6-S03 / E5-S06 done) |
 | **Status** | In progress |
 | **Build order** | **5 of 8** (before E5 — deploy eval gate needs `zaumzeug eval`) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -27,7 +27,7 @@
 
 1. **E6-S01** — `[eval]` extra ✅ (2026-07-28)
 2. **E6-S02** — `zaumzeug eval` *(blocks E5-S06)* ✅ (2026-07-28)
-3. **E6-S03** — Eval gate cross-reference
+3. **E6-S03** — Eval gate cross-reference ✅ (2026-07-28; owner [E5-S06](../06-epic.md#e5-s06-deploy-eval-gate) ✅)
 4. **E6-S04** → **E6-S07** — pytest scaffold, trace, HTTP mode, GEPA bridge
 
 ---
@@ -146,6 +146,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E6.3 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
+| **Status** | Done (2026-07-28) — canonical: [36-story.md](epic-stories/36-story.md) |
 
 ### User story
 
@@ -158,13 +159,13 @@ As a **harness developer**, I want deploy to respect eval gates, so that failed 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Covered by E5-S06 implementation
-- [ ] **AC-2** Eval runner invoked from deploy packager when gate is `warn` or `block`
+- [x] **AC-1** Covered by E5-S06 implementation
+- [x] **AC-2** Eval runner invoked from deploy packager when gate is `warn` or `block`
 
 ### Implementation tasks (build)
 
-- [ ] Cross-link tests between E5 and E6
-- [ ] Document in harness.yaml `deploy.eval_gate` examples
+- [x] Cross-link tests between E5 and E6
+- [x] Document in harness.yaml `deploy.eval_gate` examples
 
 ### Verification (after build)
 
@@ -175,13 +176,13 @@ Per [Story verification](00-README.md#story-verification-required). **Cross-stor
 | AC-1 | **shared:** [E5-S06](../06-epic.md#e5-s06-deploy-eval-gate) Verification table |
 | AC-2 | `tests/unit/deploy/test_eval_gate.py::test_e6_s03_ac2_packager_invokes_eval_runner` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] E5-S06 and E6-S03 verification tables both reference same tests
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] E5-S06 and E6-S03 verification tables both reference same tests
 
 ### Definition of done
 
-- [ ] Single source of truth in deploy packager (no duplicate gate logic)
-- [ ] Verification checklist complete
+- [x] Single source of truth in deploy packager (no duplicate gate logic)
+- [x] Verification checklist complete
 
 ---
 

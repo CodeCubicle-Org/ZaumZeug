@@ -14,8 +14,8 @@ HarnessDevelopment/
 │   ├── doctor/               # Preflight checks — pass/warn/fail (E2-S04a–S04c, E4-S05 artifact_module, E4-S07 pinned_artifact)
 │   ├── runtime/              # ModelRouter (E3-S01, E3-S05), factory (E3-S00), tools/ (E3-S03), input_rewrite preprocess (E4-S03b)
 │   ├── compile/              # DSPy loader; CLI + GEPA + --dry-run; export; workflow diagram; immutable runs (E4-S01–S08)
-│   ├── deploy/               # usr-harnesses/ → deploy/ packager
-│   ├── eval/                 # Optional DeepEval bridge — [eval] extra + require_deepeval() (E6-S01); zaumzeug eval runner (E6-S02)
+│   ├── deploy/               # Eval gate ✅ (E6-S03 / E5-S06); full usr-harnesses/ → deploy/ packager → E5-S01
+│   ├── eval/                 # Optional DeepEval bridge — [eval] extra + require_deepeval() (E6-S01); zaumzeug eval runner (E6-S02); invoked by deploy gate (E6-S03)
 │   ├── serve/                # validate_serve + dry-run (E2-S05); Hayhooks runner (E3-S02; input_rewrite on request path E4-S03b)
 │   ├── integrations/         # mock (E3-S05), haystack provider map (E3-S01); DSPy, GEPA, LiteLLM adapters
 │   └── fixtures/responses/   # bundled mock LLM fixtures (pip install; mirrors tests/fixtures/responses/)

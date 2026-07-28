@@ -22,10 +22,11 @@ EDITABLE_DEV_SPEC = ".[dev]"
 
 # .gitignore entries ensured by scaffolding (E1-S03 / E1.3).
 # Trailing slashes built via concatenation so AC-7 path-literal checks stay clean.
+# ``/deploy/`` is root-only so ``src/zaumzeug/deploy/`` and ``tests/*/deploy/`` stay tracked.
 GITIGNORE_ENTRIES: tuple[str, ...] = (
     ".venv",
     ".env",
-    "deploy" + "/",
+    "/" + "deploy" + "/",
     "artifacts" + "/",
 )
 
@@ -238,12 +239,19 @@ def copy_tree_files_if_missing(src_dir: Path, dest_dir: Path) -> int:
 
 
 def _gitignore_has_entry(lines: list[str], entry: str) -> bool:
-    """Return True if ``entry`` already appears as a non-comment gitignore line."""
+    """Return True if ``entry`` already appears as a non-comment gitignore line.
+
+    Treat ``deploy/`` and ``/deploy/`` as equivalent so older scaffolds are not
+    duplicated when the root-only pattern is introduced.
+    """
+    aliases = {entry}
+    if entry.lstrip("/") == "deploy/":
+        aliases.update({"deploy/", "/deploy/"})
     for raw in lines:
         stripped = raw.strip()
         if not stripped or stripped.startswith("#"):
             continue
-        if stripped == entry:
+        if stripped in aliases:
             return True
     return False
 

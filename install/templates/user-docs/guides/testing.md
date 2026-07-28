@@ -232,7 +232,21 @@ Run:
 deepeval test run usr-harnesses/my-harness/eval/
 ```
 
-For deploy gates, set `deploy.eval_gate` in `harness.yaml` (`skip` | `warn` | `block`) — see compile/deploy guides (Phase 2 / E5-S06).
+For deploy gates, set `deploy.eval_gate` in `harness.yaml` so `zaumzeug deploy` runs eval first (Architecture §6.4 / E5-S06 / E6-S03):
+
+```yaml
+# harness.yaml (dev copy; stripped from deploy bundle)
+deploy:
+  eval_gate: skip    # skip | warn | block (default: skip)
+```
+
+| `deploy.eval_gate` | Behavior |
+|---|---|
+| `skip` | Do not run eval on deploy (default). |
+| `warn` | If `eval:` configured, run `zaumzeug eval`; print failures; **continue** deploy. |
+| `block` | If `eval:` configured, run `zaumzeug eval`; **abort** deploy on any failure. |
+
+CLI override: `zaumzeug deploy <name> --eval-gate block`. If `eval:` is absent, `block` / `warn` are a no-op. See [CLI — zaumzeug deploy](../reference/cli.md#zaumzeug-deploy).
 
 ---
 

@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/46-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-28 |
 | **Story ID** | E5-S06 |
+| **Status** | Done |
 | **Epic** | [E5 — Deploy Packaging](../06-epic.md) |
 | **Phase** | 2 |
 | **Epic build order** | 6 of 8 |
@@ -23,7 +24,8 @@
 | **Feature** | E5.6 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
-| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ |
+| **Status** | Done (2026-07-28) — shipped early with [E6-S03](36-story.md) (build order) |
+| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) *(packager body still pending)* · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ |
 
 ### User story
 
@@ -53,15 +55,15 @@ deploy:
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `deploy.eval_gate`: `skip` | `warn` | `block` behaves per §6.4
-- [ ] **AC-2** CLI override: `zaumzeug deploy <name> --eval-gate block`
-- [ ] **AC-3** If no `eval` section, `block` is no-op
-- [ ] **AC-4** `warn` continues deploy after printing failures
+- [x] **AC-1** `deploy.eval_gate`: `skip` | `warn` | `block` behaves per §6.4
+- [x] **AC-2** CLI override: `zaumzeug deploy <name> --eval-gate block`
+- [x] **AC-3** If no `eval` section, `block` is no-op
+- [x] **AC-4** `warn` continues deploy after printing failures
 
 ### Implementation tasks (build)
 
-- [ ] Add eval gate to deploy packager pre-step
-- [ ] Wire to `zaumzeug eval` when configured
+- [x] Add eval gate to deploy packager pre-step
+- [x] Wire to `zaumzeug eval` when configured
 
 ### Verification (after build)
 
@@ -74,12 +76,18 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-3 | `tests/unit/deploy/test_eval_gate.py::test_e5_s06_ac3_block_noop_without_eval_section` |
 | AC-4 | `tests/unit/deploy/test_eval_gate.py::test_e5_s06_ac4_warn_continues_after_failures` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/deploy/test_eval_gate.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/deploy/test_eval_gate.py -v` passes (7 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Covered by E6-S03 cross-reference
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Covered by E6-S03 cross-reference
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-07-28)
+
+- `DeployConfig.eval_gate` on `HarnessConfig`; `deploy` removed from `PHASE_GATED_FIELDS`.
+- `apply_eval_gate` / `package_harness` in `deploy/packager.py`; CLI `zaumzeug deploy --eval-gate`.
+- Placeholder bundle write until [E5-S01](41-story.md) lands full copy rules; gate is the single source of truth.
 
 ---

@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 in progress: epic **E4** ([E4-S01](docs/stories/epic-stories/26-story.md)–[E4-S08](docs/stories/epic-stories/33-story.md)) **done** (2026-07-28); **E6-S01**–**E6-S02** ([34-story.md](docs/stories/epic-stories/34-story.md)–[35-story.md](docs/stories/epic-stories/35-story.md)) **done** (2026-07-28) — optional `[eval]` extra + `zaumzeug eval` CLI. Next: [E6-S03](docs/stories/epic-stories/36-story.md) (eval gate on deploy — traceability). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 in progress: epic **E4** ([E4-S01](docs/stories/epic-stories/26-story.md)–[E4-S08](docs/stories/epic-stories/33-story.md)) **done** (2026-07-28); **E6-S01**–**E6-S03** ([34-story.md](docs/stories/epic-stories/34-story.md)–[36-story.md](docs/stories/epic-stories/36-story.md)) **done** (2026-07-28) — optional `[eval]` extra, `zaumzeug eval`, and deploy eval gate ([E5-S06](docs/stories/epic-stories/46-story.md) shipped early with E6-S03). Next: [E6-S04](docs/stories/epic-stories/37-story.md) (`eval/` pytest scaffold). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -117,7 +117,7 @@ Never edit `deploy/` by hand — it is regenerated on each deploy. See [Testing]
 | Runtime | [Haystack](https://github.com/deepset-ai/haystack) + Hayhooks | Agent loop, tools, RAG, REST/MCP serve |
 | Specification | [DSPy](https://dspy.ai/) | Signatures and modules (compile-time only) |
 | Optimization | [GEPA](https://github.com/gepa-ai/gepa) | Offline prompt and module optimization |
-| Evaluation | [DeepEval](https://github.com/confident-ai/deepeval) *(optional `[eval]` extra)* | Dev regression — install with `pip install "zaumzeug[eval]"` (E6-S01); `zaumzeug eval` **Done** (E6-S02) |
+| Evaluation | [DeepEval](https://github.com/confident-ai/deepeval) *(optional `[eval]` extra)* | Dev regression — install with `pip install "zaumzeug[eval]"` (E6-S01); `zaumzeug eval` **Done** (E6-S02); deploy eval gate **Done** (E6-S03 / E5-S06) |
 
 Model routing is configuration-driven via `models.yaml` — swap providers without changing agent code. See [dependencies.md](dependencies.md) for the full list of external tools and libraries, including [Python version notes](dependencies.md#python-version-and-local-install).
 
@@ -134,7 +134,7 @@ zaumzeug doctor --verbose     # Include passing checks
 zaumzeug doctor --json        # Machine-readable report (exit 1 on fail; warns are non-blocking)
 ```
 
-Doctor validates `harness.yaml`, **`workflow.yaml`** (entry, stages, agent refs, agent folder names), merged model registries, and runtime paths. It warns (non-blocking) when: `eval` is present in Phase 1, MCP tools are configured but `uv` is missing, or `workflow.yaml` is newer than `docs/workflow-diagram.md`. In `--deploy` mode, doctor validates `manifest.json`, pinned artifact runs, and reuses core config/runtime checks against the deploy bundle (dev-only warnings are skipped).
+Doctor validates `harness.yaml`, **`workflow.yaml`** (entry, stages, agent refs, agent folder names), merged model registries, and runtime paths. It warns (non-blocking) when: MCP tools are configured but `uv` is missing, or `workflow.yaml` is newer than `docs/workflow-diagram.md`. Optional `eval:` / `deploy:` sections are validated (no Phase warn after E6-S02 / E6-S03). In `--deploy` mode, doctor validates `manifest.json`, pinned artifact runs, and reuses core config/runtime checks against the deploy bundle (dev-only warnings are skipped).
 
 ```bash
 zaumzeug serve <harness> --dry-run    # Validate harness.yaml, workflow.yaml, and resolved paths (no Hayhooks, no LLM)
@@ -143,17 +143,16 @@ zaumzeug serve <harness> --dry-run --json     # Machine-readable summary
 zaumzeug serve <harness> --verbose    # SDK + Haystack debug logging (or HARNESS_LOG_LEVEL=DEBUG)
 zaumzeug compile <harness> --verbose  # Same logging for compile (Phase 2+)
 zaumzeug compile <harness> --workflow-diagram-only  # Refresh docs/workflow-diagram.md without GEPA
+zaumzeug eval <harness>               # Builtin JSONL or DeepEval regression (E6-S02)
+zaumzeug deploy <harness>             # Eval gate then pack (gate Done E6-S03/E5-S06; full bundle E5-S01)
+zaumzeug deploy <harness> --eval-gate block  # Override deploy.eval_gate for one run
 ```
 
 **Planned:**
 
 ```bash
-zaumzeug init <harness>       # Scaffold a new harness
-zaumzeug compile <harness>    # Run DSPy/GEPA optimization (+ workflow diagram)
-zaumzeug run <harness>        # Execute workflow stages locally
-zaumzeug serve <harness>      # Interactive chat with the entry agent
-zaumzeug deploy <harness>     # Package usr-harnesses/ → deploy/
-zaumzeug mcp <harness>        # Serve via Model Context Protocol
+zaumzeug mcp <harness>        # Serve via Model Context Protocol (E7)
+zaumzeug acp <harness>        # Agent Client Protocol adapter (E7)
 ```
 
 ---

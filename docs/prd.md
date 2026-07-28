@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-28 (E6-S01 optional `[eval]` extra)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S02 **Done**; next E6-S03 / E5)  
+**Last updated:** 2026-07-28 (E6-S03 / E5-S06 deploy eval gate)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S03 **Done**; E5-S06 **Done** early with E6-S03; next E6-S04 / E5 packager body)  
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -331,7 +331,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E5.3 | `zaumzeug serve --deploy` | **AC:** Loads only from `deploy/<name>/`; same API as dev serve. |
 | E5.4 | `HARNESS_ROOT=deploy` | **AC:** Env var forces deploy root for serve/mcp/acp/run. Default dev root is `usr-harnesses/`. |
 | E5.5 | Target ship workflow | **AC:** Documented path: copy `deploy/<name>/` to target machine → run bundled `target_install` (or `install/target_install.py --deploy-dir …`) → create `.env` → `zaumzeug serve <name> --deploy`. Installs runtime deps only (`pip install zaumzeug` — Haystack/Hayhooks via SDK); **no** DSPy/GEPA/DeepEval. Python 3.11+ must already be on the target. |
-| E5.6 | Deploy eval gate | **AC:** `deploy.eval_gate` (`skip` \| `warn` \| `block`) and `--eval-gate` CLI override behave per [Architecture §6.4](architecture/05-configuration.md#64-deploy-eval-gate). |
+| E5.6 | Deploy eval gate | **Done** (E5-S06 / E6-S03, 2026-07-28). **AC:** `deploy.eval_gate` (`skip` \| `warn` \| `block`) and `--eval-gate` CLI override behave per [Architecture §6.4](architecture/05-configuration.md#64-deploy-eval-gate). |
 | E5.7 | Deploy git policy | **AC:** Default `.gitignore` includes `deploy/` and `usr-harnesses/*/artifacts/`; documented option to commit `deploy/<name>/` for audited releases; CI may build and upload bundle as artifact. |
 | E5.8 | Deploy platform policy | **AC:** Documented platform matrix in `README.deploy.md` and [Architecture §10.6](architecture/07-deploy-packaging.md#106-deploy-platform-targets): **dev** (install, serve, compile, deploy CLI) on Win/macOS/Linux; **production serve** Linux-first (VM, bare metal, Docker/Kubernetes). Bundle is OS-neutral Python + pinned artifacts. Windows/macOS production serve is supported but not CI-gated in v1. Optional container path referenced (E8.5). |
 | E5.9 | Target runtime install script | **AC:** `install/target_install.py` (+ `target-install.sh` / `target-install.ps1` wrappers) runs on the **target machine** (desktop PC or server) after the user copies `deploy/<name>/`. Assumes Python 3.11+ preinstalled; creates optional `.venv`; `pip install zaumzeug` (runtime only); runs `zaumzeug doctor <name> --deploy`; prints `.env` setup from `.env.example` if present (never overwrites `.env`). Idempotent; cross-platform Win/macOS/Linux. Supports `--skip-venv`, `--verify` (doctor + serve dry-run). Also shipped inside each `deploy/<name>/` bundle (E5.1). |
@@ -348,7 +348,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 |---|---|---|
 | E6.1 | Optional `[eval]` extra | **Done** (E6-S01, 2026-07-28) — Core install has no `deepeval`; `[eval]` extra installs it; `zaumzeug.eval.require_deepeval()` friendly hint; documented in user-docs. |
 | E6.2 | `zaumzeug eval` | **Done** (E6-S02, 2026-07-28). **AC:** Behavior per [Architecture §6.3](architecture/05-configuration.md#63-zaumzeug-eval-frameworks): `eval.framework: deepeval` requires `[eval]` extra; `eval.framework: builtin` runs JSONL checks without DeepEval; missing `eval` section → clear error. |
-| E6.3 | Eval gate on deploy | **AC:** Covered by E5.6 — `deploy.eval_gate` and `--eval-gate` on `zaumzeug deploy`. |
+| E6.3 | Eval gate on deploy | **Done** (E6-S03, 2026-07-28) — covered by E5.6; packager invokes `run_eval` when gate is `warn`/`block`; shared tests in `tests/unit/deploy/test_eval_gate.py`. |
 | E6.4 | `eval/` pytest scaffold | **AC:** Optional `usr-harnesses/<name>/eval/test_*.py` runs via `deepeval test run`; custom metrics in `eval/metrics.py`. |
 | E6.5 | Trace → test case | **AC:** Haystack trace export to JSONL (`data/traces/`); score single trace with `zaumzeug eval --trace`. |
 | E6.6 | HTTP black-box eval | **AC:** Optional Mode C — eval against running `zaumzeug serve` via `/v1/chat/completions` (staging/debug). |
@@ -417,7 +417,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S02](stories/epic-stories/35-story.md) **Done** 2026-07-28; next [E6-S03](stories/epic-stories/36-story.md) |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S03](stories/epic-stories/36-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); next [E6-S04](stories/epic-stories/37-story.md) |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A | E8 |
 

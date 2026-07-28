@@ -223,6 +223,42 @@ See [Testing](../guides/testing.md) for valset layout and optional `deepeval tes
 
 ---
 
+## `zaumzeug deploy`
+
+Package a harness for production. Runs the **eval gate** first (Architecture §6.4 / E5-S06 / E6-S03); full bundle copy rules land in E5-S01.
+
+```bash
+zaumzeug deploy <harness> [--eval-gate skip|warn|block] [--verbose]
+```
+
+| Flag / arg | Description |
+|---|---|
+| `<harness>` | Harness name under `usr-harnesses/` |
+| `--eval-gate` | Override `deploy.eval_gate` from `harness.yaml` for this run |
+| `--verbose` | Enable SDK and Haystack structured debug logging |
+
+**Config** (`harness.yaml`):
+
+```yaml
+deploy:
+  eval_gate: skip    # skip | warn | block (default: skip)
+```
+
+| Mode | Behavior |
+|---|---|
+| `skip` | Do not run eval (default when `deploy:` omitted). |
+| `warn` | Run `zaumzeug eval` when `eval:` is set; print failures; continue packaging. |
+| `block` | Run `zaumzeug eval` when `eval:` is set; abort packaging on any failure. |
+
+If `eval:` is absent, `warn` / `block` are a no-op. Gate logic lives only in `deploy/packager.py` (no duplicate path).
+
+```bash
+zaumzeug deploy example
+zaumzeug deploy example --eval-gate block
+```
+
+---
+
 ## `zaumzeug doctor`
 
 Preflight environment and harness configuration.
@@ -237,13 +273,13 @@ zaumzeug doctor [<harness>] [--deploy] [--verbose] [--json]
 | `--json` | Emit machine-readable JSON report |
 | `--deploy` | Validate deploy bundle under `deploy/` |
 
-**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. Warnings (non-blocking): MCP without `uv`, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02).
+**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig` and `deploy:` / `DeployConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. Warnings (non-blocking): MCP without `uv`, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02) and `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06).
 
-Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack debug logs on serve, compile, or eval, use `--verbose` on those commands or `HARNESS_LOG_LEVEL=DEBUG`.
+Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack debug logs on serve, compile, eval, or deploy, use `--verbose` on those commands or `HARNESS_LOG_LEVEL=DEBUG`.
 
 ---
 
 ## Related
 
-- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`
+- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, deploy eval gates
 - [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml` and agent routing

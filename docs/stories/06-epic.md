@@ -5,8 +5,8 @@
 | **Document** | Epic E5 user stories |
 | **File** | `docs/stories/06-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
-| **Status** | Backlog |
+| **Last modified** | 2026-07-28 (E5-S06 done early with E6-S03) |
+| **Status** | In progress (eval gate Done; packager body pending E5-S01) |
 | **Build order** | **6 of 8** (after E4 compile + E6-S02 eval for eval gate) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -31,7 +31,7 @@
 4. **E5-S03** → **E5-S04** — serve `--deploy` + `HARNESS_ROOT`
 5. **E5-S05** → **E5-S08** — Ops docs and platform policy
 6. **E5-S07** — Git policy
-7. **E5-S06** — Deploy eval gate **last** (requires [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) ✅)
+7. **E5-S06** — Deploy eval gate ✅ (2026-07-28; shipped early with [E6-S03](../05-epic.md#e6-s03-eval-gate-on-deploy); requires [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) ✅)
 
 ---
 
@@ -63,9 +63,9 @@ As a **harness developer**, I want `zaumzeug deploy <name>` to produce a product
 
 ### Implementation tasks (build)
 
-- [ ] Implement `src/zaumzeug/deploy/packager.py`
+- [ ] Implement full `src/zaumzeug/deploy/packager.py` copy rules *(module + eval gate exist from E5-S06 / E6-S03)*
 - [ ] Run preflight doctor before pack
-- [ ] Apply eval gate (E5-S06)
+- [x] Apply eval gate (E5-S06) ✅ (2026-07-28)
 - [ ] Generate `README.deploy.md` from template
 
 ### Verification (after build)
@@ -302,7 +302,8 @@ Per [Story verification](00-README.md#story-verification-required). **Docs + int
 | **Feature** | E5.6 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
-| **Prerequisites** | [E5-S01](#e5-s01-zaumzeug-deploy-command) · [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) ✅ |
+| **Status** | Done (2026-07-28) — shipped early with E6-S03; canonical: [46-story.md](epic-stories/46-story.md) |
+| **Prerequisites** | [E5-S01](#e5-s01-zaumzeug-deploy-command) *(packager body still pending)* · [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) ✅ |
 
 ### User story
 
@@ -316,15 +317,15 @@ As a **harness developer**, I want configurable eval gates on deploy, so that I 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `deploy.eval_gate`: `skip` | `warn` | `block` behaves per §6.4
-- [ ] **AC-2** CLI override: `zaumzeug deploy <name> --eval-gate block`
-- [ ] **AC-3** If no `eval` section, `block` is no-op
-- [ ] **AC-4** `warn` continues deploy after printing failures
+- [x] **AC-1** `deploy.eval_gate`: `skip` | `warn` | `block` behaves per §6.4
+- [x] **AC-2** CLI override: `zaumzeug deploy <name> --eval-gate block`
+- [x] **AC-3** If no `eval` section, `block` is no-op
+- [x] **AC-4** `warn` continues deploy after printing failures
 
 ### Implementation tasks (build)
 
-- [ ] Add eval gate to deploy packager pre-step
-- [ ] Wire to `zaumzeug eval` when configured
+- [x] Add eval gate to deploy packager pre-step
+- [x] Wire to `zaumzeug eval` when configured
 
 ### Verification (after build)
 
@@ -337,13 +338,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-3 | `tests/unit/deploy/test_eval_gate.py::test_e5_s06_ac3_block_noop_without_eval_section` |
 | AC-4 | `tests/unit/deploy/test_eval_gate.py::test_e5_s06_ac4_warn_continues_after_failures` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/deploy/test_eval_gate.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/deploy/test_eval_gate.py -v` passes
 
 ### Definition of done
 
-- [ ] Covered by E6-S03 cross-reference
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Covered by E6-S03 cross-reference
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 
