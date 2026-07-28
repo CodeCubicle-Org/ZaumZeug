@@ -57,7 +57,7 @@ serve:
 
 - [ ] **AC-1** User `pipelines/` exposed via `serve.expose` in yaml
 - [ ] **AC-2** RAG path documented with retriever → prompt → generator pattern
-- [ ] **AC-3** Pipelines listed in `serve.expose` copied to deploy bundle
+- [ ] **AC-3** Pipelines listed in `serve.expose` copied to deploy bundle *(packager row **Done** early with [E5-S02](42-story.md), 2026-07-28; Phase 4 serve remains this story)*
 - [ ] **AC-4** `POST /{pipeline}/run` available per Architecture §9.1
 
 ### Implementation tasks (build)
@@ -74,7 +74,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 |---|---|
 | AC-1 | `tests/integration/pipelines/test_serve_expose.py::test_e8_s01_ac1_pipelines_registered_from_yaml` |
 | AC-2 | **manual:** user-docs RAG pattern documented |
-| AC-3 | `tests/unit/deploy/test_copy_rules.py::test_e8_s01_ac3_exposed_pipelines_in_deploy` |
+| AC-3 | **shared early:** `tests/unit/deploy/test_copy_rules.py::test_e8_s01_ac3_exposed_pipelines_in_deploy` *(packager copy landed with [E5-S02](42-story.md), 2026-07-28)* |
 | AC-4 | `tests/integration/pipelines/test_serve_expose.py::test_e8_s01_ac4_post_pipeline_run_endpoint` |
 
 - [ ] Every AC row above has a passing test or documented manual exception

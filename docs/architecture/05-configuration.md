@@ -150,7 +150,7 @@ Requirements: [PRD E5.6](../prd.md#epic-e5--deploy-packaging-phase-2), [E6.3](..
 
 **Implementation (E5-S06 / E6-S03, 2026-07-28):** Single source of truth in [`deploy/packager.py`](../../src/zaumzeug/deploy/packager.py) — `apply_eval_gate()` / `package_harness()`; `DeployConfig` on `HarnessConfig`; CLI `zaumzeug deploy --eval-gate`. Tests: `tests/unit/deploy/test_eval_gate.py` (7 passed).
 
-**Implementation (E5-S01, 2026-07-28):** Full bundle write via `write_deploy_bundle` (doctor preflight → gate → strip/pin/manifest/README/target install scripts). Tests: `tests/integration/deploy/test_deploy.py` (8 passed, 0 skipped). Full include/pin golden matrix remains [E5-S02](../stories/epic-stories/42-story.md).
+**Implementation (E5-S01, 2026-07-28):** Full bundle write via `write_deploy_bundle` (doctor preflight → gate → strip/pin/manifest/README/target install scripts). Tests: `tests/integration/deploy/test_deploy.py` (8 passed, 0 skipped). **E5-S02 (2026-07-28):** copy-matrix resolve/assert + golden `test_deploy_golden.py`.
 
 ### 6.5 Builtin tools catalog
 

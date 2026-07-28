@@ -34,7 +34,7 @@ Requirements: **[PRD E5](../prd.md#epic-e5--deploy-packaging-phase-2)**.
 | `docs/workflow-diagram.md` | Generated at compile (E4-S08) | **Included** in `deploy/<harness>/docs/` |
 | `agents/<name>/modules/`, `skills/`, `data/`, `eval/` | Dev only | **Never** |
 
-Requirements: [PRD E5.2](../prd.md#epic-e5--deploy-packaging-phase-2).
+Requirements: [PRD E5.2](../prd.md#epic-e5--deploy-packaging-phase-2). **Done** ([E5-S02](../stories/epic-stories/42-story.md), 2026-07-28) — `resolve_deploy_copy_plan` / `assert_required_paths` in `deploy/copy_rules.py`; golden `tests/integration/deploy/test_deploy_golden.py`.
 
 ### 10.2 Packager steps
 
@@ -51,7 +51,9 @@ Idempotent — overwrites `deploy/<name>/`. Future: `zaumzeug export` tarball of
 
 **Implementation (E6-S03 / E5-S06, 2026-07-28):** Step 2 (eval gate) is live in `src/zaumzeug/deploy/packager.py` (`apply_eval_gate` → `package_harness`); CLI `zaumzeug deploy --eval-gate`.
 
-**Implementation (E5-S01, 2026-07-28):** Steps 1 and 3–6 are live: doctor preflight → `write_deploy_bundle` (stripped yaml, pin/copy, merged harness `models.yaml`, `manifest.json`, `README.deploy.md` from `install/templates/deploy/`, target install scripts from `install/`). Tests: `tests/integration/deploy/test_deploy.py` (`e5_s01`). Full include/pin golden matrix remains [E5-S02](../stories/epic-stories/42-story.md); full `target_install` behaviour remains [E5-S09](../stories/epic-stories/49.1-story.md).
+**Implementation (E5-S02, 2026-07-28):** `resolve_deploy_copy_plan` / `assert_required_paths` encode the §10.1 include matrix; packager validates before writing `deploy/<name>/`. Tests: `tests/unit/deploy/test_copy_rules.py` (`e5_s02`), golden `tests/integration/deploy/test_deploy_golden.py`.
+
+**Implementation (E5-S01, 2026-07-28):** Steps 1 and 3–6 are live: doctor preflight → `write_deploy_bundle` (stripped yaml, pin/copy, merged harness `models.yaml`, `manifest.json`, `README.deploy.md` from `install/templates/deploy/`, target install scripts from `install/`). Tests: `tests/integration/deploy/test_deploy.py` (`e5_s01`). Full `target_install` behaviour remains [E5-S09](../stories/epic-stories/49.1-story.md).
 
 **Implementation (E6-S04, 2026-07-28):** `deploy/copy_rules.py` exports `is_excluded_from_deploy()` so `eval/` (and other §10.1 dev-only paths) are marked excluded. Strip helpers (`strip_harness_yaml` / `strip_agent_yaml`) landed with E5-S01. Shared test: `tests/unit/deploy/test_copy_rules.py::test_e5_s02_excludes_eval`.
 

@@ -1,0 +1,12 @@
+[
+  "agents/researcher/agent.yaml",
+  "agents/researcher/agents-models.yaml",
+  "agents/researcher/artifacts/20260728T120000Z/artifact-manifest.json",
+  "agents/researcher/artifacts/20260728T120000Z/prompts/system.md",
+  "agents/researcher/hooks.py",
+  "agents/researcher/tools/search_docs.py",
+  "docs/workflow-diagram.md",
+  "harness.yaml",
+  "pipelines/summarize.yaml",
+  "workflow.yaml"
+]

@@ -73,7 +73,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 ```text
 tests/
 ├── unit/                         # config merge, doctor checks, ModelRouter, export/ (Phase 2+)
-├── integration/                  # doctor harness scans, serve HTTP contract, deploy smoke
+├── integration/                  # doctor harness scans, serve HTTP contract, deploy smoke / golden
 ├── usr-harnesses/                # SDK runs against fixture/example harness trees
 │   ├── fixture/                  # minimal harness — not shipped to users ✅ (E3-S06)
 │   └── example/                  # optional DeepEval pytest when [eval] installed
@@ -103,6 +103,8 @@ usr-harnesses/<harness>/eval/
 **Implementation (E6-S02, 2026-07-28):** `zaumzeug eval <harness>` via `eval/runner.py` — builtin JSONL or DeepEval per `eval.framework`; CLI `--framework` override.
 
 **Implementation (E6-S04, 2026-07-28):** Optional harness `eval/` pytest scaffold — `zaumzeug init --with-eval` copies `eval/metrics.py` + `test_*.py`; example harness ships the same layout. Run: `deepeval test run usr-harnesses/<harness>/eval/`. `eval/` is excluded from deploy (`deploy/copy_rules.py`). See [user-docs/guides/testing.md](../user-docs/guides/testing.md#deepeval-pytest-scaffold).
+
+**Implementation (E5-S02, 2026-07-28):** Dev-vs-deploy copy matrix — `resolve_deploy_copy_plan` / `assert_required_paths` in `deploy/copy_rules.py`; packager validates before write; golden `tests/integration/deploy/test_deploy_golden.py`. Tests: `tests/unit/deploy/test_copy_rules.py` (`e5_s02`).
 
 **Implementation (E6-S05, 2026-07-28):** Trace export + `zaumzeug eval --trace` — see [§13.4](#134-trace-capture-phase-2).
 
@@ -184,6 +186,7 @@ pytest tests/unit tests/integration tests/usr-harnesses -v
 
 # Single story / module while developing
 pytest tests/unit/config/test_schemas.py -v -k e2_s01
+pytest tests/unit/deploy/ tests/integration/deploy/test_deploy_golden.py -v -k e5_s02
 
 # Optional harness regression (requires [eval])
 pip install -e ".[dev,eval]"

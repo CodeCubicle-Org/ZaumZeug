@@ -87,7 +87,7 @@ zaumzeug compile example --workflow-diagram-only
 | Agent stage | Agent id + resolved `default_model_id (provider)` |
 | Pipeline stage | Pipeline id |
 
-`zaumzeug doctor` warns (exit 0) when `workflow.yaml` is newer than the diagram, or the diagram is missing. Deploy packaging (E5) copies `docs/` into `deploy/<harness>/docs/`.
+`zaumzeug doctor` warns (exit 0) when `workflow.yaml` is newer than the diagram, or the diagram is missing. Deploy packaging copies `docs/workflow-diagram.md` into `deploy/<harness>/docs/` (E5-S01 + E5-S02 golden matrix).
 
 ## Serve after compile
 

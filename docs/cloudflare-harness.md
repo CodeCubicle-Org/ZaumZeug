@@ -400,7 +400,7 @@ Parallel fan-out (`parallelism: N`) is **deferred** post–Phase 1 — not a sep
 | `workflow.yaml` schema (serial) | E2 | E2-S07 ✅ |
 | `zaumzeug run` + stage-scoped `ModelRouter` | E3 | E3-S08 |
 | `docs/workflow-diagram.md` at compile | E4 | E4-S08 ✅ (2026-07-28) |
-| Deploy agents + workflow + diagram | E5 | E5-S02 |
+| Deploy agents + workflow + diagram | E5 | E5-S02 ✅ (2026-07-28) |
 
 ### 5.2 Deferred / illustrative ideas (not committed)
 

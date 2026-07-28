@@ -5,8 +5,8 @@
 | **Document** | Epic E5 user stories |
 | **File** | `docs/stories/06-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E5-S01 done) |
-| **Status** | In progress (E5-S01 + E5-S06 Done; next E5-S02 copy rules) |
+| **Last modified** | 2026-07-28 (E5-S02 done) |
+| **Status** | In progress (E5-S01–S02 + E5-S06 Done; next E5-S03 `serve --deploy`) |
 | **Build order** | **6 of 8** (after E4 compile + E6-S02 eval for eval gate) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -25,7 +25,7 @@
 
 ### Story implementation order (within this epic)
 
-1. **E5-S02** — Copy rules *(can start with packager design)*
+1. **E5-S02** — Copy rules ✅ (2026-07-28)
 2. **E5-S01** — `zaumzeug deploy` ✅ (2026-07-28)
 3. **E5-S09a** → **E5-S09b** → **E5-S09c** — Target install *(core, wrappers, verify)*
 4. **E5-S03** → **E5-S04** — serve `--deploy` + `HARNESS_ROOT`
@@ -100,6 +100,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E5.2 |
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
+| **Status** | Done (2026-07-28) |
 
 ### User story
 
@@ -112,16 +113,16 @@ As an **SDK maintainer**, I want explicit packager copy rules, so that dev-only 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Excludes `agents/<name>/modules/`, `data/`, `eval/`, `skills/` always
-- [ ] **AC-2** Includes per-agent `prompts/`, `tools/`, `hooks.py`, `agents-models.yaml` per [Architecture §10.1](../architecture/07-deploy-packaging.md#101-dev-vs-deploy)
-- [ ] **AC-3** Pins per-agent artifact runs under `deploy/<harness>/agents/<name>/artifacts/`
-- [ ] **AC-4** Includes `workflow.yaml` and `docs/workflow-diagram.md`
-- [ ] **AC-5** Stripped yaml removes `compile`, `eval`, `deploy` sections
+- [x] **AC-1** Excludes `agents/<name>/modules/`, `data/`, `eval/`, `skills/` always
+- [x] **AC-2** Includes per-agent `prompts/`, `tools/`, `hooks.py`, `agents-models.yaml` per [Architecture §10.1](../architecture/07-deploy-packaging.md#101-dev-vs-deploy)
+- [x] **AC-3** Pins per-agent artifact runs under `deploy/<harness>/agents/<name>/artifacts/`
+- [x] **AC-4** Includes `workflow.yaml` and `docs/workflow-diagram.md`
+- [x] **AC-5** Stripped yaml removes `compile`, `eval`, `deploy` sections
 
 ### Implementation tasks (build)
 
-- [ ] Implement reference resolver for copy matrix
-- [ ] Fail deploy if required runtime path missing
+- [x] Implement reference resolver for copy matrix
+- [x] Fail deploy if required runtime path missing
 
 ### Verification (after build)
 
@@ -137,15 +138,15 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-5 | `tests/unit/deploy/test_copy_rules.py::test_e5_s02_ac5_stripped_yaml_sections` |
 | AC-1–5 | `tests/integration/deploy/test_deploy_golden.py::test_e5_s02_golden_example_bundle` *(golden snapshot)* |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/deploy/ tests/integration/deploy/test_deploy_golden.py -v -k e5_s02` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/deploy/ tests/integration/deploy/test_deploy_golden.py -v -k e5_s02` passes (13 passed, 0 skipped; 9 deselected)
 
 ### Definition of done
 
-- [ ] Golden test: example zaumzeug deploy contents match matrix
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Golden test: example zaumzeug deploy contents match matrix
+- [x] Verification checklist complete; all ACs traced to tests
 
-**Early slice (E6-S04, 2026-07-28):** `deploy/copy_rules.py` + `test_e5_s02_excludes_eval` assert `eval/` exclusion policy. **Early slice (E5-S01, 2026-07-28):** packager uses strip helpers + exclude policy when writing bundles; full include/pin golden matrix remains this story.
+**Done (2026-07-28):** `resolve_deploy_copy_plan` / `assert_required_paths` in `deploy/copy_rules.py`; packager validates before write; golden matrix in `test_deploy_golden.py`. Early slices: E6-S04 `eval/` exclude; E5-S01 strip helpers.
 ---
 
 ## E5-S03 — `zaumzeug serve --deploy`

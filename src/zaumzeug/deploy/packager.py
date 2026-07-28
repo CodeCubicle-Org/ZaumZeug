@@ -1,7 +1,8 @@
 """Deploy packager — doctor, eval gate, and bundle write (Architecture §6.4 / §10.2).
 
 Eval gate is E5-S06 / E6-S03. Full bundle assembly (strip, pin, manifest, README,
-target install scripts) is E5-S01.
+target install scripts) is E5-S01. Copy-matrix resolve + required-path fail is
+E5-S02 (``deploy.copy_rules``).
 """
 
 from __future__ import annotations
@@ -36,7 +37,13 @@ from zaumzeug.config.resolver import (
     load_agent_yaml,
     resolve_agent_serve,
 )
-from zaumzeug.deploy.copy_rules import strip_agent_yaml, strip_harness_yaml
+from zaumzeug.deploy.copy_rules import (
+    CopyRulesError,
+    assert_required_paths,
+    resolve_deploy_copy_plan,
+    strip_agent_yaml,
+    strip_harness_yaml,
+)
 from zaumzeug.doctor.checks import workflow_agent_names
 from zaumzeug.doctor.project import find_project_root
 from zaumzeug.doctor.report import DoctorReport
@@ -531,6 +538,58 @@ def _copy_target_install_scripts(dest_dir: Path) -> None:
         _copy_file(install_dir / name, dest_dir / name)
 
 
+def _load_agents_for_deploy(
+    harness_dir: Path,
+    *,
+    harness_name: str,
+) -> tuple[list[str], dict[str, dict[str, Any]]]:
+    """Discover workflow agents and load raw agent.yaml mappings."""
+    agent_names = workflow_agent_names(harness_dir)
+    if not agent_names:
+        raise DeployError(
+            f"No agents found for harness '{harness_name}'",
+            path=harness_dir / "agents",
+            harness_name=harness_name,
+            suggestion="Define workflow entry/stages or agents/<name>/agent.yaml",
+        )
+
+    agents_data: dict[str, dict[str, Any]] = {}
+    for agent_name in agent_names:
+        agent_yaml_path = harness_dir / "agents" / agent_name / "agent.yaml"
+        if not agent_yaml_path.is_file():
+            raise DeployError(
+                f"Missing agent.yaml for '{agent_name}'",
+                path=agent_yaml_path,
+                harness_name=harness_name,
+            )
+        _, agent_data = load_agent_yaml(harness_dir, agent_name)
+        agents_data[agent_name] = agent_data
+    return agent_names, agents_data
+
+
+def _validate_copy_matrix(
+    harness_dir: Path,
+    *,
+    harness_name: str,
+    harness_raw: dict[str, Any],
+    agents_data: dict[str, dict[str, Any]],
+) -> None:
+    """Resolve §10.1 matrix and fail before writing when required paths miss."""
+    copy_plan = resolve_deploy_copy_plan(
+        harness_raw=harness_raw,
+        agents=agents_data,
+    )
+    try:
+        assert_required_paths(harness_dir, copy_plan)
+    except CopyRulesError as exc:
+        raise DeployError(
+            str(exc),
+            path=exc.path,
+            harness_name=harness_name,
+            suggestion=exc.suggestion,
+        ) from exc
+
+
 def write_deploy_bundle(
     harness_name: str,
     *,
@@ -540,10 +599,6 @@ def write_deploy_bundle(
 ) -> Path:
     """Assemble ``deploy/<name>/`` per Architecture §10.2 (idempotent overwrite)."""
     del harness_config  # validated upstream; we re-read raw yaml for strip/copy
-    dest = project_root / "deploy" / harness_name
-    if dest.exists():
-        shutil.rmtree(dest)
-    dest.mkdir(parents=True, exist_ok=True)
 
     harness_yaml_src = harness_dir / "harness.yaml"
     harness_raw = _read_yaml_mapping(harness_yaml_src)
@@ -553,6 +608,23 @@ def write_deploy_bundle(
             path=harness_yaml_src,
             harness_name=harness_name,
         )
+
+    agent_names, agents_data = _load_agents_for_deploy(
+        harness_dir,
+        harness_name=harness_name,
+    )
+    # E5-S02: validate include matrix before wiping/writing deploy/<name>/.
+    _validate_copy_matrix(
+        harness_dir,
+        harness_name=harness_name,
+        harness_raw=harness_raw,
+        agents_data=agents_data,
+    )
+
+    dest = project_root / "deploy" / harness_name
+    if dest.exists():
+        shutil.rmtree(dest)
+    dest.mkdir(parents=True, exist_ok=True)
 
     stripped_harness = strip_harness_yaml(harness_raw)
     # Keep models: as a relative bundle path when declared.
@@ -575,67 +647,26 @@ def write_deploy_bundle(
         _write_yaml(dest / "models.yaml", merged)
 
     _write_yaml(dest / "harness.yaml", stripped_harness)
-
-    workflow_src = harness_dir / "workflow.yaml"
-    if not workflow_src.is_file():
-        raise DeployError(
-            f"Missing workflow.yaml at {workflow_src}",
-            path=workflow_src,
-            harness_name=harness_name,
-            suggestion="Add workflow.yaml before deploying",
-        )
-    _copy_file(workflow_src, dest / "workflow.yaml")
-
-    diagram_src = harness_dir / "docs" / "workflow-diagram.md"
-    if not diagram_src.is_file():
-        raise DeployError(
-            f"Missing docs/workflow-diagram.md at {diagram_src}",
-            path=diagram_src,
-            harness_name=harness_name,
-            suggestion=(
-                f"Run `zaumzeug compile {harness_name} --workflow-diagram-only` "
-                "then re-deploy"
-            ),
-        )
-    _copy_file(diagram_src, dest / "docs" / "workflow-diagram.md")
-
+    _copy_file(harness_dir / "workflow.yaml", dest / "workflow.yaml")
+    _copy_file(
+        harness_dir / "docs" / "workflow-diagram.md",
+        dest / "docs" / "workflow-diagram.md",
+    )
     _copy_exposed_pipelines(
         harness_dir=harness_dir,
         dest_dir=dest,
         harness_raw=harness_raw,
     )
 
-    agent_names = workflow_agent_names(harness_dir)
-    if not agent_names:
-        raise DeployError(
-            f"No agents found for harness '{harness_name}'",
-            path=harness_dir / "agents",
-            harness_name=harness_name,
-            suggestion="Define workflow entry/stages or agents/<name>/agent.yaml",
-        )
-
     artifact_run_ids: dict[str, str] = {}
     for agent_name in agent_names:
         src_agent_dir = harness_dir / "agents" / agent_name
         dest_agent_dir = dest / "agents" / agent_name
-        agent_yaml_path = src_agent_dir / "agent.yaml"
-        if not agent_yaml_path.is_file():
-            raise DeployError(
-                f"Missing agent.yaml for '{agent_name}'",
-                path=agent_yaml_path,
-                harness_name=harness_name,
-            )
-
-        _, agent_data = load_agent_yaml(harness_dir, agent_name)
-        models_src = src_agent_dir / "agents-models.yaml"
-        if not models_src.is_file():
-            raise DeployError(
-                f"Missing agents-models.yaml for agent '{agent_name}'",
-                path=models_src,
-                harness_name=harness_name,
-                suggestion="Every agent requires agents-models.yaml at pack time",
-            )
-        _copy_file(models_src, dest_agent_dir / "agents-models.yaml")
+        agent_data = agents_data[agent_name]
+        _copy_file(
+            src_agent_dir / "agents-models.yaml",
+            dest_agent_dir / "agents-models.yaml",
+        )
 
         run_id = _pin_agent_artifact(
             harness_name=harness_name,

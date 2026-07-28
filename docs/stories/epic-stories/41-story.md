@@ -25,7 +25,7 @@
 | **Feature** | E5.1 |
 | **Persona** | Harness developer |
 | **Priority** | P0 |
-| **Prerequisites** | [E4-S02b](27.2-story.md#e4-s02b-gepa-runner-and-artifacts) · [E5-S02](42-story.md#e5-s02-dev-vs-deploy-copy-rules) · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ |
+| **Prerequisites** | [E4-S02b](27.2-story.md#e4-s02b-gepa-runner-and-artifacts) ✅ · [E5-S02](42-story.md#e5-s02-dev-vs-deploy-copy-rules) ✅ · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ |
 
 ### User story
 
@@ -86,6 +86,6 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 ### Implementation notes (2026-07-28)
 
 - `deploy/packager.py`: doctor preflight → eval gate → `write_deploy_bundle` (strip yaml, pin artifacts, merge harness models, `manifest.json`, README, target install scripts).
-- `deploy/copy_rules.py`: `strip_harness_yaml` / `strip_agent_yaml` helpers (full include/pin golden matrix remains [E5-S02](42-story.md)).
+- `deploy/copy_rules.py`: `strip_harness_yaml` / `strip_agent_yaml` helpers; full include/pin golden matrix completed in [E5-S02](42-story.md) ✅ (2026-07-28).
 - Templates: `install/templates/deploy/README.deploy.md`; scripts: `install/target_install.py` (+ wrappers) — full target install behaviour is [E5-S09](49.1-story.md).
 - CLI: `zaumzeug deploy <name> [--eval-gate …]`.

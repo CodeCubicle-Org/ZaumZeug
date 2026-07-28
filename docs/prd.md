@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-28 (E5-S01 `zaumzeug deploy` packager)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S07 **Done**; E5-S06 **Done** early with E6-S03; E5-S01 **Done**; next E5-S02 copy rules)  
+**Last updated:** 2026-07-28 (E5-S02 deploy copy rules)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S07 **Done**; E5-S06 **Done** early with E6-S03; E5-S01–S02 **Done**; next E5-S03 `serve --deploy`)  
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -316,7 +316,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E4.4 | Haystack GEPA evaluator (Pattern B) | **Done** (E4-S04, 2026-07-28) — `compile/gepa_adapter.py`: `HaystackGepaAdapter` + `optimize_haystack_artifact`; modes `single-task` \| `multi-task` \| `generalization`; `CompileConfig` `optimizer`/`mode`/`seed_artifact`. CLI `zaumzeug compile` remains Pattern A. Tests: `tests/unit/compile/test_gepa_adapter.py` (5 passed, 0 skipped). |
 | E4.5 | Post-compile serve | **Done** (E4-S05, 2026-07-28) — After compile, serve/run prefer valid `agent.artifact` over hand-edited `system_prompt`; `compile.module` not imported at serve; optional `input_rewrite` preprocess; doctor warns on stale `source_hash`. Tests: 12 passed, 0 skipped (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). Docs: [guides/compile.md — Serve after compile](user-docs/guides/compile.md#serve-after-compile). |
 | E4.6 | `--dry-run` on compile | **Done** (E4-S06, 2026-07-28) — `zaumzeug compile --dry-run` validates Phase 2 schema, resolves module imports, prints task/reflection registry; no GEPA, no LLM calls, no artifacts. Tests: `tests/integration/compile/test_compile_dry_run.py` (5 passed). Docs: [CLI reference](user-docs/reference/cli.md#zaumzeug-compile). |
-| E4.7 | Workflow diagram | **Done** (E4-S08, 2026-07-28) — Every `zaumzeug compile` regenerates `docs/workflow-diagram.md` (Mermaid) from `workflow.yaml` + resolved agents/models; `--workflow-diagram-only` skips GEPA; doctor warns if stale; deploy copies to `deploy/<harness>/docs/` (**Done** E5-S01; golden matrix E5-S02). ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-compile).) |
+| E4.7 | Workflow diagram | **Done** (E4-S08, 2026-07-28) — Every `zaumzeug compile` regenerates `docs/workflow-diagram.md` (Mermaid) from `workflow.yaml` + resolved agents/models; `--workflow-diagram-only` skips GEPA; doctor warns if stale; deploy copies to `deploy/<harness>/docs/` (**Done** E5-S01 + golden ✅ E5-S02). ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-compile).) |
 
 **Phase 2 compile scope (resolved):** **Pattern A** (`dspy.GEPA`) is the default `zaumzeug compile` path — optimize prompts/signatures via DSPy modules, export to Haystack artifacts. **Optional within Pattern A:** compile-time GEPA on **input rewrite/clarify templates** (how the harness preprocesses user messages — not optimization of end-user chat at runtime). **Pattern B** (`optimize_anything` / Haystack evaluator) **shipped early** (E4-S04, 2026-07-28) as a programmatic adapter + schema; not wired into the CLI compile path yet.
 
@@ -331,7 +331,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | ID | Feature | Acceptance criteria |
 |---|---|---|
 | E5.1 | `zaumzeug deploy` | **Done** (E5-S01, 2026-07-28). **AC:** Writes `deploy/<name>/` with stripped yaml, `workflow.yaml`, per-agent runtime files, `docs/workflow-diagram.md`, pinned per-agent artifacts, `manifest.json`, `README.deploy.md`, target install scripts. Tests: `tests/integration/deploy/test_deploy.py` (8 passed, 0 skipped). |
-| E5.2 | Exclude dev files | **AC:** Packager copy rules per [Architecture §10.1](architecture/07-deploy-packaging.md#101-dev-vs-deploy): `agents/<name>/` runtime subset; exclude `modules/`, `data/`, `eval/`, `skills/`; include `docs/workflow-diagram.md`. |
+| E5.2 | Exclude dev files | **Done** (E5-S02, 2026-07-28). **AC:** Packager copy rules per [Architecture §10.1](architecture/07-deploy-packaging.md#101-dev-vs-deploy): `agents/<name>/` runtime subset; exclude `modules/`, `data/`, `eval/`, `skills/`; include `docs/workflow-diagram.md`. |
 | E5.3 | `zaumzeug serve --deploy` | **AC:** Loads only from `deploy/<name>/`; same API as dev serve. |
 | E5.4 | `HARNESS_ROOT=deploy` | **AC:** Env var forces deploy root for serve/mcp/acp/run. Default dev root is `usr-harnesses/`. |
 | E5.5 | Target ship workflow | **AC:** Documented path: copy `deploy/<name>/` to target machine → run bundled `target_install` (or `install/target_install.py --deploy-dir …`) → create `.env` → `zaumzeug serve <name> --deploy`. Installs runtime deps only (`pip install zaumzeug` — Haystack/Hayhooks via SDK); **no** DSPy/GEPA/DeepEval. Python 3.11+ must already be on the target. |
@@ -421,7 +421,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S07](stories/epic-stories/40-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); [E5-S01](stories/epic-stories/41-story.md) **Done** 2026-07-28; next [E5-S02](stories/epic-stories/42-story.md) |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S07](stories/epic-stories/40-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); [E5-S01](stories/epic-stories/41-story.md)–[E5-S02](stories/epic-stories/42-story.md) **Done** 2026-07-28; next [E5-S03](stories/epic-stories/43-story.md) |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A | E8 |
 
@@ -477,7 +477,7 @@ All items below were addressed in PRD + Architecture updates.
 | V16 | Time target conflict (< 15 min vs 15–30 min) | §7.4 + §11 aligned: < 15 min target, ~30 min slow networks |
 | V17 | `dspy` vs `dspy-ai` package name | [Architecture §4.1](architecture/03-technology-stack.md#41-core-libraries), §4.4 — canonical **`dspy-ai`** |
 | V18 | Two `manifest.json` meanings conflated | [Architecture §5.3](architecture/04-data-flows.md#53-artifact-layout) `artifact-manifest.json` vs §10.3 deploy `manifest.json` |
-| V19 | Deploy copy rules vague (“runtime-referenced”) | [Architecture §10.1](architecture/07-deploy-packaging.md#101-dev-vs-deploy) matrix; E5.2 AC |
+| V19 | Deploy copy rules vague (“runtime-referenced”) | **Resolved** — [Architecture §10.1](architecture/07-deploy-packaging.md#101-dev-vs-deploy) matrix; E5.2 / [E5-S02](stories/epic-stories/42-story.md) **Done** (2026-07-28) |
 | V20 | Journey A implied live API keys | Journey A + §7.4 mock-first path |
 | V21 | Dependency updates missing from architecture | [Architecture §3.4](architecture/02-repository-and-layout.md#34-install-scripts-dev-vs-target) → PRD §7.4 |
 | V22 | Open #5 ModelRouter, #7 harness.py blocked E2/E3 | Resolved in PRD §12 + Architecture §7, §3.3 |

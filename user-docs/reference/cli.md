@@ -243,7 +243,7 @@ See [Testing — Trace → test case](../guides/testing.md#trace--test-case-jour
 
 ## `zaumzeug deploy`
 
-Package a harness for production (Architecture §10.2). Runs **doctor** preflight, then the **eval gate** (Architecture §6.4 / E5-S06 / E6-S03), then writes `deploy/<name>/` (E5-S01): stripped yaml, workflow, pinned artifacts, `manifest.json`, `README.deploy.md`, and target install scripts.
+Package a harness for production (Architecture §10.2). Runs **doctor** preflight, then the **eval gate** (Architecture §6.4 / E5-S06 / E6-S03), then writes `deploy/<name>/` (E5-S01 + copy matrix E5-S02): stripped yaml, workflow, pinned artifacts, `manifest.json`, `README.deploy.md`, and target install scripts.
 
 ```bash
 zaumzeug deploy <harness> [--eval-gate skip|warn|block] [--verbose]
@@ -270,7 +270,7 @@ deploy:
 
 If `eval:` is absent, `warn` / `block` are a no-op. Gate logic lives only in `deploy/packager.py` (no duplicate path).
 
-**Bundle contents** (`deploy/<name>/`): stripped `harness.yaml` (no `eval`/`deploy`/`compile`), `workflow.yaml`, per-agent runtime files + pinned `artifacts/<run_id>/`, `docs/workflow-diagram.md`, `manifest.json`, `README.deploy.md`, and `target_install.py` (+ `.sh` / `.ps1` wrappers). Idempotent — overwrites an existing bundle. Full target-install behaviour is E5-S09; the scripts are stubbed so the folder is self-describing when copied alone.
+**Bundle contents** (`deploy/<name>/`): stripped `harness.yaml` (no `eval`/`deploy`/`compile`), `workflow.yaml`, per-agent runtime files (`prompts/` / `tools/` / `hooks.py` / `agents-models.yaml` when referenced) + pinned `artifacts/<run_id>/`, `docs/workflow-diagram.md`, `manifest.json`, `README.deploy.md`, and `target_install.py` (+ `.sh` / `.ps1` wrappers). **Never** copies `modules/`, `skills/`, `data/`, or `eval/` (Architecture §10.1 / E5-S02). Missing required runtime paths abort deploy before writing. Idempotent — overwrites an existing bundle. Full target-install behaviour is E5-S09; the scripts are stubbed so the folder is self-describing when copied alone.
 
 ```bash
 zaumzeug deploy example

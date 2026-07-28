@@ -108,7 +108,7 @@ As a **harness developer**, I want Python tools under `tools/` loaded from confi
 - [ ] **AC-1** `tools.custom` imports modules from harness folder
 - [ ] **AC-2** Tools registered as Haystack `ComponentTool` (or equivalent)
 - [ ] **AC-3** Import errors fail at doctor/ serve with module path
-- [ ] **AC-4** Custom tools copied to deploy when listed in yaml (E5-S02)
+- [ ] **AC-4** Custom tools copied to deploy when listed in yaml *(packager row **Done** early with [E5-S02](epic-stories/42-story.md), 2026-07-28; loader remains this story)*
 
 ### Implementation tasks (build)
 
@@ -125,7 +125,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-1 | `tests/unit/runtime/tools/test_custom_loader.py::test_e7_s02_ac1_imports_custom_modules` |
 | AC-2 | `tests/unit/runtime/tools/test_custom_loader.py::test_e7_s02_ac2_registers_component_tool` |
 | AC-3 | `tests/integration/test_doctor.py::test_e7_s02_ac3_import_error_at_doctor` |
-| AC-4 | **shared:** `tests/unit/deploy/test_copy_rules.py::test_e7_s02_ac4_custom_tools_in_deploy` *(E5-S02)* |
+| AC-4 | **shared early:** `tests/unit/deploy/test_copy_rules.py::test_e7_s02_ac4_custom_tools_in_deploy` *(packager copy landed with [E5-S02](epic-stories/42-story.md), 2026-07-28)* |
 | AC-2 | **optional:** ToolCorrectnessMetric in example harness `eval/` when DeepEval present |
 
 - [ ] Every AC row above has a passing test or documented manual exception

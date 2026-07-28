@@ -1,11 +1,17 @@
-"""Deploy packaging — eval gate (E5-S06 / E6-S03) and packager (E5-S01)."""
+"""Deploy packaging — eval gate (E5-S06 / E6-S03), packager (E5-S01), copy rules (E5-S02)."""
 
 from zaumzeug.deploy.copy_rules import (
+    ALWAYS_INCLUDED_HARNESS_FILES,
     DEV_ONLY_AGENT_DIRS,
     DEV_ONLY_TOP_LEVEL_DIRS,
     STRIPPED_AGENT_KEYS,
     STRIPPED_HARNESS_KEYS,
+    CopyEntry,
+    CopyRulesError,
+    DeployCopyPlan,
+    assert_required_paths,
     is_excluded_from_deploy,
+    resolve_deploy_copy_plan,
     strip_agent_yaml,
     strip_harness_yaml,
 )
@@ -24,20 +30,26 @@ from zaumzeug.deploy.packager import (
 )
 
 __all__ = [
+    "ALWAYS_INCLUDED_HARNESS_FILES",
     "DEFAULT_EVAL_GATE",
     "DEV_ONLY_AGENT_DIRS",
     "DEV_ONLY_TOP_LEVEL_DIRS",
     "STRIPPED_AGENT_KEYS",
     "STRIPPED_HARNESS_KEYS",
     "TARGET_INSTALL_FILES",
+    "CopyEntry",
+    "CopyRulesError",
+    "DeployCopyPlan",
     "DeployError",
     "EvalGateResult",
     "PackageResult",
     "apply_eval_gate",
+    "assert_required_paths",
     "discover_install_dir",
     "format_eval_gate_result",
     "is_excluded_from_deploy",
     "package_harness",
+    "resolve_deploy_copy_plan",
     "resolve_eval_gate",
     "strip_agent_yaml",
     "strip_harness_yaml",
