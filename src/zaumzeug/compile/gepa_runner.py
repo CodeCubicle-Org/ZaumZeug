@@ -2,7 +2,9 @@
 
 Preflight validates registry + ``.env`` for task/reflection LM ids.
 ``invoke_gepa`` runs ``dspy.GEPA`` (or a CI stub) and writes immutable
-``artifacts/<run_id>/`` plus ``artifacts/current``.
+``artifacts/<run_id>/`` plus ``artifacts/current``. Haystack export
+(``artifact-manifest.json``, prompts) is applied in ``write_artifact_run``
+via ``compile/export.py`` (E4-S03a).
 """
 
 from __future__ import annotations
@@ -456,6 +458,33 @@ def write_artifact_run(
                 json.dumps(state, indent=2, default=str) + "\n",
                 encoding="utf-8",
             )
+        # Haystack export (E4-S03a) before updating ``current`` so copy fallback includes it.
+        from zaumzeug.compile.export import ExportError, export_optimized_module
+
+        try:
+            export_optimized_module(
+                run_dir,
+                optimized_module,
+                run_id=run_id,
+                module_ref=payload.get("module_ref"),
+                harness_name=payload.get("harness_name"),
+                agent_name=payload.get("agent_name"),
+                gepa_metadata={
+                    "stubbed": payload.get("stubbed"),
+                    "has_input_rewrite": payload.get("has_input_rewrite"),
+                    "gepa_budget": payload.get("gepa_budget"),
+                    "optimizer": payload.get("optimizer"),
+                },
+            )
+        except ExportError as exc:
+            raise GepaRunError(
+                f"Haystack export failed for run_id {run_id!r}: {exc}",
+                path=exc.path or run_dir,
+                harness_name=payload.get("harness_name"),
+                agent_name=payload.get("agent_name"),
+                suggestion=exc.suggestion
+                or "Inspect dump_state() / compile.module and retry compile",
+            ) from exc
 
     current = _update_artifacts_current(artifacts_root, run_id=run_id, run_dir=run_dir)
     return run_dir, current

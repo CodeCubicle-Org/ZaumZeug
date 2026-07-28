@@ -23,7 +23,9 @@ DSPy and GEPA never run in production. End-user chat is never a GEPA optimizatio
 
 **Implementation (E4-S02a, 2026-07-28):** Compile CLI + Phase 2 schema + LM preflight (`compile/runner.py`, `CompileConfig`, `preflight_compile_lms`).
 
-**Implementation (E4-S02b, 2026-07-28):** GEPA optimize + immutable artifacts (`invoke_gepa`, `StubGEPA` for mock/CI). Export to Haystack prompts/manifest remains E4-S03a.
+**Implementation (E4-S02b, 2026-07-28):** GEPA optimize + immutable artifacts (`invoke_gepa`, `StubGEPA` for mock/CI).
+
+**Implementation (E4-S03a, 2026-07-28):** Export contract (`compile/export.py`) — `dump_state()` → Haystack `prompts/system.md`, optional `input_rewrite.md`, `agent.json`, `artifact-manifest.json`. GEPA optimizes the **template** only; runtime applies fixed exported text.
 
 ### Pattern B — `optimize_anything` *(deferred — Phase 4+)*
 

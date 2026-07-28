@@ -23,7 +23,7 @@
 | **Feature** | E4.5 |
 | **Persona** | Harness developer |
 | **Priority** | P0 |
-| **Prerequisites** | [E4-S03a](28.1-story.md#e4-s03a-export-contract-and-manifest) · [E4-S03b](28.2-story.md#e4-s03b-runtime-input_rewrite-preprocess) · [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) |
+| **Prerequisites** | [E4-S03a](28.1-story.md#e4-s03a-export-contract-and-manifest) ✅ (2026-07-28) · [E4-S03b](28.2-story.md#e4-s03b-runtime-input_rewrite-preprocess) · [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) ✅ |
 
 ### User story
 

@@ -23,7 +23,7 @@
 | **Feature** | E5.2 |
 | **Persona** | SDK maintainer |
 | **Priority** | P0 |
-| **Prerequisites** | [E2-S01](02-story.md#e2-s01-pydantic-config-schemas) · [E4-S03a](28.1-story.md#e4-s03a-export-contract-and-manifest) |
+| **Prerequisites** | [E2-S01](02-story.md#e2-s01-pydantic-config-schemas) ✅ · [E4-S03a](28.1-story.md#e4-s03a-export-contract-and-manifest) ✅ (2026-07-28) |
 
 ### User story
 

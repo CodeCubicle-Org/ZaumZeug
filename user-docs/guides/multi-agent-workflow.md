@@ -80,7 +80,7 @@ stages:
   - agent: researcher
 ```
 
-After **`zaumzeug compile`**, each agent's GEPA run writes **`artifacts/<run_id>/`** (and updates **`artifacts/current`**). Harness **`docs/workflow-diagram.md`** regeneration is a later E4 story (E4-S08).
+After **`zaumzeug compile`**, each agent's GEPA run writes **`artifacts/<run_id>/`** (and updates **`artifacts/current`**) with Haystack export files (`artifact-manifest.json`, `prompts/system.md`, optional `input_rewrite.md`). GEPA optimizes the **template**, not end-user chat — see [Compile and export](compile.md). Harness **`docs/workflow-diagram.md`** regeneration is a later E4 story (E4-S08).
 
 ---
 
@@ -218,7 +218,7 @@ Full **pipeline exposure** ships in **Phase 4** (RAG and production hardening). 
 | **`zaumzeug serve <harness>`** | Runs the **`entry`** agent only (interactive) |
 | **`zaumzeug run <harness>`** | Runs all **`stages`** in order (agents + pipelines) |
 | **`zaumzeug run <harness> --from <stage>`** | Partial run from a given stage (debug) |
-| **`zaumzeug compile <harness>`** | Runs GEPA per agent with a `compile:` block; writes `artifacts/<run_id>/` + `current`. Live models need API keys in `.env`. Workflow diagram generation is a later E4 story |
+| **`zaumzeug compile <harness>`** | Runs GEPA per agent with a `compile:` block; writes `artifacts/<run_id>/` + `current` with Haystack export. Live models need API keys in `.env`. See [Compile and export](compile.md). Workflow diagram generation is a later E4 story |
 | **`zaumzeug doctor <harness>`** | Validates `workflow.yaml` (schema + agent refs), `harness.yaml`, models, runtime paths; warns on stale diagram |
 | **`zaumzeug serve <harness> --dry-run`** | Same workflow validation path as doctor before resolving the entry agent |
 

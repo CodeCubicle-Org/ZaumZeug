@@ -13,6 +13,7 @@ from zaumzeug.config.loader import ConfigValidationError, _read_yaml_mapping, lo
 from zaumzeug.config.schemas import CompileConfig
 
 ARTIFACT_MANIFEST = "artifact-manifest.json"
+LEGACY_ARTIFACT_MANIFEST = "manifest.json"
 
 
 class RuntimeSource(str, Enum):
@@ -129,8 +130,8 @@ def resolve_agent_serve(
     artifact_ref = _artifact_ref(data)
     if artifact_ref is not None:
         artifact_path = _resolve_relative(agent_dir, artifact_ref)
-        manifest_path = artifact_path / ARTIFACT_MANIFEST
-        if artifact_path.is_dir() and manifest_path.is_file():
+        manifest_path = _find_artifact_manifest(artifact_path)
+        if artifact_path.is_dir() and manifest_path is not None:
             return ServeResolution(
                 harness_name=harness_name,
                 agent_name=agent_name,
@@ -138,6 +139,7 @@ def resolve_agent_serve(
                 path=artifact_path,
                 agent_yaml_path=agent_yaml_path,
             )
+        missing = artifact_path / ARTIFACT_MANIFEST
         raise AgentResolutionError(
             _missing_artifact_message(
                 harness_name=harness_name,
@@ -145,7 +147,7 @@ def resolve_agent_serve(
                 artifact_path=artifact_path,
                 agent_yaml_path=agent_yaml_path,
             ),
-            path=manifest_path if artifact_path.is_dir() else artifact_path,
+            path=missing if artifact_path.is_dir() else artifact_path,
             harness_name=harness_name,
             agent_name=agent_name,
             suggestion=(
@@ -276,6 +278,17 @@ def resolve_serve_entry(
         harness_name=harness_name,
         agent_name=workflow.entry,
     )
+
+
+def _find_artifact_manifest(artifact_path: Path) -> Path | None:
+    """Prefer ``artifact-manifest.json``; accept legacy ``manifest.json`` (E4-S03a)."""
+    canonical = artifact_path / ARTIFACT_MANIFEST
+    if canonical.is_file():
+        return canonical
+    legacy = artifact_path / LEGACY_ARTIFACT_MANIFEST
+    if legacy.is_file():
+        return legacy
+    return None
 
 
 def _missing_artifact_message(

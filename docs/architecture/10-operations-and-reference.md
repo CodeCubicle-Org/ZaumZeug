@@ -42,6 +42,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E3-S06, 2026-07-20):** Test pyramid layout — `tests/unit/` (incl. `export/` placeholder), `tests/integration/`, `tests/usr-harnesses/fixture/` minimal harness, `tests/fixtures/responses/` + `cassettes/`, `tests/e2e/` gated by `HARNESS_LIVE_LLM=1`. Serve enforces localhost bind (`_enforce_localhost_bind`). Docs: `HARNESS_LIVE_LLM` + debugpy + Phase 1 security notes in `user-docs/reference/cli.md` and `user-docs/guides/testing.md`. Tests: `tests/usr-harnesses/fixture/test_fixture_harness.py`, `tests/integration/test_serve.py` (`-k e3_s06`).
 
+**Implementation (E4-S03a, 2026-07-28):** Export golden snapshots live under `tests/compile/` (+ `tests/compile/golden/`) and `tests/unit/compile/test_export.py`. `tests/unit/export/` remains a layout placeholder pointing at those tests.
+
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract on ephemeral port — `tests/integration/conftest.py::ephemeral_serve_url`, `tests/integration/test_openai_contract.py` (`-k e3_s07`); HTTP `model_id` override wired in `serve/runner.py`. Cross-OS green closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
 
 | `zaumzeug eval` | Optional regression; `--trace <file>` for single trace |
@@ -103,7 +105,7 @@ Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/
 | Phase | Debug/test deliverables |
 |---|---|
 | 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06), OpenAI REST contract ✅ (E3-S07) |
-| 2 | compile `--dry-run`, export golden tests, trace → `LLMTestCase`, optional `zaumzeug eval` |
+| 2 | compile `--dry-run`, export golden tests (**E4-S03a Done** — `tests/compile/`), trace → `LLMTestCase`, optional `zaumzeug eval` |
 | 3 | MCP integration tests, tool correctness eval when DeepEval present |
 | 4 | `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
 

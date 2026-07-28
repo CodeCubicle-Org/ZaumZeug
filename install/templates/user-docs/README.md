@@ -21,6 +21,7 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 | Guide | Description |
 |---|---|
 | [Multi-agent workflow](guides/multi-agent-workflow.md) | `workflow.yaml`, agent vs pipeline stages, control flow inside agents |
+| [Compile and export](guides/compile.md) | GEPA offline compile; Haystack artifact export; template-only optimization |
 | [Testing](guides/testing.md) | Unit, integration, eval layers; mock profile; CI tiers |
 
 ## Quick links
@@ -28,4 +29,4 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 - **`zaumzeug init <name>`** — scaffold a new harness under `usr-harnesses/`
 - **`zaumzeug serve <harness>`** — interactive chat with the workflow **entry** agent
 - **`zaumzeug run <harness>`** — run serial workflow stages in order
-- **`zaumzeug compile <harness>`** — run GEPA per agent (Phase 2); writes `artifacts/<run_id>/` + `current`; live task/reflection models need API keys in `.env` (example uses mock/stub offline)
+- **`zaumzeug compile <harness>`** — run GEPA per agent (Phase 2); writes `artifacts/<run_id>/` + `current` with Haystack export (`artifact-manifest.json`, prompts); live task/reflection models need API keys in `.env` (example uses mock/stub offline). See [Compile and export](guides/compile.md).

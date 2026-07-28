@@ -1,0 +1,21 @@
+{
+  "agent_json": {
+    "export_version": 1,
+    "system_prompt": "prompts/system.md",
+    "templates": {
+      "respond.answer": "{{ answer }}",
+      "respond.question": "{{ question }}"
+    },
+    "tools": []
+  },
+  "export_version": 1,
+  "has_input_rewrite": false,
+  "input_rewrite": null,
+  "module_hash": "7985c0977e4b5a67754db229b000a524b54981e257b601c811d87ff1dda92ef7",
+  "optimization_target": "template",
+  "paths": {
+    "agent_json": "agent.json",
+    "system_prompt": "prompts/system.md"
+  },
+  "system_prompt": "GOLDEN_SYSTEM: Answer research questions carefully.\n"
+}

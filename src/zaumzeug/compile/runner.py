@@ -1,7 +1,8 @@
-"""``zaumzeug compile`` orchestration — validate, load modules, run GEPA.
+"""``zaumzeug compile`` orchestration — validate, load modules, run GEPA, export.
 
 E4-S02a: schema + module load + LM preflight.
 E4-S02b: invoke GEPA and write ``artifacts/<run_id>/`` + ``current``.
+E4-S03a: Haystack export (``artifact-manifest.json``, prompts) via ``export.py``.
 """
 
 from __future__ import annotations

@@ -40,7 +40,7 @@ See [Project setup](../getting-started/project-setup.md) for layout details.
 
 ## `zaumzeug install-project` (deferred)
 
-Scaffold project folders (`usr-harnesses/`, `user-docs/`, `.env`, etc.) in an arbitrary cwd for **PyPI consumers** who do not clone this repo. **Not available yet** — deferred until `zaumzeug` is published on PyPI. Until then, use [clone + client install](../getting-started/installation.md).
+Scaffold project folders (`usr-harnesses/`, `user-docs/`, `.env`, etc.) in an arbitrary cwd for **PyPI consumers** who do not clone this repo. **Not available yet** — deferred until `zaumzeug` is published on PyPI ([E1-S08](../../docs/stories/epic-stories/25-story.md)). Until then, use [clone + client install](../getting-started/installation.md).
 
 ---
 
@@ -55,9 +55,9 @@ zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose] [--port N]
 | Flag | Description |
 |---|---|
 | `--dry-run` | Validate `harness.yaml`, `workflow.yaml`, and resolved paths without binding a port or calling an LLM |
-| `--deploy` | Load harness from `deploy/<name>/` (or set `HARNESS_ROOT=deploy`) |
+| `--deploy` | Load harness from `deploy/<name>/` (or `HARNESS_ROOT=deploy`) |
 | `--json` | Emit machine-readable JSON (dry-run only) |
-| `--verbose` | Enable SDK and Haystack structured debug logging |
+| `--verbose` | Enable SDK and Haystack debug logging |
 | `--port N` | Override `serve.hayhooks.port` from harness.yaml (CI smoke on an ephemeral free port) |
 
 **Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**), or `--port` when set. Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`).
@@ -164,7 +164,7 @@ zaumzeug compile <harness> [--agent NAME] [--verbose]
 
 **API keys:** Live task/reflection models need provider keys in `.env` (or the environment) before GEPA runs — the same keys `zaumzeug doctor` checks. Missing registry ids or keys fail fast with an actionable suggestion. The shipped `example` harness uses `provider: mock` and a stub GEPA path so you can exercise compile offline without keys; switch to live model ids in `agents-models.yaml` for real optimization.
 
-**Artifacts:** Each run writes immutable `agents/<name>/artifacts/<run_id>/` and updates `artifacts/current` (symlink when possible, otherwise a copy). Full Haystack export (`artifact-manifest.json`, prompts) lands in a later story (E4-S03a).
+**Artifacts:** Each run writes immutable `agents/<name>/artifacts/<run_id>/` and updates `artifacts/current` (symlink when possible, otherwise a copy). Export maps `dump_state()` to Haystack files: `prompts/system.md`, optional `prompts/input_rewrite.md`, `agent.json`, and **`artifact-manifest.json`** (not the deploy bundle’s `manifest.json`). Legacy `manifest.json` inside an artifact folder is accepted during migration. **GEPA optimizes the template offline; runtime applies fixed exported text only** — never end-user chat as an optimization target. See [Compile and export](../guides/compile.md).
 
 **Fail-fast (before GEPA):** missing `compile.module`, unimportable module, model id absent from the merged registry, or missing provider API keys in `.env` / the environment.
 

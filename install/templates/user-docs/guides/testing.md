@@ -159,7 +159,7 @@ def test_chat_completions_contract(ephemeral_serve_url):
 
 Optional request field **`model_id`** selects a registry LLM (OpenAI `model` stays the harness name). Use **`respx`** to stub outbound `web_fetch` or provider HTTP without hitting the public internet.
 
-Contract suite (E3-S07): `pytest tests/integration/test_openai_contract.py -v` — asserts OpenAI JSON shape, `model_id` override, and offline mock + stubbed fetch. Cross-OS green is covered by E1-S07 (`.github/workflows/ci-matrix.yml`).
+Contract suite (E3-S07): `pytest tests/integration/test_openai_contract.py -v` — asserts OpenAI JSON shape, `model_id` override, and offline mock + stubbed fetch. Cross-OS green is covered by [E1-S07](../../docs/stories/epic-stories/24-story.md) (`.github/workflows/ci-matrix.yml`).
 
 ---
 
@@ -221,7 +221,7 @@ Never commit API keys. `.env` is gitignored. Default CI runs mock only — see [
 
 ## CI expectations
 
-Default branch CI (Win / macOS / Linux) is `.github/workflows/ci-matrix.yml` (E1-S07):
+Default branch CI (Win / macOS / Linux) is [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml) (E1-S07):
 
 1. OS install wrapper with `--skip-venv --verify`
    - Windows: `.\install\client-install.ps1 --skip-venv --verify`
@@ -260,7 +260,7 @@ zaumzeug serve example --dry-run
 | Phase | Testing deliverables |
 |---|---|
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
-| **2** | Compile `--dry-run`, export golden snapshots, trace → eval case, optional `zaumzeug eval` |
+| **2** | Compile `--dry-run`, export golden snapshots (**Done** E4-S03a — `tests/compile/`), trace → eval case, optional `zaumzeug eval` |
 | **3** | MCP integration tests, tool-correctness eval |
 | **4** | Production trace ratchet, `@observe` / Confident AI sync |
 

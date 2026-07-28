@@ -55,7 +55,7 @@ At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug run` (workflow
 5. Else if `agent.yaml` → `system_prompt` file exists → use as `Agent.system_prompt`.
 6. Else → fail fast with actionable error (include `harness-name` and `agent-name`).
 
-**Implementation (E2-S03, 2026-07-08):** Serve/compile resolution via `zaumzeug.config.resolve_agent_serve()`, `resolve_agent_compile()`, and `resolve_serve_entry()` (`src/zaumzeug/config/resolver.py`). When `agent.artifact` is set, `artifact-manifest.json` must exist in that directory. No DSPy import on the serve resolution path.
+**Implementation (E2-S03, 2026-07-08):** Serve/compile resolution via `zaumzeug.config.resolve_agent_serve()`, `resolve_agent_compile()`, and `resolve_serve_entry()` (`src/zaumzeug/config/resolver.py`). When `agent.artifact` is set, `artifact-manifest.json` must exist in that directory (legacy `manifest.json` also accepted — E4-S03a). No DSPy import on the serve resolution path.
 
 **Implementation (E2-S04a, 2026-07-08):** `zaumzeug doctor` runtime path checks call `resolve_agent_serve()` for each workflow agent — same resolution logic as serve ([E3-S02](../stories/02-epic.md#e3-s02-zaumzeug-serve-dev-mode)).
 
@@ -79,6 +79,8 @@ At `zaumzeug compile <harness> --agent <agent-name>` (offline):
 **Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile` wires the loader + LM preflight (`compile/runner.py`, `compile/gepa_runner.py`). Fails fast on missing `compile.module`, unimportable modules, or missing registry/`.env` keys for task/reflection LMs — before any GEPA call.
 
 **Implementation (E4-S02b, 2026-07-28):** After preflight, `invoke_gepa()` runs `dspy.GEPA` (stub when `provider: mock` or injected for CI), writes `agents/<name>/artifacts/<run_id>/`, and updates `artifacts/current` (symlink or copy).
+
+**Implementation (E4-S03a, 2026-07-28):** `compile/export.py` maps `dump_state()` → `prompts/system.md`, optional `prompts/input_rewrite.md`, `agent.json`, and `artifact-manifest.json` (legacy `manifest.json` accepted when resolving). Wired from `write_artifact_run` before `current` update.
 
 ### 5.3 Artifact layout
 
@@ -104,7 +106,7 @@ Deploy pins **each agent's** selected run under `deploy/<harness>/agents/<agent-
 | **`agents/.../artifacts/<run_id>/artifact-manifest.json`** | Per-agent compile export | `zaumzeug compile --agent <name>` | Export version, module hash, GEPA run metadata |
 | **`deploy/<harness>/manifest.json`** | Deploy bundle | `zaumzeug deploy` | Build id, git sha, yaml hash, per-agent `artifact_run_id` map ([§10.3](07-deploy-packaging.md#103-deploy-manifestjson)) |
 
-Legacy alias: compile may accept `manifest.json` during migration; v1 canonical name is **`artifact-manifest.json`**.
+Legacy alias: compile / serve accept `manifest.json` during migration (**implemented** E4-S03a via `find_artifact_manifest` / resolver); v1 canonical name is **`artifact-manifest.json`**.
 
 ### 5.4 Workflow diagram (compile)
 

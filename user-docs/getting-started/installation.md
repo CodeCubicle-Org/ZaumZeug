@@ -125,7 +125,7 @@ Not required to start a harness with the mock profile.
 
 | Feature | Extra install | When needed |
 |---|---|---|
-| **Compile / GEPA** | Included in `[dev]` | Offline prompt optimization (`zaumzeug compile`) — Phase 2 (E4-S02b); live task/reflection models need API keys in `.env` |
+| **Compile / GEPA** | Included in `[dev]` | Offline prompt optimization + Haystack export (`zaumzeug compile`) — Phase 2 (E4-S02b/S03a); live task/reflection models need API keys in `.env`. See [Compile and export](../guides/compile.md). |
 | **DeepEval** | `pip install "zaumzeug[eval]"` | Dev regression only (`zaumzeug eval`) — Phase 2+ |
 | **Provider plugins** | e.g. `openai-haystack`, `anthropic-haystack` | Only for configured live providers |
 | **MCP in Cursor** | `uv` + install `--cursor-mcp` | Phase 3 IDE integration |

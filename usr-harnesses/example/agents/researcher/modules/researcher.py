@@ -1,7 +1,7 @@
 """Example research DSPy module for ``zaumzeug compile`` (Phase 2 / E4).
 
-Optimized offline by GEPA; runtime serve continues to use Haystack + system_prompt
-until the export contract (E4-S03a) maps artifacts into the agent.
+Optimized offline by GEPA; ``compile/export.py`` maps ``dump_state()`` into
+Haystack ``prompts/system.md`` + ``artifact-manifest.json`` (E4-S03a).
 """
 
 from __future__ import annotations

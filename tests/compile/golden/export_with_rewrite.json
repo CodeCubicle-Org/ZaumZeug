@@ -1,0 +1,23 @@
+{
+  "agent_json": {
+    "export_version": 1,
+    "input_rewrite": "prompts/input_rewrite.md",
+    "system_prompt": "prompts/system.md",
+    "templates": {
+      "respond.answer": "{{ answer }}",
+      "respond.question": "{{ question }}"
+    },
+    "tools": []
+  },
+  "export_version": 1,
+  "has_input_rewrite": true,
+  "input_rewrite": "GOLDEN_REWRITE: Clarify and rewrite user input.\n",
+  "module_hash": "414e375e58e520c82f39bcc82f632e74f6c0774007ee253553cce211eda3dbe1",
+  "optimization_target": "template",
+  "paths": {
+    "agent_json": "agent.json",
+    "input_rewrite": "prompts/input_rewrite.md",
+    "system_prompt": "prompts/system.md"
+  },
+  "system_prompt": "GOLDEN_SYSTEM: Answer research questions carefully.\n"
+}

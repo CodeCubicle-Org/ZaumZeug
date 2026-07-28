@@ -260,7 +260,7 @@ zaumzeug serve example --dry-run
 | Phase | Testing deliverables |
 |---|---|
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
-| **2** | Compile `--dry-run`, export golden snapshots, trace → eval case, optional `zaumzeug eval` |
+| **2** | Compile `--dry-run`, export golden snapshots (**Done** E4-S03a — `tests/compile/`), trace → eval case, optional `zaumzeug eval` |
 | **3** | MCP integration tests, tool-correctness eval |
 | **4** | Production trace ratchet, `@observe` / Confident AI sync |
 

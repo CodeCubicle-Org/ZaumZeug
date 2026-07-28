@@ -125,7 +125,7 @@ Not required to start a harness with the mock profile.
 
 | Feature | Extra install | When needed |
 |---|---|---|
-| **Compile / GEPA** | Included in `[dev]` | Offline prompt optimization (`zaumzeug compile`) — Phase 2 (E4-S02b); live task/reflection models need API keys in `.env` |
+| **Compile / GEPA** | Included in `[dev]` | Offline prompt optimization + Haystack export (`zaumzeug compile`) — Phase 2 (E4-S02b/S03a); live task/reflection models need API keys in `.env`. See [Compile and export](../guides/compile.md). |
 | **DeepEval** | `pip install "zaumzeug[eval]"` | Dev regression only (`zaumzeug eval`) — Phase 2+ |
 | **Provider plugins** | e.g. `openai-haystack`, `anthropic-haystack` | Only for configured live providers |
 | **MCP in Cursor** | `uv` + install `--cursor-mcp` | Phase 3 IDE integration |
@@ -145,7 +145,7 @@ There is **no `zaumzeug update-deps` command in v1**. Updates stay **pip-based**
 | **Refresh SDK + `[dev]` stack manually** | Activate `.venv`, then `pip install -e ".[dev]"`, then `zaumzeug doctor` |
 | **Update optional extras** | `pip install -U "zaumzeug[eval]"`, provider packages, or `hayhooks[chainlit]` as needed |
 | **Production server** | Ship a new `deploy/<name>/` bundle → re-run bundled `target_install` (idempotent); do **not** `pip upgrade` ad hoc on the server |
-| **PyPI consumer project** (deferred until `zaumzeug` is published on PyPI) | `pip install -U zaumzeug` then `zaumzeug install-project` (optionally pin `zaumzeug==x.y.z`) |
+| **PyPI consumer project** (deferred until package publish — [E1-S08](../../docs/stories/epic-stories/25-story.md)) | `pip install -U zaumzeug` then `zaumzeug install-project` (optionally pin `zaumzeug==x.y.z`) |
 
 ### After `git pull` (dev machine)
 

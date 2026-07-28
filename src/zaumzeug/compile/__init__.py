@@ -1,5 +1,16 @@
 """DSPy loader, GEPA runner, and export contract."""
 
+from zaumzeug.compile.export import (
+    ARTIFACT_MANIFEST_NAME,
+    EXPORT_VERSION,
+    ExportError,
+    ExportResult,
+    LEGACY_MANIFEST_NAME,
+    compute_module_hash,
+    export_optimized_module,
+    find_artifact_manifest,
+    map_dump_state_to_haystack,
+)
 from zaumzeug.compile.gepa_runner import (
     CompileLmPlan,
     GepaPreflightError,
@@ -30,21 +41,30 @@ from zaumzeug.compile.runner import (
 )
 
 __all__ = [
+    "ARTIFACT_MANIFEST_NAME",
     "CompileAgentResult",
     "CompileError",
     "CompileLmPlan",
     "CompileResult",
+    "EXPORT_VERSION",
+    "ExportError",
+    "ExportResult",
     "GepaPreflightError",
     "GepaRunError",
     "GepaRunResult",
+    "LEGACY_MANIFEST_NAME",
     "ModuleLoaderError",
     "StubGEPA",
+    "compute_module_hash",
     "default_gepa_metric",
+    "export_optimized_module",
+    "find_artifact_manifest",
     "format_compile_result",
     "gepa_budget_kwargs",
     "invoke_gepa",
     "load_dspy_module",
     "load_dspy_module_from_resolution",
+    "map_dump_state_to_haystack",
     "model_entry_to_litellm",
     "module_has_input_rewrite",
     "parse_compile_module_ref",

@@ -62,7 +62,7 @@ Optional Phase 2 compile (offline with mock → stub GEPA; live models need API 
 zaumzeug compile example --agent researcher
 ```
 
-Writes `agents/researcher/artifacts/<run_id>/` and updates `artifacts/current`. Full Haystack export of those artifacts is a later story (E4-S03a).
+Writes `agents/researcher/artifacts/<run_id>/` (including `artifact-manifest.json`, `prompts/system.md`, `agent.json`) and updates `artifacts/current`. GEPA optimizes the **template**, not end-user chat — see [Compile and export](../guides/compile.md).
 
 ---
 

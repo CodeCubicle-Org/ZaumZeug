@@ -108,7 +108,7 @@ Test libraries ship in **`[dev]`** (SDK repo) and **`[eval]`** (optional harness
 | **httpx** | Runtime + integration | 1+ | Outbound HTTP for builtin `web_fetch`; OpenAI contract tests against ephemeral serve ([E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests) ✅) |
 | **respx** | Integration | 1+ | Mock outbound HTTP at boundary (`web_fetch` stubs in unit + E3-S07 contract tests) |
 | **debugpy** | Local debug | 1+ | IDE attach to `zaumzeug serve` ([§13.2](10-operations-and-reference.md#132-mechanisms)) |
-| **syrupy** *(optional)* | Unit | 2+ | Golden snapshots for compile export / `artifact-manifest.json` ([E4-S03](../stories/04-epic.md#e4-s03-export-contract-haystack-artifacts)) |
+| **syrupy** *(optional)* | Unit | 2+ | Golden snapshots for compile export / `artifact-manifest.json` ([E4-S03a](../stories/epic-stories/28.1-story.md) ✅ uses checked-in golden JSON under `tests/compile/golden/` without requiring syrupy) |
 | **pytest-recording** *(optional)* | Integration | 2+ | VCR cassettes for re-recordable provider HTTP when mock profile is insufficient |
 | **deepeval** | Harness eval | 2+ (`[eval]`) | Optional LLM regression via `usr-harnesses/<name>/eval/test_*.py` ([E6](../stories/05-epic.md)) |
 
