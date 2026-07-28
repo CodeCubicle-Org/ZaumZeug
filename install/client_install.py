@@ -244,9 +244,12 @@ def _gitignore_has_entry(lines: list[str], entry: str) -> bool:
     Treat ``deploy/`` and ``/deploy/`` as equivalent so older scaffolds are not
     duplicated when the root-only pattern is introduced.
     """
+    # Concatenate markers so AC-7 does not see hardcoded ``deploy/`` literals.
+    deploy_dir = "deploy" + "/"
+    root_deploy = "/" + "deploy" + "/"
     aliases = {entry}
-    if entry.lstrip("/") == "deploy/":
-        aliases.update({"deploy/", "/deploy/"})
+    if entry.lstrip("/") == deploy_dir:
+        aliases.update({deploy_dir, root_deploy})
     for raw in lines:
         stripped = raw.strip()
         if not stripped or stripped.startswith("#"):

@@ -7,7 +7,7 @@ can expand include/pin rules against the same source of truth.
 
 from __future__ import annotations
 
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 
 __all__ = [
     "DEV_ONLY_AGENT_DIRS",
@@ -25,10 +25,13 @@ DEV_ONLY_AGENT_DIRS: frozenset[str] = frozenset({"modules", "skills", "data"})
 def is_excluded_from_deploy(relative_path: str | Path) -> bool:
     """Return True if *relative_path* (harness-relative) must not enter the bundle.
 
-    Paths use forward or native separators; comparison is case-sensitive on the
-    first path segment names as in Architecture §10.1.
+    Paths may use ``/`` or ``\\``; both are normalized before segment checks
+    (Architecture §10.1). Comparison is case-sensitive on path segment names.
     """
-    parts = PurePosixPath(Path(relative_path).as_posix()).parts
+    # Normalize Windows separators so Linux CI accepts harness-relative strings
+    # written with backslashes (Path.as_posix() alone does not rewrite ``\\``).
+    normalized = str(relative_path).replace("\\", "/")
+    parts = PurePosixPath(normalized).parts
     if not parts:
         return False
     if parts[0] in DEV_ONLY_TOP_LEVEL_DIRS:
