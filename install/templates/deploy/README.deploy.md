@@ -46,10 +46,20 @@ Python **3.11+** must already be on PATH. From this directory:
 
 ## Serve
 
+From the **project root** that contains `deploy/{{harness_name}}/` (not from inside the bundle folder):
+
 ```bash
 zaumzeug serve {{harness_name}} --deploy
 # or: HARNESS_ROOT=deploy zaumzeug serve {{harness_name}}
 ```
+
+`--deploy` loads **only** this production tree — no `usr-harnesses/` required. The OpenAI-compatible API matches dev serve:
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /v1/chat/completions` | Chat — `"model": "{{harness_name}}"` |
+| `GET /v1/models` | Lists the served harness |
+| `POST /{{harness_name}}/run` | Direct Hayhooks run API |
 
 Validate without binding a port:
 

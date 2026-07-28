@@ -307,7 +307,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | Field | Value |
 |---|---|
 | **Feature** | E2.4 (part 3) |
-| **Prerequisites** | [E2-S04a](epic-stories/05.1-story.md) · [E5-S01](../06-epic.md#e5-s01-zaumzeug-deploy-command) · [E5-S03](../06-epic.md#e5-s03-zaumzeug-serve-deploy) |
+| **Prerequisites** | [E2-S04a](epic-stories/05.1-story.md) · [E5-S01](../06-epic.md#e5-s01-zaumzeug-deploy-command) ✅ · [E5-S03](../06-epic.md#e5-s03-zaumzeug-serve-deploy) ✅ (2026-07-28) |
 | **Status** | Done (2026-07-08) |
 
 **AC:** `--deploy` / `HARNESS_ROOT=deploy` resolves `deploy/<name>/`; validates deploy `manifest.json` and pinned artifacts; reuses E2-S04a core checks; non-zero exit on missing manifest or broken artifact refs.

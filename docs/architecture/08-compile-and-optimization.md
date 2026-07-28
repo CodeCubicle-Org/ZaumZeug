@@ -19,6 +19,8 @@
 
 DSPy and GEPA never run in production. End-user chat is never a GEPA optimization target at runtime.
 
+**Implementation (E5-S03, 2026-07-28):** Step 6 production serve — `zaumzeug serve <name> --deploy` loads only `deploy/<name>/` (same OpenAI REST as dev). Tests: `tests/integration/deploy/test_serve_deploy.py`.
+
 **Implementation (E4-S01, 2026-07-28):** Step 1 (load DSPy `Module`) is implemented by `zaumzeug.compile.module_loader` — resolves `compile.module` from `agent.yaml`, safe agent-folder import, `dspy.Module` subclass check.
 
 **Implementation (E4-S02a, 2026-07-28):** Compile CLI + Phase 2 schema + LM preflight (`compile/runner.py`, `CompileConfig`, `preflight_compile_lms`).

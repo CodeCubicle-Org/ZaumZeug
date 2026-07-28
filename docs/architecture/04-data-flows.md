@@ -171,4 +171,6 @@ production failure → trace → dataset row → zaumzeug eval (optional) → GE
 
 **Implementation (E6-S07, 2026-07-28):** Failed eval → train via `eval/gepa_bridge.append_failed_eval_to_train`; shared val aliases; optional DeepEval GEPA metric. Docs: [testing.md — GEPA ↔ DeepEval bridge](../user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile). Production auto-capture / dataset ratchet remains [E8-S03](../stories/epic-stories/60-story.md).
 
+**Implementation (E5-S03, 2026-07-28):** `zaumzeug serve --deploy` runs production bundles under `deploy/<name>/` (same OpenAI REST as dev). Tests: `tests/integration/deploy/test_serve_deploy.py`.
+
 ---

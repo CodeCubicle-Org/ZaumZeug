@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/43-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-28 |
 | **Story ID** | E5-S03 |
+| **Status** | Done |
 | **Epic** | [E5 — Deploy Packaging](../06-epic.md) |
 | **Phase** | 2 |
 | **Epic build order** | 6 of 8 |
@@ -23,7 +24,7 @@
 | **Feature** | E5.3 |
 | **Persona** | Ops / platform |
 | **Priority** | P0 |
-| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) · [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) |
+| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) ✅ · [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) ✅ |
 
 ### User story
 
@@ -44,15 +45,15 @@ As **ops**, I want `zaumzeug serve <name> --deploy`, so that I run production bu
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Loads only from `deploy/<name>/`
-- [ ] **AC-2** Same OpenAI REST API as dev serve
-- [ ] **AC-3** Fails if deploy folder missing or invalid manifest
-- [ ] **AC-4** Works after target_install on clean venv without `usr-harnesses/`
+- [x] **AC-1** Loads only from `deploy/<name>/`
+- [x] **AC-2** Same OpenAI REST API as dev serve
+- [x] **AC-3** Fails if deploy folder missing or invalid manifest
+- [x] **AC-4** Works after target_install on clean venv without `usr-harnesses/`
 
 ### Implementation tasks (build)
 
-- [ ] Add `--deploy` flag to serve command
-- [ ] Resolve paths relative to `deploy/<name>/`
+- [x] Add `--deploy` flag to serve command
+- [x] Resolve paths relative to `deploy/<name>/`
 
 ### Verification (after build)
 
@@ -66,12 +67,18 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-4 | `tests/integration/deploy/test_serve_deploy.py::test_e5_s03_ac4_after_target_install_clean_venv` |
 | AC-1–4 | **shared:** E5-S08 Linux CI deploy → serve --deploy smoke |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/deploy/test_serve_deploy.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/deploy/test_serve_deploy.py -v` passes (4 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Documented in `README.deploy.md` and user-docs
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Documented in `README.deploy.md` and user-docs
+- [x] Verification checklist complete; all ACs traced to tests
 
+### Implementation notes (2026-07-28)
+
+- CLI `--deploy` and `serve/runner.py` / `validate_serve(deploy=…)` already resolved roots via `config/harness_root.py` (E2-S04c / E2-S05 / E3-S02); this story closes full Hayhooks serve from production bundles and AC tests.
+- Deploy mode validates `manifest.json` via `check_deploy_manifest` before bind; missing folder → `harness_discovery` fail.
+- Docs: `install/templates/deploy/README.deploy.md`, `user-docs/reference/cli.md` (+ install template mirror).
+- Shared Linux CI smoke remains [E5-S08](48-story.md).
 ---

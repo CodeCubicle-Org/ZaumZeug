@@ -5,8 +5,8 @@
 | **Document** | Epic E5 user stories |
 | **File** | `docs/stories/06-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E5-S02 done) |
-| **Status** | In progress (E5-S01–S02 + E5-S06 Done; next E5-S03 `serve --deploy`) |
+| **Last modified** | 2026-07-28 (E5-S03 done) |
+| **Status** | In progress (E5-S01–S03 + E5-S06 Done; next E5-S04 `HARNESS_ROOT=deploy`) |
 | **Build order** | **6 of 8** (after E4 compile + E6-S02 eval for eval gate) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -156,6 +156,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E5.3 |
 | **Persona** | Ops / platform |
 | **Priority** | P0 |
+| **Status** | Done (2026-07-28) |
 
 ### User story
 
@@ -168,15 +169,15 @@ As **ops**, I want `zaumzeug serve <name> --deploy`, so that I run production bu
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Loads only from `deploy/<name>/`
-- [ ] **AC-2** Same OpenAI REST API as dev serve
-- [ ] **AC-3** Fails if deploy folder missing or invalid manifest
-- [ ] **AC-4** Works after target_install on clean venv without `usr-harnesses/`
+- [x] **AC-1** Loads only from `deploy/<name>/`
+- [x] **AC-2** Same OpenAI REST API as dev serve
+- [x] **AC-3** Fails if deploy folder missing or invalid manifest
+- [x] **AC-4** Works after target_install on clean venv without `usr-harnesses/`
 
 ### Implementation tasks (build)
 
-- [ ] Add `--deploy` flag to serve command
-- [ ] Resolve paths relative to `deploy/<name>/`
+- [x] Add `--deploy` flag to serve command
+- [x] Resolve paths relative to `deploy/<name>/`
 
 ### Verification (after build)
 
@@ -190,13 +191,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-4 | `tests/integration/deploy/test_serve_deploy.py::test_e5_s03_ac4_after_target_install_clean_venv` |
 | AC-1–4 | **shared:** E5-S08 Linux CI deploy → serve --deploy smoke |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/deploy/test_serve_deploy.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/deploy/test_serve_deploy.py -v` passes (4 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Documented in `README.deploy.md` and user-docs
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Documented in `README.deploy.md` and user-docs
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

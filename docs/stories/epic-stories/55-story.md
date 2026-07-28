@@ -23,7 +23,7 @@
 | **Feature** | E7.6 |
 | **Persona** | Ops / platform |
 | **Priority** | P1 |
-| **Prerequisites** | [E5-S03](43-story.md#e5-s03-zaumzeug-serve-deploy) · [E7-S01](50-story.md#e7-s01-mcp-tool-configuration) |
+| **Prerequisites** | [E5-S03](43-story.md#e5-s03-zaumzeug-serve-deploy) ✅ (2026-07-28) · [E7-S01](50-story.md#e7-s01-mcp-tool-configuration) |
 
 ### User story
 

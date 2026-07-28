@@ -1,4 +1,4 @@
-"""Hayhooks serve runner — canonical entry for ``zaumzeug serve`` (E3-S02)."""
+"""Hayhooks serve runner — canonical entry for ``zaumzeug serve`` (E3-S02 / E5-S03)."""
 
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ from hayhooks.server.pipelines.registry import registry
 from hayhooks.server.utils.deploy_utils import add_pipeline_api_route
 from hayhooks.settings import settings as hayhooks_settings
 
+from zaumzeug.config.harness_root import is_deploy_mode
 from zaumzeug.doctor.project import find_project_root
 from zaumzeug.runtime.factory import build_agent_bundle
 from zaumzeug.runtime.model_router import ModelRouter
@@ -179,6 +180,8 @@ def prepare_serve(
 
     Does not bind a socket. Call :func:`run_app` (or :func:`run_serve`) to listen.
     Optional ``port`` overrides ``serve.hayhooks.port`` from harness.yaml.
+    When ``deploy`` is true (or ``HARNESS_ROOT=deploy``), loads only
+    ``deploy/<name>/`` and requires a valid deploy ``manifest.json`` (E5-S03).
     """
     bind_host = _enforce_localhost_bind(host)
     root = Path(project_root) if project_root is not None else find_project_root()
@@ -261,8 +264,11 @@ def run_serve(
         return exc.validation.exit_code
 
     base = f"http://{prepared.host}:{prepared.port}"
+    root_label = (
+        "deploy" if is_deploy_mode(deploy_flag=deploy) else "usr-harnesses"
+    )
     print(
-        f"Serving harness '{prepared.harness_name}' "
+        f"Serving harness '{prepared.harness_name}' from {root_label}/ "
         f"(entry agent: {prepared.agent_name}) at {base}/v1"
     )
     print(f"  POST {base}/v1/chat/completions")

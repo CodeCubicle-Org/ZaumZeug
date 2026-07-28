@@ -23,7 +23,7 @@
 | **Feature** | E8.2 |
 | **Persona** | Ops / platform |
 | **Priority** | P1 |
-| **Prerequisites** | [E5-S03](43-story.md#e5-s03-zaumzeug-serve-deploy) |
+| **Prerequisites** | [E5-S03](43-story.md#e5-s03-zaumzeug-serve-deploy) ✅ (2026-07-28) |
 
 ### User story
 

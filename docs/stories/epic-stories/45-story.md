@@ -23,7 +23,7 @@
 | **Feature** | E5.5 |
 | **Persona** | Ops / platform · Harness developer |
 | **Priority** | P0 |
-| **Prerequisites** | [E5-S03](43-story.md#e5-s03-zaumzeug-serve-deploy) · [E5-S09c](49.3-story.md#e5-s09c-target-install-verify-integration) |
+| **Prerequisites** | [E5-S03](43-story.md#e5-s03-zaumzeug-serve-deploy) ✅ (2026-07-28) · [E5-S09c](49.3-story.md#e5-s09c-target-install-verify-integration) |
 
 ### User story
 
