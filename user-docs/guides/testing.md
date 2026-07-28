@@ -7,7 +7,7 @@
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
-DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra. Optional harness `eval/` pytest files (`zaumzeug init --with-eval` or the example harness) run with `deepeval test run` (**Done** E6-S04). Captured Haystack turns export to `data/traces/` and score with `zaumzeug eval --trace` (**Done** E6-S05). Mode C black-boxes a running serve with `zaumzeug eval --base-url` (**Done** E6-S06) — staging/debug only.
+DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra. Optional harness `eval/` pytest files (`zaumzeug init --with-eval` or the example harness) run with `deepeval test run` (**Done** E6-S04). Captured Haystack turns export to `data/traces/` and score with `zaumzeug eval --trace` (**Done** E6-S05). Mode C black-boxes a running serve with `zaumzeug eval --base-url` (**Done** E6-S06) — staging/debug only. Failed eval rows feed GEPA training via `append_failed_eval_to_train`; shared `val.jsonl` and optional DeepEval GEPA metrics close the loop (**Done** E6-S07).
 
 For SDK design detail, see internal `docs/architecture/10-operations-and-reference.md` §13 and `docs/architecture/03-technology-stack.md` §4.5.
 
@@ -285,6 +285,61 @@ append_trace_to_valset(path, harness_dir / "data" / "val.jsonl")
 
 Automatic production capture hooks land in Phase 4 ([E8-S03](../../docs/stories/epic-stories/60-story.md)). Until then, call `export_haystack_trace` from a failing session or a small debug script.
 
+### GEPA ↔ DeepEval bridge (compile → eval → compile)
+
+After eval fails, fold those rows into GEPA training and re-compile. Trace capture (above) feeds the **valset**; this bridge feeds the **trainset** and optionally shares one val file between compile and eval ([Journey C](../../docs/prd.md#73-journey-c--improve-after-failure-phase-2)):
+
+```text
+zaumzeug compile → zaumzeug eval → append failed rows to train.jsonl
+→ zaumzeug compile → zaumzeug eval (verify) → zaumzeug deploy
+```
+
+**JSONL schemas** (one object per line):
+
+| File | Fields | Used by |
+|---|---|---|
+| `agents/<agent>/data/train.jsonl` | `question`, `answer` | `zaumzeug compile` (GEPA trainset) |
+| Shared `data/val.jsonl` | `input` / `expected_output` **or** `question` / `answer` (aliases both ways) | `compile.valset` **and** `eval.valset` |
+
+Point both configs at the same file when you want one golden set:
+
+```yaml
+# agents/<agent>/agent.yaml
+compile:
+  trainset: data/train.jsonl
+  valset: data/val.jsonl
+
+# harness.yaml
+eval:
+  framework: builtin
+  valset: agents/researcher/data/val.jsonl   # same file as compile.valset
+```
+
+**Append failed eval rows to train** (requires `expected_output` / gold answer on the failing case):
+
+```python
+from zaumzeug.eval.runner import run_eval
+from zaumzeug.eval.gepa_bridge import append_failed_eval_to_train
+
+result = run_eval("example", framework="builtin", agent_runner=my_runner)
+n = append_failed_eval_to_train(
+    result,
+    harness_dir / "agents" / "researcher" / "data" / "train.jsonl",
+)
+# → n rows of {"question": ..., "answer": ...} appended
+```
+
+**Optional DeepEval inside GEPA** — put a `metric` callable in `agents/<agent>/modules/metrics.py`. Compile loads it automatically. The example researcher ships a template that wraps DeepEval `.measure()` via `deepeval_gepa_metric(...)` and falls back to the keyword metric when the `[eval]` extra is missing or `USE_DEEPEVAL = False`:
+
+```python
+from zaumzeug.eval.gepa_bridge import deepeval_gepa_metric
+
+USE_DEEPEVAL = True  # set False to force the builtin keyword metric
+metric = deepeval_gepa_metric(my_metric_factory, enabled=USE_DEEPEVAL)
+```
+
+SDK tests: `pytest tests/unit/eval/test_gepa_bridge.py -v`.
+
 ### DeepEval pytest scaffold
 
 DeepEval treats LLM checks like pytest tests. Put optional files under `usr-harnesses/<name>/eval/` (Architecture §3.3) — **dev only**; the deploy packager excludes `eval/` (Architecture §10.1).
@@ -444,7 +499,7 @@ zaumzeug compile example --dry-run
 | Phase | Testing deliverables |
 |---|---|
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
-| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (**Done** E6-S05 — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**Done** E6-S06 — `tests/integration/eval/test_http_eval.py`) |
+| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (**Done** E6-S05 — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**Done** E6-S06 — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**Done** E6-S07 — `tests/unit/eval/test_gepa_bridge.py`) |
 | **3** | MCP integration tests, tool-correctness eval |
 | **4** | Production trace ratchet, `@observe` / Confident AI sync |
 
@@ -453,4 +508,4 @@ zaumzeug compile example --dry-run
 ## Related guides
 
 - [Multi-agent workflow](multi-agent-workflow.md) — `workflow.yaml` and stage routing under test
-- [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_LIVE_LLM`, debugpy, serve/compile `--dry-run`, `doctor`, `eval` / `--trace` / `--base-url`, Phase 1 security notes
+- [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_LIVE_LLM`, debugpy, serve/compile `--dry-run`, `doctor`, `eval` / `--trace` / `--base-url`, GEPA ↔ DeepEval bridge, Phase 1 security notes

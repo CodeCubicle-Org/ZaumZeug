@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-28 (E6-S06 HTTP black-box eval / Mode C)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S06 **Done**; E5-S06 **Done** early with E6-S03; next E6-S07 / E5 packager body)  
+**Last updated:** 2026-07-28 (E6-S07 GEPA ↔ DeepEval bridge)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S07 **Done**; E5-S06 **Done** early with E6-S03; next E5-S01 packager body)  
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -108,7 +108,9 @@ production trace → add to valset → zaumzeug eval (optional) → zaumzeug com
 → zaumzeug deploy → redeploy
 ```
 
-**Implementation (E6-S05, 2026-07-28):** Manual/API export via `zaumzeug.eval.trace.export_haystack_trace` → `data/traces/`; score with `zaumzeug eval --trace`; append with `append_trace_to_valset`. Walkthrough: [user-docs/guides/testing.md](user-docs/guides/testing.md#trace--test-case-journey-c). Production auto-capture remains [E8-S03](stories/epic-stories/60-story.md).
+**Implementation (E6-S05, 2026-07-28):** Manual/API export via `zaumzeug.eval.trace.export_haystack_trace` → `data/traces/`; score with `zaumzeug eval --trace`; append with `append_trace_to_valset`. Walkthrough: [user-docs/guides/testing.md](user-docs/guides/testing.md#trace--test-case-journey-c).
+
+**Implementation (E6-S07, 2026-07-28):** Failed eval → `data/train.jsonl` via `append_failed_eval_to_train`; shared val aliases; optional DeepEval GEPA metric in `modules/metrics.py`. Compile → eval → compile loop: [testing.md — GEPA ↔ DeepEval bridge](user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile). Production auto-capture remains [E8-S03](stories/epic-stories/60-story.md).
 
 ### 7.4 User installation guide (content for README — Phase 1)
 
@@ -354,9 +356,9 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E6.4 | `eval/` pytest scaffold | **Done** (E6-S04, 2026-07-28). **AC:** Optional `usr-harnesses/<name>/eval/test_*.py` runs via `deepeval test run`; custom metrics in `eval/metrics.py`; `eval/` excluded from deploy (`copy_rules`); `zaumzeug init --with-eval`. |
 | E6.5 | Trace → test case | **Done** (E6-S05, 2026-07-28). **AC:** Haystack trace export to JSONL (`data/traces/`); score single trace with `zaumzeug eval --trace`; schema documented for valset append. |
 | E6.6 | HTTP black-box eval | **Done** (E6-S06, 2026-07-28). **AC:** Optional Mode C — eval against running `zaumzeug serve` via `/v1/chat/completions` (staging/debug); `--base-url` / `eval.base_url`. |
-| E6.7 | GEPA ↔ DeepEval bridge | **AC:** Failed eval rows can append to `data/train.jsonl`; shared `data/val.jsonl`; GEPA custom metric may delegate to DeepEval `.measure()`. |
+| E6.7 | GEPA ↔ DeepEval bridge | **Done** (E6-S07, 2026-07-28). **AC:** Failed eval rows can append to `data/train.jsonl`; shared `data/val.jsonl`; GEPA custom metric may delegate to DeepEval `.measure()`. |
 
-**Story seeds:** Eval without deepeval shows install hint ✅ (E6-S01 `require_deepeval()`); Mode C `--base-url` vs running serve ✅ (E6-S06); GEPA metric delegates to DeepEval `.measure()` optionally.
+**Story seeds:** Eval without deepeval shows install hint ✅ (E6-S01 `require_deepeval()`); Mode C `--base-url` vs running serve ✅ (E6-S06); GEPA metric delegates to DeepEval `.measure()` optionally ✅ (E6-S07).
 
 ---
 
@@ -419,7 +421,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S06](stories/epic-stories/39-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); next [E6-S07](stories/epic-stories/40-story.md) |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S07](stories/epic-stories/40-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); next [E5-S01](stories/epic-stories/41-story.md) |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A | E8 |
 

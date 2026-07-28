@@ -117,6 +117,16 @@ At serve/run time:
 - Optional `input_rewrite` from the manifest is applied as a fixed preprocess before the agent loop.
 - `zaumzeug doctor` warns (exit 0) when the current `compile.module` `.py` hash no longer matches `source_hash` in the artifact manifest — re-run compile.
 
+## Custom GEPA metrics (optional DeepEval)
+
+By default, compile uses a keyword-containment metric with textual feedback. To customize:
+
+1. Add `agents/<agent>/modules/metrics.py` exporting a callable named `metric` (or `gepa_metric`).
+2. `zaumzeug compile` loads it automatically when present.
+3. Optionally wrap a DeepEval metric with `deepeval_gepa_metric(...)` so GEPA gets `score` + `feedback` from `.measure()` — DeepEval stays optional (`USE_DEEPEVAL = False` or missing `[eval]` falls back to the builtin keyword metric).
+
+Failed `zaumzeug eval` rows can append to `data/train.jsonl` for the next compile — see [Testing — GEPA ↔ DeepEval bridge](testing.md#gepa--deepeval-bridge-compile--eval--compile) (E6-S07).
+
 ## Rollback to a pinned run
 
 Compile never overwrites an existing `artifacts/<run_id>/` folder — only `artifacts/current` moves forward. To recover from a bad compile **without** re-running GEPA:

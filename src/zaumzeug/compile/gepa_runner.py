@@ -305,7 +305,13 @@ def invoke_gepa(
     compile_config = resolution.compile_config
     use_stub = lm_plan.uses_mock_provider if stub is None else stub
     budget = gepa_budget_kwargs(compile_config)
-    metric_fn = metric or default_gepa_metric
+    if metric is not None:
+        metric_fn = metric
+    else:
+        # Optional agents/<agent>/modules/metrics.py (E6-S07 GEPA ↔ DeepEval).
+        from zaumzeug.eval.gepa_bridge import load_modules_gepa_metric
+
+        metric_fn = load_modules_gepa_metric(agent_dir) or default_gepa_metric
     has_rewrite = module_has_input_rewrite(module)
 
     loaded_train = trainset
@@ -601,12 +607,30 @@ def _read_jsonl_examples(path: Path) -> list[Any]:
                 f"JSONL row must be an object at {path}:{line_no}",
                 path=path,
             )
-        ex = dspy.Example(**row)
-        inputs = [k for k in row if k != "answer"]
-        if inputs:
-            ex = ex.with_inputs(*inputs)
-        elif "question" in row:
-            ex = ex.with_inputs("question")
+        # Shared valset aliases (E6-S07): input→question, expected_output→answer.
+        question = row.get("question", row.get("input"))
+        answer = row.get("answer", row.get("expected_output"))
+        if question is None:
+            raise GepaRunError(
+                f"JSONL row missing question/input at {path}:{line_no}",
+                path=path,
+            )
+        normalized: dict[str, Any] = {"question": str(question)}
+        if answer is not None:
+            normalized["answer"] = str(answer)
+        # Preserve extra fields GEPA modules may use (except eval-only aliases).
+        for key, value in row.items():
+            if key in {
+                "question",
+                "answer",
+                "input",
+                "expected_output",
+                "retrieval_context",
+            }:
+                continue
+            normalized[key] = value
+        ex = dspy.Example(**normalized)
+        ex = ex.with_inputs("question")
         examples.append(ex)
     return examples
 

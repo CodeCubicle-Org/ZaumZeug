@@ -195,7 +195,7 @@ HARNESS_LOG_LEVEL=DEBUG zaumzeug compile example
 
 ## `zaumzeug eval`
 
-Run harness regression checks from the optional `eval:` block in `harness.yaml` (Architecture §6.3 / E6-S02). Dev-only — never invoked from `zaumzeug serve`. Score a captured Haystack turn with `--trace` (E6-S05) without re-running the agent. Black-box a **running** serve with `--base-url` (Mode C / E6-S06) — **staging/debug only**.
+Run harness regression checks from the optional `eval:` block in `harness.yaml` (Architecture §6.3 / E6-S02). Dev-only — never invoked from `zaumzeug serve`. Score a captured Haystack turn with `--trace` (E6-S05) without re-running the agent. Black-box a **running** serve with `--base-url` (Mode C / E6-S06) — **staging/debug only**. Feed failures into the next GEPA compile with `append_failed_eval_to_train` (E6-S07).
 
 ```bash
 zaumzeug eval <harness> [--framework builtin|deepeval] [--agent NAME] [--trace PATH] [--base-url [URL]] [--verbose]
@@ -237,7 +237,7 @@ zaumzeug eval example --framework builtin --base-url
 zaumzeug eval example --framework builtin --base-url http://127.0.0.1:1416
 ```
 
-See [Testing — Trace → test case](../guides/testing.md#trace--test-case-journey-c) for the JSONL schema and valset append, and [Mode C](../guides/testing.md#mode-c--http-black-box-stagingdebug) for HTTP black-box eval.
+See [Testing — Trace → test case](../guides/testing.md#trace--test-case-journey-c) for the JSONL schema and valset append, [Mode C](../guides/testing.md#mode-c--http-black-box-stagingdebug) for HTTP black-box eval, and [GEPA ↔ DeepEval bridge](../guides/testing.md#gepa--deepeval-bridge-compile--eval--compile) for failed-eval → train / shared valset.
 
 ---
 
@@ -291,7 +291,7 @@ zaumzeug doctor [<harness>] [--deploy] [--verbose] [--json]
 | `--json` | Emit machine-readable JSON report |
 | `--deploy` | Validate deploy bundle under `deploy/` |
 
-**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig` and `deploy:` / `DeployConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. Warnings (non-blocking): MCP without `uv`, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02), `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06), `zaumzeug eval --trace` for captured failures (E6-S05), and `zaumzeug eval --base-url` for Mode C staging/debug (E6-S06).
+**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig` and `deploy:` / `DeployConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. Warnings (non-blocking): MCP without `uv`, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02), `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06), `zaumzeug eval --trace` for captured failures (E6-S05), `zaumzeug eval --base-url` for Mode C staging/debug (E6-S06), and `zaumzeug.eval.gepa_bridge` for failed-eval → train / optional DeepEval GEPA metrics (E6-S07).
 
 Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack debug logs on serve, compile, eval, or deploy, use `--verbose` on those commands or `HARNESS_LOG_LEVEL=DEBUG`.
 
@@ -299,5 +299,5 @@ Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack
 
 ## Related
 
-- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, `--trace` / Journey C, Mode C `--base-url`, deploy eval gates
+- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, `--trace` / Journey C, Mode C `--base-url`, GEPA ↔ DeepEval bridge, deploy eval gates
 - [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml` and agent routing

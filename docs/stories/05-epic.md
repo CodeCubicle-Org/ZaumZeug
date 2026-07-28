@@ -5,8 +5,8 @@
 | **Document** | Epic E6 user stories |
 | **File** | `docs/stories/05-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E6-S06 done) |
-| **Status** | In progress |
+| **Last modified** | 2026-07-28 (E6-S07 done) |
+| **Status** | Done (E6-S01–S07, 2026-07-28) |
 | **Build order** | **5 of 8** (before E5 — deploy eval gate needs `zaumzeug eval`) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -344,6 +344,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E6.7 |
 | **Persona** | Harness developer |
 | **Priority** | P2 |
+| **Status** | Done (2026-07-28) |
 
 ### User story
 
@@ -356,16 +357,16 @@ As a **harness developer**, I want failed eval rows to feed compile training dat
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Failed eval rows can append to `data/train.jsonl`
-- [ ] **AC-2** Shared `data/val.jsonl` for compile and eval
-- [ ] **AC-3** GEPA custom metric may delegate to DeepEval `.measure()` optionally
-- [ ] **AC-4** Story seed: GEPA metric delegates to DeepEval optionally
+- [x] **AC-1** Failed eval rows can append to `data/train.jsonl`
+- [x] **AC-2** Shared `data/val.jsonl` for compile and eval
+- [x] **AC-3** GEPA custom metric may delegate to DeepEval `.measure()` optionally
+- [x] **AC-4** Story seed: GEPA metric delegates to DeepEval optionally
 
 ### Implementation tasks (build)
 
-- [ ] Document JSONL schemas for train/val
-- [ ] Helper to append failed rows from eval report
-- [ ] Example in `modules/metrics.py` template
+- [x] Document JSONL schemas for train/val
+- [x] Helper to append failed rows from eval report
+- [x] Example in `modules/metrics.py` template
 
 ### Verification (after build)
 
@@ -378,10 +379,12 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-3 | `tests/unit/eval/test_gepa_bridge.py::test_e6_s07_ac3_gepa_metric_delegates_deepeval` |
 | AC-4 | `tests/unit/eval/test_gepa_bridge.py::test_e6_s07_ac4_optional_deepeval_measure` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/eval/test_gepa_bridge.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/eval/test_gepa_bridge.py -v` passes (4 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Compile → eval → compile loop documented ([Journey C](../prd.md#73-journey-c--improve-after-failure-phase-2))
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Compile → eval → compile loop documented ([Journey C](../prd.md#73-journey-c--improve-after-failure-phase-2))
+- [x] Verification checklist complete; all ACs traced to tests
+
+**E6-S07 Done (2026-07-28):** `eval/gepa_bridge.py` — failed→train, shared val aliases, optional DeepEval GEPA metric; example `modules/metrics.py`; docs in testing.md.

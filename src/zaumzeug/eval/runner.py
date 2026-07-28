@@ -288,11 +288,17 @@ def load_valset_jsonl(path: Path) -> list[dict[str, Any]]:
                 f"got {type(row).__name__}",
                 path=path,
             )
-        if "input" not in row:
+        if "input" not in row and "question" not in row:
             raise EvalError(
-                f"Invalid JSONL in {path} at line {line_no}: missing required `input`",
+                f"Invalid JSONL in {path} at line {line_no}: missing required "
+                "`input` (or compile alias `question`)",
                 path=path,
             )
+        # Shared valset aliases (E6-S07): question→input, answer→expected_output.
+        if "input" not in row and "question" in row:
+            row = {**row, "input": row["question"]}
+        if "expected_output" not in row and "answer" in row:
+            row = {**row, "expected_output": row["answer"]}
         rows.append(row)
 
     if not rows:

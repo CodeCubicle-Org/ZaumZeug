@@ -165,6 +165,8 @@ production failure → trace → dataset row → zaumzeug eval (optional) → GE
 → zaumzeug deploy → zaumzeug serve --deploy
 ```
 
-**Implementation (E6-S05, 2026-07-28):** Trace export + `zaumzeug eval --trace` land in `eval/trace.py` / `eval/runner.py`. End-to-end Journey C walkthrough: [user-docs/guides/testing.md](../user-docs/guides/testing.md#trace--test-case-journey-c). Production auto-capture / dataset ratchet remains [E8-S03](../stories/epic-stories/60-story.md).
+**Implementation (E6-S05, 2026-07-28):** Trace export + `zaumzeug eval --trace` land in `eval/trace.py` / `eval/runner.py`. End-to-end Journey C walkthrough: [user-docs/guides/testing.md](../user-docs/guides/testing.md#trace--test-case-journey-c).
+
+**Implementation (E6-S07, 2026-07-28):** Failed eval → train via `eval/gepa_bridge.append_failed_eval_to_train`; shared val aliases; optional DeepEval GEPA metric. Docs: [testing.md — GEPA ↔ DeepEval bridge](../user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile). Production auto-capture / dataset ratchet remains [E8-S03](../stories/epic-stories/60-story.md).
 
 ---

@@ -95,6 +95,8 @@ Or set eval.framework: builtin for JSONL checks without DeepEval.
 
 **Implementation (E6-S06, 2026-07-28):** Mode C HTTP black-box — `zaumzeug eval --base-url [URL]` or `eval.base_url` posts to a running serve `POST /v1/chat/completions`; empty URL → `http://127.0.0.1:<serve.hayhooks.port>`. Same builtin / DeepEval metrics as Mode A. **Staging/debug only** — not a production gate. Tests: `tests/integration/eval/test_http_eval.py`.
 
+**Implementation (E6-S07, 2026-07-28):** GEPA ↔ DeepEval bridge — `eval/gepa_bridge.py` (`append_failed_eval_to_train`, shared val aliases, `deepeval_gepa_metric`); compile loads optional `agents/<agent>/modules/metrics.py`; train/val JSONL schemas documented in user-docs. Tests: `tests/unit/eval/test_gepa_bridge.py`.
+
 CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 `zaumzeug eval <name> --trace data/traces/run-001.jsonl` scores a captured turn (E6-S05).
 `zaumzeug eval <name> --base-url` (or `--base-url http://host:port`) black-boxes a running serve (E6-S06).
@@ -120,7 +122,7 @@ CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 | Multi-turn | `ConversationCompletenessMetric`, `KnowledgeRetentionMetric` |
 | MCP-heavy | `MCPTaskCompletionMetric`, `MCPUseMetric` |
 
-**GEPA ↔ DeepEval bridge:** compile then verify; failed rows → `data/train.jsonl`; shared `data/val.jsonl`; GEPA metric may call DeepEval `.measure()`.
+**GEPA ↔ DeepEval bridge:** compile then verify; failed rows → `data/train.jsonl`; shared `data/val.jsonl`; GEPA metric may call DeepEval `.measure()`. ✅ (E6-S07, 2026-07-28) — see `zaumzeug.eval.gepa_bridge` and [testing.md](../user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile).
 
 Requirements: [PRD E6](../prd.md#epic-e6--evaluation-and-quality-phase-2-optional).
 

@@ -5,6 +5,8 @@ Importing this package must not require ``deepeval``. Call
 The ``zaumzeug eval`` CLI lives in :mod:`zaumzeug.eval.runner` (E6-S02).
 Trace export / ``--trace`` scoring lives in :mod:`zaumzeug.eval.trace` (E6-S05).
 Mode C HTTP black-box (``--base-url``) lives in the eval runner (E6-S06).
+GEPA ↔ DeepEval bridge (failed rows → train, optional ``.measure()``) lives in
+:mod:`zaumzeug.eval.gepa_bridge` (E6-S07).
 """
 
 from __future__ import annotations

@@ -25,6 +25,8 @@ DSPy and GEPA never run in production. End-user chat is never a GEPA optimizatio
 
 **Implementation (E4-S02b, 2026-07-28):** GEPA optimize + immutable artifacts (`invoke_gepa`, `StubGEPA` for mock/CI).
 
+**Implementation (E6-S07, 2026-07-28):** Optional `agents/<agent>/modules/metrics.py` auto-loaded by `invoke_gepa` (`metric` / `gepa_metric`); may wrap DeepEval `.measure()` via `eval/gepa_bridge.deepeval_gepa_metric`. Failed eval → train helper: `append_failed_eval_to_train`. Docs: [testing.md — GEPA ↔ DeepEval bridge](../user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile).
+
 **Implementation (E4-S03a, 2026-07-28):** Export contract (`compile/export.py`) — `dump_state()` → Haystack `prompts/system.md`, optional `input_rewrite.md`, `agent.json`, `artifact-manifest.json`. GEPA optimizes the **template** only; runtime applies fixed exported text.
 
 **Implementation (E4-S03b, 2026-07-28):** Runtime preprocess (`runtime/preprocess.py`) — load manifest `paths.input_rewrite`, apply Jinja/`str.format`/plain prepend before `Agent.run` on serve and `zaumzeug run`.
