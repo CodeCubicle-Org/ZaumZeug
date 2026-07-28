@@ -5,7 +5,7 @@
 | **Document** | Epic E6 user stories |
 | **File** | `docs/stories/05-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E6-S04 done) |
+| **Last modified** | 2026-07-28 (E6-S05 done) |
 | **Status** | In progress |
 | **Build order** | **5 of 8** (before E5 — deploy eval gate needs `zaumzeug eval`) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -29,7 +29,8 @@
 2. **E6-S02** — `zaumzeug eval` *(blocks E5-S06)* ✅ (2026-07-28)
 3. **E6-S03** — Eval gate cross-reference ✅ (2026-07-28; owner [E5-S06](../06-epic.md#e5-s06-deploy-eval-gate) ✅)
 4. **E6-S04** — `eval/` pytest scaffold ✅ (2026-07-28)
-5. **E6-S05** → **E6-S07** — trace, HTTP mode, GEPA bridge
+5. **E6-S05** — Trace → test case ✅ (2026-07-28)
+6. **E6-S06** → **E6-S07** — HTTP mode, GEPA bridge
 
 ---
 
@@ -244,6 +245,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E6.5 |
 | **Persona** | Harness developer |
 | **Priority** | P2 |
+| **Status** | Done (2026-07-28) |
 
 ### User story
 
@@ -256,14 +258,14 @@ As a **harness developer**, I want to score a production trace as a test case, s
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Haystack trace export to JSONL under `data/traces/`
-- [ ] **AC-2** `zaumzeug eval --trace <path>` scores single trace
-- [ ] **AC-3** Trace format documented for append to valset
+- [x] **AC-1** Haystack trace export to JSONL under `data/traces/`
+- [x] **AC-2** `zaumzeug eval --trace <path>` scores single trace
+- [x] **AC-3** Trace format documented for append to valset
 
 ### Implementation tasks (build)
 
-- [ ] Implement trace export helper
-- [ ] Add `--trace` CLI flag to eval command
+- [x] Implement trace export helper
+- [x] Add `--trace` CLI flag to eval command
 
 ### Verification (after build)
 
@@ -275,13 +277,15 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-2 | `tests/unit/eval/test_trace.py::test_e6_s05_ac2_eval_trace_flag_scores` |
 | AC-3 | **manual:** user-docs documents trace JSONL schema for valset append |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/eval/test_trace.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/eval/test_trace.py -v` passes (4 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Journey C documented end-to-end in user-docs
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Journey C documented end-to-end in user-docs
+- [x] Verification checklist complete; all ACs traced to tests
+
+**E6-S05 Done (2026-07-28):** `eval/trace.py` export to `data/traces/`; `zaumzeug eval --trace`; Journey C in testing.md.
 
 ---
 

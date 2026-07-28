@@ -2,6 +2,9 @@
 
 Eval is a **dev-only** path: it is never imported or invoked from ``serve`` /
 production Hayhooks wiring (PRD NG3 adjacent).
+
+``--trace`` (E6-S05) scores a captured Haystack JSONL turn without re-running
+the agent — see :mod:`zaumzeug.eval.trace`.
 """
 
 from __future__ import annotations
@@ -27,8 +30,7 @@ from zaumzeug.config import (
 from zaumzeug.config.harness_root import harness_dir as resolve_harness_dir
 from zaumzeug.doctor.project import find_project_root
 from zaumzeug.eval import DeepEvalMissingError, require_deepeval
-from zaumzeug.runtime.factory import RuntimeFactoryError, build_agent_bundle
-from zaumzeug.runtime.model_router import ModelRouter, ModelRouterError
+from zaumzeug.eval.trace import TraceError, load_trace_jsonl
 from zaumzeug.runtime.factory import RuntimeFactoryError, build_agent_bundle
 from zaumzeug.runtime.model_router import ModelRouter, ModelRouterError
 from zaumzeug.runtime.preprocess import preprocess_openai_messages
@@ -307,15 +309,32 @@ def _build_deepeval_metric(
         return cls(threshold=metric_cfg.threshold)
 
 
+def _row_actual_output(
+    row: Mapping[str, Any],
+    agent_runner: AgentRunner | None,
+) -> str:
+    """Resolve actual output: captured trace field, or live agent run."""
+    if agent_runner is None:
+        if "actual_output" not in row:
+            raise EvalError(
+                "Trace/valset row missing `actual_output` and no agent runner "
+                "was provided",
+                suggestion="Export traces with export_haystack_trace, or omit "
+                "--trace to run the agent",
+            )
+        return str(row["actual_output"])
+    return agent_runner(str(row["input"]))
+
+
 def _run_builtin_cases(
     rows: list[dict[str, Any]],
-    agent_runner: AgentRunner,
+    agent_runner: AgentRunner | None,
 ) -> list[EvalCaseResult]:
     cases: list[EvalCaseResult] = []
     for index, row in enumerate(rows):
         user_input = str(row["input"])
         expected = _expected_output(row)
-        actual = agent_runner(user_input)
+        actual = _row_actual_output(row, agent_runner)
         passed = builtin_match(actual, expected)
         detail = ""
         if not passed:
@@ -352,7 +371,7 @@ def _metric_passed(metric: Any) -> bool:
 
 def _run_deepeval_cases(
     rows: list[dict[str, Any]],
-    agent_runner: AgentRunner,
+    agent_runner: AgentRunner | None,
     eval_config: EvalConfig,
 ) -> list[EvalCaseResult]:
     require_deepeval()
@@ -374,7 +393,7 @@ def _run_deepeval_cases(
     for index, row in enumerate(rows):
         user_input = str(row["input"])
         expected = _expected_output(row)
-        actual = agent_runner(user_input)
+        actual = _row_actual_output(row, agent_runner)
         test_case_kwargs: dict[str, Any] = {
             "input": user_input,
             "actual_output": actual,
@@ -414,6 +433,16 @@ def _run_deepeval_cases(
     return cases
 
 
+def _resolve_trace_path(harness_dir: Path, trace_ref: str | Path) -> Path:
+    path = Path(trace_ref)
+    if path.is_absolute():
+        return path
+    candidate = (Path.cwd() / path).resolve()
+    if candidate.is_file():
+        return candidate
+    return (harness_dir / path).resolve()
+
+
 def run_eval(
     harness_name: str,
     *,
@@ -422,11 +451,15 @@ def run_eval(
     project_root: Path | str | None = None,
     deploy: bool = False,
     agent_runner: AgentRunner | None = None,
+    trace: Path | str | None = None,
 ) -> EvalResult:
     """Run harness eval (builtin JSONL or DeepEval) for *harness_name*.
 
     *framework* overrides ``eval.framework`` for one run (CLI ``--framework``).
     Pass *agent_runner* in tests to avoid building a live Haystack agent.
+
+    When *trace* is set (CLI ``--trace``), load that JSONL and score captured
+    ``actual_output`` without re-running the agent (E6-S05).
     """
     root = Path(project_root) if project_root is not None else find_project_root()
     harness_path = resolve_harness_dir(root, harness_name, deploy=deploy)
@@ -485,32 +518,47 @@ def run_eval(
         ) from exc
 
     resolved_agent = (agent_name or entry.agent_name).strip()
-    valset_path = _resolve_valset_path(harness_path, eval_config.valset)
-    rows = load_valset_jsonl(valset_path)
 
-    runner = agent_runner
-    if runner is None:
-        harness_models: Path | None = None
-        if harness_config.models:
-            harness_models = Path(harness_config.models)
+    score_from_trace = trace is not None
+    if score_from_trace:
+        trace_path = _resolve_trace_path(harness_path, trace)
         try:
-            runner = _default_agent_runner(
-                project_root=root,
-                harness_dir=harness_path,
-                harness_name=harness_name,
-                agent_name=resolved_agent,
-                harness_models=harness_models,
-            )
-        except (
-            AgentResolutionError,
-            RuntimeFactoryError,
-            ModelRouterError,
-            ConfigValidationError,
-        ) as exc:
+            rows = load_trace_jsonl(trace_path)
+        except TraceError as exc:
             raise EvalError(
-                f"Harness '{harness_name}' agent '{resolved_agent}': {exc}",
+                str(exc),
+                path=exc.path,
                 harness_name=harness_name,
+                suggestion=exc.suggestion,
             ) from exc
+        runner: AgentRunner | None = None
+    else:
+        valset_path = _resolve_valset_path(harness_path, eval_config.valset)
+        rows = load_valset_jsonl(valset_path)
+
+        runner = agent_runner
+        if runner is None:
+            harness_models: Path | None = None
+            if harness_config.models:
+                harness_models = Path(harness_config.models)
+            try:
+                runner = _default_agent_runner(
+                    project_root=root,
+                    harness_dir=harness_path,
+                    harness_name=harness_name,
+                    agent_name=resolved_agent,
+                    harness_models=harness_models,
+                )
+            except (
+                AgentResolutionError,
+                RuntimeFactoryError,
+                ModelRouterError,
+                ConfigValidationError,
+            ) as exc:
+                raise EvalError(
+                    f"Harness '{harness_name}' agent '{resolved_agent}': {exc}",
+                    harness_name=harness_name,
+                ) from exc
 
     if resolved_framework == "builtin":
         cases = _run_builtin_cases(rows, runner)

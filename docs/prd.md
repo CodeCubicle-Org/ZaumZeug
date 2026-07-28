@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-28 (E6-S04 `eval/` pytest scaffold)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S04 **Done**; E5-S06 **Done** early with E6-S03; next E6-S05 / E5 packager body)  
+**Last updated:** 2026-07-28 (E6-S05 Trace → test case)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S05 **Done**; E5-S06 **Done** early with E6-S03; next E6-S06 / E5 packager body)  
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -107,6 +107,8 @@ zaumzeug init → edit harness.yaml → zaumzeug compile → zaumzeug deploy
 production trace → add to valset → zaumzeug eval (optional) → zaumzeug compile
 → zaumzeug deploy → redeploy
 ```
+
+**Implementation (E6-S05, 2026-07-28):** Manual/API export via `zaumzeug.eval.trace.export_haystack_trace` → `data/traces/`; score with `zaumzeug eval --trace`; append with `append_trace_to_valset`. Walkthrough: [user-docs/guides/testing.md](user-docs/guides/testing.md#trace--test-case-journey-c). Production auto-capture remains [E8-S03](stories/epic-stories/60-story.md).
 
 ### 7.4 User installation guide (content for README — Phase 1)
 
@@ -350,7 +352,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E6.2 | `zaumzeug eval` | **Done** (E6-S02, 2026-07-28). **AC:** Behavior per [Architecture §6.3](architecture/05-configuration.md#63-zaumzeug-eval-frameworks): `eval.framework: deepeval` requires `[eval]` extra; `eval.framework: builtin` runs JSONL checks without DeepEval; missing `eval` section → clear error. |
 | E6.3 | Eval gate on deploy | **Done** (E6-S03, 2026-07-28) — covered by E5.6; packager invokes `run_eval` when gate is `warn`/`block`; shared tests in `tests/unit/deploy/test_eval_gate.py`. |
 | E6.4 | `eval/` pytest scaffold | **Done** (E6-S04, 2026-07-28). **AC:** Optional `usr-harnesses/<name>/eval/test_*.py` runs via `deepeval test run`; custom metrics in `eval/metrics.py`; `eval/` excluded from deploy (`copy_rules`); `zaumzeug init --with-eval`. |
-| E6.5 | Trace → test case | **AC:** Haystack trace export to JSONL (`data/traces/`); score single trace with `zaumzeug eval --trace`. |
+| E6.5 | Trace → test case | **Done** (E6-S05, 2026-07-28). **AC:** Haystack trace export to JSONL (`data/traces/`); score single trace with `zaumzeug eval --trace`; schema documented for valset append. |
 | E6.6 | HTTP black-box eval | **AC:** Optional Mode C — eval against running `zaumzeug serve` via `/v1/chat/completions` (staging/debug). |
 | E6.7 | GEPA ↔ DeepEval bridge | **AC:** Failed eval rows can append to `data/train.jsonl`; shared `data/val.jsonl`; GEPA custom metric may delegate to DeepEval `.measure()`. |
 
@@ -417,7 +419,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S04](stories/epic-stories/37-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); next [E6-S05](stories/epic-stories/38-story.md) |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S05](stories/epic-stories/38-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); next [E6-S06](stories/epic-stories/39-story.md) |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A | E8 |
 

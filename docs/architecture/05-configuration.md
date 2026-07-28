@@ -91,7 +91,10 @@ Or set eval.framework: builtin for JSONL checks without DeepEval.
 
 **Implementation (E6-S04, 2026-07-28):** Optional harness-level DeepEval pytest under `usr-harnesses/<name>/eval/` — `zaumzeug init --with-eval` + example scaffold; run with `deepeval test run`. Custom metrics in `eval/metrics.py`. Excluded from deploy via `deploy/copy_rules.py`. See [§3.3](02-repository-and-layout.md#33-harness-folder-layout) and [user-docs/guides/testing.md](../user-docs/guides/testing.md#deepeval-pytest-scaffold).
 
+**Implementation (E6-S05, 2026-07-28):** `eval/trace.py` exports Haystack runs to `data/traces/*.jsonl`; `zaumzeug eval --trace <path>` scores without re-running the agent. Journey C docs: [testing.md](../user-docs/guides/testing.md#trace--test-case-journey-c).
+
 CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
+`zaumzeug eval <name> --trace data/traces/run-001.jsonl` scores a captured turn (E6-S05).
 
 **`eval` config fields (deepeval):**
 

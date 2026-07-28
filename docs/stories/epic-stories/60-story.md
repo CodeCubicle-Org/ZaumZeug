@@ -23,7 +23,7 @@
 | **Feature** | E8.3 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
-| **Prerequisites** | [E6-S05](38-story.md#e6-s05-trace-test-case) |
+| **Prerequisites** | [E6-S05](38-story.md#e6-s05-trace-test-case) ✅ (2026-07-28) |
 
 ### User story
 

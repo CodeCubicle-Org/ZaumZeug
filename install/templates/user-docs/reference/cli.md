@@ -195,10 +195,10 @@ HARNESS_LOG_LEVEL=DEBUG zaumzeug compile example
 
 ## `zaumzeug eval`
 
-Run harness regression checks from the optional `eval:` block in `harness.yaml` (Architecture §6.3 / E6-S02). Dev-only — never invoked from `zaumzeug serve`.
+Run harness regression checks from the optional `eval:` block in `harness.yaml` (Architecture §6.3 / E6-S02). Dev-only — never invoked from `zaumzeug serve`. Score a captured Haystack turn with `--trace` (E6-S05) without re-running the agent.
 
 ```bash
-zaumzeug eval <harness> [--framework builtin|deepeval] [--agent NAME] [--verbose]
+zaumzeug eval <harness> [--framework builtin|deepeval] [--agent NAME] [--trace PATH] [--verbose]
 ```
 
 | Flag / arg | Description |
@@ -206,9 +206,10 @@ zaumzeug eval <harness> [--framework builtin|deepeval] [--agent NAME] [--verbose
 | `<harness>` | Harness name under `usr-harnesses/` |
 | `--framework` | Override `eval.framework` for this run (`builtin` or `deepeval`) |
 | `--agent NAME` | Evaluate a single agent (default: workflow entry agent) |
+| `--trace PATH` | Score a captured JSONL trace (`data/traces/…`); uses `actual_output` from the file |
 | `--verbose` | Enable SDK and Haystack structured debug logging |
 
-**Requires:** an `eval:` section in `harness.yaml` with at least `valset` (JSONL of `input` / optional `expected_output`). Missing `eval:` exits with a clear error.
+**Requires:** an `eval:` section in `harness.yaml` with at least `valset` (JSONL of `input` / optional `expected_output`). Missing `eval:` exits with a clear error. With `--trace`, the valset file is skipped; metrics/framework still come from `eval:`.
 
 **Frameworks:**
 
@@ -225,9 +226,12 @@ zaumzeug eval example --framework builtin
 # DeepEval metrics (needs: pip install "zaumzeug[eval]")
 zaumzeug eval example
 zaumzeug eval example --agent researcher --verbose
+
+# Score one captured production/local failure (Journey C)
+zaumzeug eval example --framework builtin --trace data/traces/run-001.jsonl
 ```
 
-See [Testing](../guides/testing.md) for valset layout and optional `deepeval test run`.
+See [Testing — Trace → test case](../guides/testing.md#trace--test-case-journey-c) for the JSONL schema and valset append.
 
 ---
 
@@ -281,7 +285,7 @@ zaumzeug doctor [<harness>] [--deploy] [--verbose] [--json]
 | `--json` | Emit machine-readable JSON report |
 | `--deploy` | Validate deploy bundle under `deploy/` |
 
-**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig` and `deploy:` / `DeployConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. Warnings (non-blocking): MCP without `uv`, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02) and `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06).
+**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig` and `deploy:` / `DeployConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. Warnings (non-blocking): MCP without `uv`, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02), `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06), and `zaumzeug eval --trace` for captured failures (E6-S05).
 
 Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack debug logs on serve, compile, eval, or deploy, use `--verbose` on those commands or `HARNESS_LOG_LEVEL=DEBUG`.
 
@@ -289,5 +293,5 @@ Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack
 
 ## Related
 
-- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, deploy eval gates
+- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, `--trace` / Journey C, deploy eval gates
 - [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml` and agent routing

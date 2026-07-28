@@ -165,7 +165,7 @@ As a **harness developer**, I want production traces to feed back into datasets,
 
 - [PRD E8.3](../prd.md#epic-e8--rag-and-production-hardening-phase-4)
 - [Architecture §5.5](../architecture/04-data-flows.md#55-continuous-improvement-loop)
-- [E6-S05 — Trace export](../05-epic.md#e6-s05-trace-test-case)
+- [E6-S05 — Trace export](../05-epic.md#e6-s05-trace-test-case) ✅ (2026-07-28)
 
 ### Acceptance criteria
 

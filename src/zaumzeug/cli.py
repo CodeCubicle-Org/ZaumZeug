@@ -127,7 +127,7 @@ def _run_command(args: argparse.Namespace) -> int:
 
 
 def _eval_command(args: argparse.Namespace) -> int:
-    """Run harness eval (builtin JSONL or DeepEval) — E6-S02."""
+    """Run harness eval (builtin JSONL or DeepEval) — E6-S02; ``--trace`` E6-S05."""
     configure_logging(verbose=args.verbose)
     from zaumzeug.eval.runner import EvalError, format_eval_result, run_eval
 
@@ -136,6 +136,7 @@ def _eval_command(args: argparse.Namespace) -> int:
             args.harness_name,
             framework=args.framework,
             agent_name=args.agent,
+            trace=args.trace,
         )
     except EvalError as exc:
         print(str(exc), file=sys.stderr)
@@ -345,6 +346,15 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="NAME",
         help="evaluate a single agent (default: workflow entry agent)",
+    )
+    eval_cmd.add_argument(
+        "--trace",
+        default=None,
+        metavar="PATH",
+        help=(
+            "score a captured Haystack JSONL trace under data/traces/ "
+            "(does not re-run the agent)"
+        ),
     )
     eval_cmd.add_argument(
         "--verbose",
