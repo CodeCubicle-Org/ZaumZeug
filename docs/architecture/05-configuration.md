@@ -164,7 +164,9 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E4-S01, 2026-07-28):** `zaumzeug.compile.module_loader.load_dspy_module()` consumes `resolve_agent_compile()` and instantiates the DSPy `Module` named by `compile.module` (`module.path:ClassName`). Import errors include the expected file under `agents/<name>/modules/`. Serve/runtime do not import `zaumzeug.compile`. Tests: `tests/unit/compile/test_module_loader.py`.
 
-**Implementation (E4-S02a, 2026-07-28):** Phase 2 `CompileConfig` on `agent.yaml` (`src/zaumzeug/config/schemas.py`). `zaumzeug compile <harness> [--agent]` via `compile/runner.py` validates schema, loads the DSPy module, and preflights task/reflection LM ids against the merged registry + `.env` (`compile/gepa_runner.preflight_compile_lms`). GEPA is not invoked yet (E4-S02b). Tests: `pytest … -k e4_s02a` (4 passed, 0 skipped).
+**Implementation (E4-S02a, 2026-07-28):** Phase 2 `CompileConfig` on `agent.yaml` (`src/zaumzeug/config/schemas.py`). `zaumzeug compile <harness> [--agent]` via `compile/runner.py` validates schema, loads the DSPy module, and preflights task/reflection LM ids against the merged registry + `.env` (`compile/gepa_runner.preflight_compile_lms`).
+
+**Implementation (E4-S02b, 2026-07-28):** `invoke_gepa()` runs GEPA, wires LiteLLM strings, respects budget, writes `artifacts/<run_id>/` + `current`. Tests: `pytest … -k e4_s02` (8 passed).
 
 Example Phase 2 `compile` section:
 
@@ -218,6 +220,13 @@ agent:
   system_prompt: prompts/system.md
 tools:
   builtin: [web_fetch]
+compile:                                 # Phase 2 — GEPA (E4-S02b)
+  module: modules.researcher:ResearchModule
+  task_model_id: mock
+  reflection_model_id: mock
+  trainset: data/train.jsonl
+  valset: data/val.jsonl
+  auto: light
 ```
 
 **`usr-harnesses/example/agents/researcher/agents-models.yaml`:**
@@ -242,7 +251,7 @@ stages:
   - agent: researcher
 ```
 
-**First-run path:** `default_model_id: mock` on the entry agent allows `zaumzeug serve example` and CI smoke **without** live API keys ([PRD Journey A](../prd.md#71-journey-a--config-only-harness-phase-1)). After first `zaumzeug compile example` (or `--workflow-diagram-only`), the harness gains `docs/workflow-diagram.md` for documentation and deploy.
+**First-run path:** `default_model_id: mock` on the entry agent allows `zaumzeug serve example` and CI smoke **without** live API keys ([PRD Journey A](../prd.md#71-journey-a--config-only-harness-phase-1)). `zaumzeug compile example` also works offline with mock → stub GEPA (writes `artifacts/<run_id>/`); live task/reflection models need API keys in `.env`. Workflow diagram regeneration remains [E4-S08](../stories/epic-stories/33-story.md).
 
 User-facing explanation of `workflow.yaml`, pipeline stages, and agent-internal control flow: [user-docs/guides/multi-agent-workflow.md](../user-docs/guides/multi-agent-workflow.md).
 

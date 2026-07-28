@@ -78,6 +78,8 @@ At `zaumzeug compile <harness> --agent <agent-name>` (offline):
 
 **Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile` wires the loader + LM preflight (`compile/runner.py`, `compile/gepa_runner.py`). Fails fast on missing `compile.module`, unimportable modules, or missing registry/`.env` keys for task/reflection LMs — before any GEPA call.
 
+**Implementation (E4-S02b, 2026-07-28):** After preflight, `invoke_gepa()` runs `dspy.GEPA` (stub when `provider: mock` or injected for CI), writes `agents/<name>/artifacts/<run_id>/`, and updates `artifacts/current` (symlink or copy).
+
 ### 5.3 Artifact layout
 
 Per-agent under `agents/<agent-name>/artifacts/`:

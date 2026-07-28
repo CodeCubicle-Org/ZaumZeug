@@ -148,7 +148,7 @@ zaumzeug run example --from reviewer --input "Check the draft"
 
 ## `zaumzeug compile`
 
-Validate Phase 2 compile config, load DSPy modules, and preflight task/reflection LM ids (GEPA optimization lands in E4-S02b).
+Run offline GEPA per agent: validate Phase 2 compile config, load DSPy modules, preflight task/reflection LM ids, optimize, and write artifacts.
 
 ```bash
 zaumzeug compile <harness> [--agent NAME] [--verbose]
@@ -161,6 +161,10 @@ zaumzeug compile <harness> [--agent NAME] [--verbose]
 | `--verbose` | Enable SDK and Haystack structured debug logging |
 
 **Requires per agent:** a Phase 2 `compile:` block in `agents/<name>/agent.yaml` with `compile.module` (`module.path:ClassName`). Optional: `task_model_id`, `reflection_model_id`, train/val paths, GEPA budget (`auto` / `budget` / `max_metric_calls` / `max_full_evals`).
+
+**API keys:** Live task/reflection models need provider keys in `.env` (or the environment) before GEPA runs — the same keys `zaumzeug doctor` checks. Missing registry ids or keys fail fast with an actionable suggestion. The shipped `example` harness uses `provider: mock` and a stub GEPA path so you can exercise compile offline without keys; switch to live model ids in `agents-models.yaml` for real optimization.
+
+**Artifacts:** Each run writes immutable `agents/<name>/artifacts/<run_id>/` and updates `artifacts/current` (symlink when possible, otherwise a copy). Full Haystack export (`artifact-manifest.json`, prompts) lands in a later story (E4-S03a).
 
 **Fail-fast (before GEPA):** missing `compile.module`, unimportable module, model id absent from the merged registry, or missing provider API keys in `.env` / the environment.
 

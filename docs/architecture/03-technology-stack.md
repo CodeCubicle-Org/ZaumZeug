@@ -30,7 +30,9 @@ GEPA requires **task LM** and **reflection LM** as separate config roles (LiteLL
 
 **Implementation (E4-S01, 2026-07-28):** DSPy enters the SDK only via `zaumzeug.compile.module_loader` (lazy import). Serve/runtime keep zero DSPy imports (verified by unit tests).
 
-**Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile` loads modules and preflights LMs without invoking GEPA. Full GEPA path → E4-S02b.
+**Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile` loads modules and preflights LMs without invoking GEPA.
+
+**Implementation (E4-S02b, 2026-07-28):** `invoke_gepa()` runs `dspy.GEPA` (or `StubGEPA` for mock/CI), wires LiteLLM strings from the agent registry, respects budget config, and writes `artifacts/<run_id>/` + `artifacts/current`.
 
 ### 4.3 Languages and key packages
 

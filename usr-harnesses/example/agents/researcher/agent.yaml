@@ -4,3 +4,10 @@ agent:
   system_prompt: prompts/system.md
 tools:
   builtin: [web_fetch]
+compile:
+  module: modules.researcher:ResearchModule
+  task_model_id: mock
+  reflection_model_id: mock
+  trainset: data/train.jsonl
+  valset: data/val.jsonl
+  auto: light

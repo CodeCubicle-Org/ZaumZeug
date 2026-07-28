@@ -1,6 +1,7 @@
-"""``zaumzeug compile`` orchestration — validate, load modules, preflight LMs.
+"""``zaumzeug compile`` orchestration — validate, load modules, run GEPA.
 
-E4-S02a stops after successful preflight (no GEPA). E4-S02b adds the GEPA run.
+E4-S02a: schema + module load + LM preflight.
+E4-S02b: invoke GEPA and write ``artifacts/<run_id>/`` + ``current``.
 """
 
 from __future__ import annotations
@@ -9,7 +10,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from zaumzeug.compile.gepa_runner import CompileLmPlan, GepaPreflightError, preflight_compile_lms
+from zaumzeug.compile.gepa_runner import (
+    CompileLmPlan,
+    GepaPreflightError,
+    GepaRunError,
+    GepaRunResult,
+    invoke_gepa,
+    preflight_compile_lms,
+)
 from zaumzeug.compile.module_loader import ModuleLoaderError, load_dspy_module_from_resolution
 from zaumzeug.config import (
     AgentResolutionError,
@@ -51,18 +59,21 @@ class CompileError(RuntimeError):
 
 @dataclass(slots=True)
 class CompileAgentResult:
-    """Per-agent compile preflight outcome (E4-S02a — no GEPA artifacts yet)."""
+    """Per-agent compile outcome including GEPA artifacts (E4-S02b)."""
 
     agent_name: str
     module_ref: str
     lm_plan: CompileLmPlan
     module_instance: Any
     gepa_invoked: bool = False
+    run_id: str | None = None
+    artifact_dir: Path | None = None
+    gepa_result: GepaRunResult | None = None
 
 
 @dataclass(slots=True)
 class CompileResult:
-    """Outcome of ``zaumzeug compile`` preflight for one harness."""
+    """Outcome of ``zaumzeug compile`` for one harness."""
 
     harness_name: str
     harness_dir: Path
@@ -79,11 +90,13 @@ def run_compile(
     agent_name: str | None = None,
     project_root: Path | str | None = None,
     deploy: bool = False,
+    gepa_cls: Any | None = None,
+    stub_gepa: bool | None = None,
 ) -> CompileResult:
-    """Validate Phase 2 compile config, load DSPy modules, preflight LM ids.
+    """Validate Phase 2 compile config, load DSPy modules, run GEPA, write artifacts.
 
-    Does **not** invoke GEPA (E4-S02b). Failures raise :class:`CompileError`
-    before any optimizer call.
+    Failures raise :class:`CompileError` before or during the optimizer call.
+    Pass *gepa_cls* (or ``stub_gepa=True``) to inject a CI stub without live API keys.
     """
     root = Path(project_root) if project_root is not None else find_project_root()
     harness_path = resolve_harness_dir(root, harness_name, deploy=deploy)
@@ -180,13 +193,35 @@ def run_compile(
                 suggestion=exc.suggestion,
             ) from exc
 
+        agent_dir = resolution.agent_yaml_path.parent
+        try:
+            gepa_result = invoke_gepa(
+                module=module_instance,
+                resolution=resolution,
+                lm_plan=lm_plan,
+                agent_dir=agent_dir,
+                gepa_cls=gepa_cls,
+                stub=stub_gepa,
+            )
+        except GepaRunError as exc:
+            raise CompileError(
+                str(exc),
+                path=exc.path,
+                harness_name=exc.harness_name or harness_name,
+                agent_name=exc.agent_name or name,
+                suggestion=exc.suggestion,
+            ) from exc
+
         results.append(
             CompileAgentResult(
                 agent_name=name,
                 module_ref=resolution.compile_module,
                 lm_plan=lm_plan,
-                module_instance=module_instance,
-                gepa_invoked=False,
+                module_instance=gepa_result.optimized_module,
+                gepa_invoked=True,
+                run_id=gepa_result.run_id,
+                artifact_dir=gepa_result.artifact_dir,
+                gepa_result=gepa_result,
             )
         )
 
@@ -248,16 +283,25 @@ def _compile_agent_targets(
 
 
 def format_compile_result(result: CompileResult) -> str:
-    """Human-readable preflight summary for the CLI."""
+    """Human-readable compile summary for the CLI."""
     lines = [
-        f"Compile preflight OK for harness '{result.harness_name}' "
+        f"Compile OK for harness '{result.harness_name}' "
         f"({len(result.agents)} agent(s)).",
-        "GEPA optimization is not run yet (E4-S02b).",
     ]
     for agent in result.agents:
+        stub = ""
+        if agent.gepa_result is not None and agent.gepa_result.stubbed:
+            stub = " (stub GEPA)"
+        artifact = (
+            str(agent.artifact_dir)
+            if agent.artifact_dir is not None
+            else "(no artifact)"
+        )
         lines.append(
             f"  - {agent.agent_name}: module={agent.module_ref} "
             f"task={agent.lm_plan.task_model_id} "
-            f"reflection={agent.lm_plan.reflection_model_id}"
+            f"reflection={agent.lm_plan.reflection_model_id} "
+            f"run_id={agent.run_id}{stub}"
         )
+        lines.append(f"    artifacts: {artifact}")
     return "\n".join(lines)

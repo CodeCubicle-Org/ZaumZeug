@@ -1,0 +1,3 @@
+{"question": "What is ZaumZeug?", "answer": "harness"}
+{"question": "Which library runs agents at serve time?", "answer": "Haystack"}
+{"question": "What optimizes prompts offline?", "answer": "GEPA"}

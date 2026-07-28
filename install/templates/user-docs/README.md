@@ -28,4 +28,4 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 - **`zaumzeug init <name>`** — scaffold a new harness under `usr-harnesses/`
 - **`zaumzeug serve <harness>`** — interactive chat with the workflow **entry** agent
 - **`zaumzeug run <harness>`** — run serial workflow stages in order
-- **`zaumzeug compile <harness>`** — validate Phase 2 compile config + load DSPy modules + LM preflight (E4-S02a); GEPA optimization and workflow diagram follow in later E4 stories
+- **`zaumzeug compile <harness>`** — run GEPA per agent (Phase 2); writes `artifacts/<run_id>/` + `current`; live task/reflection models need API keys in `.env` (example uses mock/stub offline)

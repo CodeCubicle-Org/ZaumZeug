@@ -94,7 +94,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 - `zaumzeug.compile.module_loader.load_dspy_module()` resolves `compile.module` via `resolve_agent_compile`, prepends `agents/<name>/` to `sys.path`, imports `module.path:ClassName`, and requires a `dspy.Module` subclass.
 - Path segments reject traversal (`..`, separators); post-import `__file__` must stay under the agent directory.
-- DSPy is imported lazily inside the loader only; `serve/` and `runtime/` stay free of `dspy` / `gepa` / `zaumzeug.compile` (AST-checked). CLI `compile` wire-up completed in [E4-S02a](27.1-story.md) (2026-07-28).
+- DSPy is imported lazily inside the loader only; `serve/` and `runtime/` stay free of `dspy` / `gepa` / `zaumzeug.compile` (AST-checked). CLI `compile` + GEPA runner completed in [E4-S02a](27.1-story.md) / [E4-S02b](27.2-story.md) (2026-07-28).
 - Public exports: `load_dspy_module`, `load_dspy_module_from_resolution`, `parse_compile_module_ref`, `ModuleLoaderError` from `zaumzeug.compile`.
 
 ---

@@ -108,6 +108,9 @@ def test_e3_s04_ac6_install_template_mirrors_example() -> None:
         "agents/researcher/agent.yaml",
         "agents/researcher/agents-models.yaml",
         "agents/researcher/prompts/system.md",
+        "agents/researcher/modules/researcher.py",
+        "agents/researcher/data/train.jsonl",
+        "agents/researcher/data/val.jsonl",
     ]
     for relative in required:
         assert (TEMPLATE_HARNESS / relative).is_file(), relative

@@ -5,8 +5,8 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E4-S02a done; next E4-S02b) |
-| **Status** | In progress (E4-S01 + E4-S02a done) |
+| **Last modified** | 2026-07-28 (E4-S02b done; next E4-S03a) |
+| **Status** | In progress (E4-S01–S02b done) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -27,7 +27,7 @@
 ### Story implementation order (within this epic)
 
 1. **E4-S01** — DSPy module loader ✅ (2026-07-28)
-2. **E4-S02a** → **E4-S02b** — Compile schema + GEPA runner (E4-S02a ✅ 2026-07-28)
+2. **E4-S02a** → **E4-S02b** — Compile schema + GEPA runner ✅ (2026-07-28)
 3. **E4-S03a** → **E4-S03b** — Export contract + runtime preprocess
 4. **E4-S05** — Post-compile serve uses artifact
 5. **E4-S06** — Compile `--dry-run`
@@ -99,13 +99,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 ## E4-S02 — GEPA compile *(split into sub-stories)*
 
-> **Canonical story files:** [E4-S02a — schema/CLI](epic-stories/27.1-story.md) ✅ (2026-07-28) · [E4-S02b — GEPA runner](epic-stories/27.2-story.md). Diagram generation: [E4-S08](#e4-s08-workflow-diagram-at-compile) *(separate; not in S02b)*.
+> **Canonical story files:** [E4-S02a — schema/CLI](epic-stories/27.1-story.md) ✅ (2026-07-28) · [E4-S02b — GEPA runner](epic-stories/27.2-story.md) ✅ (2026-07-28). Diagram generation: [E4-S08](#e4-s08-workflow-diagram-at-compile) *(separate; not in S02b)*.
 
 See [epic-stories/27.1-story.md](epic-stories/27.1-story.md) and [27.2-story.md](epic-stories/27.2-story.md) for full AC → test mapping.
 
-**E4-S02a Done (2026-07-28):** Phase 2 `CompileConfig`; `zaumzeug compile <harness> [--agent]` validates config, loads DSPy modules, preflights task/reflection LM registry + `.env`; no GEPA yet. Tests: `pytest … -k e4_s02a` (4 passed, 0 skipped).
+**E4-S02a Done (2026-07-28):** Phase 2 `CompileConfig`; `zaumzeug compile <harness> [--agent]` validates config, loads DSPy modules, preflights task/reflection LM registry + `.env` (GEPA invoke was out of scope for S02a). Tests: `pytest … -k e4_s02a` (4 passed, 0 skipped).
 
-**E4-S02b (next):** run `dspy.GEPA`, write `artifacts/<run_id>/` + `current`; **AC-5** (task/reflection LM from registry wired into GEPA).
+**E4-S02b Done (2026-07-28):** `invoke_gepa()` runs `dspy.GEPA` (stub for mock/CI), LiteLLM strings from registry, budget kwargs, writes `artifacts/<run_id>/` + `current`. Tests: `pytest … -k e4_s02` (8 passed). Next: [E4-S03a](epic-stories/28.1-story.md).
 
 ---
 
