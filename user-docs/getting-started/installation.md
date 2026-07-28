@@ -124,7 +124,7 @@ zaumzeug serve <name> --deploy
 HARNESS_ROOT=deploy zaumzeug serve <name>
 ```
 
-(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required. `HARNESS_ROOT=deploy` is **Done** E5-S04 — env equivalent for serve/mcp/acp. Ship docs **Done** E5-S05. Deploy git policy **Done** E5-S07 — see [Deploy and ship — Git policy](../guides/deploy.md#git-policy-for-deploy-bundles).)
+(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required. `HARNESS_ROOT=deploy` is **Done** E5-S04 — env equivalent for serve/mcp/acp. Ship docs **Done** E5-S05. Deploy git policy **Done** E5-S07 — see [Deploy and ship — Git policy](../guides/deploy.md#git-policy-for-deploy-bundles). Platform policy **Done** E5-S08 — Linux-first production; OS-neutral bundle; Linux CI `deploy` → `serve --deploy` smoke — see [Platforms](../guides/deploy.md#platforms).)
 
 ---
 

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""CI mock-serve smoke (E1-S07 / E1.7).
+"""CI mock-serve smoke (E1-S07 / E1.7; E5-S08 --deploy).
 
 Starts ``zaumzeug serve <harness>`` via the CLI on an ephemeral localhost port,
 probes ``GET /v1/models``, then terminates the process. No live API keys.
+
+Use ``--deploy`` for Phase 2+ Linux production-bundle smoke (E5-S08).
 """
 
 from __future__ import annotations
@@ -59,6 +61,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         metavar="N",
         help="bind port (default: OS-assigned ephemeral free port)",
     )
+    parser.add_argument(
+        "--deploy",
+        action="store_true",
+        help="serve from deploy/<harness>/ (E5-S08 Linux production smoke)",
+    )
     return parser.parse_args(argv)
 
 
@@ -80,6 +87,7 @@ def run_smoke(
     timeout_s: float = DEFAULT_TIMEOUT_S,
     project_root: Path | None = None,
     python: str | None = None,
+    deploy: bool = False,
 ) -> int:
     """Start CLI serve, probe models endpoint, tear down. Exit 0 on success."""
     root = project_root or discover_project_root()
@@ -94,6 +102,8 @@ def run_smoke(
         "--port",
         str(bind_port),
     ]
+    if deploy:
+        cmd.append("--deploy")
     proc = subprocess.Popen(
         cmd,
         cwd=str(root),
@@ -104,6 +114,7 @@ def run_smoke(
     base = f"http://127.0.0.1:{bind_port}"
     models_url = f"{base}/v1/models"
     deadline = time.monotonic() + timeout_s
+    mode = "deploy" if deploy else "dev"
     try:
         while time.monotonic() < deadline:
             if proc.poll() is not None:
@@ -120,7 +131,10 @@ def run_smoke(
                 continue
             if response.status_code == 200:
                 print(f"OK: {models_url} -> {response.status_code}")
-                print(f"  harness={harness_name} port={bind_port} (mock CI smoke)")
+                print(
+                    f"  harness={harness_name} port={bind_port} "
+                    f"mode={mode} (mock CI smoke)"
+                )
                 return 0
             time.sleep(POLL_INTERVAL_S)
         print(
@@ -138,6 +152,7 @@ def main(argv: list[str] | None = None) -> int:
         args.harness_name,
         port=args.port,
         timeout_s=args.timeout,
+        deploy=args.deploy,
     )
 
 

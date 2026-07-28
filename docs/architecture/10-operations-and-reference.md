@@ -46,6 +46,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E5-S07, 2026-07-28):** Deploy git policy — scaffolding ensures `/deploy/` + `usr-harnesses/*/artifacts/`; release force-add and CI upload documented. See [§10.4](07-deploy-packaging.md#104-git-and-gitignore); tests `test_e5_s07_ac1_gitignore_deploy_and_artifacts`.
 
+**Implementation (E5-S08, 2026-07-29):** Deploy platform policy — Linux-first matrix + OS-neutral bundle tests (`test_e5_s08_*`) + Linux CI `deploy` → `serve --deploy` smoke. See [§10.6](07-deploy-packaging.md#106-deploy-platform-targets).
+
 **Implementation (E4-S06, 2026-07-28):** `zaumzeug compile <harness> --dry-run` — same validation path as full compile (`run_compile(..., dry_run=True)`): Phase 2 schema, module import, LM registry preflight; prints task/reflection models; no GEPA, no LLM API calls, no artifacts. Tests: `tests/integration/compile/test_compile_dry_run.py`.
 
 **Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` sets SDK (`zaumzeug`) and Haystack loggers to DEBUG when `zaumzeug serve|compile --verbose` or `HARNESS_LOG_LEVEL=DEBUG`. `log_request()` emits structured per-request context (`model_id`, `tool`, `artifact_path`). `SecretRedactingFilter` redacts API keys and bearer tokens. CLI reference: `user-docs/reference/cli.md`. Tests: `tests/unit/test_logging.py`.
@@ -179,12 +181,14 @@ End-user walkthrough: [user-docs/guides/testing.md](../user-docs/guides/testing.
 
 | Tier | Trigger | Jobs | Epics |
 |---|---|---|---|
-| **Smoke** | Every push; `windows-latest`, `ubuntu-latest`, `macos-latest` | OS install wrappers (`client-install.sh` / `.ps1 --skip-venv --verify`), `zaumzeug doctor`, `serve --dry-run`, `install/ci_serve_smoke.py`, `pytest tests/integration/test_openai_contract.py`, unit+integration suite | [E1-S07](../stories/03-epic.md#e1-s07-cross-platform-ci-matrix) ✅ *(closes DoD from [E1-S02](../stories/epic-stories/19-story.md#definition-of-done), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests))* |
+| **Smoke** | Every push; `windows-latest`, `ubuntu-latest`, `macos-latest` | OS install wrappers (`client-install.sh` / `.ps1 --skip-venv --verify`), `zaumzeug doctor`, `serve --dry-run`, `install/ci_serve_smoke.py`, `pytest tests/integration/test_openai_contract.py`, unit+integration suite; **Linux only:** `zaumzeug deploy example` → `ci_serve_smoke.py example --deploy` (**Done** E5-S08) | [E1-S07](../stories/03-epic.md#e1-s07-cross-platform-ci-matrix) ✅ *(closes DoD from [E1-S02](../stories/epic-stories/19-story.md#definition-of-done), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests))*; [E5-S08](../stories/epic-stories/48-story.md) ✅ |
 | **Unit + integration** | Every push (same workflow or dedicated job) | `pytest tests/unit tests/integration tests/usr-harnesses -v` | [E2](../stories/01-epic.md), [E3-S06](../stories/02-epic.md#e3-s06-phase-1-test-infrastructure-and-security-baseline), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests) ✅ |
 | **Eval regression** | PR touching prompts/artifacts; nightly | `deepeval test run` / `zaumzeug eval` on critical cases; `deploy.eval_gate` on release (**Done** E6-S03 / E5-S06); harness `eval/` scaffold (**Done** E6-S04); `eval --trace` (**Done** E6-S05); Mode C `--base-url` staging/debug (**Done** E6-S06); GEPA ↔ DeepEval bridge (**Done** E6-S07) | [E6](../stories/05-epic.md), [E5-S06](../stories/epic-stories/46-story.md), [E6-S04](../stories/epic-stories/37-story.md), [E6-S05](../stories/epic-stories/38-story.md), [E6-S06](../stories/epic-stories/39-story.md), [E6-S07](../stories/epic-stories/40-story.md) |
 | **Live e2e** | Nightly / manual | `HARNESS_LIVE_LLM=1 pytest tests/e2e -v` | Optional — not Phase 1 CI gate |
 
 **Implementation (E1-S07, 2026-07-22):** Workflow [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml) — Python 3.11, pip cache, fail-fast, 30m timeout; mock-only (no `HARNESS_LIVE_LLM=1`); ephemeral serve smoke via `install/ci_serve_smoke.py` + `zaumzeug serve --port`. Tests: `tests/unit/ci/test_ci_matrix_workflow.py`, `tests/unit/install/test_ci_serve_smoke.py`.
+
+**Implementation (E5-S08, 2026-07-29):** Same workflow adds Linux-gated `zaumzeug deploy example` → `install/ci_serve_smoke.py example --deploy` after the unit/integration suite. Win/macOS production serve remains best-effort (not CI-gated).
 
 #### Common workflows
 

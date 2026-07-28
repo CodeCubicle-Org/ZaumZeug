@@ -176,7 +176,7 @@ user-docs/
 ├── guides/
 │   ├── multi-agent-workflow.md   # workflow.yaml, agents vs pipelines, control flow
 │   ├── compile.md                # GEPA compile / export / rollback
-│   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05); git policy (E5-S07)
+│   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05); git policy (E5-S07); platforms (E5-S08)
 │   └── testing.md                # unit, integration, eval; mock profile; CI tiers
 └── reference/cli.md
 ```
@@ -188,6 +188,8 @@ Install copies this tree from `install/templates/user-docs/` ([§3.4](02-reposit
 **Implementation (E1-S05, 2026-07-22):** Full `user-docs/` skeleton per §3.5 — `getting-started/installation.md` expands [PRD §7.4](../prd.md#74-user-installation-guide-content-for-readme--phase-1) (prerequisites, effort, disk, extras, updates, troubleshooting); Architecture §3.4 linked for technical install behavior only. Tests: `tests/unit/docs/test_user_docs_skeleton.py`.
 
 **Implementation (E5-S05, 2026-07-28):** [user-docs/guides/deploy.md](../../user-docs/guides/deploy.md) — target ship workflow (copy → `target_install` → `.env` → `zaumzeug serve --deploy`); Win/macOS/Linux table; runtime-only deps. Bundle mirror: `install/templates/deploy/README.deploy.md`. Tests: `tests/integration/deploy/test_target_install.py`.
+
+**Implementation (E5-S08, 2026-07-29):** Platform matrix (§10.6) in the same `deploy.md` / `README.deploy.md` — Linux-first production, OS-neutral bundle, Win/macOS best-effort not CI-gated, E8-S05 Dockerfile forward ref. Linux CI: `deploy` → `serve --deploy` smoke.
 
 **Implementation (E1-S06, 2026-07-22):** Short new-contributor onboarding guide at root [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (product `README.md` unchanged) — vision, install table, `< 15 min` / `~1–2.5 GB` planning ranges, mock-first serve, optional extras, updating dependencies, abbreviated layout; links to [installation.md](../../user-docs/getting-started/installation.md) for depth. Tests: `tests/unit/docs/test_contributing_guide.py`.
 

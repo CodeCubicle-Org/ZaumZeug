@@ -65,7 +65,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-2 | `tests/integration/deploy/test_serve_deploy.py::test_e5_s03_ac2_openai_rest_parity` |
 | AC-3 | `tests/integration/deploy/test_serve_deploy.py::test_e5_s03_ac3_fails_missing_manifest` |
 | AC-4 | `tests/integration/deploy/test_serve_deploy.py::test_e5_s03_ac4_after_target_install_clean_venv` |
-| AC-1–4 | **shared:** E5-S08 Linux CI deploy → serve --deploy smoke |
+| AC-1–4 | **shared:** E5-S08 Linux CI deploy → serve --deploy smoke ✅ (2026-07-29) |
 
 - [x] Every AC row above has a passing test or documented manual exception
 - [x] `pytest tests/integration/deploy/test_serve_deploy.py -v` passes (4 passed, 0 skipped)
@@ -80,5 +80,5 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 - CLI `--deploy` and `serve/runner.py` / `validate_serve(deploy=…)` already resolved roots via `config/harness_root.py` (E2-S04c / E2-S05 / E3-S02); this story closes full Hayhooks serve from production bundles and AC tests.
 - Deploy mode validates `manifest.json` via `check_deploy_manifest` before bind; missing folder → `harness_discovery` fail.
 - Docs: `install/templates/deploy/README.deploy.md`, `user-docs/reference/cli.md` (+ install template mirror).
-- Shared Linux CI smoke remains [E5-S08](48-story.md).
+- Shared Linux CI smoke **Done** ([E5-S08](48-story.md), 2026-07-29).
 ---

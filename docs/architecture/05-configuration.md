@@ -229,7 +229,7 @@ compile:
 
 **Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run` in `src/zaumzeug/serve/` — `validate_serve()` uses strict `load_harness()` and `load_workflow()`, `resolve_serve_entry()`, and doctor model/runtime checks; optional `--deploy` and `--json`. No Hayhooks bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
 
-**Implementation (E5-S03, 2026-07-28):** `zaumzeug serve <harness> --deploy` binds Hayhooks from `deploy/<name>/` only (manifest required). Tests: `tests/integration/deploy/test_serve_deploy.py`. Env-only equivalent: `HARNESS_ROOT=deploy` (E5-S04). Ship workflow after package: [user-docs/guides/deploy.md](../../user-docs/guides/deploy.md) (**Done** E5-S05). Git policy for bundles: [§10.4](07-deploy-packaging.md#104-git-and-gitignore) (**Done** E5-S07).
+**Implementation (E5-S03, 2026-07-28):** `zaumzeug serve <harness> --deploy` binds Hayhooks from `deploy/<name>/` only (manifest required). Tests: `tests/integration/deploy/test_serve_deploy.py`. Env-only equivalent: `HARNESS_ROOT=deploy` (E5-S04). Ship workflow after package: [user-docs/guides/deploy.md](../../user-docs/guides/deploy.md) (**Done** E5-S05). Git policy for bundles: [§10.4](07-deploy-packaging.md#104-git-and-gitignore) (**Done** E5-S07). Platform policy: [§10.6](07-deploy-packaging.md#106-deploy-platform-targets) (**Done** E5-S08).
 
 **Implementation (E3-S02, 2026-07-20):** `zaumzeug serve <harness>` via `serve/runner.py` — same `validate_serve()`, then `build_agent()`, Hayhooks on `127.0.0.1` / `serve.hayhooks.port`. Tests: `tests/integration/test_serve.py`, `tests/integration/test_openai_contract.py` (AC-4).
 

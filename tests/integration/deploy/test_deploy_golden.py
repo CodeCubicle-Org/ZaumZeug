@@ -1,5 +1,8 @@
-# Story: E5-S02 / E5.2
-"""E5-S02 — Golden deploy bundle snapshot for Architecture §10.1 copy matrix."""
+# Story: E5-S02 / E5.2 · E5-S08 / E5.8
+"""E5-S02 — Golden deploy bundle snapshot for Architecture §10.1 copy matrix.
+
+E5-S08 — OS-neutral production bundle assertions (Architecture §10.6).
+"""
 
 from __future__ import annotations
 
@@ -215,3 +218,96 @@ def test_e5_s02_golden_example_bundle(tmp_path: Path) -> None:
     )
     assert "compile" not in agent_data
     assert agent_data["agent"]["artifact"] == f"artifacts/{run_id}"
+
+
+# Portable text/config/source suffixes expected in an OS-neutral bundle (E5-S08).
+_OS_NEUTRAL_SUFFIXES = frozenset(
+    {
+        ".yaml",
+        ".yml",
+        ".json",
+        ".md",
+        ".py",
+        ".ps1",
+        ".sh",
+        ".txt",
+        ".jsonl",
+        "",  # extensionless (rare)
+    }
+)
+_NATIVE_BINARY_SUFFIXES = frozenset(
+    {".exe", ".dll", ".so", ".dylib", ".bin", ".o", ".a", ".whl", ".egg"}
+)
+
+_README_DEPLOY_TEMPLATE = (
+    Path(__file__).resolve().parents[3]
+    / "install"
+    / "templates"
+    / "deploy"
+    / "README.deploy.md"
+)
+_SHIP_GUIDE = (
+    Path(__file__).resolve().parents[3] / "user-docs" / "guides" / "deploy.md"
+)
+
+
+def test_e5_s08_ac2_os_neutral_bundle(tmp_path: Path) -> None:
+    """AC-2: Bundle is OS-neutral Python + pinned artifacts (no native binaries)."""
+    run_id = "20260728T120000Z"
+    harness_dir = _seed_golden_example(tmp_path, run_id=run_id)
+    config = HarnessConfig(name="example", models="models.yaml")
+    bundle = write_deploy_bundle(
+        "example",
+        project_root=tmp_path,
+        harness_dir=harness_dir,
+        harness_config=config,
+    )
+
+    for path in bundle.rglob("*"):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(bundle).as_posix()
+        assert "\\" not in rel, f"bundle path must be portable: {rel}"
+        suffix = path.suffix.lower()
+        assert suffix not in _NATIVE_BINARY_SUFFIXES, (
+            f"OS-native binary not allowed in deploy bundle: {rel}"
+        )
+        assert suffix in _OS_NEUTRAL_SUFFIXES, (
+            f"unexpected non-portable file type in deploy bundle: {rel}"
+        )
+
+    pinned = (
+        bundle
+        / "agents"
+        / "researcher"
+        / "artifacts"
+        / run_id
+        / "artifact-manifest.json"
+    )
+    assert pinned.is_file(), "pinned artifact manifest must ship in the bundle"
+    assert (bundle / "agents" / "researcher" / "artifacts" / run_id / "prompts" / "system.md").is_file()
+
+    manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+    artifact_map = manifest.get("artifact_run_id")
+    assert isinstance(artifact_map, dict)
+    assert artifact_map.get("researcher") == run_id
+
+    readme = (bundle / "README.deploy.md").read_text(encoding="utf-8")
+    assert "OS-neutral" in readme
+    assert "Linux" in readme
+    assert "pinned" in readme.lower() or "artifact" in readme.lower()
+
+
+def test_e5_s08_platform_docs_matrix() -> None:
+    """AC-1 / AC-3 / AC-4 (docs): Linux-first, best-effort Win/macOS, E8-S05 link."""
+    for path in (_README_DEPLOY_TEMPLATE, _SHIP_GUIDE):
+        text = path.read_text(encoding="utf-8")
+        lower = text.lower()
+        assert "linux" in lower
+        assert "vm" in lower or "bare metal" in lower
+        assert "docker" in lower or "kubernetes" in lower or "k8s" in lower
+        assert "os-neutral" in lower
+        assert "best-effort" in lower
+        assert "not ci-gated" in lower or "not CI-gated" in text
+        assert "e8-s05" in lower
+        assert "dockerfile" in lower

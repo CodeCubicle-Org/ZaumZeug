@@ -54,12 +54,16 @@ On a **clean target** (desktop PC or server):
 
 ## Supported platforms
 
-| Role | Windows | macOS | Linux |
-|---|---|---|---|
-| **Developer** (compile / deploy CLI) | Yes | Yes | Yes |
-| **Production serve** | Best-effort | Best-effort | **Primary** (VM, bare metal, Docker/K8s) |
+| Role | Windows | macOS | Linux | Notes |
+|---|---|---|---|---|
+| **Developer workstation** | Primary | Primary | Primary | Install, serve, compile, deploy CLI |
+| **Production server** | Best-effort | Best-effort | **Primary** | Linux VM, bare metal, or Docker/Kubernetes |
 
-The bundle is OS-neutral (Python 3.11+ + pinned YAML/artifacts). Linux is the supported ops target in v1.
+This bundle is **OS-neutral**: Python 3.11+ sources, YAML/JSON config, and pinned artifacts only — no OS-specific binaries. Ship the same folder to any host.
+
+**Linux-first production:** The supported ops target in v1 is Linux (VM, bare metal, Docker/Kubernetes). Windows/macOS production serve is supported **best-effort** and is **not CI-gated** in v1 — report issues as best-effort. Phase 2+ CI requires `zaumzeug deploy` → `zaumzeug serve --deploy` smoke on Linux (`ubuntu-latest`).
+
+**Optional container path:** A generated Dockerfile inside the deploy bundle is planned for Phase 4 (E8-S05). Until then, run with `HARNESS_ROOT=deploy` inside your own Python 3.11+ image after `pip install zaumzeug`.
 
 ---
 

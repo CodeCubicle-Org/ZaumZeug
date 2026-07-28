@@ -23,7 +23,7 @@
 | **Feature** | E8.5 |
 | **Persona** | Ops / platform |
 | **Priority** | P2 |
-| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) · [E5-S08](48-story.md#e5-s08-deploy-platform-policy) |
+| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) ✅ · [E5-S08](48-story.md#e5-s08-deploy-platform-policy) ✅ (2026-07-29) |
 
 ### User story
 

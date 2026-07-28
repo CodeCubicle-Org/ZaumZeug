@@ -258,7 +258,7 @@ As **ops**, I want an optional generated Dockerfile in the deploy bundle, so tha
 ### References
 
 - [PRD E8.5](../prd.md#epic-e8--rag-and-production-hardening-phase-4)
-- [E5-S08 — Platform policy](../06-epic.md#e5-s08-deploy-platform-policy)
+- [E5-S08 — Platform policy](../06-epic.md#e5-s08-deploy-platform-policy) ✅ (2026-07-29)
 - [Architecture §10.6](../architecture/07-deploy-packaging.md#106-deploy-platform-targets)
 
 ### Acceptance criteria

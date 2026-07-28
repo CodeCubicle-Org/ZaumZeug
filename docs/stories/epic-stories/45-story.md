@@ -82,7 +82,7 @@ Per [Story verification](../00-README.md#story-verification-required). **Docs + 
 
 ### Definition of done
 
-- [x] Happy path documented; clean-bundle serve covered by E5-S03 AC-4; Linux CI smoke remains [E5-S08](48-story.md)
+- [x] Happy path documented; clean-bundle serve covered by E5-S03 AC-4; Linux CI smoke **Done** ([E5-S08](48-story.md), 2026-07-29)
 - [x] Verification checklist complete; all ACs traced to tests or documented manual exceptions
 
 ### Implementation notes (2026-07-28)

@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
 **Last updated:** 2026-07-29 (E5-S07 deploy git policy docs sweep)
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S07 **Done**; E5-S06 **Done** early with E6-S03; E5-S01–S05 + E5-S07 **Done**; next E5-S08 deploy platform policy)
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S07 **Done**; E5-S06 **Done** early with E6-S03; E5-S01–S05 + E5-S07–S08 **Done**; next E5-S09 target install)
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -337,10 +337,10 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E5.5 | Target ship workflow | **Done** (E5-S05, 2026-07-28). **AC:** Documented path: copy `deploy/<name>/` to target machine → run bundled `target_install` (or `install/target_install.py --deploy-dir …`) → create `.env` → `zaumzeug serve <name> --deploy`. Installs runtime deps only (`pip install zaumzeug` — Haystack/Hayhooks via SDK); **no** DSPy/GEPA/DeepEval. Python 3.11+ must already be on the target. Docs: `README.deploy.md`, [user-docs/guides/deploy.md](../user-docs/guides/deploy.md). Tests: `tests/integration/deploy/test_target_install.py` + `test_e5_s05_ac5_no_env_in_bundle` (5 passed). |
 | E5.6 | Deploy eval gate | **Done** (E5-S06 / E6-S03, 2026-07-28). **AC:** `deploy.eval_gate` (`skip` \| `warn` \| `block`) and `--eval-gate` CLI override behave per [Architecture §6.4](architecture/05-configuration.md#64-deploy-eval-gate). |
 | E5.7 | Deploy git policy | **Done** (E5-S07, 2026-07-28). **AC:** Default `.gitignore` includes `deploy/` and `usr-harnesses/*/artifacts/`; documented option to commit `deploy/<name>/` for audited releases; CI may build and upload bundle as artifact. Scaffolding: `install/client_install.py`; docs: [deploy.md](../user-docs/guides/deploy.md#git-policy-for-deploy-bundles), [CONTRIBUTING.md](../CONTRIBUTING.md#deploy-git-policy-maintainers); CI comment in [ci-matrix.yml](../.github/workflows/ci-matrix.yml). Tests: `tests/unit/install/test_scaffolding.py::test_e5_s07_ac1_gitignore_deploy_and_artifacts`. |
-| E5.8 | Deploy platform policy | **AC:** Documented platform matrix in `README.deploy.md` and [Architecture §10.6](architecture/07-deploy-packaging.md#106-deploy-platform-targets): **dev** (install, serve, compile, deploy CLI) on Win/macOS/Linux; **production serve** Linux-first (VM, bare metal, Docker/Kubernetes). Bundle is OS-neutral Python + pinned artifacts. Windows/macOS production serve is supported but not CI-gated in v1. Optional container path referenced (E8.5). |
+| E5.8 | Deploy platform policy | **Done** (E5-S08, 2026-07-29). **AC:** Documented platform matrix in `README.deploy.md` and [Architecture §10.6](architecture/07-deploy-packaging.md#106-deploy-platform-targets): **dev** (install, serve, compile, deploy CLI) on Win/macOS/Linux; **production serve** Linux-first (VM, bare metal, Docker/Kubernetes). Bundle is OS-neutral Python + pinned artifacts. Windows/macOS production serve is supported but not CI-gated in v1. Optional container path referenced (E8.5). Tests: `tests/integration/deploy/test_deploy_golden.py` (`test_e5_s08_*`); Linux CI: `deploy` → `serve --deploy` smoke. Story: [48-story.md](stories/epic-stories/48-story.md). |
 | E5.9 | Target runtime install script | **AC:** `install/target_install.py` (+ `target-install.sh` / `target-install.ps1` wrappers) runs on the **target machine** (desktop PC or server) after the user copies `deploy/<name>/`. Assumes Python 3.11+ preinstalled; creates optional `.venv`; `pip install zaumzeug` (runtime only); runs `zaumzeug doctor <name> --deploy`; prints `.env` setup from `.env.example` if present (never overwrites `.env`). Idempotent; cross-platform Win/macOS/Linux. Supports `--skip-venv`, `--verify` (doctor + serve dry-run). Also shipped inside each `deploy/<name>/` bundle (E5.1). **Partial (E5-S01, 2026-07-28):** stubs + wrappers copied into bundles (preflight only); full install → E5-S09. |
 
-**Story seeds:** Deploy after compile; serve --deploy on clean venv without usr-harnesses folder; `target_install` on Windows desktop and Linux server; serve --deploy smoke on Linux CI (Phase 2). **Git policy Done** ([E5-S07](stories/epic-stories/47-story.md), 2026-07-28) — default ignore + release/CI upload options.
+**Story seeds:** Deploy after compile; serve --deploy on clean venv without usr-harnesses folder; `target_install` on Windows desktop and Linux server; serve --deploy smoke on Linux CI (Phase 2). **Git policy Done** ([E5-S07](stories/epic-stories/47-story.md), 2026-07-28) — default ignore + release/CI upload options. **Platform policy Done** ([E5-S08](stories/epic-stories/48-story.md), 2026-07-29) — Linux-first ops matrix + Linux CI deploy→serve smoke.
 
 ---
 
@@ -421,7 +421,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S07](stories/epic-stories/40-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); [E5-S01](stories/epic-stories/41-story.md)–[E5-S05](stories/epic-stories/45-story.md) + [E5-S07](stories/epic-stories/47-story.md) **Done** 2026-07-28; next [E5-S08](stories/epic-stories/48-story.md) |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S07](stories/epic-stories/40-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); [E5-S01](stories/epic-stories/41-story.md)–[E5-S05](stories/epic-stories/45-story.md) + [E5-S07](stories/epic-stories/47-story.md)–[E5-S08](stories/epic-stories/48-story.md) **Done** 2026-07-28 / 2026-07-29; next [E5-S09](stories/epic-stories/49.1-story.md) |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A | E8 |
 
@@ -468,7 +468,7 @@ All items below were addressed in PRD + Architecture updates.
 | V7 | Builtin catalog underspecified | Architecture §6.5 catalog; E3.3, E7.7 |
 | V8 | Ideation mixed product + architecture | Split: PRD + architecture.md + ideation archive |
 | V9 | Ideation parity gaps (2026-06-24) | Full requirement-level port to PRD + Architecture (extension points, install flags, eval modes, deploy policy, debug, client layouts, ecosystem reference) |
-| V10 | Cross-platform scope limited to install only | E1.7 CI matrix; E3.2 runtime AC; E5.8 deploy platform policy; PRD §14 table; Architecture §2.5, §10.6 |
+| V10 | Cross-platform scope limited to install only | **Resolved** (E5-S08, 2026-07-29): E1.7 CI matrix; E3.2 runtime AC; E5.8 deploy platform policy (Linux-first + Linux CI deploy→serve smoke); PRD §14 table; Architecture §2.5, §10.6 |
 | V11 | Deploy bundle missing target dependency installer | E5.9 `target_install.py`; bundled in deploy; Journey B updated; folder rename `usr-harnesses/` |
 | V12 | User install effort/disk not specified for README | [§7.4](#74-user-installation-guide-content-for-readme--phase-1); E1.5, E1.6 AC updated |
 | V13 | Dependency update path not specified for README | [§7.4](#74-user-installation-guide-content-for-readme--phase-1) “Updating dependencies”; E1.5, E1.6 AC updated |

@@ -107,7 +107,7 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 
 **Implementation (E5-S03, 2026-07-28):** Full Hayhooks serve from `deploy/<name>/` is live — same OpenAI REST as dev, fails on missing/invalid manifest, works without `usr-harnesses/`. Tests: `tests/integration/deploy/test_serve_deploy.py`.
 
-**Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` is the env equivalent of `--deploy` for serve / mcp / acp (and doctor / run) via `config/harness_root.resolve_harness_path()`. Docs: `README.deploy.md`, CLI reference. Tests: `tests/unit/deploy/test_harness_root.py` (`e5_s04`). Linux CI smoke remains [E5-S08](../stories/epic-stories/48-story.md).
+**Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` is the env equivalent of `--deploy` for serve / mcp / acp (and doctor / run) via `config/harness_root.resolve_harness_path()`. Docs: `README.deploy.md`, CLI reference. Tests: `tests/unit/deploy/test_harness_root.py` (`e5_s04`). Linux CI smoke **Done** ([E5-S08](../stories/epic-stories/48-story.md), 2026-07-29).
 
 **Implementation (E5-S05, 2026-07-28):** Target ship workflow documented — copy `deploy/<name>/` → `target_install` → create `.env` → `zaumzeug serve --deploy`. Runtime-only `pip install zaumzeug` (no DSPy/GEPA/DeepEval); Python 3.11+ prerequisite; `.env` never in bundle. Docs: `install/templates/deploy/README.deploy.md`, [user-docs/guides/deploy.md](../user-docs/guides/deploy.md), root README production note. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s05`) + `test_deploy.py::test_e5_s05_ac5_no_env_in_bundle`.
 
@@ -123,6 +123,8 @@ Requirements: **[PRD E5.8](../prd.md#epic-e5--deploy-packaging-phase-2)**.
 | **CI — Phase 2+** | Optional | Optional | **Required** | `zaumzeug deploy` → `zaumzeug serve --deploy` smoke on `ubuntu-latest` |
 
 The `deploy/<name>/` bundle is **OS-neutral** (Python 3.11+, pinned yaml/artifacts, runtime tools only). Production docs (`README.deploy.md`) must state Linux as the supported ops target and reference optional Dockerfile (E8.5). Windows/macOS production serve is not CI-gated in v1 — report issues as best-effort.
+
+**Implementation (E5-S08, 2026-07-29):** Platform matrix in `install/templates/deploy/README.deploy.md` + [user-docs/guides/deploy.md](../user-docs/guides/deploy.md#platforms). OS-neutral bundle test: `tests/integration/deploy/test_deploy_golden.py` (`test_e5_s08_ac2_os_neutral_bundle`). Phase 2+ Linux CI: `zaumzeug deploy example` → `install/ci_serve_smoke.py example --deploy` on `ubuntu-latest` ([ci-matrix.yml](../../.github/workflows/ci-matrix.yml)).
 
 ### 10.7 Target runtime install script
 

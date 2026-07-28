@@ -114,12 +114,16 @@ zaumzeug serve <name> --deploy --dry-run
 
 ## Platforms
 
-| Role | Windows | macOS | Linux |
-|---|---|---|---|
-| **Developer** (install, compile, deploy CLI) | Yes | Yes | Yes |
-| **Production serve** | Best-effort | Best-effort | **Primary** (VM, bare metal, Docker/K8s) |
+| Role | Windows | macOS | Linux | CI-gated (v1) |
+|---|---|---|---|---|
+| **Developer workstation** (install, serve, compile, deploy CLI) | Primary | Primary | Primary | Yes — all three (E1-S07) |
+| **Production serve** | Best-effort | Best-effort | **Primary** (VM, bare metal, Docker/K8s) | Linux only (`deploy` → `serve --deploy` smoke) |
 
-The bundle is OS-neutral. Linux is the supported ops target in v1; Windows/macOS production serve is best-effort and not CI-gated. Optional container packaging is Phase 4 (E8-S05 Dockerfile).
+The `deploy/<name>/` bundle is **OS-neutral** (Python 3.11+ sources, YAML/JSON, pinned artifacts — no OS-specific binaries). Linux is the supported ops target in v1. Windows/macOS production serve is supported **best-effort** and is **not CI-gated** in v1.
+
+**Optional container path:** Generated Dockerfile in the bundle is Phase 4 ([E8-S05](../../docs/stories/epic-stories/62-story.md)). Until then, use `HARNESS_ROOT=deploy` in your own container image after `pip install zaumzeug`.
+
+See also [PRD §14 — Cross-platform support](../../docs/prd.md#cross-platform-support) and [Architecture §10.6](../../docs/architecture/07-deploy-packaging.md#106-deploy-platform-targets).
 
 ---
 
@@ -162,6 +166,7 @@ Remove or restore the ignore later with `git rm -r --cached deploy/<name>/` if y
 ## Related
 
 - Bundle ops sheet: `deploy/<name>/README.deploy.md`
+- [Platforms](#platforms) (E5-S08) — Linux-first production; OS-neutral bundle; Win/macOS best-effort
 - [Git policy for deploy bundles](#git-policy-for-deploy-bundles) (E5-S07)
 - [CLI — deploy](../reference/cli.md#zaumzeug-deploy) · [CLI — serve](../reference/cli.md#zaumzeug-serve)
 - [Testing — deploy gates](testing.md#deploy-eval-gate)

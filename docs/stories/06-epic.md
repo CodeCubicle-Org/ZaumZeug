@@ -5,8 +5,8 @@
 | **Document** | Epic E5 user stories |
 | **File** | `docs/stories/06-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-29 (E5-S07 done + docs sweep) |
-| **Status** | In progress (E5-S01–S07 Done; next E5-S08 deploy platform policy) |
+| **Last modified** | 2026-07-29 (E5-S08 deploy platform policy Done) |
+| **Status** | In progress (E5-S01–S08 Done; next E5-S09 target install) |
 | **Build order** | **6 of 8** (after E4 compile + E6-S02 eval for eval gate) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -29,7 +29,7 @@
 2. **E5-S01** — `zaumzeug deploy` ✅ (2026-07-28)
 3. **E5-S09a** → **E5-S09b** → **E5-S09c** — Target install *(core, wrappers, verify)*
 4. **E5-S03** → **E5-S04** — serve `--deploy` + `HARNESS_ROOT` ✅ (2026-07-28)
-5. **E5-S05** → **E5-S08** — Ops docs and platform policy
+5. **E5-S05** → **E5-S08** — Ops docs and platform policy ✅ (2026-07-28 / 2026-07-29)
 6. **E5-S07** — Git policy ✅ (2026-07-28)
 7. **E5-S06** — Deploy eval gate ✅ (2026-07-28; shipped early with [E6-S03](../05-epic.md#e6-s03-eval-gate-on-deploy); requires [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) ✅)
 
@@ -189,7 +189,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-2 | `tests/integration/deploy/test_serve_deploy.py::test_e5_s03_ac2_openai_rest_parity` |
 | AC-3 | `tests/integration/deploy/test_serve_deploy.py::test_e5_s03_ac3_fails_missing_manifest` |
 | AC-4 | `tests/integration/deploy/test_serve_deploy.py::test_e5_s03_ac4_after_target_install_clean_venv` |
-| AC-1–4 | **shared:** E5-S08 Linux CI deploy → serve --deploy smoke |
+| AC-1–4 | **shared:** E5-S08 Linux CI deploy → serve --deploy smoke ✅ (2026-07-29) |
 
 - [x] Every AC row above has a passing test or documented manual exception
 - [x] `pytest tests/integration/deploy/test_serve_deploy.py -v` passes (4 passed, 0 skipped)
@@ -298,7 +298,7 @@ Per [Story verification](00-README.md#story-verification-required). **Docs + int
 
 ### Definition of done
 
-- [x] Happy path documented; clean-bundle serve covered by E5-S03 AC-4; Linux CI smoke remains E5-S08
+- [x] Happy path documented; clean-bundle serve covered by E5-S03 AC-4; Linux CI smoke **Done** (E5-S08, 2026-07-29)
 - [x] Verification checklist complete
 
 ---
@@ -412,6 +412,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E5.8 |
 | **Persona** | Ops / platform |
 | **Priority** | P1 |
+| **Status** | Done (2026-07-29) |
 
 ### User story
 
@@ -425,34 +426,34 @@ As **ops**, I want a documented platform matrix, so that I know Linux is the pri
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `README.deploy.md` states Linux-first production (VM, bare metal, Docker/K8s)
-- [ ] **AC-2** Bundle is OS-neutral Python + pinned artifacts
-- [ ] **AC-3** Windows/macOS production serve supported best-effort, not CI-gated in v1
-- [ ] **AC-4** Optional container path referenced (E8-S05)
+- [x] **AC-1** `README.deploy.md` states Linux-first production (VM, bare metal, Docker/K8s)
+- [x] **AC-2** Bundle is OS-neutral Python + pinned artifacts
+- [x] **AC-3** Windows/macOS production serve supported best-effort, not CI-gated in v1
+- [x] **AC-4** Optional container path referenced (E8-S05)
 
 ### Implementation tasks (build)
 
-- [ ] Author platform matrix in `README.deploy.md`
-- [ ] Phase 2+ Linux CI: deploy → serve --deploy smoke
+- [x] Author platform matrix in `README.deploy.md`
+- [x] Phase 2+ Linux CI: deploy → serve --deploy smoke
 
 ### Verification (after build)
 
-Per [Story verification](00-README.md#story-verification-required).
+Per [Story verification](00-README.md#story-verification-required). See [48-story.md](epic-stories/48-story.md) for full AC → test mapping.
 
 | AC | Verification |
 |---|---|
-| AC-1 | **manual:** README.deploy.md platform section |
+| AC-1 | **manual + docs test:** README.deploy.md platform section; `test_e5_s08_platform_docs_matrix` |
 | AC-2 | `tests/integration/deploy/test_deploy_golden.py::test_e5_s08_ac2_os_neutral_bundle` |
-| AC-3 | **manual:** docs state best-effort Win/macOS prod |
-| AC-4 | **manual:** cross-link E8-S05 when present |
+| AC-3 | **manual + docs test:** docs state best-effort Win/macOS prod |
+| AC-4 | **manual + docs test:** cross-link E8-S05 |
 | AC-1–2 | **CI:** Linux job deploy → serve --deploy smoke |
 
-- [ ] Manual checklist + CI smoke complete
+- [x] Manual checklist + CI smoke complete (Done 2026-07-29)
 
 ### Definition of done
 
-- [ ] Aligns with PRD §14 CI-gated column
-- [ ] Verification checklist complete
+- [x] Aligns with PRD §14 CI-gated column
+- [x] Verification checklist complete
 
 ---
 
