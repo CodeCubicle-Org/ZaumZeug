@@ -23,7 +23,7 @@
 | **Feature** | E8.6 |
 | **Persona** | Harness developer |
 | **Priority** | P3 |
-| **Prerequisites** | [E6-S01](34-story.md#e6-s01-optional-eval-extra) · [E5-S09c](49.3-story.md#e5-s09c-target-install-verify-integration) |
+| **Prerequisites** | [E6-S01](34-story.md#e6-s01-optional-eval-extra) ✅ · [E5-S09c](49.3-story.md#e5-s09c-target-install-verify-integration) |
 
 ### User story
 

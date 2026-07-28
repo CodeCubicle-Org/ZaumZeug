@@ -23,7 +23,7 @@
 | **Feature** | E6.2 |
 | **Persona** | Harness developer |
 | **Priority** | P0 |
-| **Prerequisites** | [E6-S01](34-story.md#e6-s01-optional-eval-extra) · [E2-S01](02-story.md#e2-s01-pydantic-config-schemas) |
+| **Prerequisites** | [E6-S01](34-story.md#e6-s01-optional-eval-extra) ✅ · [E2-S01](02-story.md#e2-s01-pydantic-config-schemas) ✅ |
 
 ### User story
 

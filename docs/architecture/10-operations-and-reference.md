@@ -98,6 +98,7 @@ usr-harnesses/<harness>/eval/
 └── metrics.py         # custom metrics
 ```
 
+**Implementation (E6-S01, 2026-07-28):** Optional `[eval]` extra ships `deepeval`; `zaumzeug.eval.require_deepeval()` raises the Architecture §6.3 install hint when missing. Doctor does not require DeepEval. `zaumzeug eval` CLI → E6-S02; harness `eval/` scaffold → E6-S04.
 Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/<harness>/eval/`. See [user-docs/guides/testing.md](../user-docs/guides/testing.md).
 
 ### 13.4 Trace capture (Phase 2+)

@@ -70,7 +70,7 @@ Then run story tests as usual, e.g.:
 
 | Project | Package | Role |
 |---|---|---|
-| [DeepEval](https://github.com/confident-ai/deepeval) | `deepeval` | Dev regression, agentic/RAG metrics, tracing |
+| [DeepEval](https://github.com/confident-ai/deepeval) | `deepeval` via `pip install "zaumzeug[eval]"` | Dev regression, agentic/RAG metrics, tracing — **not** in core/`[dev]` (**Done** E6-S01, 2026-07-28); `zaumzeug.eval.require_deepeval()` install hint when missing |
 
 ## LLM provider integrations (install per `models.yaml`)
 

@@ -199,7 +199,7 @@ zaumzeug doctor [<harness>] [--deploy] [--verbose] [--json]
 | `--json` | Emit machine-readable JSON report |
 | `--deploy` | Validate deploy bundle under `deploy/` |
 
-**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml`, **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. Warnings (non-blocking): `eval` in Phase 1, MCP without `uv`, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`.
+**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml`, **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. Warnings (non-blocking): `eval` in Phase 1, MCP without `uv`, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01).
 
 Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack debug logs on serve or compile, use `--verbose` on those commands or `HARNESS_LOG_LEVEL=DEBUG`.
 

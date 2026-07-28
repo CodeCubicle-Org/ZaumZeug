@@ -85,6 +85,8 @@ Install with: pip install "zaumzeug[eval]"
 Or set eval.framework: builtin for JSONL checks without DeepEval.
 ```
 
+**Implementation (E6-S01, 2026-07-28):** Message text lives in `zaumzeug.eval.DEEPEVAL_MISSING_MESSAGE` / `require_deepeval()`. Full `zaumzeug eval` CLI → E6-S02.
+
 CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 
 **`eval` config fields (deepeval):**

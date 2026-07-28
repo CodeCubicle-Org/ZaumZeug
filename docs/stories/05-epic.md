@@ -5,8 +5,8 @@
 | **Document** | Epic E6 user stories |
 | **File** | `docs/stories/05-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
-| **Status** | Backlog |
+| **Last modified** | 2026-07-28 (E6-S01 done) |
+| **Status** | In progress |
 | **Build order** | **5 of 8** (before E5 — deploy eval gate needs `zaumzeug eval`) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -25,7 +25,7 @@
 
 ### Story implementation order (within this epic)
 
-1. **E6-S01** — `[eval]` extra
+1. **E6-S01** — `[eval]` extra ✅ (2026-07-28)
 2. **E6-S02** — `zaumzeug eval` *(blocks E5-S06)*
 3. **E6-S03** — Eval gate cross-reference
 4. **E6-S04** → **E6-S07** — pytest scaffold, trace, HTTP mode, GEPA bridge
@@ -39,6 +39,7 @@
 | **Feature** | E6.1 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
+| **Status** | Done (2026-07-28) |
 
 ### User story
 
@@ -51,32 +52,34 @@ As a **harness developer**, I want DeepEval as an optional extra, so that core i
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Core `zaumzeug` install has no `deepeval` dependency
-- [ ] **AC-2** `[eval]` extra installs `deepeval`
-- [ ] **AC-3** `pip install "zaumzeug[eval]"` documented in user-docs
+- [x] **AC-1** Core `zaumzeug` install has no `deepeval` dependency
+- [x] **AC-2** `[eval]` extra installs `deepeval`
+- [x] **AC-3** `pip install "zaumzeug[eval]"` documented in user-docs
 
 ### Implementation tasks (build)
 
-- [ ] Add `eval = ["deepeval"]` to `pyproject.toml` optional-dependencies
-- [ ] Guard imports in eval module with friendly error
+- [x] Add `eval = ["deepeval"]` to `pyproject.toml` optional-dependencies *(already present from E2-S00; re-asserted)*
+- [x] Guard imports in eval module with friendly error
 
 ### Verification (after build)
 
-Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E6-S01 / E6.1`.
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E6-S01 / E6.1`. Canonical: [34-story.md](epic-stories/34-story.md).
 
 | AC | Test |
 |---|---|
 | AC-1 | `tests/unit/eval/test_eval_extra.py::test_e6_s01_ac1_core_has_no_deepeval_dependency` |
 | AC-2 | `tests/unit/eval/test_eval_extra.py::test_e6_s01_ac2_eval_extra_installs_deepeval` |
-| AC-3 | **manual:** user-docs documents `pip install "zaumzeug[eval]"` |
+| AC-3 | `tests/unit/eval/test_eval_extra.py::test_e6_s01_ac3_user_docs_document_eval_extra` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/eval/test_eval_extra.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/eval/test_eval_extra.py -v` passes (6 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] `zaumzeug doctor` does not require deepeval unless eval configured
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] `zaumzeug doctor` does not require deepeval unless eval configured
+- [x] Verification checklist complete; all ACs traced to tests
+
+**E6-S01 Done (2026-07-28):** `eval = ["deepeval"]` in `pyproject.toml`; `zaumzeug.eval.require_deepeval()` friendly install hint; doctor has no deepeval dependency. Tests: **6 passed, 0 skipped**.
 
 ---
 

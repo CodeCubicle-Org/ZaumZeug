@@ -84,7 +84,7 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 | Python | 3.11+ | 3.11+ |
 | `pip install zaumzeug` | Yes (editable `[dev]` ok) | Yes (**runtime** install; no `[eval]` unless ops explicitly want eval on server) |
 | DSPy, GEPA | Yes (compile) | **No** — compile on dev/CI only |
-| DeepEval | Optional (`[eval]`) | **No** (default) |
+| DeepEval | Optional (`[eval]` ✅ E6-S01) | **No** (default) |
 | `usr-harnesses/<name>/` | Yes | **No** |
 | `deploy/<name>/` | Output of deploy | **Yes** — ship this folder |
 | `target_install.py` (in bundle) | N/A | **Yes** — run once on target to install runtime deps |

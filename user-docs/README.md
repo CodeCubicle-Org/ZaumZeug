@@ -22,7 +22,7 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 |---|---|
 | [Multi-agent workflow](guides/multi-agent-workflow.md) | `workflow.yaml`, agent vs pipeline stages, control flow inside agents |
 | [Compile and export](guides/compile.md) | GEPA offline compile; Haystack artifact export; workflow diagram; optional runtime `input_rewrite`; pin/rollback to immutable `artifacts/<run_id>/` |
-| [Testing](guides/testing.md) | Unit, integration, eval layers; mock profile; CI tiers |
+| [Testing](guides/testing.md) | Unit, integration, eval layers; mock profile; optional `[eval]` / DeepEval (E6-S01); CI tiers |
 
 ## Quick links
 
