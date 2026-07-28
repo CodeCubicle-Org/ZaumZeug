@@ -5,8 +5,8 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
-| **Status** | Backlog |
+| **Last modified** | 2026-07-28 |
+| **Status** | In progress (E4-S01 done) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -26,7 +26,7 @@
 
 ### Story implementation order (within this epic)
 
-1. **E4-S01** — DSPy module loader
+1. **E4-S01** — DSPy module loader ✅ (2026-07-28)
 2. **E4-S02a** → **E4-S02b** — Compile schema + GEPA runner
 3. **E4-S03a** → **E4-S03b** — Export contract + runtime preprocess
 4. **E4-S05** — Post-compile serve uses artifact
@@ -45,6 +45,7 @@
 | **Feature** | E4.1 |
 | **Persona** | Harness developer |
 | **Priority** | P0 |
+| **Status** | Done (2026-07-28) |
 
 ### User story
 
@@ -55,18 +56,19 @@ As a **harness developer**, I want the compile path to load my DSPy module from 
 - [PRD E4.1](../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2)
 - [Architecture §2.1 — Compile vs runtime](../architecture/01-overview-and-principles.md#21-golden-rules)
 - [Architecture §3.3 — `modules/`](../architecture/02-repository-and-layout.md#33-harness-folder-layout)
+- Canonical story file: [26-story.md](epic-stories/26-story.md)
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Loads `compile.module` from `agents/<name>/agent.yaml`
-- [ ] **AC-2** Runs only on `zaumzeug compile` — never during serve/MCP/ACP
-- [ ] **AC-3** Import errors surface with module path and file hint
-- [ ] **AC-4** Validates module is a DSPy `Module` subclass
+- [x] **AC-1** Loads `compile.module` from `agents/<name>/agent.yaml`
+- [x] **AC-2** Runs only on `zaumzeug compile` — never during serve/MCP/ACP
+- [x] **AC-3** Import errors surface with module path and file hint
+- [x] **AC-4** Validates module is a DSPy `Module` subclass
 
 ### Implementation tasks (build)
 
-- [ ] Implement loader in `src/zaumzeug/compile/module_loader.py`
-- [ ] Add harness folder to `sys.path` safely (no traversal)
+- [x] Implement loader in `src/zaumzeug/compile/module_loader.py`
+- [x] Add harness folder to `sys.path` safely (no traversal)
 
 ### Verification (after build)
 
@@ -79,13 +81,19 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-3 | `tests/unit/compile/test_module_loader.py::test_e4_s01_ac3_invalid_path_actionable_error` |
 | AC-4 | `tests/unit/compile/test_module_loader.py::test_e4_s01_ac4_requires_dspy_module_subclass` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/compile/test_module_loader.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/compile/test_module_loader.py -v` passes (4 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Serve path has zero DSPy imports ([PRD G2](../prd.md#3-goals))
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Serve path has zero DSPy imports ([PRD G2](../prd.md#3-goals))
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-07-28)
+
+- `zaumzeug.compile.module_loader.load_dspy_module()` resolves `compile.module` via `resolve_agent_compile`, prepends `agents/<name>/` to `sys.path`, imports `module.path:ClassName`, and requires a `dspy.Module` subclass.
+- Path segments reject traversal; post-import `__file__` must stay under the agent directory.
+- DSPy imported lazily in the loader only; AST check keeps `serve/` / `runtime/` free of `dspy` / `gepa` / `zaumzeug.compile`. CLI `compile` stub until E4-S02a.
 
 ---
 

@@ -1,7 +1,8 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-22 (open #3 resolved — E1-S08 deferred until PyPI publish)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2+ backlog  
+**Last updated:** 2026-07-28 (E4-S01 DSPy module loader done)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4-S01 done; next E4-S02a)  
+
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
 **Document scope:** This PRD defines **what** to build — goals, users, journeys, epics, acceptance criteria, phases, and open decisions. Technical **how** (stack, flows, protocols, repo layout, SDK modules) lives in **[architecture.md](architecture.md)** and topic files under **[architecture/](architecture/00-README.md)**. Cross-reference; do not duplicate.
@@ -305,7 +306,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 | ID | Feature | Acceptance criteria |
 |---|---|---|
-| E4.1 | DSPy module loader | **AC:** Loads `compile.module` from `agents/<name>/agent.yaml`; runs outside request path. |
+| E4.1 | DSPy module loader | **Done** (E4-S01, 2026-07-28) — `zaumzeug.compile.module_loader.load_dspy_module()` loads `compile.module` (`module.path:ClassName`) from `agents/<name>/agent.yaml`; safe agent-dir `sys.path`; validates `dspy.Module` subclass; compile-only (not on serve/runtime import graph). Tests: `tests/unit/compile/test_module_loader.py`. CLI wire-up → E4-S02a. |
 | E4.2 | GEPA compile | **AC:** `zaumzeug compile <harness> [--agent <name>]` runs `dspy.GEPA` per agent config; writes `agents/<name>/artifacts/<run_id>/` and updates `artifacts/current`. Textual feedback metrics. |
 | E4.3 | Export contract | **AC:** `dump_state()` maps to Haystack `system_prompt`, tool descriptions, pipeline Jinja templates; `artifact-manifest.json` per run; golden snapshot tests. Optional input rewrite template per agent. |
 | E4.4 | Haystack GEPA evaluator *(deferred — Phase 4+)* | **AC (when shipped):** `optimize_anything` evaluator wrapper. **Not Phase 2 v1.** |
@@ -315,7 +316,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 **Phase 2 v1 compile scope (resolved):** **`dspy.GEPA` only** (Architecture Pattern A) — optimize prompts/signatures via DSPy modules, export to Haystack artifacts. **Optional within Pattern A:** compile-time GEPA on **input rewrite/clarify templates** (how the harness preprocesses user messages — not optimization of end-user chat at runtime). **`optimize_anything`** (Pattern B: pipeline YAML, direct artifact mutation) is **deferred to Phase 4+**; E4.4 remains specified but not required for Phase 2 ship.
 
-**Story seeds:** Compile example harness; rollback to pinned `artifacts/<run_id>`; workflow diagram golden snapshot (E4-S08).
+**Story seeds:** DSPy module loader **Done** (E4-S01, 2026-07-28). Remaining: compile example harness (E4-S02); rollback to pinned `artifacts/<run_id>` (E4-S07); workflow diagram golden snapshot (E4-S08).
 
 ---
 
@@ -416,7 +417,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4-S01 (DSPy module loader) **Done** 2026-07-28; next E4-S02a |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A; optional **`optimize_anything`** compile (E4.4 / Pattern B) | E8 (+ deferred E4.4) |
 

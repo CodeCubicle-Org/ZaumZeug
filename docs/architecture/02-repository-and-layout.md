@@ -93,13 +93,15 @@ usr-harnesses/<harness-name>/
 | Agent role config | `agents/<agent-name>/agent.yaml` | Prompts, tools, compile, hooks per role |
 | Per-agent LLM | `agents/<agent-name>/agents-models.yaml` | Independent provider/model per agent |
 | Workflow | `workflow.yaml` | Serial stages; `parallelism` per stage (later) |
-| Custom agent logic | `agents/<agent-name>/modules/*.py` | DSPy `Module`; `compile.module` in `agent.yaml` |
+| Custom agent logic | `agents/<agent-name>/modules/*.py` | DSPy `Module`; `compile.module` in `agent.yaml` (`module.path:ClassName`) |
 | Custom tools | `agents/<agent-name>/tools/*.py` | `tools.custom` in `agent.yaml` |
 | Custom pipelines | `pipelines/` | YAML or `PipelineWrapper`; `serve.expose` in `harness.yaml` |
 | GEPA metrics | `agents/<agent-name>/modules/metrics.py` | Textual feedback per agent |
 | DeepEval tests | `eval/test_*.py` | Harness-level; may target specific agents |
 | Prompts / skills | `agents/<agent-name>/prompts/`, `skills/` | Per-agent; GEPA-optimized |
 | Lifecycle hooks | `agents/<agent-name>/hooks.py` | Per-agent sensors |
+
+**Implementation (E4-S01, 2026-07-28):** Compile-time loader `zaumzeug.compile.module_loader.load_dspy_module()` imports `compile.module` relative to `agents/<agent-name>/` (prepends that directory to `sys.path`; rejects traversal). Expects `module.path:ClassName` pointing at a `dspy.Module` subclass under `modules/`. Not used by serve/runtime. Tests: `tests/unit/compile/test_module_loader.py`.
 
 #### 3.3.1 Model config files (naming)
 

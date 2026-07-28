@@ -162,6 +162,8 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E2-S03, 2026-07-08):** Per-agent serve/compile resolution via `zaumzeug.config.resolver` — `artifact` > `system_prompt` > error at serve; `compile.module` required at compile; `resolve_serve_entry()` reads `workflow.yaml` `entry`. Exported from `zaumzeug.config` for doctor, serve, and compile commands.
 
+**Implementation (E4-S01, 2026-07-28):** `zaumzeug.compile.module_loader.load_dspy_module()` consumes `resolve_agent_compile()` and instantiates the DSPy `Module` named by `compile.module` (`module.path:ClassName`). Import errors include the expected file under `agents/<name>/modules/`. Serve/runtime do not import `zaumzeug.compile`. Tests: `tests/unit/compile/test_module_loader.py`. CLI `compile` wire-up → E4-S02a.
+
 **Implementation (E2-S04a, 2026-07-08):** `zaumzeug doctor` in `src/zaumzeug/doctor/` — environment checks (Python 3.11+, package import, `.env`/API keys), harness and workflow config validation, per-agent model registry checks, runtime path checks via `resolve_agent_serve()`, port conflict warn. CLI: optional harness name (project-wide scan when omitted), `--verbose`, `--json`. Tests: `tests/unit/cli/test_doctor.py`, `tests/integration/test_doctor.py`.
 
 **Implementation (E2-S04b, 2026-07-08):** Phase-aware warn checks: `eval` section in Phase 1 (`eval_section`), MCP without `uv` on PATH (`mcp_uv`), stale or missing `docs/workflow-diagram.md` (`workflow_diagram`). `load_harness_for_doctor()` strips warned keys before validation so exit code stays 0 when only warnings fire.

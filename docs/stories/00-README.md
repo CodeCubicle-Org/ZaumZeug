@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-22 (open #3 resolved; E1-S08 deferred) |
+| **Last modified** | 2026-07-28 (E4-S01 done) |
 | **Status** | Active |
 
 ---
@@ -62,8 +62,9 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E1-S06](epic-stories/23-story.md) — Root README / CONTRIBUTING.md | Done | 2026-07-22 |
 | [E1-S07](epic-stories/24-story.md) — Cross-platform CI matrix | Done | 2026-07-22 |
 | [E1-S08](epic-stories/25-story.md) — `zaumzeug install-project` (PyPI) | Deferred | 2026-07-22 (decision; implement with publish) |
+| [E4-S01](epic-stories/26-story.md) — DSPy module loader | Done | 2026-07-28 |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done. [E1-S08](epic-stories/25-story.md) (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved 2026-07-22). Next build: [E4-S01](epic-stories/26-story.md) (Phase 2).
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done. [E1-S08](epic-stories/25-story.md) (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved 2026-07-22). Phase 2 started: [E4-S01](epic-stories/26-story.md) DSPy module loader is done. Next build: [E4-S02a](epic-stories/27.1-story.md).
 
 ---
 
@@ -100,6 +101,22 @@ E1-S05  User docs skeleton ✅
 E1-S06  Root README / CONTRIBUTING.md ✅
 E1-S07  CI matrix (last — validates full stack) ✅
 E1-S08  Future: zaumzeug install-project (deferred — with PyPI publish)
+```
+
+## Phase 2 build graph (E4 start)
+
+```text
+E4-S01  DSPy module loader ✅ (2026-07-28)
+   ↓
+E4-S02a  Compile CLI + Phase 2 schema
+E4-S02b  GEPA runner + artifacts
+   ↓
+E4-S03a / E4-S03b  Export contract + runtime input_rewrite
+E4-S05  Post-compile serve uses artifact
+E4-S06  compile --dry-run
+E4-S07  Artifact rollback
+E4-S08  Workflow diagram at compile
+*(E4-S04 deferred — Pattern B / optimize_anything, Phase 4+)*
 ```
 
 ## Validation summary (2026-07-05, re-checked)

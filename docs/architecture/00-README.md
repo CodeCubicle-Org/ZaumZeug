@@ -1,6 +1,6 @@
 # ZaumZeug — Architecture
 
-**Last updated:** 2026-07-22 (open #3 resolved — E1-S08 deferred until PyPI publish)
+**Last updated:** 2026-07-28 (E4-S01 DSPy module loader done)
 **Related:** [PRD](prd.md) · [Ideation archive](ideation-stage.md) · [Stories index](stories/00-README.md)
 
 **Document scope:** This document defines **how** the system is built — structure, flows, protocols, and SDK modules. Product **what/why**, epics, acceptance criteria, and phases live in **[prd.md](prd.md)**. Cross-reference; do not duplicate.
