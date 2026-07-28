@@ -350,6 +350,10 @@ class EvalConfig(BaseModel):
     """Optional ``eval`` section of ``harness.yaml`` (Architecture §6.3 / E6-S02).
 
     When ``framework`` is omitted, the runner defaults to ``deepeval``.
+
+    Optional ``base_url`` enables Mode C (HTTP black-box against a running
+    ``zaumzeug serve``) — staging/debug only (E6-S06). Empty string uses
+    ``http://127.0.0.1:<serve.hayhooks.port>``.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -359,12 +363,20 @@ class EvalConfig(BaseModel):
     metrics: list[EvalMetricConfig] = Field(default_factory=list)
     judge_model_id: str | None = None
     confident_ai: EvalConfidentAiConfig | None = None
+    base_url: str | None = None
 
     @field_validator("valset")
     @classmethod
     def _valset_non_empty(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("`valset` must be a non-empty path to a JSONL file")
+        return value.strip()
+
+    @field_validator("base_url")
+    @classmethod
+    def _base_url_strip(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         return value.strip()
 
 

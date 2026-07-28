@@ -5,6 +5,10 @@ production Hayhooks wiring (PRD NG3 adjacent).
 
 ``--trace`` (E6-S05) scores a captured Haystack JSONL turn without re-running
 the agent — see :mod:`zaumzeug.eval.trace`.
+
+Mode C (E6-S06): optional HTTP black-box against a running ``zaumzeug serve``
+via ``POST /v1/chat/completions`` (``--base-url`` / ``eval.base_url``).
+Staging and debug only — not a production gate.
 """
 
 from __future__ import annotations
@@ -15,6 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
+import httpx
 from haystack.dataclasses import ChatMessage
 
 from zaumzeug.config import (
@@ -22,6 +27,7 @@ from zaumzeug.config import (
     ConfigValidationError,
     EvalConfig,
     EvalMetricConfig,
+    HarnessConfig,
     load_harness,
     load_merged_agent_models,
     load_workflow,
@@ -38,25 +44,147 @@ from zaumzeug.runtime.workflow import build_stage_messages
 
 __all__ = [
     "DEFAULT_EVAL_FRAMEWORK",
+    "DEFAULT_EVAL_HOST",
+    "DEFAULT_HAYHOOKS_PORT",
     "MISSING_EVAL_MESSAGE",
     "EvalCaseResult",
     "EvalError",
     "EvalResult",
     "builtin_match",
+    "chat_completion_actual_output",
+    "default_eval_base_url",
     "format_eval_result",
     "load_valset_jsonl",
+    "resolve_eval_base_url",
     "resolve_eval_framework",
     "run_eval",
 ]
 
 DEFAULT_EVAL_FRAMEWORK: Literal["deepeval"] = "deepeval"
+DEFAULT_EVAL_HOST = "127.0.0.1"
+DEFAULT_HAYHOOKS_PORT = 1416
 
 MISSING_EVAL_MESSAGE = (
     "No eval configured. Add an `eval:` block to harness.yaml."
 )
 
+# HTTP Mode C timeouts — staging/debug against a local or remote serve.
+_HTTP_EVAL_TIMEOUT = httpx.Timeout(60.0, connect=10.0)
+
 EvalFramework = Literal["deepeval", "builtin"]
 AgentRunner = Callable[[str], str]
+
+
+def _serve_port(harness_config: HarnessConfig) -> int:
+    if harness_config.serve and harness_config.serve.hayhooks:
+        return harness_config.serve.hayhooks.port
+    return DEFAULT_HAYHOOKS_PORT
+
+
+def default_eval_base_url(harness_config: HarnessConfig) -> str:
+    """Default Mode C base URL: localhost + ``serve.hayhooks.port`` (AC-2)."""
+    return f"http://{DEFAULT_EVAL_HOST}:{_serve_port(harness_config)}"
+
+
+def resolve_eval_base_url(
+    *,
+    cli_base_url: str | None,
+    eval_config: EvalConfig,
+    harness_config: HarnessConfig,
+) -> str | None:
+    """Resolve Mode C base URL: CLI ``--base-url`` → ``eval.base_url`` → None.
+
+    An empty string (CLI ``--base-url`` alone, or ``eval.base_url: ""``) means
+    use :func:`default_eval_base_url`. Returns ``None`` for in-process Mode A.
+    """
+    if cli_base_url is not None:
+        raw = cli_base_url
+    elif eval_config.base_url is not None:
+        raw = eval_config.base_url
+    else:
+        return None
+    stripped = raw.strip()
+    if stripped:
+        return stripped.rstrip("/")
+    return default_eval_base_url(harness_config)
+
+
+def chat_completion_actual_output(payload: Mapping[str, Any]) -> str:
+    """Extract assistant text from an OpenAI-shaped chat completion body."""
+    choices = payload.get("choices")
+    if not isinstance(choices, list) or not choices:
+        raise EvalError(
+            "Chat completions response missing non-empty `choices`",
+            suggestion="Confirm the server exposes OpenAI-compatible "
+            "/v1/chat/completions",
+        )
+    first = choices[0]
+    if not isinstance(first, Mapping):
+        raise EvalError(
+            "Chat completions `choices[0]` is not an object",
+            suggestion="Confirm the server returns OpenAI-shaped JSON",
+        )
+    message = first.get("message")
+    if isinstance(message, Mapping):
+        content = message.get("content")
+        if content is not None:
+            return str(content)
+    text = first.get("text")
+    if text is not None:
+        return str(text)
+    raise EvalError(
+        "Chat completions response has no assistant content",
+        suggestion="Confirm choices[0].message.content is present",
+    )
+
+
+def _http_agent_runner(*, base_url: str, model: str) -> AgentRunner:
+    """Mode C: call running serve ``POST /v1/chat/completions`` (E6-S06)."""
+    endpoint = f"{base_url.rstrip('/')}/v1/chat/completions"
+
+    def _run(user_input: str) -> str:
+        try:
+            response = httpx.post(
+                endpoint,
+                json={
+                    "model": model,
+                    "messages": [{"role": "user", "content": user_input}],
+                },
+                timeout=_HTTP_EVAL_TIMEOUT,
+            )
+            response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            body = (exc.response.text or "")[:300]
+            raise EvalError(
+                f"Mode C HTTP eval failed ({exc.response.status_code}) "
+                f"at {endpoint}: {body}",
+                suggestion=(
+                    "Confirm `zaumzeug serve` is running and --base-url matches "
+                    "the serve host/port (staging/debug only)"
+                ),
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise EvalError(
+                f"Mode C HTTP eval could not reach {endpoint}: {exc}",
+                suggestion=(
+                    "Start `zaumzeug serve <harness>` first, or pass "
+                    "--base-url http://127.0.0.1:<port> (staging/debug only)"
+                ),
+            ) from exc
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise EvalError(
+                f"Mode C HTTP eval got non-JSON from {endpoint}",
+                suggestion="Confirm the URL points at zaumzeug serve / Hayhooks",
+            ) from exc
+        if not isinstance(payload, Mapping):
+            raise EvalError(
+                f"Mode C HTTP eval expected a JSON object from {endpoint}",
+            )
+        return chat_completion_actual_output(payload)
+
+    return _run
 
 
 class EvalError(RuntimeError):
@@ -452,6 +580,7 @@ def run_eval(
     deploy: bool = False,
     agent_runner: AgentRunner | None = None,
     trace: Path | str | None = None,
+    base_url: str | None = None,
 ) -> EvalResult:
     """Run harness eval (builtin JSONL or DeepEval) for *harness_name*.
 
@@ -460,6 +589,10 @@ def run_eval(
 
     When *trace* is set (CLI ``--trace``), load that JSONL and score captured
     ``actual_output`` without re-running the agent (E6-S05).
+
+    When *base_url* is set (CLI ``--base-url``) or ``eval.base_url`` is set,
+    use Mode C: HTTP black-box against a running serve (E6-S06). Empty string
+    resolves to localhost + harness port. Staging/debug only.
     """
     root = Path(project_root) if project_root is not None else find_project_root()
     harness_path = resolve_harness_dir(root, harness_name, deploy=deploy)
@@ -495,6 +628,19 @@ def run_eval(
         eval_config,
         framework_override=framework,
     )
+    mode_c_base_url = resolve_eval_base_url(
+        cli_base_url=base_url,
+        eval_config=eval_config,
+        harness_config=harness_config,
+    )
+
+    if mode_c_base_url is not None and trace is not None:
+        raise EvalError(
+            "Cannot combine Mode C (--base-url / eval.base_url) with --trace",
+            harness_name=harness_name,
+            suggestion="Use --trace to score a captured turn, or --base-url "
+            "to black-box a running serve — not both",
+        )
 
     # Fail fast on missing [eval] extra before loading agents / valset (AC-1).
     if resolved_framework == "deepeval":
@@ -537,7 +683,13 @@ def run_eval(
         rows = load_valset_jsonl(valset_path)
 
         runner = agent_runner
-        if runner is None:
+        if runner is None and mode_c_base_url is not None:
+            # Mode C: OpenAI ``model`` is the harness/pipeline identity.
+            runner = _http_agent_runner(
+                base_url=mode_c_base_url,
+                model=harness_name,
+            )
+        elif runner is None:
             harness_models: Path | None = None
             if harness_config.models:
                 harness_models = Path(harness_config.models)

@@ -59,9 +59,11 @@ zaumzeug doctor my-agent
 zaumzeug serve my-agent
 # optional (needs pip install "zaumzeug[eval]"):
 # deepeval test run usr-harnesses/my-agent/eval/
+# Mode C staging/debug — black-box a running serve:
+# zaumzeug eval my-agent --framework builtin --base-url
 ```
 
-Edit `agents/agent/prompts/system.md`, tools, and models as needed. For a fuller research-oriented layout (including a sample `eval/`), copy patterns from `usr-harnesses/example/` or start from [Your first harness](first-harness.md). See [Testing — DeepEval pytest scaffold](../guides/testing.md#deepeval-pytest-scaffold).
+Edit `agents/agent/prompts/system.md`, tools, and models as needed. For a fuller research-oriented layout (including a sample `eval/`), copy patterns from `usr-harnesses/example/` or start from [Your first harness](first-harness.md). See [Testing — DeepEval pytest scaffold](../guides/testing.md#deepeval-pytest-scaffold) and [Mode C](../guides/testing.md#mode-c--http-black-box-stagingdebug).
 
 ---
 

@@ -75,7 +75,7 @@ Full schema examples: Phase 1 canonical examples in [§6.6](05-configuration.md#
 |---|---|---|
 | **A — In-process black-box** | Default: SDK runs Haystack agent, builds `LLMTestCase`, runs metrics (`zaumzeug eval`, `deepeval test run`) | 2 |
 | **B — In-process tracing** | Wrap `Agent.run()` with DeepEval `@observe` / `update_current_span` | 4 |
-| **C — HTTP black-box** | Client calls running `zaumzeug serve` `/v1/chat/completions`; same metrics — staging/debug | 2+ |
+| **C — HTTP black-box** | Client calls running `zaumzeug serve` `/v1/chat/completions`; same metrics — staging/debug ✅ (E6-S06, 2026-07-28) | 2+ |
 
 If `framework: deepeval` (or default) and `deepeval` not installed:
 
@@ -93,8 +93,11 @@ Or set eval.framework: builtin for JSONL checks without DeepEval.
 
 **Implementation (E6-S05, 2026-07-28):** `eval/trace.py` exports Haystack runs to `data/traces/*.jsonl`; `zaumzeug eval --trace <path>` scores without re-running the agent. Journey C docs: [testing.md](../user-docs/guides/testing.md#trace--test-case-journey-c).
 
+**Implementation (E6-S06, 2026-07-28):** Mode C HTTP black-box — `zaumzeug eval --base-url [URL]` or `eval.base_url` posts to a running serve `POST /v1/chat/completions`; empty URL → `http://127.0.0.1:<serve.hayhooks.port>`. Same builtin / DeepEval metrics as Mode A. **Staging/debug only** — not a production gate. Tests: `tests/integration/eval/test_http_eval.py`.
+
 CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 `zaumzeug eval <name> --trace data/traces/run-001.jsonl` scores a captured turn (E6-S05).
+`zaumzeug eval <name> --base-url` (or `--base-url http://host:port`) black-boxes a running serve (E6-S06).
 
 **`eval` config fields (deepeval):**
 
@@ -105,6 +108,7 @@ CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 | `eval.metrics` | DeepEval metric types + thresholds |
 | `eval.judge_model_id` | `models.yaml` key for LLM-as-judge |
 | `eval.confident_ai` | Optional cloud sync (`enabled`, `sync_test_results`); requires `deepeval login` |
+| `eval.base_url` | Optional Mode C — HTTP black-box against running serve (empty = localhost + harness port); staging/debug only |
 
 **Suggested metrics by harness type:**
 

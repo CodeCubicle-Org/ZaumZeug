@@ -54,7 +54,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract on ephemeral port — `tests/integration/conftest.py::ephemeral_serve_url`, `tests/integration/test_openai_contract.py` (`-k e3_s07`); HTTP `model_id` override wired in `serve/runner.py`. Cross-OS green closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
 
-| `zaumzeug eval` | **Done** (E6-S02 / E6-S05) — optional regression; `--trace <file>` scores a captured turn |
+| `zaumzeug eval` | **Done** (E6-S02 / E6-S05 / E6-S06) — optional regression; `--trace <file>` scores a captured turn; `--base-url` Mode C HTTP against running serve (staging/debug) |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
 | `zaumzeug serve` (dev) | **Done** (E3-S02, 2026-07-20) — Hayhooks runner, OpenAI REST, localhost bind |
 | `--dry-run` on compile | **Done** (E4-S06, 2026-07-28) — validate without GEPA/LLM |
@@ -106,7 +106,9 @@ usr-harnesses/<harness>/eval/
 
 **Implementation (E6-S05, 2026-07-28):** Trace export + `zaumzeug eval --trace` — see [§13.4](#134-trace-capture-phase-2).
 
-Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace data/traces/….jsonl`, or `deepeval test run usr-harnesses/<harness>/eval/`. See [user-docs/guides/testing.md](../user-docs/guides/testing.md).
+**Implementation (E6-S06, 2026-07-28):** Mode C HTTP black-box — `zaumzeug eval --base-url [URL]` or `eval.base_url` posts to a running serve `POST /v1/chat/completions`; empty URL → `http://127.0.0.1:<serve.hayhooks.port>`. Same metrics as in-process. Staging/debug only. Tests: `tests/integration/eval/test_http_eval.py`. Docs: [user-docs/guides/testing.md](../user-docs/guides/testing.md#mode-c--http-black-box-stagingdebug).
+
+Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace data/traces/….jsonl`, `zaumzeug eval <harness> --base-url`, or `deepeval test run usr-harnesses/<harness>/eval/`. See [user-docs/guides/testing.md](../user-docs/guides/testing.md).
 
 ### 13.4 Trace capture (Phase 2+)
 
@@ -123,7 +125,7 @@ Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace da
 | Phase | Debug/test deliverables |
 |---|---|
 | 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06), OpenAI REST contract ✅ (E3-S07) |
-| 2 | compile `--dry-run` (**E4-S06 Done** — `tests/integration/compile/test_compile_dry_run.py`), export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), `zaumzeug eval` (**E6-S02 Done** — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**E6-S04 Done** — `tests/integration/eval/test_deepeval_scaffold.py`), trace → `LLMTestCase` (**E6-S05 Done** — `tests/unit/eval/test_trace.py`) |
+| 2 | compile `--dry-run` (**E4-S06 Done** — `tests/integration/compile/test_compile_dry_run.py`), export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), `zaumzeug eval` (**E6-S02 Done** — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**E6-S04 Done** — `tests/integration/eval/test_deepeval_scaffold.py`), trace → `LLMTestCase` (**E6-S05 Done** — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**E6-S06 Done** — `tests/integration/eval/test_http_eval.py`) |
 | 3 | MCP integration tests, tool correctness eval when DeepEval present |
 | 4 | `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
 
@@ -167,7 +169,7 @@ End-user walkthrough: [user-docs/guides/testing.md](../user-docs/guides/testing.
 |---|---|---|---|
 | **Smoke** | Every push; `windows-latest`, `ubuntu-latest`, `macos-latest` | OS install wrappers (`client-install.sh` / `.ps1 --skip-venv --verify`), `zaumzeug doctor`, `serve --dry-run`, `install/ci_serve_smoke.py`, `pytest tests/integration/test_openai_contract.py`, unit+integration suite | [E1-S07](../stories/03-epic.md#e1-s07-cross-platform-ci-matrix) ✅ *(closes DoD from [E1-S02](../stories/epic-stories/19-story.md#definition-of-done), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests))* |
 | **Unit + integration** | Every push (same workflow or dedicated job) | `pytest tests/unit tests/integration tests/usr-harnesses -v` | [E2](../stories/01-epic.md), [E3-S06](../stories/02-epic.md#e3-s06-phase-1-test-infrastructure-and-security-baseline), [E3-S07](../stories/02-epic.md#e3-s07-openai-rest-contract-tests) ✅ |
-| **Eval regression** | PR touching prompts/artifacts; nightly | `deepeval test run` / `zaumzeug eval` on critical cases; `deploy.eval_gate` on release (**Done** E6-S03 / E5-S06); harness `eval/` scaffold (**Done** E6-S04); `eval --trace` (**Done** E6-S05) | [E6](../stories/05-epic.md), [E5-S06](../stories/epic-stories/46-story.md), [E6-S04](../stories/epic-stories/37-story.md), [E6-S05](../stories/epic-stories/38-story.md) |
+| **Eval regression** | PR touching prompts/artifacts; nightly | `deepeval test run` / `zaumzeug eval` on critical cases; `deploy.eval_gate` on release (**Done** E6-S03 / E5-S06); harness `eval/` scaffold (**Done** E6-S04); `eval --trace` (**Done** E6-S05); Mode C `--base-url` staging/debug (**Done** E6-S06) | [E6](../stories/05-epic.md), [E5-S06](../stories/epic-stories/46-story.md), [E6-S04](../stories/epic-stories/37-story.md), [E6-S05](../stories/epic-stories/38-story.md), [E6-S06](../stories/epic-stories/39-story.md) |
 | **Live e2e** | Nightly / manual | `HARNESS_LIVE_LLM=1 pytest tests/e2e -v` | Optional — not Phase 1 CI gate |
 
 **Implementation (E1-S07, 2026-07-22):** Workflow [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml) — Python 3.11, pip cache, fail-fast, 30m timeout; mock-only (no `HARNESS_LIVE_LLM=1`); ephemeral serve smoke via `install/ci_serve_smoke.py` + `zaumzeug serve --port`. Tests: `tests/unit/ci/test_ci_matrix_workflow.py`, `tests/unit/install/test_ci_serve_smoke.py`.
@@ -184,6 +186,8 @@ pytest tests/unit/config/test_schemas.py -v -k e2_s01
 # Optional harness regression (requires [eval])
 pip install -e ".[dev,eval]"
 deepeval test run usr-harnesses/example/eval/
+zaumzeug eval example --framework builtin
+zaumzeug eval example --framework builtin --base-url   # Mode C vs running serve (staging/debug)
 
 # Re-record HTTP cassettes (Phase 2+; requires keys)
 PYTEST_OPENAI_API_KEY=sk-... pytest tests/integration --record-mode=once

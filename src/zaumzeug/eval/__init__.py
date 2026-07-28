@@ -4,6 +4,7 @@ Importing this package must not require ``deepeval``. Call
 :func:`require_deepeval` only on paths that need DeepEval (E6-S01).
 The ``zaumzeug eval`` CLI lives in :mod:`zaumzeug.eval.runner` (E6-S02).
 Trace export / ``--trace`` scoring lives in :mod:`zaumzeug.eval.trace` (E6-S05).
+Mode C HTTP black-box (``--base-url``) lives in the eval runner (E6-S06).
 """
 
 from __future__ import annotations

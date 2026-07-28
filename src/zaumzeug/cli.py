@@ -127,7 +127,7 @@ def _run_command(args: argparse.Namespace) -> int:
 
 
 def _eval_command(args: argparse.Namespace) -> int:
-    """Run harness eval (builtin JSONL or DeepEval) — E6-S02; ``--trace`` E6-S05."""
+    """Run harness eval — E6-S02; ``--trace`` E6-S05; Mode C ``--base-url`` E6-S06."""
     configure_logging(verbose=args.verbose)
     from zaumzeug.eval.runner import EvalError, format_eval_result, run_eval
 
@@ -137,6 +137,7 @@ def _eval_command(args: argparse.Namespace) -> int:
             framework=args.framework,
             agent_name=args.agent,
             trace=args.trace,
+            base_url=args.base_url,
         )
     except EvalError as exc:
         print(str(exc), file=sys.stderr)
@@ -354,6 +355,18 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "score a captured Haystack JSONL trace under data/traces/ "
             "(does not re-run the agent)"
+        ),
+    )
+    eval_cmd.add_argument(
+        "--base-url",
+        nargs="?",
+        const="",
+        default=None,
+        metavar="URL",
+        help=(
+            "Mode C (staging/debug): eval via HTTP against a running "
+            "zaumzeug serve /v1/chat/completions; omit URL to use "
+            "http://127.0.0.1:<serve.hayhooks.port>"
         ),
     )
     eval_cmd.add_argument(

@@ -5,7 +5,7 @@
 | **Document** | Epic E6 user stories |
 | **File** | `docs/stories/05-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E6-S05 done) |
+| **Last modified** | 2026-07-28 (E6-S06 done) |
 | **Status** | In progress |
 | **Build order** | **5 of 8** (before E5 — deploy eval gate needs `zaumzeug eval`) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -296,6 +296,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E6.6 |
 | **Persona** | Harness developer |
 | **Priority** | P3 |
+| **Status** | Done (2026-07-28) |
 
 ### User story
 
@@ -303,19 +304,18 @@ As a **harness developer**, I want to eval against a running server, so that I c
 
 ### References
 
-- [PRD E6.6](../prd.md#epic-e6--evaluation-and-quality-phase-2-optional)
 - [Architecture §6.3 — Mode C](../architecture/05-configuration.md#63-zaumzeug-eval-frameworks)
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Optional Mode C: eval calls running `zaumzeug serve` via `/v1/chat/completions`
-- [ ] **AC-2** Configurable base URL (default localhost + harness port)
-- [ ] **AC-3** Same metrics as in-process mode where applicable
+- [x] **AC-1** Optional Mode C: eval calls running `zaumzeug serve` via `/v1/chat/completions`
+- [x] **AC-2** Configurable base URL (default localhost + harness port)
+- [x] **AC-3** Same metrics as in-process mode where applicable
 
 ### Implementation tasks (build)
 
-- [ ] Add HTTP client path in eval runner
-- [ ] CLI flag: `--base-url` or config field
+- [x] Add HTTP client path in eval runner
+- [x] CLI flag: `--base-url` or config field
 
 ### Verification (after build)
 
@@ -327,13 +327,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-2 | `tests/integration/eval/test_http_eval.py::test_e6_s06_ac2_base_url_override` |
 | AC-3 | `tests/integration/eval/test_http_eval.py::test_e6_s06_ac3_same_metrics_as_inprocess` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/eval/test_http_eval.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/eval/test_http_eval.py -v` passes
 
 ### Definition of done
 
-- [ ] Documented as staging/debug tool only
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Documented as staging/debug tool only
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 

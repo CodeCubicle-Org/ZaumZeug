@@ -7,7 +7,7 @@
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
-DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra. Optional harness `eval/` pytest files (`zaumzeug init --with-eval` or the example harness) run with `deepeval test run` (**Done** E6-S04). Captured Haystack turns export to `data/traces/` and score with `zaumzeug eval --trace` (**Done** E6-S05).
+DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra. Optional harness `eval/` pytest files (`zaumzeug init --with-eval` or the example harness) run with `deepeval test run` (**Done** E6-S04). Captured Haystack turns export to `data/traces/` and score with `zaumzeug eval --trace` (**Done** E6-S05). Mode C black-boxes a running serve with `zaumzeug eval --base-url` (**Done** E6-S06) — staging/debug only.
 
 For SDK design detail, see internal `docs/architecture/10-operations-and-reference.md` §13 and `docs/architecture/03-technology-stack.md` §4.5.
 
@@ -42,6 +42,7 @@ deepeval test run usr-harnesses/example/eval/
 # or
 zaumzeug eval example
 zaumzeug eval example --framework builtin --trace data/traces/run-001.jsonl
+zaumzeug eval example --framework builtin --base-url   # Mode C vs running serve
 
 # Live provider smoke (maintainers; costs money)
 HARNESS_LIVE_LLM=1 pytest tests/e2e -v
@@ -200,9 +201,37 @@ zaumzeug eval example --framework builtin
 zaumzeug eval example                    # deepeval — needs [eval] extra
 zaumzeug eval example --agent researcher
 zaumzeug eval example --framework builtin --trace data/traces/run-001.jsonl
+zaumzeug eval example --framework builtin --base-url
+zaumzeug eval example --framework builtin --base-url http://staging:1416
 ```
 
 **Builtin** loads the valset and checks exact/substring match on `expected_output` when present (no DeepEval). **DeepEval** builds `LLMTestCase` rows from agent output and runs configured metrics. Missing `eval:` exits with a clear error. See [CLI — zaumzeug eval](../reference/cli.md#zaumzeug-eval).
+
+### Mode C — HTTP black-box (staging/debug)
+
+Optional Mode C evals against an **already-running** `zaumzeug serve` over HTTP instead of building the agent in-process (Architecture §6.3). Same builtin / DeepEval metrics apply to the chat-completion response. Use this for staging and deployment debugging — **not** as a production gate or CI default.
+
+```bash
+# Terminal 1
+zaumzeug serve example
+
+# Terminal 2 — default URL http://127.0.0.1:<serve.hayhooks.port>
+zaumzeug eval example --framework builtin --base-url
+
+# Or point at a staging host
+zaumzeug eval example --framework builtin --base-url http://staging.example:1416
+```
+
+Persist a default Mode C target in `harness.yaml`:
+
+```yaml
+eval:
+  framework: builtin
+  valset: data/val.jsonl
+  base_url: http://127.0.0.1:1416   # or "" for localhost + harness port
+```
+
+CLI `--base-url` overrides `eval.base_url`. Do not combine Mode C with `--trace`.
 
 ### Trace → test case (Journey C)
 
@@ -415,7 +444,7 @@ zaumzeug compile example --dry-run
 | Phase | Testing deliverables |
 |---|---|
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
-| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (**Done** E6-S05 — `tests/unit/eval/test_trace.py`) |
+| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (**Done** E6-S05 — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**Done** E6-S06 — `tests/integration/eval/test_http_eval.py`) |
 | **3** | MCP integration tests, tool-correctness eval |
 | **4** | Production trace ratchet, `@observe` / Confident AI sync |
 
@@ -424,4 +453,4 @@ zaumzeug compile example --dry-run
 ## Related guides
 
 - [Multi-agent workflow](multi-agent-workflow.md) — `workflow.yaml` and stage routing under test
-- [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_LIVE_LLM`, debugpy, serve/compile `--dry-run`, `doctor`, `eval` / `--trace`, Phase 1 security notes
+- [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_LIVE_LLM`, debugpy, serve/compile `--dry-run`, `doctor`, `eval` / `--trace` / `--base-url`, Phase 1 security notes
