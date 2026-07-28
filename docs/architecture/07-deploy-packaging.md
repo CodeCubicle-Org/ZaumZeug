@@ -103,7 +103,9 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 
 **Target command on server:** `zaumzeug serve <name> --deploy` (or `HARNESS_ROOT=deploy`).
 
-**Implementation (E5-S03, 2026-07-28):** Full Hayhooks serve from `deploy/<name>/` is live — same OpenAI REST as dev, fails on missing/invalid manifest, works without `usr-harnesses/`. Tests: `tests/integration/deploy/test_serve_deploy.py`. Env-only docs remain [E5-S04](../stories/epic-stories/44-story.md); Linux CI smoke remains [E5-S08](../stories/epic-stories/48-story.md).
+**Implementation (E5-S03, 2026-07-28):** Full Hayhooks serve from `deploy/<name>/` is live — same OpenAI REST as dev, fails on missing/invalid manifest, works without `usr-harnesses/`. Tests: `tests/integration/deploy/test_serve_deploy.py`.
+
+**Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` is the env equivalent of `--deploy` for serve / mcp / acp (and doctor / run) via `config/harness_root.resolve_harness_path()`. Docs: `README.deploy.md`, CLI reference. Tests: `tests/unit/deploy/test_harness_root.py` (`e5_s04`). Linux CI smoke remains [E5-S08](../stories/epic-stories/48-story.md).
 
 ### 10.6 Deploy platform targets
 

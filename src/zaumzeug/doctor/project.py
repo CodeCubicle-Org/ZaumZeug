@@ -4,14 +4,20 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from zaumzeug.config.harness_root import (
+    DEPLOY_HARNESS_ROOT,
+    DEV_HARNESS_ROOT,
+    harness_root_segment,
+)
+
 
 def find_project_root(start: Path | str | None = None) -> Path:
     """Walk upward from *start* (or cwd) to locate the harness project root."""
     current = Path(start or Path.cwd()).resolve()
     for candidate in (current, *current.parents):
-        if (candidate / "usr-harnesses").is_dir():
+        if (candidate / DEV_HARNESS_ROOT).is_dir():
             return candidate
-        if (candidate / "deploy").is_dir():
+        if (candidate / DEPLOY_HARNESS_ROOT).is_dir():
             return candidate
         if (candidate / "config" / "models.yaml").is_file():
             return candidate
@@ -24,8 +30,6 @@ def discover_harnesses(
     deploy: bool = False,
 ) -> list[tuple[str, Path]]:
     """Return ``(name, harness_dir)`` for each harness under the active root."""
-    from zaumzeug.config.harness_root import harness_root_segment
-
     project_root = Path(project_root)
     harness_root = project_root / harness_root_segment(deploy=deploy)
     if not harness_root.is_dir():

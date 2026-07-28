@@ -26,9 +26,11 @@ from zaumzeug.config.harness_root import (
     DEPLOY_MANIFEST,
     DEV_HARNESS_ROOT,
     HARNESS_ROOT_ENV,
+    PROTOCOL_ROOT_COMMANDS,
     harness_dir,
     harness_root_segment,
     is_deploy_mode,
+    resolve_harness_path,
 )
 from zaumzeug.config.resolver import (
     ARTIFACT_MANIFEST,
@@ -69,6 +71,7 @@ __all__ = [
     "DEV_HARNESS_ROOT",
     "HARNESS_ROOT_ENV",
     "PHASE_GATED_FIELDS",
+    "PROTOCOL_ROOT_COMMANDS",
     "AgentConfig",
     "AgentModelsConfig",
     "AgentResolutionError",
@@ -96,6 +99,7 @@ __all__ = [
     "harness_dir",
     "harness_root_segment",
     "is_deploy_mode",
+    "resolve_harness_path",
     "load_agent_config",
     "load_agent_yaml",
     "load_harness",

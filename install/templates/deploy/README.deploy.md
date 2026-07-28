@@ -39,8 +39,14 @@ Python **3.11+** must already be on PATH. From this directory:
 
 ## Environment
 
+| Variable | Values | Effect |
+|---|---|---|
+| `HARNESS_ROOT` | `deploy` | Force production root (`deploy/`) for `serve` / `mcp` / `acp` (and other root-aware CLIs) without passing `--deploy` — intended for containers and systemd |
+| Provider keys | (see `.env.example`) | Put API keys in `.env` only — never in YAML or this bundle |
+
 1. Copy `.env.example` → `.env` if present (never commit secrets).
 2. Put provider API keys in `.env` only — never in YAML or this bundle.
+3. In container/systemd unit files, prefer `HARNESS_ROOT=deploy` so ops does not need `--deploy` on every command.
 
 ---
 
@@ -50,10 +56,11 @@ From the **project root** that contains `deploy/{{harness_name}}/` (not from ins
 
 ```bash
 zaumzeug serve {{harness_name}} --deploy
-# or: HARNESS_ROOT=deploy zaumzeug serve {{harness_name}}
+# equivalent env override (containers / systemd):
+HARNESS_ROOT=deploy zaumzeug serve {{harness_name}}
 ```
 
-`--deploy` loads **only** this production tree — no `usr-harnesses/` required. The OpenAI-compatible API matches dev serve:
+`--deploy` or `HARNESS_ROOT=deploy` loads **only** this production tree — no `usr-harnesses/` required. The OpenAI-compatible API matches dev serve:
 
 | Endpoint | Purpose |
 |---|---|

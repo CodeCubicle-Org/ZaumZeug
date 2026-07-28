@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-28 (E5-S03 serve --deploy)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S07 **Done**; E5-S06 **Done** early with E6-S03; E5-S01–S03 **Done**; next E5-S04 `HARNESS_ROOT=deploy`)  
+**Last updated:** 2026-07-28 (E5-S04 `HARNESS_ROOT=deploy`)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S07 **Done**; E5-S06 **Done** early with E6-S03; E5-S01–S04 **Done**; next E5-S05 target ship docs)  
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -64,7 +64,7 @@ See [Architecture §2.2.1](architecture/01-overview-and-principles.md#221-harnes
 |---|---|
 | **Harness developer** | Scaffold harness, configure models/tools, compile, deploy |
 | **SDK maintainer** | Extend SDK, example harness, CI, docs |
-| **Ops / platform** | Run `deploy/<name>/` on server with `.env` and `zaumzeug serve --deploy` |
+| **Ops / platform** | Run `deploy/<name>/` on server with `.env` and `zaumzeug serve --deploy` (or `HARNESS_ROOT=deploy`) |
 | **Client integrator** | Call harness via REST, MCP, or ACP from app or IDE |
 
 ---
@@ -333,7 +333,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E5.1 | `zaumzeug deploy` | **Done** (E5-S01, 2026-07-28). **AC:** Writes `deploy/<name>/` with stripped yaml, `workflow.yaml`, per-agent runtime files, `docs/workflow-diagram.md`, pinned per-agent artifacts, `manifest.json`, `README.deploy.md`, target install scripts. Tests: `tests/integration/deploy/test_deploy.py` (8 passed, 0 skipped). |
 | E5.2 | Exclude dev files | **Done** (E5-S02, 2026-07-28). **AC:** Packager copy rules per [Architecture §10.1](architecture/07-deploy-packaging.md#101-dev-vs-deploy): `agents/<name>/` runtime subset; exclude `modules/`, `data/`, `eval/`, `skills/`; include `docs/workflow-diagram.md`. |
 | E5.3 | `zaumzeug serve --deploy` | **Done** (E5-S03, 2026-07-28). **AC:** Loads only from `deploy/<name>/`; same OpenAI REST as dev serve; fails on missing folder or invalid `manifest.json`; works without `usr-harnesses/`. Tests: `tests/integration/deploy/test_serve_deploy.py` (4 passed, 0 skipped). |
-| E5.4 | `HARNESS_ROOT=deploy` | **AC:** Env var forces deploy root for serve/mcp/acp/run. Default dev root is `usr-harnesses/`. |
+| E5.4 | `HARNESS_ROOT=deploy` | **Done** (E5-S04, 2026-07-28). **AC:** Env var forces deploy root for serve/mcp/acp/run. Default dev root is `usr-harnesses/`. Tests: `tests/unit/deploy/test_harness_root.py` (2 passed). |
 | E5.5 | Target ship workflow | **AC:** Documented path: copy `deploy/<name>/` to target machine → run bundled `target_install` (or `install/target_install.py --deploy-dir …`) → create `.env` → `zaumzeug serve <name> --deploy`. Installs runtime deps only (`pip install zaumzeug` — Haystack/Hayhooks via SDK); **no** DSPy/GEPA/DeepEval. Python 3.11+ must already be on the target. |
 | E5.6 | Deploy eval gate | **Done** (E5-S06 / E6-S03, 2026-07-28). **AC:** `deploy.eval_gate` (`skip` \| `warn` \| `block`) and `--eval-gate` CLI override behave per [Architecture §6.4](architecture/05-configuration.md#64-deploy-eval-gate). |
 | E5.7 | Deploy git policy | **AC:** Default `.gitignore` includes `deploy/` and `usr-harnesses/*/artifacts/`; documented option to commit `deploy/<name>/` for audited releases; CI may build and upload bundle as artifact. |
@@ -404,12 +404,12 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | `zaumzeug init` | 1 | E1 |
 | `zaumzeug doctor` | 1 | E2 |
-| `zaumzeug serve [--deploy]` | 1–2 | E3, E5 (**E5-S03 Done** 2026-07-28 — production root) |
-| `zaumzeug run [--deploy]` | 1 | E3 |
+| `zaumzeug serve [--deploy]` | 1–2 | E3, E5 (**E5-S03 Done** 2026-07-28 — production root; **E5-S04 Done** — `HARNESS_ROOT=deploy`) |
+| `zaumzeug run [--deploy]` | 1–2 | E3, E5 (`HARNESS_ROOT=deploy` via E5-S04) |
 | `zaumzeug compile [--workflow-diagram-only]` | 2 | E4 |
 | `zaumzeug deploy` | 2 | E5 |
 | `zaumzeug eval` | 2 | E6 (optional) |
-| `zaumzeug mcp` / `zaumzeug acp` | 3 | E7 |
+| `zaumzeug mcp` / `zaumzeug acp` | 3 | E7 (`HARNESS_ROOT=deploy` stub wiring **Done** E5-S04; full protocol → E7) |
 
 **Future commands (not Phase 1–4 v1):** `zaumzeug export <name>` (tarball of `deploy/`); `zaumzeug replay <name> --trace` (trace replay); `zaumzeug install-project` (PyPI consumer scaffold — [E1-S08](stories/epic-stories/25-story.md); deferred until package publish).
 
@@ -421,7 +421,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S07](stories/epic-stories/40-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); [E5-S01](stories/epic-stories/41-story.md)–[E5-S03](stories/epic-stories/43-story.md) **Done** 2026-07-28; next [E5-S04](stories/epic-stories/44-story.md) |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S07](stories/epic-stories/40-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); [E5-S01](stories/epic-stories/41-story.md)–[E5-S04](stories/epic-stories/44-story.md) **Done** 2026-07-28; next [E5-S05](stories/epic-stories/45-story.md) |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A | E8 |
 

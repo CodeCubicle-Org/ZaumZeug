@@ -128,7 +128,7 @@ Requirements: **[PRD G4](../prd.md#3-goals)**, **[E1.7](../prd.md#epic-e1--onboa
 | **CI matrix (Win / macOS / Linux)** | **Done** (E1-S07, 2026-07-22) — [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml); Python 3.11; install wrappers → doctor → dry-run → `ci_serve_smoke.py` → contract + unit/integration pytest |
 | **No hardcoded paths** | SDK and install use `pathlib.Path`; no `/` or `\` literals for harness roots, venv, or artifacts |
 | **OS detection** | `platform.system()` for venv paths (`Scripts` vs `bin`), activation hints, and optional shell-specific messaging — not duplicated in shell scripts |
-| **Env over convention** | `HARNESS_ROOT`, `HARNESS_LOG_LEVEL`, port overrides in yaml — avoid OS-specific defaults in code |
+| **Env over convention** | `HARNESS_ROOT`, `HARNESS_LOG_LEVEL`, port overrides in yaml — avoid OS-specific defaults in code. **`HARNESS_ROOT=deploy`** ✅ (E5-S04, 2026-07-28) forces `deploy/` for serve/mcp/acp via `config/harness_root.py` |
 | **Line endings** | Repo `.gitattributes` normalizes text; generated files use `\n` |
 | **Subprocess** | Use list-form `subprocess` args; no shell=True for install/serve unless documented for a specific wrapper |
 

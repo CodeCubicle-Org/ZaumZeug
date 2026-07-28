@@ -15,8 +15,7 @@ from zaumzeug.config import (
     load_merged_agent_models,
     load_workflow,
 )
-from zaumzeug.config.harness_root import harness_dir as resolve_harness_dir
-from zaumzeug.config.harness_root import is_deploy_mode
+from zaumzeug.config.harness_root import resolve_harness_path
 from zaumzeug.config.schemas import WorkflowConfig, WorkflowStage
 from zaumzeug.doctor.project import find_project_root
 from zaumzeug.runtime.factory import RuntimeFactoryError, build_agent_bundle
@@ -165,8 +164,7 @@ def run_workflow(
     and forwards prior stage output as context to the next stage.
     """
     root = Path(project_root) if project_root is not None else find_project_root()
-    deploy_mode = is_deploy_mode(deploy_flag=deploy)
-    harness_path = resolve_harness_dir(root, harness_name, deploy=deploy_mode)
+    harness_path = resolve_harness_path(root, harness_name, deploy_flag=deploy)
 
     harness_yaml = harness_path / "harness.yaml"
     if not harness_yaml.is_file():

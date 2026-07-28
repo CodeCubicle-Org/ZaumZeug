@@ -17,7 +17,9 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 **Implementation (E2-S04c, 2026-07-08):** Harness root resolution centralized in `src/zaumzeug/config/harness_root.py` (`is_deploy_mode()`, `harness_dir()`). `zaumzeug doctor --deploy` validates bundles under `deploy/<name>/`; `zaumzeug serve --dry-run --deploy` uses the same root resolution ([E2-S05](../stories/epic-stories/06-story.md)).
 
-**Implementation (E5-S03, 2026-07-28):** Full Hayhooks `zaumzeug serve <name> --deploy` loads only `deploy/<name>/` (same OpenAI REST as dev serve), fails on missing folder or invalid `manifest.json`, and works without `usr-harnesses/`. Tests: `tests/integration/deploy/test_serve_deploy.py` (`e5_s03`). Env-only `HARNESS_ROOT=deploy` docs/CI remain [E5-S04](../stories/epic-stories/44-story.md).
+**Implementation (E5-S03, 2026-07-28):** Full Hayhooks `zaumzeug serve <name> --deploy` loads only `deploy/<name>/` (same OpenAI REST as dev serve), fails on missing folder or invalid `manifest.json`, and works without `usr-harnesses/`. Tests: `tests/integration/deploy/test_serve_deploy.py` (`e5_s03`).
+
+**Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` is the env equivalent of `--deploy` for serve / mcp / acp (and doctor / run). Canonical API: `resolve_harness_path()` in `config/harness_root.py`. Docs: `README.deploy.md`, CLI reference. Tests: `tests/unit/deploy/test_harness_root.py` (`e5_s04`).
 
 **Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` wired from `zaumzeug serve` and `zaumzeug compile` when `--verbose` or `HARNESS_LOG_LEVEL=DEBUG`. Structured request context via `log_request()`; API keys redacted in log output.
 
@@ -39,6 +41,7 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 | `zaumzeug install-project` | **Deferred** — PyPI consumer scaffold (no editable install); after package publish ([E1-S08](../stories/epic-stories/25-story.md)) |
 | `zaumzeug serve <harness>` | Interactive: workflow `entry` agent via Hayhooks (`/v1/chat/completions`, optional MCP/ACP) |
 | `zaumzeug serve <harness> --deploy` | Same OpenAI REST as dev serve, loads **only** `deploy/<name>/` (manifest required; no `usr-harnesses/`) ([E5-S03](../stories/epic-stories/43-story.md)) |
+| `HARNESS_ROOT=deploy` | Env equivalent of `--deploy` for serve / mcp / acp (and doctor / run); preferred in containers / systemd ([E5-S04](../stories/epic-stories/44-story.md)) |
 | `zaumzeug serve <harness> --dry-run` | Validate `harness.yaml`, `workflow.yaml`, and resolved paths; print summary — no Hayhooks bind, no LLM ([E2-S05](../stories/epic-stories/06-story.md), [E2-S07](../stories/epic-stories/08-story.md)); combine with `--deploy` for production bundles |
 | `zaumzeug serve <harness> --verbose` | Enable SDK + Haystack debug logging ([E2-S06](../stories/epic-stories/07-story.md)); equivalent to `HARNESS_LOG_LEVEL=DEBUG` |
 | `zaumzeug compile <harness> --verbose` | Same structured logging for compile path ([E2-S06](../stories/epic-stories/07-story.md)) |

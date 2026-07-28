@@ -221,13 +221,15 @@ compile:
 
 **Implementation (E2-S04c, 2026-07-08):** `zaumzeug doctor --deploy` (or `HARNESS_ROOT=deploy`) resolves harnesses under `deploy/<name>/`. Validates deploy `manifest.json` (§10.3 schema) and pinned `artifact-manifest.json` paths when `artifact_run_id` is a per-agent map; reuses E2-S04a core checks (config, models, runtime paths, port). Dev-only warnings (`mcp_uv`, `workflow_diagram`, `artifact_module`) are skipped in deploy mode. Root resolution: `src/zaumzeug/config/harness_root.py`.
 
+**Implementation (E5-S04, 2026-07-28):** Canonical env-aware API `resolve_harness_path()` in `config/harness_root.py` — `HARNESS_ROOT=deploy` forces `deploy/` for serve / mcp / acp (and doctor / run). Tests: `tests/unit/deploy/test_harness_root.py`.
+
 **Implementation (E4-S05, 2026-07-28):** Dev-mode warn check `artifact_module` (`check_artifact_module_staleness`) compares `compile.module` source SHA-256 to `source_hash` in `artifact-manifest.json`. Mismatch → warn (exit 0) suggesting re-compile. Export records `source_hash` via `compile/export.py`. Tests: `tests/integration/test_doctor.py::test_e4_s05_ac5_stale_artifact_warn`.
 
 **Implementation (E4-S07, 2026-07-28):** `check_pinned_artifact` — fail when `agent.artifact` pin lacks a valid `artifact-manifest.json`; warn when explicit `<run_id>` pin differs from `artifacts/current`. Tests: `tests/integration/test_doctor.py::test_e4_s07_ac2_doctor_validates_pinned_manifest`. Deploy `artifact_run_id` pin contract: `tests/integration/deploy/test_deploy_pin.py` (shared E5-S01).
 
 **Implementation (E2-S05, 2026-07-08):** `zaumzeug serve <harness> --dry-run` in `src/zaumzeug/serve/` — `validate_serve()` uses strict `load_harness()` and `load_workflow()`, `resolve_serve_entry()`, and doctor model/runtime checks; optional `--deploy` and `--json`. No Hayhooks bind or LLM. Tests: `tests/integration/test_serve_dry_run.py`.
 
-**Implementation (E5-S03, 2026-07-28):** `zaumzeug serve <harness> --deploy` binds Hayhooks from `deploy/<name>/` only (manifest required). Tests: `tests/integration/deploy/test_serve_deploy.py`.
+**Implementation (E5-S03, 2026-07-28):** `zaumzeug serve <harness> --deploy` binds Hayhooks from `deploy/<name>/` only (manifest required). Tests: `tests/integration/deploy/test_serve_deploy.py`. Env-only equivalent: `HARNESS_ROOT=deploy` (E5-S04).
 
 **Implementation (E3-S02, 2026-07-20):** `zaumzeug serve <harness>` via `serve/runner.py` — same `validate_serve()`, then `build_agent()`, Hayhooks on `127.0.0.1` / `serve.hayhooks.port`. Tests: `tests/integration/test_serve.py`, `tests/integration/test_openai_contract.py` (AC-4).
 

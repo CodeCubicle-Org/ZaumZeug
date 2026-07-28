@@ -120,9 +120,11 @@ Sizes are **approximate ranges**, not guarantees. The first `pip install` usuall
 ```bash
 zaumzeug doctor <name> --deploy
 zaumzeug serve <name> --deploy
+# equivalent without the flag (containers / systemd):
+HARNESS_ROOT=deploy zaumzeug serve <name>
 ```
 
-(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required.)
+(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required. `HARNESS_ROOT=deploy` is **Done** E5-S04 — env equivalent for serve/mcp/acp.)
 
 ---
 

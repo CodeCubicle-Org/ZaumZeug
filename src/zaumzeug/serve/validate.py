@@ -19,8 +19,7 @@ from zaumzeug.config import (
     load_workflow,
     resolve_serve_entry,
 )
-from zaumzeug.config.harness_root import harness_dir as resolve_harness_dir
-from zaumzeug.config.harness_root import is_deploy_mode
+from zaumzeug.config.harness_root import is_deploy_mode, resolve_harness_path
 from zaumzeug.doctor.checks import (
     check_deploy_manifest,
     check_model_registry,
@@ -100,7 +99,7 @@ def validate_serve(
     """
     root = Path(project_root) if project_root is not None else find_project_root()
     deploy_mode = is_deploy_mode(deploy_flag=deploy)
-    harness_path = resolve_harness_dir(root, harness_name, deploy=deploy_mode)
+    harness_path = resolve_harness_path(root, harness_name, deploy_flag=deploy)
     checks: list[CheckResult] = []
 
     harness_yaml = harness_path / "harness.yaml"

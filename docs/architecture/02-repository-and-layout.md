@@ -51,7 +51,7 @@ HarnessDevelopment/
 | Entry point | `zaumzeug = "zaumzeug.cli:main"` |
 | Source layout | `src/zaumzeug/` |
 
-**Domain terms:** `harness.yaml`, `usr-harnesses/`, `deploy/` refer to a **multi-agent harness instance**, not the product name and not a single agent. Env vars `HARNESS_ROOT`, `HARNESS_LOG_LEVEL` keep the domain prefix.
+**Domain terms:** `harness.yaml`, `usr-harnesses/`, `deploy/` refer to a **multi-agent harness instance**, not the product name and not a single agent. Env vars `HARNESS_ROOT`, `HARNESS_LOG_LEVEL` keep the domain prefix. **`HARNESS_ROOT=deploy`** ✅ (E5-S04, 2026-07-28) forces production root for serve/mcp/acp via `config/harness_root.py`.
 
 ### 3.3 Harness folder layout
 

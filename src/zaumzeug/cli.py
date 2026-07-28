@@ -36,6 +36,43 @@ def _stub_command(name: str) -> Callable[[argparse.Namespace], int]:
     return _run
 
 
+def _protocol_root_stub(name: str) -> Callable[[argparse.Namespace], int]:
+    """Stub for serve-adjacent protocol CLIs that honour ``HARNESS_ROOT`` (E5-S04)."""
+
+    def _run(args: argparse.Namespace) -> int:
+        from zaumzeug.config.harness_root import (
+            harness_root_segment,
+            is_deploy_mode,
+            resolve_harness_path,
+        )
+        from zaumzeug.doctor.project import find_project_root
+
+        deploy = bool(getattr(args, "deploy", False))
+        deploy_mode = is_deploy_mode(deploy_flag=deploy)
+        segment = harness_root_segment(deploy=deploy_mode)
+        harness_name = getattr(args, "harness_name", None)
+        if harness_name:
+            path = resolve_harness_path(
+                find_project_root(),
+                harness_name,
+                deploy_flag=deploy,
+            )
+            print(
+                f"zaumzeug {name}: would load from {path} "
+                f"({segment}/; not implemented yet)",
+                file=sys.stderr,
+            )
+        else:
+            print(
+                f"zaumzeug {name}: default root {segment}/ "
+                f"(not implemented yet)",
+                file=sys.stderr,
+            )
+        return 0
+
+    return _run
+
+
 def _init_command(args: argparse.Namespace) -> int:
     """Scaffold ``usr-harnesses/<name>/`` from the harness template (E1-S04)."""
     try:
@@ -302,10 +339,38 @@ def build_parser() -> argparse.ArgumentParser:
     run_cmd.set_defaults(_handler=_run_command)
 
     for name in _COMMANDS:
-        if name in {"init", "doctor", "serve", "run", "compile", "deploy", "eval"}:
+        if name in {
+            "init",
+            "doctor",
+            "serve",
+            "run",
+            "compile",
+            "deploy",
+            "eval",
+            "mcp",
+            "acp",
+        }:
             continue
         cmd = sub.add_parser(name, help=f"{name} command (stub)")
         cmd.set_defaults(_handler=_stub_command(name))
+
+    for protocol in ("mcp", "acp"):
+        protocol_cmd = sub.add_parser(
+            protocol,
+            help=f"{protocol} command (stub; respects HARNESS_ROOT / --deploy)",
+        )
+        protocol_cmd.add_argument(
+            "harness_name",
+            nargs="?",
+            default=None,
+            help="harness name under usr-harnesses/ (or deploy/ with --deploy)",
+        )
+        protocol_cmd.add_argument(
+            "--deploy",
+            action="store_true",
+            help="load harness from deploy/<name>/ (or HARNESS_ROOT=deploy)",
+        )
+        protocol_cmd.set_defaults(_handler=_protocol_root_stub(protocol))
 
     deploy_cmd = sub.add_parser(
         "deploy",

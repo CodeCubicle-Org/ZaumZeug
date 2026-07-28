@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 in progress: epic **E4** ([E4-S01](docs/stories/epic-stories/26-story.md)–[E4-S08](docs/stories/epic-stories/33-story.md)) **done** (2026-07-28); **E6-S01**–**E6-S07** ([34-story.md](docs/stories/epic-stories/34-story.md)–[40-story.md](docs/stories/epic-stories/40-story.md)) **done** (2026-07-28) — optional `[eval]` extra, `zaumzeug eval`, deploy eval gate ([E5-S06](docs/stories/epic-stories/46-story.md) early with E6-S03), `eval/` pytest scaffold (`zaumzeug init --with-eval` / `deepeval test run`), trace → test case (`data/traces/` + `zaumzeug eval --trace`), Mode C HTTP black-box (`zaumzeug eval --base-url`), and GEPA ↔ DeepEval bridge (`append_failed_eval_to_train` / `modules/metrics.py`); **E5-S01** ([41-story.md](docs/stories/epic-stories/41-story.md)) **done** (2026-07-28) — `zaumzeug deploy` writes stripped `deploy/<name>/` bundles (`manifest.json`, `README.deploy.md`, target install stubs); **E5-S02** ([42-story.md](docs/stories/epic-stories/42-story.md)) **done** (2026-07-28) — `resolve_deploy_copy_plan` / `assert_required_paths` (§10.1 matrix) + golden `test_deploy_golden.py`; **E5-S03** ([43-story.md](docs/stories/epic-stories/43-story.md)) **done** (2026-07-28) — `zaumzeug serve --deploy` from production bundles (same OpenAI REST as dev; no `usr-harnesses/` required). Next: [E5-S04](docs/stories/epic-stories/44-story.md) (`HARNESS_ROOT=deploy`). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 in progress: epic **E4** ([E4-S01](docs/stories/epic-stories/26-story.md)–[E4-S08](docs/stories/epic-stories/33-story.md)) **done** (2026-07-28); **E6-S01**–**E6-S07** ([34-story.md](docs/stories/epic-stories/34-story.md)–[40-story.md](docs/stories/epic-stories/40-story.md)) **done** (2026-07-28) — optional `[eval]` extra, `zaumzeug eval`, deploy eval gate ([E5-S06](docs/stories/epic-stories/46-story.md) early with E6-S03), `eval/` pytest scaffold (`zaumzeug init --with-eval` / `deepeval test run`), trace → test case (`data/traces/` + `zaumzeug eval --trace`), Mode C HTTP black-box (`zaumzeug eval --base-url`), and GEPA ↔ DeepEval bridge (`append_failed_eval_to_train` / `modules/metrics.py`); **E5-S01** ([41-story.md](docs/stories/epic-stories/41-story.md)) **done** (2026-07-28) — `zaumzeug deploy` writes stripped `deploy/<name>/` bundles (`manifest.json`, `README.deploy.md`, target install stubs); **E5-S02** ([42-story.md](docs/stories/epic-stories/42-story.md)) **done** (2026-07-28) — `resolve_deploy_copy_plan` / `assert_required_paths` (§10.1 matrix) + golden `test_deploy_golden.py`; **E5-S03** ([43-story.md](docs/stories/epic-stories/43-story.md)) **done** (2026-07-28) — `zaumzeug serve --deploy` from production bundles (same OpenAI REST as dev; no `usr-harnesses/` required); **E5-S04** ([44-story.md](docs/stories/epic-stories/44-story.md)) **done** (2026-07-28) — `HARNESS_ROOT=deploy` env override for serve/mcp/acp (containers / systemd). Next: [E5-S05](docs/stories/epic-stories/45-story.md) (target ship workflow docs). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -104,7 +104,7 @@ Once scaffolded, you iterate in `usr-harnesses/<name>/`:
 3. **Run locally** — `zaumzeug run <name>` executes all workflow stages in order; `zaumzeug serve <name>` opens interactive chat with the entry agent.
 4. **Compile** *(Phase 2+)* — `zaumzeug compile <name>` runs DSPy/GEPA offline and writes optimized artifacts under each agent.
 5. **Test** — `pytest` for SDK contributors; harness developers can add optional `eval/` tests with DeepEval (`pip install "zaumzeug[eval]"` — E6-S01; scaffold via `zaumzeug init --with-eval` or the example harness — E6-S04; run `deepeval test run usr-harnesses/<name>/eval/`). Score a captured failure with `zaumzeug eval --trace` (E6-S05). Black-box a running serve with `zaumzeug eval --base-url` (E6-S06, staging/debug). Default dev uses the **mock** model profile — no API keys required.
-6. **Deploy** — `zaumzeug deploy <name>` packages `usr-harnesses/<name>/` into `deploy/<name>/` for production. Ops validates with `zaumzeug doctor <name> --deploy`, then runs `zaumzeug serve --deploy` on the target host.
+6. **Deploy** — `zaumzeug deploy <name>` packages `usr-harnesses/<name>/` into `deploy/<name>/` for production. Ops validates with `zaumzeug doctor <name> --deploy`, then runs `zaumzeug serve <name> --deploy` on the target host (or set `HARNESS_ROOT=deploy` in containers / systemd).
 
 Never edit `deploy/` by hand — it is regenerated on each deploy. See [Testing](user-docs/guides/testing.md) for mock vs live test tiers.
 
@@ -139,6 +139,8 @@ Doctor validates `harness.yaml`, **`workflow.yaml`** (entry, stages, agent refs,
 ```bash
 zaumzeug serve <harness> --dry-run    # Validate harness.yaml, workflow.yaml, and resolved paths (no Hayhooks, no LLM)
 zaumzeug serve <harness> --dry-run --deploy   # Same against deploy/<harness>/
+zaumzeug serve <harness> --deploy     # Production serve from deploy/<harness>/ (E5-S03)
+HARNESS_ROOT=deploy zaumzeug serve <harness>  # Same without --deploy (E5-S04; containers / systemd)
 zaumzeug serve <harness> --dry-run --json     # Machine-readable summary
 zaumzeug serve <harness> --verbose    # SDK + Haystack debug logging (or HARNESS_LOG_LEVEL=DEBUG)
 zaumzeug compile <harness> --verbose  # Same logging for compile (Phase 2+)
@@ -192,7 +194,7 @@ zaumzeug acp <harness>        # Agent Client Protocol adapter (E7)
 
 - **Harness developers** — Scaffold a harness, configure models and tools, compile, deploy
 - **SDK maintainers** — Extend the framework, examples, CI, and docs
-- **Ops / platform** — Run `deploy/<name>/` on a server with `.env` and `zaumzeug serve --deploy`
+- **Ops / platform** — Run `deploy/<name>/` on a server with `.env` and `zaumzeug serve --deploy` (or `HARNESS_ROOT=deploy`)
 - **Client integrators** — Call a harness via REST, MCP, or ACP from an app or IDE
 
 ---

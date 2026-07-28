@@ -16,7 +16,7 @@ from hayhooks.server.pipelines.registry import registry
 from hayhooks.server.utils.deploy_utils import add_pipeline_api_route
 from hayhooks.settings import settings as hayhooks_settings
 
-from zaumzeug.config.harness_root import is_deploy_mode
+from zaumzeug.config.harness_root import harness_root_segment, is_deploy_mode
 from zaumzeug.doctor.project import find_project_root
 from zaumzeug.runtime.factory import build_agent_bundle
 from zaumzeug.runtime.model_router import ModelRouter
@@ -264,9 +264,7 @@ def run_serve(
         return exc.validation.exit_code
 
     base = f"http://{prepared.host}:{prepared.port}"
-    root_label = (
-        "deploy" if is_deploy_mode(deploy_flag=deploy) else "usr-harnesses"
-    )
+    root_label = harness_root_segment(deploy=is_deploy_mode(deploy_flag=deploy))
     print(
         f"Serving harness '{prepared.harness_name}' from {root_label}/ "
         f"(entry agent: {prepared.agent_name}) at {base}/v1"

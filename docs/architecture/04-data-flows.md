@@ -173,4 +173,6 @@ production failure → trace → dataset row → zaumzeug eval (optional) → GE
 
 **Implementation (E5-S03, 2026-07-28):** `zaumzeug serve --deploy` runs production bundles under `deploy/<name>/` (same OpenAI REST as dev). Tests: `tests/integration/deploy/test_serve_deploy.py`.
 
+**Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` forces the same production root without `--deploy` (serve / mcp / acp / doctor / run) via `config/harness_root.resolve_harness_path()`. Tests: `tests/unit/deploy/test_harness_root.py`.
+
 ---

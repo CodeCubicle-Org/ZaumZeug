@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from zaumzeug.config.harness_root import harness_dir as resolve_harness_dir
-from zaumzeug.config.harness_root import harness_root_segment, is_deploy_mode
+from zaumzeug.config.harness_root import (
+    harness_root_segment,
+    is_deploy_mode,
+    resolve_harness_path,
+)
 from zaumzeug.config import load_harness_for_doctor
 from zaumzeug.doctor.checks import (
     _live_providers,
@@ -44,7 +47,7 @@ def run_doctor(
     ]
 
     if harness_name is not None:
-        harness_path = resolve_harness_dir(root, harness_name, deploy=deploy_mode)
+        harness_path = resolve_harness_path(root, harness_name, deploy_flag=deploy)
         if not (harness_path / "harness.yaml").is_file():
             checks.append(
                 CheckResult(

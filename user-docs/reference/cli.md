@@ -9,7 +9,7 @@ ZaumZeug command-line interface reference for harness developers.
 | Variable | Values | Effect |
 |---|---|---|
 | `HARNESS_LOG_LEVEL` | `DEBUG`, `INFO`, `WARNING`, `ERROR` | Sets SDK and Haystack log verbosity (same effect as `--verbose` when `DEBUG`) |
-| `HARNESS_ROOT` | `deploy` | Load harnesses from `deploy/` instead of `usr-harnesses/` |
+| `HARNESS_ROOT` | `deploy` | Force production root (`deploy/<name>/`) for **serve**, **mcp**, **acp**, and other root-aware commands (`doctor`, `run`) instead of `usr-harnesses/`. Equivalent to `--deploy`. Use in containers / systemd so the flag is not required on every invocation. Default when unset: `usr-harnesses/` |
 | `HARNESS_LIVE_LLM` | `1` | Opt-in live provider e2e (`pytest tests/e2e`). Unset in default CI — mock profile only |
 
 ---
@@ -70,7 +70,7 @@ zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose] [--port N]
 
 **Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**), or `--port` when set. Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`).
 
-**Behavior (`--deploy` / production):** Same OpenAI REST API as dev serve (`POST /v1/chat/completions`, `GET /v1/models`, `POST /<harness>/run`), but paths resolve under `deploy/<name>/` only — `usr-harnesses/` is never consulted. Fails fast when the deploy folder is missing or `manifest.json` is absent/invalid. Typical ops flow after `zaumzeug deploy <name>` and target install: `zaumzeug serve <name> --deploy` (see the bundle's `README.deploy.md`).
+**Behavior (`--deploy` / production):** Same OpenAI REST API as dev serve (`POST /v1/chat/completions`, `GET /v1/models`, `POST /<harness>/run`), but paths resolve under `deploy/<name>/` only — `usr-harnesses/` is never consulted. Fails fast when the deploy folder is missing or `manifest.json` is absent/invalid. Typical ops flow after `zaumzeug deploy <name>` and target install: `zaumzeug serve <name> --deploy`, or set `HARNESS_ROOT=deploy` in the container/systemd environment (see [Global environment](#global-environment)).
 
 CI mock smoke (E1-S07) uses `python install/ci_serve_smoke.py example` — starts `zaumzeug serve` on an ephemeral port, probes `GET /v1/models`, then stops the process.
 
@@ -274,7 +274,7 @@ If `eval:` is absent, `warn` / `block` are a no-op. Gate logic lives only in `de
 
 **Bundle contents** (`deploy/<name>/`): stripped `harness.yaml` (no `eval`/`deploy`/`compile`), `workflow.yaml`, per-agent runtime files (`prompts/` / `tools/` / `hooks.py` / `agents-models.yaml` when referenced) + pinned `artifacts/<run_id>/`, `docs/workflow-diagram.md`, `manifest.json`, `README.deploy.md`, and `target_install.py` (+ `.sh` / `.ps1` wrappers). **Never** copies `modules/`, `skills/`, `data/`, or `eval/` (Architecture §10.1 / E5-S02). Missing required runtime paths abort deploy before writing. Idempotent — overwrites an existing bundle. Full target-install behaviour is E5-S09; the scripts are stubbed so the folder is self-describing when copied alone.
 
-**After deploy:** from a project root that contains `deploy/<name>/`, ops runs `zaumzeug serve <name> --deploy` (**Done** E5-S03) — same OpenAI REST as dev serve; `usr-harnesses/` is not required. See [serve](#zaumzeug-serve) and the bundle `README.deploy.md`.
+**After deploy:** from a project root that contains `deploy/<name>/`, ops runs `zaumzeug serve <name> --deploy` (**Done** E5-S03) or `HARNESS_ROOT=deploy zaumzeug serve <name>` (**Done** E5-S04) — same OpenAI REST as dev serve; `usr-harnesses/` is not required. See [serve](#zaumzeug-serve), [Global environment](#global-environment), and the bundle `README.deploy.md`.
 
 ```bash
 zaumzeug deploy example
@@ -295,7 +295,7 @@ zaumzeug doctor [<harness>] [--deploy] [--verbose] [--json]
 |---|---|
 | `--verbose` | Include passing checks in the human-readable report |
 | `--json` | Emit machine-readable JSON report |
-| `--deploy` | Validate deploy bundle under `deploy/` |
+| `--deploy` | Validate deploy bundle under `deploy/` (or set `HARNESS_ROOT=deploy`) |
 
 **Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig` and `deploy:` / `DeployConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. Warnings (non-blocking): MCP without `uv`, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02), `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06), `zaumzeug eval --trace` for captured failures (E6-S05), `zaumzeug eval --base-url` for Mode C staging/debug (E6-S06), and `zaumzeug.eval.gepa_bridge` for failed-eval → train / optional DeepEval GEPA metrics (E6-S07).
 

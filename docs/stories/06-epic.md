@@ -5,8 +5,8 @@
 | **Document** | Epic E5 user stories |
 | **File** | `docs/stories/06-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E5-S03 done) |
-| **Status** | In progress (E5-S01–S03 + E5-S06 Done; next E5-S04 `HARNESS_ROOT=deploy`) |
+| **Last modified** | 2026-07-28 (E5-S04 done) |
+| **Status** | In progress (E5-S01–S04 + E5-S06 Done; next E5-S05 target ship docs) |
 | **Build order** | **6 of 8** (after E4 compile + E6-S02 eval for eval gate) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -28,7 +28,7 @@
 1. **E5-S02** — Copy rules ✅ (2026-07-28)
 2. **E5-S01** — `zaumzeug deploy` ✅ (2026-07-28)
 3. **E5-S09a** → **E5-S09b** → **E5-S09c** — Target install *(core, wrappers, verify)*
-4. **E5-S03** → **E5-S04** — serve `--deploy` + `HARNESS_ROOT`
+4. **E5-S03** → **E5-S04** — serve `--deploy` + `HARNESS_ROOT` ✅ (2026-07-28)
 5. **E5-S05** → **E5-S08** — Ops docs and platform policy
 6. **E5-S07** — Git policy
 7. **E5-S06** — Deploy eval gate ✅ (2026-07-28; shipped early with [E6-S03](../05-epic.md#e6-s03-eval-gate-on-deploy); requires [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) ✅)
@@ -208,6 +208,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E5.4 |
 | **Persona** | Ops / platform |
 | **Priority** | P1 |
+| **Status** | Done (2026-07-28) — canonical: [44-story.md](epic-stories/44-story.md) |
 
 ### User story
 
@@ -220,13 +221,13 @@ As **ops**, I want `HARNESS_ROOT=deploy`, so that serve/mcp/acp default to produ
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `HARNESS_ROOT=deploy` forces deploy root for serve, mcp, acp
-- [ ] **AC-2** Default dev root remains `usr-harnesses/`
-- [ ] **AC-3** Documented in deploy README and CLI reference
+- [x] **AC-1** `HARNESS_ROOT=deploy` forces deploy root for serve, mcp, acp
+- [x] **AC-2** Default dev root remains `usr-harnesses/`
+- [x] **AC-3** Documented in deploy README and CLI reference
 
 ### Implementation tasks (build)
 
-- [ ] Centralize root resolution in config loader
+- [x] Centralize root resolution in config loader
 
 ### Verification (after build)
 
@@ -238,13 +239,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-2 | `tests/unit/deploy/test_harness_root.py::test_e5_s04_ac2_default_usr_harnesses` |
 | AC-3 | **manual:** README.deploy.md and CLI reference document env var |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/deploy/test_harness_root.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/deploy/test_harness_root.py -v` passes (2 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] No hardcoded `usr-harnesses` in serve runner when env set
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] No hardcoded `usr-harnesses` in serve runner when env set
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 
