@@ -148,10 +148,10 @@ zaumzeug run example --from reviewer --input "Check the draft"
 
 ## `zaumzeug compile`
 
-Run offline GEPA per agent: validate Phase 2 compile config, load DSPy modules, preflight task/reflection LM ids, optimize, and write artifacts. Use `--dry-run` to validate without GEPA or LLM calls (same idea as `serve --dry-run`).
+Run offline GEPA per agent: validate Phase 2 compile config, load DSPy modules, preflight task/reflection LM ids, optimize, and write artifacts. Every successful compile (except `--dry-run`) also regenerates `docs/workflow-diagram.md`. Use `--dry-run` to validate without GEPA or LLM calls (same idea as `serve --dry-run`), or `--workflow-diagram-only` to refresh the diagram without optimizing.
 
 ```bash
-zaumzeug compile <harness> [--agent NAME] [--dry-run] [--verbose]
+zaumzeug compile <harness> [--agent NAME] [--dry-run | --workflow-diagram-only] [--verbose]
 ```
 
 | Flag / arg | Description |
@@ -159,13 +159,16 @@ zaumzeug compile <harness> [--agent NAME] [--dry-run] [--verbose]
 | `<harness>` | Harness name under `usr-harnesses/` |
 | `--agent NAME` | Compile a single agent (default: every agent with `compile.module`) |
 | `--dry-run` | Validate Phase 2 compile config, resolve module imports, and print task/reflection model ids — no GEPA, no LLM API calls, no artifact writes |
+| `--workflow-diagram-only` | Regenerate `docs/workflow-diagram.md` from `workflow.yaml` + resolved agent models — no GEPA, no LLM calls (mutually exclusive with `--dry-run`) |
 | `--verbose` | Enable SDK and Haystack structured debug logging |
 
-**Requires per agent:** a Phase 2 `compile:` block in `agents/<name>/agent.yaml` with `compile.module` (`module.path:ClassName`). Optional: `task_model_id`, `reflection_model_id`, train/val paths, GEPA budget (`auto` / `budget` / `max_metric_calls` / `max_full_evals`).
+**Requires per agent:** a Phase 2 `compile:` block in `agents/<name>/agent.yaml` with `compile.module` (`module.path:ClassName`). Optional: `task_model_id`, `reflection_model_id`, train/val paths, GEPA budget (`auto` / `budget` / `max_metric_calls` / `max_full_evals`). Not required for `--workflow-diagram-only`.
 
 **API keys:** Live task/reflection models need provider keys in `.env` (or the environment) before GEPA runs — the same keys `zaumzeug doctor` checks. Missing registry ids or keys fail fast with an actionable suggestion. The shipped `example` harness uses `provider: mock` and a stub GEPA path so you can exercise compile offline without keys; switch to live model ids in `agents-models.yaml` for real optimization. `--dry-run` still preflights registry ids / keys but never calls the LLM.
 
 **Artifacts:** Each run writes immutable `agents/<name>/artifacts/<run_id>/` (never overwritten) and updates `artifacts/current` (symlink when possible, otherwise a copy). Export maps `dump_state()` to Haystack files: `prompts/system.md`, optional `prompts/input_rewrite.md`, `agent.json`, and **`artifact-manifest.json`** (includes `module_hash` + `source_hash` of the `compile.module` `.py`; not the deploy bundle’s `manifest.json`). Legacy `manifest.json` inside an artifact folder is accepted during migration. **GEPA optimizes the template offline; runtime applies fixed exported text only** — never end-user chat as an optimization target. When the manifest lists `input_rewrite`, `zaumzeug serve` / `zaumzeug run` preprocess user messages with that template before `Agent.run` (no DSPy).
+
+**Workflow diagram:** Full compile and `--workflow-diagram-only` write `docs/workflow-diagram.md` (Mermaid flowchart; auto-generated — do not hand-edit). `zaumzeug doctor` warns when `workflow.yaml` is newer than the diagram (or the file is missing).
 
 **Serve after compile:** Point `agent.artifact` at `artifacts/current` so serve loads the exported prompts (hand-edited `system_prompt` is ignored; `compile.module` is not imported). See [Compile and export — Serve after compile](../guides/compile.md#serve-after-compile).
 
@@ -175,6 +178,7 @@ zaumzeug compile <harness> [--agent NAME] [--dry-run] [--verbose]
 
 ```bash
 zaumzeug compile example --dry-run --agent researcher
+zaumzeug compile example --workflow-diagram-only
 zaumzeug compile example --agent researcher --verbose
 HARNESS_LOG_LEVEL=DEBUG zaumzeug compile example
 ```

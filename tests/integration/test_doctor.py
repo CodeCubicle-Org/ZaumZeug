@@ -3,7 +3,8 @@
 # Story: E2-S04c / E2.4
 # Story: E4-S05 / E4.5
 # Story: E4-S07
-"""E2-S04 — `zaumzeug doctor` checks (integration); E4-S05/S07 artifact checks."""
+# Story: E4-S08 / E4.7
+"""E2-S04 — `zaumzeug doctor` checks (integration); E4-S05/S07/S08 artifact/diagram checks."""
 
 from __future__ import annotations
 
@@ -238,6 +239,12 @@ def test_e2_s04_ac11_stale_workflow_diagram_warn(tmp_path: Path) -> None:
     assert diagram_warns
     assert "workflow.yaml" in diagram_warns[0].message
     assert report.exit_code == 0
+
+
+def test_e4_s08_ac5_stale_diagram_warning(tmp_path: Path) -> None:
+    """AC-5 (E4-S08): doctor warns when workflow.yaml is newer than the diagram."""
+    # Same staleness contract as E2-S04b; re-asserted under the E4-S08 AC label.
+    test_e2_s04_ac11_stale_workflow_diagram_warn(tmp_path)
 
 
 def test_e2_s04c_ac1_deploy_root_resolution(

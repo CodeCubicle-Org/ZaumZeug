@@ -31,7 +31,7 @@ Requirements: **[PRD E5](../prd.md#epic-e5--deploy-packaging-phase-2)**.
 | `agents/<name>/tools/*.py` | Listed in that agent's `tools.custom` |
 | `agents/<name>/hooks.py` | `hooks.enabled: true` in that agent's `agent.yaml` |
 | `pipelines/*` | Pipeline id listed in `serve.expose` |
-| `docs/workflow-diagram.md` | Generated at compile | **Included** in `deploy/<harness>/docs/` |
+| `docs/workflow-diagram.md` | Generated at compile (E4-S08) | **Included** in `deploy/<harness>/docs/` |
 | `agents/<name>/modules/`, `skills/`, `data/`, `eval/` | Dev only | **Never** |
 
 Requirements: [PRD E5.2](../prd.md#epic-e5--deploy-packaging-phase-2).

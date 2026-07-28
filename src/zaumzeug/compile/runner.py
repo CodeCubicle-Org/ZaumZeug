@@ -4,6 +4,7 @@ E4-S02a: schema + module load + LM preflight.
 E4-S02b: invoke GEPA and write ``artifacts/<run_id>/`` + ``current``.
 E4-S03a: Haystack export (``artifact-manifest.json``, prompts) via ``export.py``.
 E4-S06: ``--dry-run`` — same validation path without GEPA or artifact writes.
+E4-S08: regenerate ``docs/workflow-diagram.md``; ``--workflow-diagram-only``.
 """
 
 from __future__ import annotations
@@ -22,6 +23,10 @@ from zaumzeug.compile.gepa_runner import (
 )
 from zaumzeug.compile.gepa_adapter import is_optimize_anything_optimizer
 from zaumzeug.compile.module_loader import ModuleLoaderError, load_dspy_module_from_resolution
+from zaumzeug.compile.workflow_diagram import (
+    WorkflowDiagramError,
+    write_workflow_diagram,
+)
 from zaumzeug.config import (
     AgentResolutionError,
     ConfigValidationError,
@@ -83,6 +88,8 @@ class CompileResult:
     harness_name: str
     harness_dir: Path
     agents: list[CompileAgentResult] = field(default_factory=list)
+    diagram_path: Path | None = None
+    workflow_diagram_only: bool = False
 
     @property
     def exit_code(self) -> int:
@@ -96,6 +103,7 @@ def run_compile(
     project_root: Path | str | None = None,
     deploy: bool = False,
     dry_run: bool = False,
+    workflow_diagram_only: bool = False,
     gepa_cls: Any | None = None,
     stub_gepa: bool | None = None,
 ) -> CompileResult:
@@ -106,7 +114,17 @@ def run_compile(
 
     When *dry_run* is True, validates schema, resolves module imports, and
     preflights task/reflection LM ids — no GEPA, no LLM API calls, no artifacts.
+
+    When *workflow_diagram_only* is True, regenerates ``docs/workflow-diagram.md``
+    without GEPA, LLM calls, or agent compile work.
     """
+    if dry_run and workflow_diagram_only:
+        raise CompileError(
+            "Cannot combine --dry-run with --workflow-diagram-only",
+            harness_name=harness_name,
+            suggestion="Use one of --dry-run or --workflow-diagram-only",
+        )
+
     root = Path(project_root) if project_root is not None else find_project_root()
     harness_path = resolve_harness_dir(root, harness_name, deploy=deploy)
     harness_yaml = harness_path / "harness.yaml"
@@ -137,6 +155,20 @@ def run_compile(
             harness_name=harness_name,
             suggestion=f"Fix workflow.yaml under {harness_path}",
         ) from exc
+
+    if workflow_diagram_only:
+        diagram_path = _write_diagram(
+            harness_name,
+            project_root=root,
+            deploy=deploy,
+        )
+        return CompileResult(
+            harness_name=harness_name,
+            harness_dir=harness_path,
+            agents=[],
+            diagram_path=diagram_path,
+            workflow_diagram_only=True,
+        )
 
     targets = _compile_agent_targets(harness_path, harness_name=harness_name, agent_name=agent_name)
     harness_models = harness_config.models
@@ -263,11 +295,41 @@ def run_compile(
             )
         )
 
+    diagram_path: Path | None = None
+    if not dry_run:
+        diagram_path = _write_diagram(
+            harness_name,
+            project_root=root,
+            deploy=deploy,
+        )
+
     return CompileResult(
         harness_name=harness_name,
         harness_dir=harness_path,
         agents=results,
+        diagram_path=diagram_path,
     )
+
+
+def _write_diagram(
+    harness_name: str,
+    *,
+    project_root: Path,
+    deploy: bool,
+) -> Path:
+    try:
+        return write_workflow_diagram(
+            harness_name,
+            project_root=project_root,
+            deploy=deploy,
+        ).diagram_path
+    except WorkflowDiagramError as exc:
+        raise CompileError(
+            str(exc),
+            path=exc.path,
+            harness_name=exc.harness_name or harness_name,
+            suggestion=exc.suggestion,
+        ) from exc
 
 
 def _compile_agent_targets(
@@ -322,6 +384,17 @@ def _compile_agent_targets(
 
 def format_compile_result(result: CompileResult) -> str:
     """Human-readable compile summary for the CLI."""
+    if result.workflow_diagram_only:
+        path = (
+            str(result.diagram_path)
+            if result.diagram_path is not None
+            else "(no diagram)"
+        )
+        return (
+            f"Workflow diagram refreshed for harness '{result.harness_name}'.\n"
+            f"  wrote: {path}"
+        )
+
     lines = [
         f"Compile OK for harness '{result.harness_name}' "
         f"({len(result.agents)} agent(s)).",
@@ -342,6 +415,8 @@ def format_compile_result(result: CompileResult) -> str:
             f"run_id={agent.run_id}{stub}"
         )
         lines.append(f"    artifacts: {artifact}")
+    if result.diagram_path is not None:
+        lines.append(f"  workflow diagram: {result.diagram_path}")
     return "\n".join(lines)
 
 

@@ -65,7 +65,7 @@ zaumzeug serve example              # mock model — no .env required
 
 Phase 1 path: install → `zaumzeug serve example` with **mock** → optional `.env` + provider package for live models.
 
-Useful next commands: `zaumzeug doctor`, `zaumzeug init <name>`, `zaumzeug run <name>`, `zaumzeug serve <name> --dry-run`, `zaumzeug compile <name> --dry-run`.
+Useful next commands: `zaumzeug doctor`, `zaumzeug init <name>`, `zaumzeug run <name>`, `zaumzeug serve <name> --dry-run`, `zaumzeug compile <name> --dry-run`, `zaumzeug compile <name> --workflow-diagram-only`.
 
 ---
 
@@ -73,7 +73,7 @@ Useful next commands: `zaumzeug doctor`, `zaumzeug init <name>`, `zaumzeug run <
 
 Not required for mock serve:
 
-- **Compile / GEPA** — included in `[dev]` (`zaumzeug compile`, Phase 2; `--dry-run` validates modules/registry without GEPA; writes immutable Haystack export under `artifacts/<run_id>/`; pin/rollback to a prior run without re-GEPA; optional `input_rewrite` applied at serve/run; mock/stub offline, live models need `.env` keys). See [user-docs/guides/compile.md](user-docs/guides/compile.md).
+- **Compile / GEPA** — included in `[dev]` (`zaumzeug compile`, Phase 2; `--dry-run` validates modules/registry without GEPA; writes immutable Haystack export under `artifacts/<run_id>/`; regenerates `docs/workflow-diagram.md` (or `--workflow-diagram-only`); pin/rollback to a prior run without re-GEPA; optional `input_rewrite` applied at serve/run; mock/stub offline, live models need `.env` keys). See [user-docs/guides/compile.md](user-docs/guides/compile.md).
 - **DeepEval** — `pip install "zaumzeug[eval]"` (dev regression, Phase 2+)
 - **Provider plugins** — e.g. `openai-haystack`, `anthropic-haystack` (live models only)
 - **MCP in Cursor** — `uv` + install `--cursor-mcp` (Phase 3)

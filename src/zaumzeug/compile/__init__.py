@@ -55,6 +55,14 @@ from zaumzeug.compile.runner import (
     format_compile_result,
     run_compile,
 )
+from zaumzeug.compile.workflow_diagram import (
+    WORKFLOW_DIAGRAM_REL,
+    WorkflowDiagramError,
+    WorkflowDiagramResult,
+    format_workflow_diagram_result,
+    render_workflow_diagram,
+    write_workflow_diagram,
+)
 
 __all__ = [
     "ARTIFACT_MANIFEST_NAME",
@@ -76,6 +84,9 @@ __all__ = [
     "OPTIMIZE_ANYTHING_OPTIMIZERS",
     "OptimizeAnythingResult",
     "StubGEPA",
+    "WORKFLOW_DIAGRAM_REL",
+    "WorkflowDiagramError",
+    "WorkflowDiagramResult",
     "compute_module_hash",
     "compute_source_file_hash",
     "default_gepa_metric",
@@ -84,6 +95,7 @@ __all__ = [
     "find_artifact_manifest",
     "format_compile_dry_run",
     "format_compile_result",
+    "format_workflow_diagram_result",
     "gepa_budget_kwargs",
     "infer_optimize_mode",
     "invoke_gepa",
@@ -96,10 +108,12 @@ __all__ = [
     "optimize_haystack_artifact",
     "parse_compile_module_ref",
     "preflight_compile_lms",
+    "render_workflow_diagram",
     "resolve_compile_lm_ids",
     "resolve_module_source_path",
     "resolve_optimize_mode",
     "run_compile",
     "validate_mode_datasets",
     "write_artifact_run",
+    "write_workflow_diagram",
 ]

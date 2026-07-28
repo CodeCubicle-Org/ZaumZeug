@@ -132,7 +132,7 @@ ZaumZeug is a **harness factory**: `Harness = Workflow + Agents + Machinery` ([P
 | Gap | Note |
 |---|---|
 | Serial `workflow.yaml` + `zaumzeug run` | **In ZaumZeug scope** — E2-S07 ✅, E3-S08 ([§4.8](#48-how-zaumzeug-epics-deliver-this-factory-only--not-cloudflare-specific)) |
-| Workflow diagram in harness docs | **In ZaumZeug scope** — E4-S08; `docs/workflow-diagram.md` at compile |
+| Workflow diagram in harness docs | **Done** (E4-S08, 2026-07-28) — `docs/workflow-diagram.md` at compile; `--workflow-diagram-only` |
 | Parallel fan-out (`parallelism: N`) | Deferred post–Phase 1; serial workflow first |
 | PoC sandbox isolation | User/tool concern for this domain; [Architecture §14](architecture/10-operations-and-reference.md#14-security-phase-1-stance) |
 | Cross-repo symbol index | User MCP tool on tracer agent |
@@ -380,7 +380,7 @@ noisy hunter output → data/val.jsonl
 |---|---|
 | E2 | `workflow.yaml` schema; per-agent `agents-models.yaml` merge |
 | E3 | `zaumzeug run` serial workflow; stage-scoped `ModelRouter` |
-| E4 | GEPA per agent; **`docs/workflow-diagram.md` at compile** ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-compile)) |
+| E4 | GEPA per agent; **`docs/workflow-diagram.md` at compile** ✅ (E4-S08, 2026-07-28) ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-compile)) |
 | E5 | Deploy bundle: all agents + workflow + diagram |
 | E7–E8 | Tools, MCP, pipelines in workflow stages |
 
@@ -398,7 +398,7 @@ Parallel fan-out (`parallelism: N`) is **deferred** post–Phase 1 — not a sep
 |---|---|---|
 | `workflow.yaml` schema (serial) | E2 | E2-S07 ✅ |
 | `zaumzeug run` + stage-scoped `ModelRouter` | E3 | E3-S08 |
-| `docs/workflow-diagram.md` at compile | E4 | E4-S08 |
+| `docs/workflow-diagram.md` at compile | E4 | E4-S08 ✅ (2026-07-28) |
 | Deploy agents + workflow + diagram | E5 | E5-S02 |
 
 ### 5.2 Deferred / illustrative ideas (not committed)

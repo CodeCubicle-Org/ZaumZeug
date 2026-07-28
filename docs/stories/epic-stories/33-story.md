@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/33-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-28 |
 | **Story ID** | E4-S08 |
+| **Status** | Done |
 | **Epic** | [E4 — Compile and GEPA Pipeline](../04-epic.md) |
 | **Phase** | 2 |
 | **Epic build order** | 4 of 8 |
@@ -23,7 +24,8 @@
 | **Feature** | E4.7 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
-| **Prerequisites** | [E2-S07](08-story.md#e2-s07-workflowyaml-schema-serial) · [E4-S02b](27.2-story.md#e4-s02b-gepa-runner-and-artifacts) |
+| **Status** | Done (2026-07-28) |
+| **Prerequisites** | [E2-S07](08-story.md#e2-s07-workflowyaml-schema-serial) ✅ · [E4-S02b](27.2-story.md#e4-s02b-gepa-runner-and-artifacts) ✅ |
 
 ### User story
 
@@ -44,18 +46,18 @@ As a **harness developer**, I want a workflow diagram generated at compile time,
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Every `zaumzeug compile <harness>` writes `docs/workflow-diagram.md` (Mermaid flowchart)
-- [ ] **AC-2** Diagram nodes label agent/pipeline id and resolved `default_model_id` per agent
-- [ ] **AC-3** `--workflow-diagram-only` refreshes diagram without GEPA or LLM calls
-- [ ] **AC-4** File header states auto-generated; hand-edit discouraged
-- [ ] **AC-5** `zaumzeug doctor` warns when `workflow.yaml` newer than diagram
-- [ ] **AC-6** Golden snapshot test for example harness diagram structure
+- [x] **AC-1** Every `zaumzeug compile <harness>` writes `docs/workflow-diagram.md` (Mermaid flowchart)
+- [x] **AC-2** Diagram nodes label agent/pipeline id and resolved `default_model_id` per agent
+- [x] **AC-3** `--workflow-diagram-only` refreshes diagram without GEPA or LLM calls
+- [x] **AC-4** File header states auto-generated; hand-edit discouraged
+- [x] **AC-5** `zaumzeug doctor` warns when `workflow.yaml` newer than diagram
+- [x] **AC-6** Golden snapshot test for example harness diagram structure
 
 ### Implementation tasks (build)
 
-- [ ] Implement `src/zaumzeug/compile/workflow_diagram.py`
-- [ ] Invoke from compile runner before/after GEPA per agent
-- [ ] Add `--workflow-diagram-only` flag to compile CLI
+- [x] Implement `src/zaumzeug/compile/workflow_diagram.py`
+- [x] Invoke from compile runner before/after GEPA per agent
+- [x] Add `--workflow-diagram-only` flag to compile CLI
 
 ### Verification (after build)
 
@@ -70,10 +72,20 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-5 | `tests/integration/test_doctor.py::test_e4_s08_ac5_stale_diagram_warning` |
 | AC-6 | `tests/unit/compile/test_workflow_diagram.py::test_e4_s08_ac6_example_diagram_snapshot` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/compile/test_workflow_diagram.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/compile/test_workflow_diagram.py -v` passes (7 passed, 0 skipped)
+- Verification: **8 passed, 0 skipped** (`test_workflow_diagram.py` + `test_e4_s08_ac5_*`).
 
 ### Definition of done
 
-- [ ] Deploy copies diagram per E5-S02
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Deploy copies diagram per E5-S02 *(contract documented; packager copy lands in E5-S02)*
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-07-28)
+
+- `compile/workflow_diagram.py` renders Mermaid `flowchart LR` from `workflow.yaml` stages; agent nodes include `default_model_id (provider)`; pipeline stages use the pipeline id.
+- Full `zaumzeug compile` (not `--dry-run`) and `--workflow-diagram-only` write `docs/workflow-diagram.md` with an auto-generated header.
+- Doctor stale/missing diagram warn already existed (`check_workflow_diagram_staleness`, E2-S04b); AC-5 re-asserts under the E4-S08 test name.
+- Docs: [CLI reference — compile](../../user-docs/reference/cli.md#zaumzeug-compile), [guides/compile.md](../../user-docs/guides/compile.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md).
+
+---

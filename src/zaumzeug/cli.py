@@ -74,6 +74,7 @@ def _compile_command(args: argparse.Namespace) -> int:
             args.harness_name,
             agent_name=args.agent,
             dry_run=args.dry_run,
+            workflow_diagram_only=args.workflow_diagram_only,
         )
     except CompileError as exc:
         print(str(exc), file=sys.stderr)
@@ -250,7 +251,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     compile_cmd = sub.add_parser(
         "compile",
-        help="run GEPA per agent (or --dry-run to validate without optimizing)",
+        help="run GEPA per agent (or --dry-run / --workflow-diagram-only)",
     )
     compile_cmd.add_argument(
         "harness_name",
@@ -262,12 +263,21 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="NAME",
         help="compile a single agent (default: all agents with compile.module)",
     )
-    compile_cmd.add_argument(
+    compile_mode = compile_cmd.add_mutually_exclusive_group()
+    compile_mode.add_argument(
         "--dry-run",
         action="store_true",
         help=(
             "validate Phase 2 compile config, resolve module imports and "
             "task/reflection models without running GEPA or calling an LLM"
+        ),
+    )
+    compile_mode.add_argument(
+        "--workflow-diagram-only",
+        action="store_true",
+        help=(
+            "regenerate docs/workflow-diagram.md from workflow.yaml without "
+            "GEPA or LLM calls"
         ),
     )
     compile_cmd.add_argument(

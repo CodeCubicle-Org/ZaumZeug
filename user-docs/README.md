@@ -21,7 +21,7 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 | Guide | Description |
 |---|---|
 | [Multi-agent workflow](guides/multi-agent-workflow.md) | `workflow.yaml`, agent vs pipeline stages, control flow inside agents |
-| [Compile and export](guides/compile.md) | GEPA offline compile; Haystack artifact export; optional runtime `input_rewrite`; pin/rollback to immutable `artifacts/<run_id>/` |
+| [Compile and export](guides/compile.md) | GEPA offline compile; Haystack artifact export; workflow diagram; optional runtime `input_rewrite`; pin/rollback to immutable `artifacts/<run_id>/` |
 | [Testing](guides/testing.md) | Unit, integration, eval layers; mock profile; CI tiers |
 
 ## Quick links
@@ -29,4 +29,4 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 - **`zaumzeug init <name>`** — scaffold a new harness under `usr-harnesses/`
 - **`zaumzeug serve <harness>`** — interactive chat with the workflow **entry** agent
 - **`zaumzeug run <harness>`** — run serial workflow stages in order
-- **`zaumzeug compile <harness>`** — run GEPA per agent (Phase 2, Pattern A); writes immutable `artifacts/<run_id>/` + `current` with Haystack export (`artifact-manifest.json`, prompts); use `--dry-run` to validate modules/registry without GEPA or LLM calls; pin/rollback to a prior run without re-GEPA — see [Compile and export — Rollback](guides/compile.md#rollback-to-a-pinned-run); optional `input_rewrite` is applied at serve/run time; Pattern B (`optimize_anything`) is available via `optimize_haystack_artifact` (E4-S04); live task/reflection models need API keys in `.env` (example uses mock/stub offline). See [Compile and export](guides/compile.md).
+- **`zaumzeug compile <harness>`** — run GEPA per agent (Phase 2, Pattern A); writes immutable `artifacts/<run_id>/` + `current` with Haystack export (`artifact-manifest.json`, prompts); regenerates `docs/workflow-diagram.md` (or use `--workflow-diagram-only`); use `--dry-run` to validate modules/registry without GEPA or LLM calls; pin/rollback to a prior run without re-GEPA — see [Compile and export — Rollback](guides/compile.md#rollback-to-a-pinned-run); optional `input_rewrite` is applied at serve/run time; Pattern B (`optimize_anything`) is available via `optimize_haystack_artifact` (E4-S04); live task/reflection models need API keys in `.env` (example uses mock/stub offline). See [Compile and export](guides/compile.md).

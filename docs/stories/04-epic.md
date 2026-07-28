@@ -5,8 +5,8 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E4-S07 done; next E4-S08) |
-| **Status** | In progress (E4-S01–S07 done) |
+| **Last modified** | 2026-07-28 (E4-S08 done — epic complete) |
+| **Status** | Done (E4-S01–S08, 2026-07-28) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -33,7 +33,7 @@
 5. **E4-S05** — Post-compile serve uses artifact ✅ (2026-07-28)
 6. **E4-S06** — Compile `--dry-run` ✅ (2026-07-28)
 7. **E4-S07** — Artifact rollback to pinned run ✅ (2026-07-28)
-8. **E4-S08** — Workflow diagram at compile
+8. **E4-S08** — Workflow diagram at compile ✅ (2026-07-28)
 
 ---
 
@@ -98,7 +98,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 ## E4-S02 — GEPA compile *(split into sub-stories)*
 
-> **Canonical story files:** [E4-S02a — schema/CLI](epic-stories/27.1-story.md) ✅ (2026-07-28) · [E4-S02b — GEPA runner](epic-stories/27.2-story.md) ✅ (2026-07-28). Diagram generation: [E4-S08](#e4-s08-workflow-diagram-at-compile) *(separate; not in S02b)*.
+> **Canonical story files:** [E4-S02a — schema/CLI](epic-stories/27.1-story.md) ✅ (2026-07-28) · [E4-S02b — GEPA runner](epic-stories/27.2-story.md) ✅ (2026-07-28). Diagram generation: [E4-S08](#e4-s08-workflow-diagram-at-compile) ✅ (2026-07-28).
 
 See [epic-stories/27.1-story.md](epic-stories/27.1-story.md) and [27.2-story.md](epic-stories/27.2-story.md) for full AC → test mapping.
 
@@ -116,7 +116,7 @@ See epic-stories for full AC → test mapping. Runtime `input_rewrite` preproces
 
 **E4-S03a Done (2026-07-28):** `compile/export.py` maps `dump_state()` → Haystack prompts / `agent.json` / `artifact-manifest.json`; optional `input_rewrite`; legacy `manifest.json` accepted. Tests: `pytest … -k e4_s03` (7 passed).
 
-**E4-S03b Done (2026-07-28):** `runtime/preprocess.py` + `build_agent_bundle()` apply fixed `input_rewrite` before `Agent.run` on serve/run (no DSPy). Tests: `pytest … -k e4_s03b` (7 passed). **E4-S04 Done (2026-07-28):** Pattern B `compile/gepa_adapter.py` + `CompileConfig` mode/seed_artifact. Tests: `pytest tests/unit/compile/test_gepa_adapter.py -v` (5 passed, 0 skipped). **E4-S05 Done (2026-07-28):** Post-compile serve prefers artifact; doctor stale `source_hash` warn. Tests: **12 passed, 0 skipped** (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). **E4-S06 Done (2026-07-28):** `compile --dry-run`. Tests: **5 passed, 0 skipped** (`test_compile_dry_run.py`). **E4-S07 Done (2026-07-28):** Immutable `<run_id>/` + doctor `pinned_artifact` + rollback docs; deploy `artifact_run_id` contract shared with E5-S01. Tests: `test_rollback.py`, `test_e4_s07_ac2_*`, `test_deploy_pin.py`. Next: [E4-S08](epic-stories/33-story.md).
+**E4-S03b Done (2026-07-28):** `runtime/preprocess.py` + `build_agent_bundle()` apply fixed `input_rewrite` before `Agent.run` on serve/run (no DSPy). Tests: `pytest … -k e4_s03b` (7 passed). **E4-S04 Done (2026-07-28):** Pattern B `compile/gepa_adapter.py` + `CompileConfig` mode/seed_artifact. Tests: `pytest tests/unit/compile/test_gepa_adapter.py -v` (5 passed, 0 skipped). **E4-S05 Done (2026-07-28):** Post-compile serve prefers artifact; doctor stale `source_hash` warn. Tests: **12 passed, 0 skipped** (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). **E4-S06 Done (2026-07-28):** `compile --dry-run`. Tests: **5 passed, 0 skipped** (`test_compile_dry_run.py`). **E4-S07 Done (2026-07-28):** Immutable `<run_id>/` + doctor `pinned_artifact` + rollback docs; deploy `artifact_run_id` contract shared with E5-S01. Tests: `test_rollback.py`, `test_e4_s07_ac2_*`, `test_deploy_pin.py`. **E4-S08 Done (2026-07-28):** Mermaid `docs/workflow-diagram.md` + `--workflow-diagram-only`. Tests: **8 passed, 0 skipped** (`test_workflow_diagram.py` + `test_e4_s08_ac5_*`). Epic E4 complete.
 
 ---
 
@@ -336,6 +336,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E4.7 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
+| **Status** | Done (2026-07-28) |
 | **Prerequisites** | [E2-S07](../01-epic.md#e2-s07-workflowyaml-schema-serial) · [E4-S02](#e4-s02-gepa-compile-command) *(diagram runs even without GEPA)* |
 
 ### User story
@@ -349,18 +350,18 @@ As a **harness developer**, I want a workflow diagram generated at compile time,
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Every `zaumzeug compile <harness>` writes `docs/workflow-diagram.md` (Mermaid flowchart)
-- [ ] **AC-2** Diagram nodes label agent/pipeline id and resolved `default_model_id` per agent
-- [ ] **AC-3** `--workflow-diagram-only` refreshes diagram without GEPA or LLM calls
-- [ ] **AC-4** File header states auto-generated; hand-edit discouraged
-- [ ] **AC-5** `zaumzeug doctor` warns when `workflow.yaml` newer than diagram
-- [ ] **AC-6** Golden snapshot test for example harness diagram structure
+- [x] **AC-1** Every `zaumzeug compile <harness>` writes `docs/workflow-diagram.md` (Mermaid flowchart)
+- [x] **AC-2** Diagram nodes label agent/pipeline id and resolved `default_model_id` per agent
+- [x] **AC-3** `--workflow-diagram-only` refreshes diagram without GEPA or LLM calls
+- [x] **AC-4** File header states auto-generated; hand-edit discouraged
+- [x] **AC-5** `zaumzeug doctor` warns when `workflow.yaml` newer than diagram
+- [x] **AC-6** Golden snapshot test for example harness diagram structure
 
 ### Implementation tasks (build)
 
-- [ ] Implement `src/zaumzeug/compile/workflow_diagram.py`
-- [ ] Invoke from compile runner before/after GEPA per agent
-- [ ] Add `--workflow-diagram-only` flag to compile CLI
+- [x] Implement `src/zaumzeug/compile/workflow_diagram.py`
+- [x] Invoke from compile runner before/after GEPA per agent
+- [x] Add `--workflow-diagram-only` flag to compile CLI
 
 ### Verification (after build)
 
@@ -375,10 +376,12 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-5 | `tests/integration/test_doctor.py::test_e4_s08_ac5_stale_diagram_warning` |
 | AC-6 | `tests/unit/compile/test_workflow_diagram.py::test_e4_s08_ac6_example_diagram_snapshot` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/compile/test_workflow_diagram.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/compile/test_workflow_diagram.py -v` passes (7 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Deploy copies diagram per E5-S02
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Deploy copies diagram per E5-S02 *(contract documented; packager copy lands in E5-S02)*
+- [x] Verification checklist complete; all ACs traced to tests
+
+---

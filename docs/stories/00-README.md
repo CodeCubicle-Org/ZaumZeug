@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E4-S07 done) |
+| **Last modified** | 2026-07-28 (E4-S08 done) |
 | **Status** | Active |
 
 ---
@@ -71,8 +71,9 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E4-S05](epic-stories/30-story.md) — Post-compile serve uses artifact | Done | 2026-07-28 |
 | [E4-S06](epic-stories/31-story.md) — `--dry-run` on compile | Done | 2026-07-28 |
 | [E4-S07](epic-stories/32-story.md) — Rollback to pinned artifact run | Done | 2026-07-28 |
+| [E4-S08](epic-stories/33-story.md) — Workflow diagram at compile | Done | 2026-07-28 |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done. [E1-S08](epic-stories/25-story.md) (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved 2026-07-22). Phase 2 in progress: [E4-S01](epic-stories/26-story.md)–[E4-S07](epic-stories/32-story.md) done. Next build: [E4-S08](epic-stories/33-story.md).
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done. [E1-S08](epic-stories/25-story.md) (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved 2026-07-22). Phase 2: [E4-S01](epic-stories/26-story.md)–[E4-S08](epic-stories/33-story.md) done. Next build: [E6-S01](epic-stories/34-story.md).
 
 ---
 
@@ -125,7 +126,7 @@ E4-S04  Haystack GEPA evaluator / Pattern B ✅ (2026-07-28)
 E4-S05  Post-compile serve uses artifact ✅ (2026-07-28)
 E4-S06  compile --dry-run ✅ (2026-07-28)
 E4-S07  Artifact rollback ✅ (2026-07-28)
-E4-S08  Workflow diagram at compile
+E4-S08  Workflow diagram at compile ✅ (2026-07-28)
 ```
 
 ## Validation summary (2026-07-05, re-checked)
@@ -157,7 +158,7 @@ Cross-checked against [PRD §8](../prd.md#8-functional-requirements-epics) and [
 | E1 before E2/E3 broke CI/doctor/serve | Moved E1 to **03-epic.md** |
 | GEPA scope open | **Resolved:** Phase 2 CLI = Pattern A; optional input rewrite at compile; Pattern B (E4-S04) shipped 2026-07-28 as adapter + schema |
 | Serial multi-agent workflow (no E9) | **E2-S07** `workflow.yaml`; **E3-S08** `zaumzeug run`; folded into E2/E3/E4/E5 |
-| Workflow diagram at compile | **E4-S08** — `docs/workflow-diagram.md` on every `zaumzeug compile` |
+| Workflow diagram at compile | **Done** (E4-S08, 2026-07-28) — Mermaid `docs/workflow-diagram.md` on every `zaumzeug compile`; `--workflow-diagram-only` |
 | User guide: workflow + pipelines | [user-docs/guides/multi-agent-workflow.md](../user-docs/guides/multi-agent-workflow.md) |
 | Architecture split broke §N anchors | Restored `## N.` on H2 headings in `docs/architecture/` topic files; corrected Pattern/MCP slugs in stories |
 | Story `#anchor` slugs drifted from headings | Normalized 27 cross-links to GitHub auto-slugs derived from `## E*-S* — …` titles |

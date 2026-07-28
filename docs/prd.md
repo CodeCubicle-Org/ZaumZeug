@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-28 (E4-S07 artifact rollback / pin)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4-S01–S07 done; next E4-S08)  
+**Last updated:** 2026-07-28 (E4-S08 workflow diagram at compile)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; next E6-S01 / E5)  
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -312,11 +312,11 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E4.4 | Haystack GEPA evaluator (Pattern B) | **Done** (E4-S04, 2026-07-28) — `compile/gepa_adapter.py`: `HaystackGepaAdapter` + `optimize_haystack_artifact`; modes `single-task` \| `multi-task` \| `generalization`; `CompileConfig` `optimizer`/`mode`/`seed_artifact`. CLI `zaumzeug compile` remains Pattern A. Tests: `tests/unit/compile/test_gepa_adapter.py` (5 passed, 0 skipped). |
 | E4.5 | Post-compile serve | **Done** (E4-S05, 2026-07-28) — After compile, serve/run prefer valid `agent.artifact` over hand-edited `system_prompt`; `compile.module` not imported at serve; optional `input_rewrite` preprocess; doctor warns on stale `source_hash`. Tests: 12 passed, 0 skipped (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). Docs: [guides/compile.md — Serve after compile](user-docs/guides/compile.md#serve-after-compile). |
 | E4.6 | `--dry-run` on compile | **Done** (E4-S06, 2026-07-28) — `zaumzeug compile --dry-run` validates Phase 2 schema, resolves module imports, prints task/reflection registry; no GEPA, no LLM calls, no artifacts. Tests: `tests/integration/compile/test_compile_dry_run.py` (5 passed). Docs: [CLI reference](user-docs/reference/cli.md#zaumzeug-compile). |
-| E4.7 | Workflow diagram | **AC:** Every `zaumzeug compile` regenerates `docs/workflow-diagram.md` (Mermaid) from `workflow.yaml` + resolved agents/models; `--workflow-diagram-only` skips GEPA; doctor warns if stale; deploy copies to `deploy/<harness>/docs/`. ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-compile).) |
+| E4.7 | Workflow diagram | **Done** (E4-S08, 2026-07-28) — Every `zaumzeug compile` regenerates `docs/workflow-diagram.md` (Mermaid) from `workflow.yaml` + resolved agents/models; `--workflow-diagram-only` skips GEPA; doctor warns if stale; deploy copies to `deploy/<harness>/docs/` (E5-S02). ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-compile).) |
 
 **Phase 2 compile scope (resolved):** **Pattern A** (`dspy.GEPA`) is the default `zaumzeug compile` path — optimize prompts/signatures via DSPy modules, export to Haystack artifacts. **Optional within Pattern A:** compile-time GEPA on **input rewrite/clarify templates** (how the harness preprocesses user messages — not optimization of end-user chat at runtime). **Pattern B** (`optimize_anything` / Haystack evaluator) **shipped early** (E4-S04, 2026-07-28) as a programmatic adapter + schema; not wired into the CLI compile path yet.
 
-**Story seeds:** DSPy module loader **Done** (E4-S01). Compile CLI + GEPA runner + artifacts **Done** (E4-S02a/b, 2026-07-28). Export contract **Done** (E4-S03a, 2026-07-28). Runtime `input_rewrite` preprocess **Done** (E4-S03b, 2026-07-28). Haystack GEPA evaluator / Pattern B **Done** (E4-S04, 2026-07-28). Post-compile serve uses artifact **Done** (E4-S05, 2026-07-28). Compile `--dry-run` **Done** (E4-S06, 2026-07-28). Rollback to pinned `artifacts/<run_id>` **Done** (E4-S07, 2026-07-28) — immutable runs, doctor pin check, [rollback guide](user-docs/guides/compile.md#rollback-to-a-pinned-run). Remaining: workflow diagram golden snapshot (E4-S08).
+**Story seeds:** DSPy module loader **Done** (E4-S01). Compile CLI + GEPA runner + artifacts **Done** (E4-S02a/b, 2026-07-28). Export contract **Done** (E4-S03a, 2026-07-28). Runtime `input_rewrite` preprocess **Done** (E4-S03b, 2026-07-28). Haystack GEPA evaluator / Pattern B **Done** (E4-S04, 2026-07-28). Post-compile serve uses artifact **Done** (E4-S05, 2026-07-28). Compile `--dry-run` **Done** (E4-S06, 2026-07-28). Rollback to pinned `artifacts/<run_id>` **Done** (E4-S07, 2026-07-28) — immutable runs, doctor pin check, [rollback guide](user-docs/guides/compile.md#rollback-to-a-pinned-run). Workflow diagram at compile **Done** (E4-S08, 2026-07-28) — Mermaid `docs/workflow-diagram.md`, `--workflow-diagram-only`, golden snapshot.
 
 ---
 
@@ -417,7 +417,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4-S01–S07 **Done** 2026-07-28; next E4-S08 |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; next [E6-S01](stories/epic-stories/34-story.md) |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A | E8 |
 

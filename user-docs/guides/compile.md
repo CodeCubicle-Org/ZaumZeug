@@ -63,14 +63,31 @@ result = optimize_haystack_artifact(
 ## Run compile (Pattern A)
 
 ```bash
-zaumzeug compile <harness> [--agent NAME] [--dry-run]
+zaumzeug compile <harness> [--agent NAME] [--dry-run | --workflow-diagram-only]
 ```
 
 Use `--dry-run` to validate Phase 2 compile config, resolve `compile.module` imports, and print task/reflection model ids **without** running GEPA or writing artifacts (mirrors `zaumzeug serve --dry-run`).
 
+Use `--workflow-diagram-only` to regenerate `docs/workflow-diagram.md` (Mermaid flowchart from `workflow.yaml` + resolved agent models) without GEPA or LLM calls. Every full compile also refreshes that diagram.
+
 Each full run writes immutable `agents/<name>/artifacts/<run_id>/` and updates `artifacts/current`. The canonical manifest name is **`artifact-manifest.json`** (not the deploy bundle’s `manifest.json`). During migration, a legacy `manifest.json` inside an artifact folder is still accepted when resolving.
 
 Live task/reflection models need API keys in `.env`. The shipped `example` harness uses `provider: mock` and a stub GEPA path for offline compile.
+
+## Workflow diagram
+
+Every successful full compile writes **`docs/workflow-diagram.md`** under the harness (Markdown + Mermaid). Do not hand-edit it — compile overwrites.
+
+```bash
+zaumzeug compile example --workflow-diagram-only
+```
+
+| Node type | Label |
+|---|---|
+| Agent stage | Agent id + resolved `default_model_id (provider)` |
+| Pipeline stage | Pipeline id |
+
+`zaumzeug doctor` warns (exit 0) when `workflow.yaml` is newer than the diagram, or the diagram is missing. Deploy packaging (E5) copies `docs/` into `deploy/<harness>/docs/`.
 
 ## Serve after compile
 

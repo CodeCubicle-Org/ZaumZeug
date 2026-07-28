@@ -39,6 +39,8 @@ GEPA requires **task LM** and **reflection LM** as separate config roles (LiteLL
 
 **Implementation (E4-S07, 2026-07-28):** Existing `<run_id>/` directories are immutable (never overwritten); pin/rollback via `agent.artifact` or retargeting `current`. Doctor validates pins (`check_pinned_artifact`). Docs: [user-docs/guides/compile.md](../user-docs/guides/compile.md#rollback-to-a-pinned-run).
 
+**Implementation (E4-S08, 2026-07-28):** `compile/workflow_diagram.py` regenerates Mermaid `docs/workflow-diagram.md` on full compile and `--workflow-diagram-only` (no GEPA/LLM). Docs: [user-docs/guides/compile.md](../user-docs/guides/compile.md#workflow-diagram).
+
 ### 4.3 Languages and key packages
 
 | Layer | Format | Notes |
