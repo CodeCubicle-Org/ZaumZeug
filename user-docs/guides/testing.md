@@ -441,7 +441,7 @@ deploy:
 | `warn` | If `eval:` configured, run `zaumzeug eval`; print failures; **continue** deploy. |
 | `block` | If `eval:` configured, run `zaumzeug eval`; **abort** deploy on any failure. |
 
-CLI override: `zaumzeug deploy <name> --eval-gate block`. If `eval:` is absent, `block` / `warn` are a no-op. After the gate, deploy writes `deploy/<name>/` per Architecture §10.1 (E5-S01 packager + E5-S02 copy matrix: exclude `modules/`/`data/`/`eval/`/`skills/`; include referenced runtime assets + pinned artifacts). Ops then ships: copy bundle → `target_install` → create `.env` → `zaumzeug serve <name> --deploy` or `HARNESS_ROOT=deploy zaumzeug serve <name>` (**Done** E5-S03 / E5-S04 / E5-S05 — loads only the bundle; same OpenAI REST as dev; runtime-only install, no DSPy/GEPA/DeepEval). See [Deploy and ship](deploy.md), [CLI — zaumzeug deploy](../reference/cli.md#zaumzeug-deploy), and [CLI — serve](../reference/cli.md#zaumzeug-serve).
+CLI override: `zaumzeug deploy <name> --eval-gate block`. If `eval:` is absent, `block` / `warn` are a no-op. After the gate, deploy writes `deploy/<name>/` per Architecture §10.1 (E5-S01 packager + E5-S02 copy matrix: exclude `modules/`/`data/`/`eval/`/`skills/`; include referenced runtime assets + pinned artifacts). Ops then ships: copy bundle → `target_install` → create `.env` → `zaumzeug serve <name> --deploy` or `HARNESS_ROOT=deploy zaumzeug serve <name>` (**Done** E5-S03 / E5-S04 / E5-S05 — loads only the bundle; same OpenAI REST as dev; runtime-only install, no DSPy/GEPA/DeepEval). Default git policy ignores `deploy/` and compile artifacts (**Done** E5-S07 — optional release force-add or CI `upload-artifact`; see [Deploy and ship — Git policy](deploy.md#git-policy-for-deploy-bundles)). See [Deploy and ship](deploy.md), [CLI — zaumzeug deploy](../reference/cli.md#zaumzeug-deploy), and [CLI — serve](../reference/cli.md#zaumzeug-serve).
 
 ---
 
@@ -453,7 +453,7 @@ CLI override: `zaumzeug deploy <name> --eval-gate block`. If `eval:` is absent, 
 | `HARNESS_LOG_LEVEL=DEBUG` | Verbose SDK + Haystack logs while debugging (equivalent to `serve`/`compile`/`eval --verbose`) |
 | `PYTEST_OPENAI_API_KEY` | Re-record VCR cassettes (`pytest --record-mode=once`) |
 
-Never commit API keys. `.env` is gitignored. Default CI runs mock only — see [CLI reference](../reference/cli.md) for `HARNESS_LIVE_LLM` and debugpy.
+Never commit API keys. `.env` is gitignored. Default scaffolding also ignores `/deploy/` and `usr-harnesses/*/artifacts/` (**Done** E5-S07). Default CI runs mock only — see [CLI reference](../reference/cli.md) for `HARNESS_LIVE_LLM` and debugpy.
 
 ---
 
@@ -469,6 +469,8 @@ Default branch CI (Win / macOS / Linux) is [`.github/workflows/ci-matrix.yml`](.
 4. Mock-model serve smoke on ephemeral port: `python install/ci_serve_smoke.py example`
 5. `pytest tests/integration/test_openai_contract.py -v`
 6. `pytest tests/unit tests/integration tests/usr-harnesses -v`
+
+Optional (not enabled by default): build `deploy/<name>/` and upload it as a workflow artifact — commented example in the same workflow (E5-S07). See [Deploy and ship — Git policy](deploy.md#git-policy-for-deploy-bundles).
 
 Eval regression and live e2e are **additional** tiers — nightly or on PRs that touch prompts/artifacts.
 
@@ -499,7 +501,7 @@ zaumzeug compile example --dry-run
 | Phase | Testing deliverables |
 |---|---|
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
-| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (**Done** E6-S05 — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**Done** E6-S06 — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**Done** E6-S07 — `tests/unit/eval/test_gepa_bridge.py`), `zaumzeug deploy` packager (**Done** E5-S01 — `tests/integration/deploy/test_deploy.py`), deploy copy matrix (**Done** E5-S02 — `tests/unit/deploy/test_copy_rules.py`, `tests/integration/deploy/test_deploy_golden.py`), serve `--deploy` (**Done** E5-S03 — `tests/integration/deploy/test_serve_deploy.py`, 4 passed / 0 skipped), `HARNESS_ROOT=deploy` (**Done** E5-S04 — `tests/unit/deploy/test_harness_root.py`, 2 passed / 0 skipped), target ship workflow docs (**Done** E5-S05 — `tests/integration/deploy/test_target_install.py` + `test_e5_s05_ac5_no_env_in_bundle`, 5 passed / 0 skipped) |
+| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (**Done** E6-S05 — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**Done** E6-S06 — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**Done** E6-S07 — `tests/unit/eval/test_gepa_bridge.py`), `zaumzeug deploy` packager (**Done** E5-S01 — `tests/integration/deploy/test_deploy.py`), deploy copy matrix (**Done** E5-S02 — `tests/unit/deploy/test_copy_rules.py`, `tests/integration/deploy/test_deploy_golden.py`), serve `--deploy` (**Done** E5-S03 — `tests/integration/deploy/test_serve_deploy.py`, 4 passed / 0 skipped), `HARNESS_ROOT=deploy` (**Done** E5-S04 — `tests/unit/deploy/test_harness_root.py`, 2 passed / 0 skipped), target ship workflow docs (**Done** E5-S05 — `tests/integration/deploy/test_target_install.py` + `test_e5_s05_ac5_no_env_in_bundle`, 5 passed / 0 skipped), deploy git policy (**Done** E5-S07 — `tests/unit/install/test_scaffolding.py::test_e5_s07_ac1_gitignore_deploy_and_artifacts`, 6 passed / 0 skipped in file) |
 | **3** | MCP integration tests, tool-correctness eval |
 | **4** | Production trace ratchet, `@observe` / Confident AI sync |
 
@@ -508,5 +510,5 @@ zaumzeug compile example --dry-run
 ## Related guides
 
 - [Multi-agent workflow](multi-agent-workflow.md) — `workflow.yaml` and stage routing under test
-- [Deploy and ship](deploy.md) — copy → `target_install` → `.env` → `serve --deploy` (E5-S05)
+- [Deploy and ship](deploy.md) — copy → `target_install` → `.env` → `serve --deploy` (E5-S05); git policy for bundles (E5-S07)
 - [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_ROOT=deploy` (E5-S04), `HARNESS_LIVE_LLM`, debugpy, serve/compile `--dry-run`, serve `--deploy` (E5-S03), `doctor`, `eval` / `--trace` / `--base-url`, GEPA ↔ DeepEval bridge, Phase 1 security notes

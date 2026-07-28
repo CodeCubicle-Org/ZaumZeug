@@ -161,6 +161,7 @@ venv.bak/
 # Root production bundles only — do not ignore src/zaumzeug/deploy or tests/*/deploy
 /deploy/
 artifacts/
+usr-harnesses/*/artifacts/
 
 # Spyder project settings
 .spyderproject

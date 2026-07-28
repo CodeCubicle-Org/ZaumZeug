@@ -159,6 +159,8 @@ Secrets remain in `.env` only; all model files hold provider + model id + genera
 
 **Implementation (E1-S03, 2026-07-22):** `scaffold_project()` in `client_install.py` — copy-if-missing from `install/templates/` for `usr-harnesses/example/` (skip with `--no-example`), `config/models.yaml` (from `models.example.yaml`), `.env.example`, `.cursor/mcp.json.example`, `user-docs/` skeleton; seeds `.env` only when missing; merges `.gitignore` entries (`.venv`, `.env`, `deploy/`, `artifacts/`). Live `.cursor/mcp.json` via `--cursor-mcp` → [E7-S03](../stories/epic-stories/52-story.md). Tests: `tests/unit/install/test_scaffolding.py`.
 
+**Implementation (E5-S07, 2026-07-28):** Scaffolding also ensures `usr-harnesses/*/artifacts/` (Architecture §10.4). Release-commit / CI upload policy: [§10.4](07-deploy-packaging.md#104-git-and-gitignore).
+
 **Implementation (E1-S04, 2026-07-22):** `zaumzeug init <name>` in `src/zaumzeug/cli.py` + `zaumzeug.scaffold` — scaffolds `usr-harnesses/<name>/` from `install/templates/harness/` (Phase 1 minimal harness with mock agent); safe name validation; fails if exists unless `--force`; prints `doctor` / `serve` hints. Tests: `tests/unit/cli/test_init.py`. Docs: [project-setup.md](../../user-docs/getting-started/project-setup.md).
 
 **Implementation (E1-S07, 2026-07-22):** Cross-platform CI matrix at [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml) — `windows-latest` / `ubuntu-latest` / `macos-latest`, Python **3.11**, pip cache, fail-fast, 30m timeout; per-OS install wrappers → `zaumzeug doctor` → `serve --dry-run` → `install/ci_serve_smoke.py` (ephemeral `--port`, mock only) → OpenAI contract pytest → unit+integration suite. Tests: `tests/unit/ci/test_ci_matrix_workflow.py`, `tests/unit/install/test_ci_serve_smoke.py`.
@@ -174,7 +176,7 @@ user-docs/
 ├── guides/
 │   ├── multi-agent-workflow.md   # workflow.yaml, agents vs pipelines, control flow
 │   ├── compile.md                # GEPA compile / export / rollback
-│   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05)
+│   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05); git policy (E5-S07)
 │   └── testing.md                # unit, integration, eval; mock profile; CI tiers
 └── reference/cli.md
 ```

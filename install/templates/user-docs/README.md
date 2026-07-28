@@ -22,8 +22,8 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 |---|---|
 | [Multi-agent workflow](guides/multi-agent-workflow.md) | `workflow.yaml`, agent vs pipeline stages, control flow inside agents |
 | [Compile and export](guides/compile.md) | GEPA offline compile; Haystack artifact export; workflow diagram; optional runtime `input_rewrite`; pin/rollback to immutable `artifacts/<run_id>/` |
-| [Deploy and ship](guides/deploy.md) | Copy `deploy/<name>/` → `target_install` → `.env` → `zaumzeug serve --deploy`; runtime-only install (no DSPy/GEPA/DeepEval); Win/macOS/Linux table (E5-S05) |
-| [Testing](guides/testing.md) | Unit, integration, eval layers; mock profile; optional `[eval]` / DeepEval (E6-S01); `zaumzeug eval` (E6-S02); deploy eval gate (E6-S03 / E5-S06); `eval/` pytest (E6-S04); trace → test case (E6-S05); Mode C HTTP `--base-url` (E6-S06); GEPA ↔ DeepEval bridge (E6-S07); deploy packager (E5-S01) + copy matrix (E5-S02); serve `--deploy` (E5-S03); `HARNESS_ROOT=deploy` (E5-S04); ship workflow (E5-S05); CI tiers |
+| [Deploy and ship](guides/deploy.md) | Copy `deploy/<name>/` → `target_install` → `.env` → `zaumzeug serve --deploy`; runtime-only install (no DSPy/GEPA/DeepEval); Win/macOS/Linux table (E5-S05); git policy for bundles (E5-S07) |
+| [Testing](guides/testing.md) | Unit, integration, eval layers; mock profile; optional `[eval]` / DeepEval (E6-S01); `zaumzeug eval` (E6-S02); deploy eval gate (E6-S03 / E5-S06); `eval/` pytest (E6-S04); trace → test case (E6-S05); Mode C HTTP `--base-url` (E6-S06); GEPA ↔ DeepEval bridge (E6-S07); deploy packager (E5-S01) + copy matrix (E5-S02); serve `--deploy` (E5-S03); `HARNESS_ROOT=deploy` (E5-S04); ship workflow (E5-S05); deploy git policy (E5-S07); CI tiers |
 
 ## Quick links
 

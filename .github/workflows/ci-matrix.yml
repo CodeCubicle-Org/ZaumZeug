@@ -49,3 +49,15 @@ jobs:
 
       - name: Unit + integration suite
         run: python -m pytest tests/unit tests/integration tests/usr-harnesses -v
+
+      # E5-S07 / E5.7 — optional deploy bundle as workflow artifact (not enabled by default).
+      # Teams that want an audited shippable tree without committing deploy/<name>/ may
+      # uncomment the steps below (or add an equivalent job) after `zaumzeug deploy`:
+      #
+      # - name: Build deploy bundle
+      #   run: python -m zaumzeug deploy example
+      # - name: Upload deploy bundle
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: deploy-example
+      #     path: deploy/example/

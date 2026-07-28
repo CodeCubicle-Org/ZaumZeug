@@ -20,14 +20,17 @@ MIN_PYTHON = (3, 11)
 VENV_DIRNAME = ".venv"
 EDITABLE_DEV_SPEC = ".[dev]"
 
-# .gitignore entries ensured by scaffolding (E1-S03 / E1.3).
+# .gitignore entries ensured by scaffolding (E1-S03 / E1.3; E5-S07 / E5.7).
 # Trailing slashes built via concatenation so AC-7 path-literal checks stay clean.
 # ``/deploy/`` is root-only so ``src/zaumzeug/deploy/`` and ``tests/*/deploy/`` stay tracked.
+# ``usr-harnesses/*/artifacts/`` is the Architecture §10.4 default; broad ``artifacts/``
+# still covers agent-level ``agents/<name>/artifacts/`` trees.
 GITIGNORE_ENTRIES: tuple[str, ...] = (
     ".venv",
     ".env",
     "/" + "deploy" + "/",
     "artifacts" + "/",
+    "usr-harnesses" + "/*/" + "artifacts" + "/",
 )
 
 

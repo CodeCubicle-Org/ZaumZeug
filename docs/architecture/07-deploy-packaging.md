@@ -85,7 +85,9 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 | **Release tags** | Optionally commit `deploy/<name>/` for audited releases |
 | **CI** | Build `deploy/` in pipeline; upload as deployment artifact |
 
-**Implementation (E1-S03, 2026-07-22):** `client_install.py` ensures `.gitignore` includes `.venv`, `.env`, `deploy/`, and `artifacts/` (copy/merge, idempotent). Narrower `usr-harnesses/*/artifacts/` pattern remains an [E5-S07](../stories/epic-stories/47-story.md) extension. Tests: `tests/unit/install/test_scaffolding.py` (`test_e1_s03_ac3_gitignore_entries`).
+**Implementation (E1-S03, 2026-07-22):** `client_install.py` ensures `.gitignore` includes `.venv`, `.env`, `/deploy/`, and `artifacts/` (copy/merge, idempotent).
+
+**Implementation (E5-S07, 2026-07-28):** Scaffolding also ensures `usr-harnesses/*/artifacts/` (Architecture §10.4 default). Broad `artifacts/` remains so agent-level `agents/<name>/artifacts/` trees stay ignored. Release-commit and CI upload options documented in [user-docs/guides/deploy.md](../user-docs/guides/deploy.md#git-policy-for-deploy-bundles), [CONTRIBUTING.md](../../CONTRIBUTING.md#deploy-git-policy-maintainers), and commented example in [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml). Tests: `tests/unit/install/test_scaffolding.py` (`test_e5_s07_ac1_gitignore_deploy_and_artifacts`).
 
 ### 10.5 Production server dependencies
 

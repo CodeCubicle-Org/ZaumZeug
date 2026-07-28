@@ -23,6 +23,8 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 **Implementation (E5-S05, 2026-07-28):** Ops ship path (copy → `target_install` → `.env` → serve) documented in `README.deploy.md` and [user-docs/guides/deploy.md](../../user-docs/guides/deploy.md). Tests: `tests/integration/deploy/test_target_install.py`.
 
+**Implementation (E5-S07, 2026-07-28):** Deploy git policy (default ignore + release/CI options) — [user-docs/guides/deploy.md](../../user-docs/guides/deploy.md#git-policy-for-deploy-bundles); Architecture [§10.4](07-deploy-packaging.md#104-git-and-gitignore).
+
 **Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` wired from `zaumzeug serve` and `zaumzeug compile` when `--verbose` or `HARNESS_LOG_LEVEL=DEBUG`. Structured request context via `log_request()`; API keys redacted in log output.
 
 **Implementation (E3-S02, 2026-07-20):** `src/zaumzeug/serve/runner.py` — `validate_serve()` → `build_agent()` → Hayhooks `create_app` / `run_app` on `127.0.0.1` and `serve.hayhooks.port`. OpenAI routes via Hayhooks registry (`/v1/chat/completions`, `GET /v1/models`). Production `--deploy` path closed by [E5-S03](../stories/epic-stories/43-story.md) (2026-07-28).

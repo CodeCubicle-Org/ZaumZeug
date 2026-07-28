@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | New contributors · harness developers |
-| **Last updated** | 2026-07-28 |
+| **Last updated** | 2026-07-29 |
 | **Related** | [Root README](README.md) · [Installation (full)](user-docs/getting-started/installation.md) |
 
 Short entry point for vision, install, and first commands — without reading the full PRD. Depth lives in [user-docs/getting-started/installation.md](user-docs/getting-started/installation.md).
@@ -75,7 +75,7 @@ Not required for mock serve:
 
 - **Compile / GEPA** — included in `[dev]` (`zaumzeug compile`, Phase 2; `--dry-run` validates modules/registry without GEPA; writes immutable Haystack export under `artifacts/<run_id>/`; regenerates `docs/workflow-diagram.md` (or `--workflow-diagram-only`); pin/rollback to a prior run without re-GEPA; optional `input_rewrite` applied at serve/run; mock/stub offline, live models need `.env` keys). See [user-docs/guides/compile.md](user-docs/guides/compile.md).
 - **DeepEval** — `pip install "zaumzeug[eval]"` (optional extra **Done** E6-S01 — core install stays lean; `zaumzeug eval` CLI **Done** E6-S02; deploy eval gate **Done** E6-S03 / E5-S06 — `deploy.eval_gate` / `--eval-gate`; harness `eval/` pytest scaffold **Done** E6-S04 — `zaumzeug init --with-eval` / `deepeval test run`; trace → test case **Done** E6-S05 — `data/traces/` + `zaumzeug eval --trace`; Mode C HTTP black-box **Done** E6-S06 — `zaumzeug eval --base-url` / `eval.base_url`, staging/debug only; GEPA ↔ DeepEval bridge **Done** E6-S07 — `append_failed_eval_to_train`, shared val aliases, optional `modules/metrics.py` DeepEval metric)
-- **Deploy packaging** — `zaumzeug deploy` (**Done** E5-S01 / E5-S02) writes `deploy/<name>/`; ops ships with copy → `target_install` → `.env` → `zaumzeug serve <name> --deploy` (**Done** E5-S03) or `HARNESS_ROOT=deploy` (**Done** E5-S04). Ship workflow docs **Done** E5-S05 — see [Deploy and ship](user-docs/guides/deploy.md), [CLI — serve](user-docs/reference/cli.md#zaumzeug-serve) / [Global environment](user-docs/reference/cli.md#global-environment), and bundle `README.deploy.md`.
+- **Deploy packaging** — `zaumzeug deploy` (**Done** E5-S01 / E5-S02) writes `deploy/<name>/`; ops ships with copy → `target_install` → `.env` → `zaumzeug serve <name> --deploy` (**Done** E5-S03) or `HARNESS_ROOT=deploy` (**Done** E5-S04). Ship workflow docs **Done** E5-S05 — see [Deploy and ship](user-docs/guides/deploy.md), [CLI — serve](user-docs/reference/cli.md#zaumzeug-serve) / [Global environment](user-docs/reference/cli.md#global-environment), and bundle `README.deploy.md`. Deploy git policy **Done** E5-S07 — default ignore `deploy/` + `usr-harnesses/*/artifacts/`; optional release commit or CI artifact upload ([Git policy](user-docs/guides/deploy.md#git-policy-for-deploy-bundles)).
 - **Provider plugins** — e.g. `openai-haystack`, `anthropic-haystack` (live models only)
 - **MCP in Cursor** — `uv` + install `--cursor-mcp` (Phase 3)
 - **Chainlit UI** — `hayhooks[chainlit]` (Phase 3)
@@ -142,3 +142,12 @@ Internal design and backlog — not required for first serve:
 - Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml)
 - [Architecture](docs/architecture.md)
 - [Stories / backlog](docs/stories/00-README.md)
+
+#### Deploy git policy (maintainers)
+
+Default `.gitignore` (via install scaffolding) keeps `deploy/` and compile artifacts out of git — local-only bundles. Two audited alternatives:
+
+1. **Release commit** — force-add a single bundle for a tag (`git add -f deploy/<name>/`), then tag. Documented for harness teams in [Deploy and ship — Git policy](user-docs/guides/deploy.md#git-policy-for-deploy-bundles).
+2. **CI workflow artifact** — run `zaumzeug deploy <name>` in CI and upload `deploy/<name>/` with `actions/upload-artifact` (see commented example in [ci-matrix.yml](.github/workflows/ci-matrix.yml)). Prefer this when you want an audited binary without permanent git history of generated trees.
+
+Never commit `.env` (always gitignored).

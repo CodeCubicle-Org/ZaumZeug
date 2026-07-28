@@ -5,8 +5,8 @@
 | **Document** | Epic E5 user stories |
 | **File** | `docs/stories/06-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E5-S05 done) |
-| **Status** | In progress (E5-S01–S06 Done; next E5-S07 deploy git policy) |
+| **Last modified** | 2026-07-29 (E5-S07 done + docs sweep) |
+| **Status** | In progress (E5-S01–S07 Done; next E5-S08 deploy platform policy) |
 | **Build order** | **6 of 8** (after E4 compile + E6-S02 eval for eval gate) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -30,7 +30,7 @@
 3. **E5-S09a** → **E5-S09b** → **E5-S09c** — Target install *(core, wrappers, verify)*
 4. **E5-S03** → **E5-S04** — serve `--deploy` + `HARNESS_ROOT` ✅ (2026-07-28)
 5. **E5-S05** → **E5-S08** — Ops docs and platform policy
-6. **E5-S07** — Git policy
+6. **E5-S07** — Git policy ✅ (2026-07-28)
 7. **E5-S06** — Deploy eval gate ✅ (2026-07-28; shipped early with [E6-S03](../05-epic.md#e6-s03-eval-gate-on-deploy); requires [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) ✅)
 
 ---
@@ -363,6 +363,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E5.7 |
 | **Persona** | SDK maintainer |
 | **Priority** | P2 |
+| **Status** | Done (2026-07-28) — canonical: [47-story.md](epic-stories/47-story.md) |
 
 ### User story
 
@@ -375,14 +376,14 @@ As an **SDK maintainer**, I want clear git policy for deploy artifacts, so that 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Default `.gitignore` includes `deploy/` and `usr-harnesses/*/artifacts/`
-- [ ] **AC-2** Documented option to commit `deploy/<name>/` for release tags
-- [ ] **AC-3** CI may build and upload bundle as workflow artifact
+- [x] **AC-1** Default `.gitignore` includes `deploy/` and `usr-harnesses/*/artifacts/`
+- [x] **AC-2** Documented option to commit `deploy/<name>/` for release tags
+- [x] **AC-3** CI may build and upload bundle as workflow artifact
 
 ### Implementation tasks (build)
 
-- [ ] Ensure install scaffolding sets `.gitignore` entries (E1-S03)
-- [ ] Document release commit policy in maintainer docs
+- [x] Ensure install scaffolding sets `.gitignore` entries (E1-S03)
+- [x] Document release commit policy in maintainer docs
 
 ### Verification (after build)
 
@@ -392,14 +393,15 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 |---|---|
 | AC-1 | `tests/unit/install/test_scaffolding.py::test_e5_s07_ac1_gitignore_deploy_and_artifacts` *(extends E1-S03)* |
 | AC-2 | **manual:** maintainer docs describe release commit option |
-| AC-3 | **manual:** CI workflow documents artifact upload (when added) |
+| AC-3 | **manual:** CI workflow documents artifact upload (commented example in ci-matrix.yml) |
 
-- [ ] Every AC row above has a passing test or documented manual exception
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/install/test_scaffolding.py -v` passes (6 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] No accidental commit of `.env` in examples
-- [ ] Verification checklist complete
+- [x] No accidental commit of `.env` in examples
+- [x] Verification checklist complete
 
 ---
 

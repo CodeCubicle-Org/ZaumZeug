@@ -1,5 +1,6 @@
 # Story: E1-S03 / E1.3
-"""E1-S03 — Project scaffolding on install (unit)."""
+# Story: E5-S07 / E5.7
+"""E1-S03 — Project scaffolding on install (unit); E5-S07 gitignore extension."""
 
 from __future__ import annotations
 
@@ -103,8 +104,37 @@ def test_e1_s03_ac3_gitignore_entries(
     # Second run does not duplicate
     client_install.scaffold_project(tmp_path, no_example=True, cursor_mcp=False)
     text2 = (tmp_path / ".gitignore").read_text(encoding="utf-8")
-    assert text2.count("deploy/") == 1
-    assert text2.count("artifacts/") == 1
+    lines2 = [
+        line.strip()
+        for line in text2.splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    ]
+    assert sum(1 for line in lines2 if line in {"/deploy/", "deploy/"}) == 1
+    assert lines2.count("artifacts/") == 1
+
+
+def test_e5_s07_ac1_gitignore_deploy_and_artifacts(
+    client_install: ModuleType,
+    tmp_path: Path,
+) -> None:
+    """AC-1 (E5-S07): Default ``.gitignore`` includes ``deploy/`` and
+    ``usr-harnesses/*/artifacts/`` (extends E1-S03 scaffolding).
+    """
+    client_install.scaffold_project(tmp_path, no_example=True, cursor_mcp=False)
+
+    text = (tmp_path / ".gitignore").read_text(encoding="utf-8")
+    lines = {
+        line.strip()
+        for line in text.splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    }
+    assert "/deploy/" in lines or "deploy/" in lines
+    assert "usr-harnesses/*/artifacts/" in lines
+
+    # Idempotent: re-scaffold does not duplicate the harness artifacts pattern
+    client_install.scaffold_project(tmp_path, no_example=True, cursor_mcp=False)
+    text2 = (tmp_path / ".gitignore").read_text(encoding="utf-8")
+    assert text2.count("usr-harnesses/*/artifacts/") == 1
 
 
 def test_e1_s03_ac4_preserves_existing_env(

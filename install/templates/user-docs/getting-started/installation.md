@@ -54,7 +54,7 @@ The `.sh` / `.ps1` wrappers only locate Python 3.11+ and forward arguments to `i
    - `.env.example` and a seeded `.env` **only when `.env` is missing** (never overwrite)
    - `.cursor/mcp.json.example`
    - `user-docs/` skeleton
-   - `.gitignore` entries for `.venv`, `.env`, `deploy/`, `artifacts/`
+   - `.gitignore` entries for `.venv`, `.env`, `/deploy/`, `artifacts/`, `usr-harnesses/*/artifacts/`
 3. Optional `--verify` runs `zaumzeug doctor`.
 
 After a successful install you can run `zaumzeug serve example` with no API keys.
@@ -124,7 +124,7 @@ zaumzeug serve <name> --deploy
 HARNESS_ROOT=deploy zaumzeug serve <name>
 ```
 
-(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required. `HARNESS_ROOT=deploy` is **Done** E5-S04 — env equivalent for serve/mcp/acp. Ship docs **Done** E5-S05.)
+(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required. `HARNESS_ROOT=deploy` is **Done** E5-S04 — env equivalent for serve/mcp/acp. Ship docs **Done** E5-S05. Deploy git policy **Done** E5-S07 — see [Deploy and ship — Git policy](../guides/deploy.md#git-policy-for-deploy-bundles).)
 
 ---
 

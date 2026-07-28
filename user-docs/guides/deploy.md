@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Ops / platform · Harness developers |
-| **Last updated** | 2026-07-28 |
+| **Last updated** | 2026-07-29 |
 
 Ship a production harness to a clean server **without** DSPy, GEPA, or DeepEval on the target. Compile and eval stay on the developer machine (or CI); the target only runs Haystack via `zaumzeug`.
 
@@ -133,9 +133,36 @@ The bundle is OS-neutral. Linux is the supported ops target in v1; Windows/macOS
 
 ---
 
+## Git policy for deploy bundles
+
+Default scaffolding ignores generated production output and compile artifacts (Architecture §10.4):
+
+| Path | Default |
+|---|---|
+| `/deploy/` (repo root) | **Ignored** — local-only bundles |
+| `usr-harnesses/*/artifacts/` | **Ignored** — harness-level generated artifacts |
+| `artifacts/` (any depth) | **Ignored** — covers agent `agents/<name>/artifacts/` trees |
+| `.env` | **Ignored** — never commit secrets |
+
+**Audited releases:** Teams that want a release tag to pin an exact shippable tree may **force-add** a single bundle and commit it:
+
+```bash
+zaumzeug deploy <name>
+git add -f deploy/<name>/
+git commit -m "Release deploy/<name> for tag vX.Y.Z"
+git tag vX.Y.Z
+```
+
+Remove or restore the ignore later with `git rm -r --cached deploy/<name>/` if you return to local-only bundles. Prefer CI artifact upload (below) when you need an audited binary without permanent git history.
+
+**CI:** Pipelines may run `zaumzeug deploy <name>` and upload `deploy/<name>/` as a workflow artifact instead of (or in addition to) committing it — for example GitHub Actions `actions/upload-artifact` with `path: deploy/<name>/`.
+
+---
+
 ## Related
 
 - Bundle ops sheet: `deploy/<name>/README.deploy.md`
+- [Git policy for deploy bundles](#git-policy-for-deploy-bundles) (E5-S07)
 - [CLI — deploy](../reference/cli.md#zaumzeug-deploy) · [CLI — serve](../reference/cli.md#zaumzeug-serve)
 - [Testing — deploy gates](testing.md#deploy-eval-gate)
 - [Installation — production disk](../getting-started/installation.md#disk-space-planning-estimates)
