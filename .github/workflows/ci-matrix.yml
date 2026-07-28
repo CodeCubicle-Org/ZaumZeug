@@ -36,16 +36,16 @@ jobs:
         run: .\install\client-install.ps1 --skip-venv --verify
 
       - name: Doctor
-        run: zaumzeug doctor
+        run: python -m zaumzeug doctor
 
       - name: Serve dry-run
-        run: zaumzeug serve example --dry-run
+        run: python -m zaumzeug serve example --dry-run
 
       - name: Serve smoke (mock, ephemeral port)
         run: python install/ci_serve_smoke.py example
 
       - name: OpenAI REST contract (E3-S07)
-        run: pytest tests/integration/test_openai_contract.py -v
+        run: python -m pytest tests/integration/test_openai_contract.py -v
 
       - name: Unit + integration suite
-        run: pytest tests/unit tests/integration tests/usr-harnesses -v
+        run: python -m pytest tests/unit tests/integration tests/usr-harnesses -v

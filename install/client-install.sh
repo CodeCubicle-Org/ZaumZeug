@@ -13,16 +13,17 @@ _python_ok() {
   "$exe" "$@" -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)" >/dev/null 2>&1
 }
 
-# Prefer Windows py launcher when present (avoids Microsoft Store python stubs).
-if command -v py >/dev/null 2>&1 && _python_ok py -3; then
-  exec py -3 "$SCRIPT" "$@"
-fi
-
+# Prefer python3/python on PATH first (CI setup-python / activated venv) so
+# installed console scripts stay on PATH. Fall back to Windows py launcher.
 for cand in python3 python; do
   if command -v "$cand" >/dev/null 2>&1 && _python_ok "$cand"; then
     exec "$cand" "$SCRIPT" "$@"
   fi
 done
+
+if command -v py >/dev/null 2>&1 && _python_ok py -3; then
+  exec py -3 "$SCRIPT" "$@"
+fi
 
 echo "error: Python 3.11+ is required but no working python3/python/py was found on PATH." >&2
 exit 1
