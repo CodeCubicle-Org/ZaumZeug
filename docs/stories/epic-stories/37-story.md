@@ -23,7 +23,7 @@
 | **Feature** | E6.4 |
 | **Persona** | Harness developer |
 | **Priority** | P2 |
-| **Prerequisites** | [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) · [E6-S01](34-story.md#e6-s01-optional-eval-extra) ✅ |
+| **Prerequisites** | [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ · [E6-S01](34-story.md#e6-s01-optional-eval-extra) ✅ |
 
 ### User story
 

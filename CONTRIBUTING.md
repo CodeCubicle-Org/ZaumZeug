@@ -74,7 +74,7 @@ Useful next commands: `zaumzeug doctor`, `zaumzeug init <name>`, `zaumzeug run <
 Not required for mock serve:
 
 - **Compile / GEPA** — included in `[dev]` (`zaumzeug compile`, Phase 2; `--dry-run` validates modules/registry without GEPA; writes immutable Haystack export under `artifacts/<run_id>/`; regenerates `docs/workflow-diagram.md` (or `--workflow-diagram-only`); pin/rollback to a prior run without re-GEPA; optional `input_rewrite` applied at serve/run; mock/stub offline, live models need `.env` keys). See [user-docs/guides/compile.md](user-docs/guides/compile.md).
-- **DeepEval** — `pip install "zaumzeug[eval]"` (optional extra **Done** E6-S01 — core install stays lean; `zaumzeug eval` CLI → E6-S02)
+- **DeepEval** — `pip install "zaumzeug[eval]"` (optional extra **Done** E6-S01 — core install stays lean; `zaumzeug eval` CLI **Done** E6-S02)
 - **Provider plugins** — e.g. `openai-haystack`, `anthropic-haystack` (live models only)
 - **MCP in Cursor** — `uv` + install `--cursor-mcp` (Phase 3)
 - **Chainlit UI** — `hayhooks[chainlit]` (Phase 3)

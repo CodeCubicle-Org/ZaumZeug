@@ -23,7 +23,7 @@
 | **Feature** | E6.7 |
 | **Persona** | Harness developer |
 | **Priority** | P2 |
-| **Prerequisites** | [E4-S02b](27.2-story.md#e4-s02b-gepa-runner-and-artifacts) · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) |
+| **Prerequisites** | [E4-S02b](27.2-story.md#e4-s02b-gepa-runner-and-artifacts) · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ |
 
 ### User story
 

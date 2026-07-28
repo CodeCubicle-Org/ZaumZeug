@@ -24,7 +24,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P1 |
 | **Status** | Traceability slice — **implementation owner: [E5-S06](46-story.md#e5-s06-deploy-eval-gate)** |
-| **Prerequisites** | [E5-S06](46-story.md#e5-s06-deploy-eval-gate) *(implementation owner)* · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) |
+| **Prerequisites** | [E5-S06](46-story.md#e5-s06-deploy-eval-gate) *(implementation owner)* · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ |
 
 ### User story
 

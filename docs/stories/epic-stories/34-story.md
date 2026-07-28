@@ -78,6 +78,6 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 - `pyproject.toml` already declared `eval = ["deepeval"]` (E2-S00); core `dependencies` still exclude `deepeval`.
 - `zaumzeug.eval.require_deepeval()` / `is_deepeval_available()` — package import stays lean; missing DeepEval raises Architecture §6.3 install hint.
 - User-docs already document `pip install "zaumzeug[eval]"` in `getting-started/installation.md` (live + install template).
-- Doctor checks/runner have no `deepeval` import; full `zaumzeug eval` lands in E6-S02.
+- Doctor checks/runner have no `deepeval` import; full `zaumzeug eval` landed in [E6-S02](35-story.md) ✅ (2026-07-28).
 
 ---

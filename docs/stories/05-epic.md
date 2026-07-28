@@ -5,7 +5,7 @@
 | **Document** | Epic E6 user stories |
 | **File** | `docs/stories/05-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E6-S01 done) |
+| **Last modified** | 2026-07-28 (E6-S02 done) |
 | **Status** | In progress |
 | **Build order** | **5 of 8** (before E5 — deploy eval gate needs `zaumzeug eval`) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -26,7 +26,7 @@
 ### Story implementation order (within this epic)
 
 1. **E6-S01** — `[eval]` extra ✅ (2026-07-28)
-2. **E6-S02** — `zaumzeug eval` *(blocks E5-S06)*
+2. **E6-S02** — `zaumzeug eval` *(blocks E5-S06)* ✅ (2026-07-28)
 3. **E6-S03** — Eval gate cross-reference
 4. **E6-S04** → **E6-S07** — pytest scaffold, trace, HTTP mode, GEPA bridge
 
@@ -90,6 +90,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E6.2 |
 | **Persona** | Harness developer |
 | **Priority** | P0 |
+| **Status** | Done (2026-07-28) |
 
 ### User story
 
@@ -102,21 +103,21 @@ As a **harness developer**, I want `zaumzeug eval`, so that I can run builtin JS
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `eval.framework: deepeval` requires `[eval]` extra; shows install hint if missing
-- [ ] **AC-2** `eval.framework: builtin` runs JSONL checks without DeepEval
-- [ ] **AC-3** Missing `eval` section → clear error exit
-- [ ] **AC-4** CLI override: `zaumzeug eval <name> --framework builtin`
-- [ ] **AC-5** Default framework `deepeval` when `eval:` present and `framework` omitted
+- [x] **AC-1** `eval.framework: deepeval` requires `[eval]` extra; shows install hint if missing
+- [x] **AC-2** `eval.framework: builtin` runs JSONL checks without DeepEval
+- [x] **AC-3** Missing `eval` section → clear error exit
+- [x] **AC-4** CLI override: `zaumzeug eval <name> --framework builtin`
+- [x] **AC-5** Default framework `deepeval` when `eval:` present and `framework` omitted
 
 ### Implementation tasks (build)
 
-- [ ] Implement `src/zaumzeug/eval/runner.py` ([Architecture §11 #10](../architecture/09-sdk-module-map.md#11-sdk-modules-to-build))
-- [ ] Builtin: load `eval.valset` JSONL; exact/substring match on `expected_output`
-- [ ] DeepEval: wire configured metrics and thresholds
+- [x] Implement `src/zaumzeug/eval/runner.py` ([Architecture §11 #10](../architecture/09-sdk-module-map.md#11-sdk-modules-to-build))
+- [x] Builtin: load `eval.valset` JSONL; exact/substring match on `expected_output`
+- [x] DeepEval: wire configured metrics and thresholds
 
 ### Verification (after build)
 
-Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E6-S02 / E6.2`.
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E6-S02 / E6.2`. Canonical: [35-story.md](epic-stories/35-story.md).
 
 | AC | Test |
 |---|---|
@@ -126,13 +127,15 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-4 | `tests/unit/eval/test_runner.py::test_e6_s02_ac4_cli_framework_override` |
 | AC-5 | `tests/unit/eval/test_runner.py::test_e6_s02_ac5_default_deepeval_when_omitted` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/eval/test_runner.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/eval/test_runner.py -v` passes (7 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Eval never runs on production serve path ([PRD NG3 adjacent — compile on prod](../prd.md#4-non-goals-v1))
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Eval never runs on production serve path ([PRD NG3 adjacent — compile on prod](../prd.md#4-non-goals-v1))
+- [x] Verification checklist complete; all ACs traced to tests
+
+---
 
 ---
 

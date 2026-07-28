@@ -18,7 +18,7 @@ from zaumzeug.config.constants import CURRENT_SDK_PHASE
 # so pydantic nests parent field names correctly.
 PHASE_GATED_FIELDS: dict[tuple[str, ...], int] = {
     ("compile",): 2,
-    ("eval",): 2,
+    # ``eval`` unblocked by E6-S02 (``zaumzeug eval``); still Phase 2 in the PRD.
     ("deploy",): 2,
     ("parallelism",): 2,
     ("serve", "acp"): 3,
@@ -321,8 +321,55 @@ class AgentConfig(BaseModel):
         return value
 
 
+class EvalMetricConfig(BaseModel):
+    """One DeepEval metric entry under ``eval.metrics`` (Architecture §6.3)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    type: str
+    threshold: float = 0.5
+
+    @field_validator("type")
+    @classmethod
+    def _type_non_empty(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("`type` must be a non-empty DeepEval metric class name")
+        return value.strip()
+
+
+class EvalConfidentAiConfig(BaseModel):
+    """Optional Confident AI sync settings under ``eval.confident_ai``."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = False
+    sync_test_results: bool = True
+
+
+class EvalConfig(BaseModel):
+    """Optional ``eval`` section of ``harness.yaml`` (Architecture §6.3 / E6-S02).
+
+    When ``framework`` is omitted, the runner defaults to ``deepeval``.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    framework: Literal["deepeval", "builtin"] | None = None
+    valset: str
+    metrics: list[EvalMetricConfig] = Field(default_factory=list)
+    judge_model_id: str | None = None
+    confident_ai: EvalConfidentAiConfig | None = None
+
+    @field_validator("valset")
+    @classmethod
+    def _valset_non_empty(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("`valset` must be a non-empty path to a JSONL file")
+        return value.strip()
+
+
 class HarnessConfig(BaseModel):
-    """Root schema for ``harness.yaml`` (Architecture §6.6 Phase 1)."""
+    """Root schema for ``harness.yaml`` (Architecture §6.6 Phase 1+)."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -330,6 +377,7 @@ class HarnessConfig(BaseModel):
     description: str | None = None
     models: str | None = None
     serve: ServeConfig | None = None
+    eval: EvalConfig | None = None
 
     @model_validator(mode="before")
     @classmethod

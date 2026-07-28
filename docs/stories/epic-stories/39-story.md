@@ -23,7 +23,7 @@
 | **Feature** | E6.6 |
 | **Persona** | Harness developer |
 | **Priority** | P3 |
-| **Prerequisites** | [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) |
+| **Prerequisites** | [E3-S02](13-story.md#e3-s02-zaumzeug-serve-dev-mode) · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ |
 
 ### User story
 

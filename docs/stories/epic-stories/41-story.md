@@ -23,7 +23,7 @@
 | **Feature** | E5.1 |
 | **Persona** | Harness developer |
 | **Priority** | P0 |
-| **Prerequisites** | [E4-S02b](27.2-story.md#e4-s02b-gepa-runner-and-artifacts) · [E5-S02](42-story.md#e5-s02-dev-vs-deploy-copy-rules) · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) |
+| **Prerequisites** | [E4-S02b](27.2-story.md#e4-s02b-gepa-runner-and-artifacts) · [E5-S02](42-story.md#e5-s02-dev-vs-deploy-copy-rules) · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ |
 
 ### User story
 

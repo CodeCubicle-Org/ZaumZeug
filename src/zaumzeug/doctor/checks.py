@@ -330,7 +330,11 @@ def _read_harness_yaml(harness_yaml: Path) -> dict[str, Any]:
 
 
 def check_eval_section_phase_hint(harness_name: str, harness_dir: Path) -> CheckResult | None:
-    """AC-1 (E2-S04b): Warn when ``eval`` is present in Phase 1."""
+    """Warn when ``eval`` is present but still phase-gated (pre-E6-S02).
+
+    After E6-S02, ``eval`` is removed from ``PHASE_GATED_FIELDS`` and this check
+    returns ``None``.
+    """
     min_phase = PHASE_GATED_FIELDS.get(("eval",))
     if min_phase is None or min_phase <= CURRENT_SDK_PHASE:
         return None

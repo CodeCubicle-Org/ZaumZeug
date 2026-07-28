@@ -16,7 +16,7 @@
 | **Phase** | 2 |
 | **Epic** | E5 |
 | **Outcome** | Production bundle separated from dev workspace |
-| **Depends on** | [E4](04-epic.md) (artifacts to pin) · [E6-S02](05-epic.md#e6-s02-zaumzeug-eval-command) (for E5-S06 only) |
+| **Depends on** | [E4](04-epic.md) (artifacts to pin) · [E6-S02](05-epic.md#e6-s02-zaumzeug-eval-command) ✅ (for E5-S06 only) |
 | **Blocks** | [E7-S06](07-epic.md#e7-s06-mcp-from-deploy-bundle) |
 | **PRD** | [Epic E5](../prd.md#epic-e5--deploy-packaging-phase-2) |
 | **Architecture** | [§10 Deploy packager](../architecture/07-deploy-packaging.md#10-deploy-packager) · [§11 #9, #13](../architecture/09-sdk-module-map.md#11-sdk-modules-to-build) |
@@ -31,7 +31,7 @@
 4. **E5-S03** → **E5-S04** — serve `--deploy` + `HARNESS_ROOT`
 5. **E5-S05** → **E5-S08** — Ops docs and platform policy
 6. **E5-S07** — Git policy
-7. **E5-S06** — Deploy eval gate **last** (requires [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command))
+7. **E5-S06** — Deploy eval gate **last** (requires [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) ✅)
 
 ---
 
@@ -302,7 +302,7 @@ Per [Story verification](00-README.md#story-verification-required). **Docs + int
 | **Feature** | E5.6 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
-| **Prerequisites** | [E5-S01](#e5-s01-zaumzeug-deploy-command) · [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) |
+| **Prerequisites** | [E5-S01](#e5-s01-zaumzeug-deploy-command) · [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) ✅ |
 
 ### User story
 

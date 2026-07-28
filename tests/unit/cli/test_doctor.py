@@ -202,8 +202,8 @@ def test_e2_s04_ac9_verbose_and_json_output(
     assert "PASS python_version" not in captured_quiet.out
 
 
-def test_e2_s04_ac4_eval_section_phase1_warn(tmp_path: Path) -> None:
-    """AC-1 (E2-S04b): warn when eval section is present in Phase 1."""
+def test_e2_s04_ac4_eval_section_supported_after_e6_s02(tmp_path: Path) -> None:
+    """E2-S04b AC-1 updated: after E6-S02, ``eval`` no longer emits a Phase 2 warn."""
     project_root = tmp_path / "project"
     _minimal_harness(
         project_root,
@@ -216,13 +216,16 @@ def test_e2_s04_ac4_eval_section_phase1_warn(tmp_path: Path) -> None:
             },
         },
     )
+    # Valset file is optional for doctor validation of the eval schema.
+    valset = project_root / "usr-harnesses" / "example" / "eval" / "val.jsonl"
+    valset.parent.mkdir(parents=True, exist_ok=True)
+    valset.write_text('{"input": "x"}\n', encoding="utf-8")
 
     report = run_doctor(harness_name="example", project_root=project_root)
     eval_warns = [
         c for c in report.checks if c.name == "eval_section" and c.severity == "warn"
     ]
-    assert eval_warns
-    assert "Phase 2" in eval_warns[0].message
+    assert not eval_warns
     assert report.exit_code == 0
 
 

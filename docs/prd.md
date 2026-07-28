@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
 **Last updated:** 2026-07-28 (E6-S01 optional `[eval]` extra)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01 **Done**; next E6-S02 / E5)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S02 **Done**; next E6-S03 / E5)  
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -192,7 +192,7 @@ No pinned size until `pyproject.toml` locks dependencies; README must set expect
 | Feature | Extra install | When needed |
 |---|---|---|
 | **Compile / GEPA** | Included in `[dev]` | Offline prompt optimization (`zaumzeug compile`) |
-| **DeepEval** | `pip install "zaumzeug[eval]"` | Dev regression only — `[eval]` extra **Done** (E6-S01, 2026-07-28); `zaumzeug eval` CLI → E6-S02 |
+| **DeepEval** | `pip install "zaumzeug[eval]"` | Dev regression only — `[eval]` extra **Done** (E6-S01, 2026-07-28); `zaumzeug eval` CLI **Done** (E6-S02, 2026-07-28) |
 | **Provider plugins** | e.g. `openai-haystack`, `anthropic-haystack` | Only configured providers |
 | **MCP in Cursor** | `uv` + `--cursor-mcp` | Phase 3 IDE integration |
 | **Chainlit UI** | `hayhooks[chainlit]` | Phase 3 embedded `/chat` |
@@ -347,7 +347,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | ID | Feature | Acceptance criteria |
 |---|---|---|
 | E6.1 | Optional `[eval]` extra | **Done** (E6-S01, 2026-07-28) — Core install has no `deepeval`; `[eval]` extra installs it; `zaumzeug.eval.require_deepeval()` friendly hint; documented in user-docs. |
-| E6.2 | `zaumzeug eval` | **AC:** Behavior per [Architecture §6.3](architecture/05-configuration.md#63-zaumzeug-eval-frameworks): `eval.framework: deepeval` requires `[eval]` extra; `eval.framework: builtin` runs JSONL checks without DeepEval; missing `eval` section → clear error. |
+| E6.2 | `zaumzeug eval` | **Done** (E6-S02, 2026-07-28). **AC:** Behavior per [Architecture §6.3](architecture/05-configuration.md#63-zaumzeug-eval-frameworks): `eval.framework: deepeval` requires `[eval]` extra; `eval.framework: builtin` runs JSONL checks without DeepEval; missing `eval` section → clear error. |
 | E6.3 | Eval gate on deploy | **AC:** Covered by E5.6 — `deploy.eval_gate` and `--eval-gate` on `zaumzeug deploy`. |
 | E6.4 | `eval/` pytest scaffold | **AC:** Optional `usr-harnesses/<name>/eval/test_*.py` runs via `deepeval test run`; custom metrics in `eval/metrics.py`. |
 | E6.5 | Trace → test case | **AC:** Haystack trace export to JSONL (`data/traces/`); score single trace with `zaumzeug eval --trace`. |
@@ -417,7 +417,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md) **Done** 2026-07-28; next [E6-S02](stories/epic-stories/35-story.md) |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S02](stories/epic-stories/35-story.md) **Done** 2026-07-28; next [E6-S03](stories/epic-stories/36-story.md) |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A | E8 |
 

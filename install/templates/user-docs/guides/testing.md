@@ -7,7 +7,7 @@
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
-DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI lands in E6-S02.
+DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra.
 
 For SDK design detail, see internal `docs/architecture/10-operations-and-reference.md` §13 and `docs/architecture/03-technology-stack.md` §4.5.
 
@@ -179,6 +179,31 @@ Local `zaumzeug serve` is unauthenticated in Phase 1. Keep exposure narrow:
 
 ## Writing harness eval tests (optional)
 
+### `zaumzeug eval` (harness.yaml)
+
+Add an `eval:` block to `harness.yaml`, then run the CLI (E6-S02):
+
+```yaml
+eval:
+  framework: builtin          # or deepeval (default when omitted)
+  valset: data/val.jsonl      # JSONL: input, optional expected_output
+  # deepeval only:
+  # metrics:
+  #   - type: AnswerRelevancyMetric
+  #     threshold: 0.7
+  # judge_model_id: strong
+```
+
+```bash
+zaumzeug eval example --framework builtin
+zaumzeug eval example                    # deepeval — needs [eval] extra
+zaumzeug eval example --agent researcher
+```
+
+**Builtin** loads the valset and checks exact/substring match on `expected_output` when present (no DeepEval). **DeepEval** builds `LLMTestCase` rows from agent output and runs configured metrics. Missing `eval:` exits with a clear error. See [CLI — zaumzeug eval](../reference/cli.md#zaumzeug-eval).
+
+### DeepEval pytest files
+
 DeepEval treats LLM checks like pytest tests. Start with **20–50 cases from real failures** — not a thousand synthetic prompts on day one.
 
 ```python
@@ -207,7 +232,7 @@ Run:
 deepeval test run usr-harnesses/my-harness/eval/
 ```
 
-For deploy gates, set `deploy.eval_gate` in `harness.yaml` (`skip` | `warn` | `block`) — see compile/deploy guides (Phase 2).
+For deploy gates, set `deploy.eval_gate` in `harness.yaml` (`skip` | `warn` | `block`) — see compile/deploy guides (Phase 2 / E5-S06).
 
 ---
 
@@ -216,7 +241,7 @@ For deploy gates, set `deploy.eval_gate` in `harness.yaml` (`skip` | `warn` | `b
 | Variable | Purpose |
 |---|---|
 | `HARNESS_LIVE_LLM=1` | Enable `tests/e2e/` live provider smoke (nightly / manual only — **never** set in default CI) |
-| `HARNESS_LOG_LEVEL=DEBUG` | Verbose SDK + Haystack logs while debugging (equivalent to `serve`/`compile --verbose`) |
+| `HARNESS_LOG_LEVEL=DEBUG` | Verbose SDK + Haystack logs while debugging (equivalent to `serve`/`compile`/`eval --verbose`) |
 | `PYTEST_OPENAI_API_KEY` | Re-record VCR cassettes (`pytest --record-mode=once`) |
 
 Never commit API keys. `.env` is gitignored. Default CI runs mock only — see [CLI reference](../reference/cli.md) for `HARNESS_LIVE_LLM` and debugpy.
@@ -265,7 +290,7 @@ zaumzeug compile example --dry-run
 | Phase | Testing deliverables |
 |---|---|
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
-| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), trace → eval case, optional `zaumzeug eval` |
+| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), trace → eval case (E6-S05) |
 | **3** | MCP integration tests, tool-correctness eval |
 | **4** | Production trace ratchet, `@observe` / Confident AI sync |
 

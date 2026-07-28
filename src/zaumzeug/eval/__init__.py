@@ -2,6 +2,7 @@
 
 Importing this package must not require ``deepeval``. Call
 :func:`require_deepeval` only on paths that need DeepEval (E6-S01).
+The ``zaumzeug eval`` CLI lives in :mod:`zaumzeug.eval.runner` (E6-S02).
 """
 
 from __future__ import annotations

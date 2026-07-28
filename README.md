@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 in progress: epic **E4** ([E4-S01](docs/stories/epic-stories/26-story.md)–[E4-S08](docs/stories/epic-stories/33-story.md)) **done** (2026-07-28); **E6-S01** ([34-story.md](docs/stories/epic-stories/34-story.md)) **done** (2026-07-28) — optional `[eval]` extra + DeepEval import guard. Next: [E6-S02](docs/stories/epic-stories/35-story.md) (`zaumzeug eval`). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 in progress: epic **E4** ([E4-S01](docs/stories/epic-stories/26-story.md)–[E4-S08](docs/stories/epic-stories/33-story.md)) **done** (2026-07-28); **E6-S01**–**E6-S02** ([34-story.md](docs/stories/epic-stories/34-story.md)–[35-story.md](docs/stories/epic-stories/35-story.md)) **done** (2026-07-28) — optional `[eval]` extra + `zaumzeug eval` CLI. Next: [E6-S03](docs/stories/epic-stories/36-story.md) (eval gate on deploy — traceability). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -117,7 +117,7 @@ Never edit `deploy/` by hand — it is regenerated on each deploy. See [Testing]
 | Runtime | [Haystack](https://github.com/deepset-ai/haystack) + Hayhooks | Agent loop, tools, RAG, REST/MCP serve |
 | Specification | [DSPy](https://dspy.ai/) | Signatures and modules (compile-time only) |
 | Optimization | [GEPA](https://github.com/gepa-ai/gepa) | Offline prompt and module optimization |
-| Evaluation | [DeepEval](https://github.com/confident-ai/deepeval) *(optional `[eval]` extra)* | Dev regression — install with `pip install "zaumzeug[eval]"` (E6-S01); `zaumzeug eval` → E6-S02 |
+| Evaluation | [DeepEval](https://github.com/confident-ai/deepeval) *(optional `[eval]` extra)* | Dev regression — install with `pip install "zaumzeug[eval]"` (E6-S01); `zaumzeug eval` **Done** (E6-S02) |
 
 Model routing is configuration-driven via `models.yaml` — swap providers without changing agent code. See [dependencies.md](dependencies.md) for the full list of external tools and libraries, including [Python version notes](dependencies.md#python-version-and-local-install).
 

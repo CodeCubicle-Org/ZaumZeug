@@ -98,7 +98,9 @@ usr-harnesses/<harness>/eval/
 └── metrics.py         # custom metrics
 ```
 
-**Implementation (E6-S01, 2026-07-28):** Optional `[eval]` extra ships `deepeval`; `zaumzeug.eval.require_deepeval()` raises the Architecture §6.3 install hint when missing. Doctor does not require DeepEval. `zaumzeug eval` CLI → E6-S02; harness `eval/` scaffold → E6-S04.
+**Implementation (E6-S01, 2026-07-28):** Optional `[eval]` extra ships `deepeval`; `zaumzeug.eval.require_deepeval()` raises the Architecture §6.3 install hint when missing. Doctor does not require DeepEval.
+
+**Implementation (E6-S02, 2026-07-28):** `zaumzeug eval <harness>` via `eval/runner.py` — builtin JSONL or DeepEval per `eval.framework`; CLI `--framework` override. Harness `eval/` scaffold → E6-S04.
 Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/<harness>/eval/`. See [user-docs/guides/testing.md](../user-docs/guides/testing.md).
 
 ### 13.4 Trace capture (Phase 2+)
@@ -114,7 +116,7 @@ Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/
 | Phase | Debug/test deliverables |
 |---|---|
 | 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06), OpenAI REST contract ✅ (E3-S07) |
-| 2 | compile `--dry-run` (**E4-S06 Done** — `tests/integration/compile/test_compile_dry_run.py`), export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), trace → `LLMTestCase`, optional `zaumzeug eval` |
+| 2 | compile `--dry-run` (**E4-S06 Done** — `tests/integration/compile/test_compile_dry_run.py`), export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), `zaumzeug eval` (**E6-S02 Done** — `tests/unit/eval/test_runner.py`), trace → `LLMTestCase` (E6-S05) |
 | 3 | MCP integration tests, tool correctness eval when DeepEval present |
 | 4 | `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
 

@@ -119,6 +119,26 @@ def _run_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def _eval_command(args: argparse.Namespace) -> int:
+    """Run harness eval (builtin JSONL or DeepEval) — E6-S02."""
+    configure_logging(verbose=args.verbose)
+    from zaumzeug.eval.runner import EvalError, format_eval_result, run_eval
+
+    try:
+        result = run_eval(
+            args.harness_name,
+            framework=args.framework,
+            agent_name=args.agent,
+        )
+    except EvalError as exc:
+        print(str(exc), file=sys.stderr)
+        if exc.suggestion:
+            print(f"Suggestion: {exc.suggestion}", file=sys.stderr)
+        return 1
+    print(format_eval_result(result))
+    return result.exit_code
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="zaumzeug",
@@ -244,10 +264,37 @@ def build_parser() -> argparse.ArgumentParser:
     run_cmd.set_defaults(_handler=_run_command)
 
     for name in _COMMANDS:
-        if name in {"init", "doctor", "serve", "run", "compile"}:
+        if name in {"init", "doctor", "serve", "run", "compile", "eval"}:
             continue
         cmd = sub.add_parser(name, help=f"{name} command (stub)")
         cmd.set_defaults(_handler=_stub_command(name))
+
+    eval_cmd = sub.add_parser(
+        "eval",
+        help="run harness eval (builtin JSONL checks or DeepEval metrics)",
+    )
+    eval_cmd.add_argument(
+        "harness_name",
+        help="harness name under usr-harnesses/",
+    )
+    eval_cmd.add_argument(
+        "--framework",
+        choices=("builtin", "deepeval"),
+        default=None,
+        help="override eval.framework from harness.yaml for this run",
+    )
+    eval_cmd.add_argument(
+        "--agent",
+        default=None,
+        metavar="NAME",
+        help="evaluate a single agent (default: workflow entry agent)",
+    )
+    eval_cmd.add_argument(
+        "--verbose",
+        action="store_true",
+        help="enable SDK and Haystack debug logging",
+    )
+    eval_cmd.set_defaults(_handler=_eval_command)
 
     compile_cmd = sub.add_parser(
         "compile",

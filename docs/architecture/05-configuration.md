@@ -85,7 +85,9 @@ Install with: pip install "zaumzeug[eval]"
 Or set eval.framework: builtin for JSONL checks without DeepEval.
 ```
 
-**Implementation (E6-S01, 2026-07-28):** Message text lives in `zaumzeug.eval.DEEPEVAL_MISSING_MESSAGE` / `require_deepeval()`. Full `zaumzeug eval` CLI → E6-S02.
+**Implementation (E6-S01, 2026-07-28):** Message text lives in `zaumzeug.eval.DEEPEVAL_MISSING_MESSAGE` / `require_deepeval()`.
+
+**Implementation (E6-S02, 2026-07-28):** `zaumzeug.eval.runner.run_eval()` — `EvalConfig` on `HarnessConfig`; builtin JSONL exact/substring checks; DeepEval metrics via `.measure()`; CLI `zaumzeug eval <name> [--framework builtin|deepeval]`. `eval` unblocked from `PHASE_GATED_FIELDS` (doctor no longer Phase-warns). Tests: `tests/unit/eval/test_runner.py`.
 
 CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 
@@ -156,7 +158,7 @@ Custom tools use `tools.custom` (user Python), not this catalog — [PRD E7.2](.
 
 Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validation-phase-1), [E3.4](../prd.md#epic-e3--runtime-and-local-serve-phase-1), [E3.5](../prd.md#epic-e3--runtime-and-local-serve-phase-1).
 
-**Implementation (E2-S01, 2026-07-08):** Phase 1 `harness.yaml` root fields are validated by `zaumzeug.config.load_harness()` → `HarnessConfig` (`src/zaumzeug/config/schemas.py`, `loader.py`). Phase-gated keys (`compile`, `eval`, `deploy`, `serve.acp`, …) fail with a phase hint.
+**Implementation (E2-S01, 2026-07-08):** Phase 1 `harness.yaml` root fields are validated by `zaumzeug.config.load_harness()` → `HarnessConfig` (`src/zaumzeug/config/schemas.py`, `loader.py`). Phase-gated keys (`compile`, `deploy`, `serve.acp`, …) fail with a phase hint. **`eval` unblocked by E6-S02** (validated as `EvalConfig` when present).
 
 **Implementation (E2-S02, 2026-07-08):** Per-agent model registries merge via `zaumzeug.config.load_merged_agent_models()` (`models.py`).
 
@@ -200,7 +202,7 @@ compile:
 
 **Implementation (E2-S04a, 2026-07-08):** `zaumzeug doctor` in `src/zaumzeug/doctor/` — environment checks (Python 3.11+, package import, `.env`/API keys), harness and workflow config validation, per-agent model registry checks, runtime path checks via `resolve_agent_serve()`, port conflict warn. CLI: optional harness name (project-wide scan when omitted), `--verbose`, `--json`. Tests: `tests/unit/cli/test_doctor.py`, `tests/integration/test_doctor.py`.
 
-**Implementation (E2-S04b, 2026-07-08):** Phase-aware warn checks: `eval` section in Phase 1 (`eval_section`), MCP without `uv` on PATH (`mcp_uv`), stale or missing `docs/workflow-diagram.md` (`workflow_diagram`). `load_harness_for_doctor()` strips warned keys before validation so exit code stays 0 when only warnings fire.
+**Implementation (E2-S04b, 2026-07-08):** Phase-aware warn checks: MCP without `uv` on PATH (`mcp_uv`), stale or missing `docs/workflow-diagram.md` (`workflow_diagram`). Historically also warned on `eval` in Phase 1 (`eval_section`) — **superseded by E6-S02** (`eval` removed from `PHASE_GATED_FIELDS`; doctor no longer emits that warn). `load_harness_for_doctor()` still strips remaining warned keys before validation so exit code stays 0 when only warnings fire.
 
 **Implementation (E2-S04c, 2026-07-08):** `zaumzeug doctor --deploy` (or `HARNESS_ROOT=deploy`) resolves harnesses under `deploy/<name>/`. Validates deploy `manifest.json` (§10.3 schema) and pinned `artifact-manifest.json` paths when `artifact_run_id` is a per-agent map; reuses E2-S04a core checks (config, models, runtime paths, port). Dev-only warnings (`mcp_uv`, `workflow_diagram`, `artifact_module`) are skipped in deploy mode. Root resolution: `src/zaumzeug/config/harness_root.py`.
 

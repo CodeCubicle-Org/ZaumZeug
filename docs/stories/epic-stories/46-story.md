@@ -23,7 +23,7 @@
 | **Feature** | E5.6 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
-| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) |
+| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ |
 
 ### User story
 
@@ -42,7 +42,7 @@ As a **harness developer**, I want configurable eval gates on deploy, so that I 
 
 - [DeepEval CLI / thresholds](https://docs.confident-ai.com/)
 - [Architecture §6.4 — deploy eval gate](../../architecture/05-configuration.md#64-deploy-eval-gate)
-- Requires [E6-S02](35-story.md) `zaumzeug eval` before gate can run
+- Requires [E6-S02](35-story.md) `zaumzeug eval` ✅ before gate can run
 
 **Config example**
 
