@@ -7,7 +7,10 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from pydantic import ValidationError
+
 from zaumzeug.config.loader import ConfigValidationError, _read_yaml_mapping, load_workflow
+from zaumzeug.config.schemas import CompileConfig
 
 ARTIFACT_MANIFEST = "artifact-manifest.json"
 
@@ -57,6 +60,8 @@ class CompileResolution:
     agent_name: str
     compile_module: str
     agent_yaml_path: Path
+    compile_config: CompileConfig
+    default_model_id: str | None = None
 
 
 def _agent_dir(harness_dir: Path, agent_name: str) -> Path:
@@ -84,16 +89,6 @@ def _system_prompt_ref(data: dict[str, Any]) -> str | None:
         agent = data.get("agent")
         if isinstance(agent, dict):
             value = agent.get("system_prompt")
-    if value is None or value == "":
-        return None
-    return str(value)
-
-
-def _compile_module_ref(data: dict[str, Any]) -> str | None:
-    compile_section = data.get("compile")
-    if not isinstance(compile_section, dict):
-        return None
-    value = compile_section.get("module")
     if value is None or value == "":
         return None
     return str(value)
@@ -208,8 +203,8 @@ def resolve_agent_compile(
     """Resolve compile path: requires ``compile.module`` in ``agent.yaml``."""
     harness_dir = Path(harness_dir)
     agent_yaml_path, data = load_agent_yaml(harness_dir, agent_name)
-    compile_module = _compile_module_ref(data)
-    if compile_module is None:
+    compile_section = data.get("compile")
+    if not isinstance(compile_section, dict):
         raise AgentResolutionError(
             _missing_compile_module_message(
                 harness_name=harness_name,
@@ -223,11 +218,39 @@ def resolve_agent_compile(
                 f"Add `compile.module` (DSPy Module import path) to {agent_yaml_path}"
             ),
         )
+
+    try:
+        compile_config = CompileConfig.model_validate(compile_section)
+    except ValidationError as exc:
+        field_msgs = "; ".join(
+            f"{'.'.join(str(p) for p in err.get('loc', ()))}: {err.get('msg', 'invalid')}"
+            for err in exc.errors()
+        )
+        raise AgentResolutionError(
+            (
+                f"Harness '{harness_name}' agent '{agent_name}': invalid `compile` "
+                f"section in {agent_yaml_path}: {field_msgs}"
+            ),
+            path=agent_yaml_path,
+            harness_name=harness_name,
+            agent_name=agent_name,
+            suggestion=(
+                f"Fix Phase 2 `compile` fields in {agent_yaml_path} "
+                "(requires `module`; optional task/reflection model ids and GEPA budget)"
+            ),
+        ) from exc
+
+    default_model_id = data.get("default_model_id")
+    if default_model_id is not None:
+        default_model_id = str(default_model_id)
+
     return CompileResolution(
         harness_name=harness_name,
         agent_name=agent_name,
-        compile_module=compile_module,
+        compile_module=compile_config.module,
         agent_yaml_path=agent_yaml_path,
+        compile_config=compile_config,
+        default_model_id=default_model_id,
     )
 
 

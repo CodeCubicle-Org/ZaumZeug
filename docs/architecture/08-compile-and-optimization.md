@@ -19,7 +19,9 @@
 
 DSPy and GEPA never run in production. End-user chat is never a GEPA optimization target at runtime.
 
-**Implementation (E4-S01, 2026-07-28):** Step 1 (load DSPy `Module`) is implemented by `zaumzeug.compile.module_loader` — resolves `compile.module` from `agent.yaml`, safe agent-folder import, `dspy.Module` subclass check. GEPA optimize + export (steps 2–4) remain E4-S02 / E4-S03.
+**Implementation (E4-S01, 2026-07-28):** Step 1 (load DSPy `Module`) is implemented by `zaumzeug.compile.module_loader` — resolves `compile.module` from `agent.yaml`, safe agent-folder import, `dspy.Module` subclass check.
+
+**Implementation (E4-S02a, 2026-07-28):** Compile CLI + Phase 2 schema + LM preflight (`compile/runner.py`, `CompileConfig`, `preflight_compile_lms`). GEPA optimize + export (steps 2–4) remain E4-S02b / E4-S03.
 
 ### Pattern B — `optimize_anything` *(deferred — Phase 4+)*
 

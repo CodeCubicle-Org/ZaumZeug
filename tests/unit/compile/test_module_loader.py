@@ -226,3 +226,58 @@ def test_e4_s01_ac4_requires_dspy_module_subclass(tmp_path: Path) -> None:
     err = exc_info.value
     assert "dspy.Module" in str(err)
     assert err.module_ref == "modules.plain:PlainClass"
+
+
+def test_e4_s02a_ac3_missing_module_actionable_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-3: Fails with actionable error when module not importable (no GEPA)."""
+    from zaumzeug.compile import gepa_runner, runner
+
+    harness_dir = tmp_path / "usr-harnesses" / "example"
+    agent_dir = harness_dir / "agents" / "researcher"
+    _write_yaml(
+        harness_dir / "harness.yaml",
+        {"name": "example", "serve": {"hayhooks": {"port": 1416}}},
+    )
+    _write_yaml(
+        harness_dir / "workflow.yaml",
+        {"entry": "researcher", "stages": [{"agent": "researcher"}]},
+    )
+    _write_yaml(
+        agent_dir / "agent.yaml",
+        {
+            "name": "researcher",
+            "default_model_id": "mock",
+            "compile": {"module": "modules.missing:ResearchModule"},
+        },
+    )
+    _write_yaml(
+        agent_dir / "agents-models.yaml",
+        {
+            "default_model_id": "mock",
+            "models": {"mock": {"provider": "mock", "model": "harness-fixture"}},
+        },
+    )
+
+    gepa_calls: list[object] = []
+
+    def _gepa_spy(*args: object, **kwargs: object) -> None:
+        gepa_calls.append((args, kwargs))
+        raise AssertionError("GEPA must not be invoked on missing module")
+
+    monkeypatch.setattr(gepa_runner, "invoke_gepa", _gepa_spy)
+    monkeypatch.setattr(runner, "invoke_gepa", _gepa_spy, raising=False)
+
+    with pytest.raises(runner.CompileError) as exc_info:
+        runner.run_compile(
+            "example",
+            agent_name="researcher",
+            project_root=tmp_path,
+        )
+
+    message = str(exc_info.value)
+    assert "modules.missing" in message or "compile.module" in message
+    assert "missing" in message.lower()
+    assert gepa_calls == []

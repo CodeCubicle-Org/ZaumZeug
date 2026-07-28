@@ -28,7 +28,9 @@ Optional: `mcp-haystack` only if a specific Haystack MCP integration requires it
 
 GEPA requires **task LM** and **reflection LM** as separate config roles (LiteLLM strings from `models.yaml`). Budget: `auto="light"|"medium"|"heavy"` or `max_metric_calls`.
 
-**Implementation (E4-S01, 2026-07-28):** DSPy enters the SDK only via `zaumzeug.compile.module_loader` (lazy import). Serve/runtime keep zero DSPy imports (verified by unit tests). Full GEPA compile path → E4-S02.
+**Implementation (E4-S01, 2026-07-28):** DSPy enters the SDK only via `zaumzeug.compile.module_loader` (lazy import). Serve/runtime keep zero DSPy imports (verified by unit tests).
+
+**Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile` loads modules and preflights LMs without invoking GEPA. Full GEPA path → E4-S02b.
 
 ### 4.3 Languages and key packages
 

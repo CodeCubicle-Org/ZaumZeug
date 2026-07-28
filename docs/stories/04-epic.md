@@ -5,8 +5,8 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 |
-| **Status** | In progress (E4-S01 done) |
+| **Last modified** | 2026-07-28 (E4-S02a done; next E4-S02b) |
+| **Status** | In progress (E4-S01 + E4-S02a done) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -27,7 +27,7 @@
 ### Story implementation order (within this epic)
 
 1. **E4-S01** — DSPy module loader ✅ (2026-07-28)
-2. **E4-S02a** → **E4-S02b** — Compile schema + GEPA runner
+2. **E4-S02a** → **E4-S02b** — Compile schema + GEPA runner (E4-S02a ✅ 2026-07-28)
 3. **E4-S03a** → **E4-S03b** — Export contract + runtime preprocess
 4. **E4-S05** — Post-compile serve uses artifact
 5. **E4-S06** — Compile `--dry-run`
@@ -93,15 +93,19 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 - `zaumzeug.compile.module_loader.load_dspy_module()` resolves `compile.module` via `resolve_agent_compile`, prepends `agents/<name>/` to `sys.path`, imports `module.path:ClassName`, and requires a `dspy.Module` subclass.
 - Path segments reject traversal; post-import `__file__` must stay under the agent directory.
-- DSPy imported lazily in the loader only; AST check keeps `serve/` / `runtime/` free of `dspy` / `gepa` / `zaumzeug.compile`. CLI `compile` stub until E4-S02a.
+- DSPy imported lazily in the loader only; AST check keeps `serve/` / `runtime/` free of `dspy` / `gepa` / `zaumzeug.compile`. CLI `compile` wired in E4-S02a (2026-07-28).
 
 ---
 
 ## E4-S02 — GEPA compile *(split into sub-stories)*
 
-> **Canonical story files:** [E4-S02a — schema/CLI](epic-stories/27.1-story.md) · [E4-S02b — GEPA runner](epic-stories/27.2-story.md). Diagram generation: [E4-S08](#e4-s08-workflow-diagram-at-compile) *(separate; not in S02b)*.
+> **Canonical story files:** [E4-S02a — schema/CLI](epic-stories/27.1-story.md) ✅ (2026-07-28) · [E4-S02b — GEPA runner](epic-stories/27.2-story.md). Diagram generation: [E4-S08](#e4-s08-workflow-diagram-at-compile) *(separate; not in S02b)*.
 
-See [epic-stories/27.1-story.md](epic-stories/27.1-story.md) and [27.2-story.md](epic-stories/27.2-story.md) for full AC → test mapping. **E4-S02b includes AC-5** (task/reflection LM from registry).
+See [epic-stories/27.1-story.md](epic-stories/27.1-story.md) and [27.2-story.md](epic-stories/27.2-story.md) for full AC → test mapping.
+
+**E4-S02a Done (2026-07-28):** Phase 2 `CompileConfig`; `zaumzeug compile <harness> [--agent]` validates config, loads DSPy modules, preflights task/reflection LM registry + `.env`; no GEPA yet. Tests: `pytest … -k e4_s02a` (4 passed, 0 skipped).
+
+**E4-S02b (next):** run `dspy.GEPA`, write `artifacts/<run_id>/` + `current`; **AC-5** (task/reflection LM from registry wired into GEPA).
 
 ---
 

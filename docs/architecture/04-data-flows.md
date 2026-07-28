@@ -74,7 +74,9 @@ At `zaumzeug compile <harness> --agent <agent-name>` (offline):
 - Writes `agents/<agent-name>/artifacts/<run_id>/`, updates `artifacts/current` for that agent.
 - Runtime prefers artifact over `system_prompt` after compile.
 
-**Implementation (E4-S01, 2026-07-28):** `zaumzeug.compile.module_loader.load_dspy_module()` loads `compile.module` as `module.path:ClassName` from the agent folder (safe `sys.path`, no traversal) and validates a `dspy.Module` subclass. Compile-only — not imported by serve/runtime. CLI wiring → E4-S02a.
+**Implementation (E4-S01, 2026-07-28):** `zaumzeug.compile.module_loader.load_dspy_module()` loads `compile.module` as `module.path:ClassName` from the agent folder (safe `sys.path`, no traversal) and validates a `dspy.Module` subclass. Compile-only — not imported by serve/runtime.
+
+**Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile` wires the loader + LM preflight (`compile/runner.py`, `compile/gepa_runner.py`). Fails fast on missing `compile.module`, unimportable modules, or missing registry/`.env` keys for task/reflection LMs — before any GEPA call.
 
 ### 5.3 Artifact layout
 

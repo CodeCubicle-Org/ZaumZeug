@@ -148,18 +148,24 @@ zaumzeug run example --from reviewer --input "Check the draft"
 
 ## `zaumzeug compile`
 
-Compile harness artifacts with GEPA (Phase 2+).
+Validate Phase 2 compile config, load DSPy modules, and preflight task/reflection LM ids (GEPA optimization lands in E4-S02b).
 
 ```bash
-zaumzeug compile <harness> [--verbose]
+zaumzeug compile <harness> [--agent NAME] [--verbose]
 ```
 
-| Flag | Description |
+| Flag / arg | Description |
 |---|---|
+| `<harness>` | Harness name under `usr-harnesses/` |
+| `--agent NAME` | Compile a single agent (default: every agent with `compile.module`) |
 | `--verbose` | Enable SDK and Haystack structured debug logging |
 
+**Requires per agent:** a Phase 2 `compile:` block in `agents/<name>/agent.yaml` with `compile.module` (`module.path:ClassName`). Optional: `task_model_id`, `reflection_model_id`, train/val paths, GEPA budget (`auto` / `budget` / `max_metric_calls` / `max_full_evals`).
+
+**Fail-fast (before GEPA):** missing `compile.module`, unimportable module, model id absent from the merged registry, or missing provider API keys in `.env` / the environment.
+
 ```bash
-zaumzeug compile example --verbose
+zaumzeug compile example --agent researcher --verbose
 HARNESS_LOG_LEVEL=DEBUG zaumzeug compile example
 ```
 

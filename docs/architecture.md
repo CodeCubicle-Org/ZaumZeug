@@ -1,6 +1,6 @@
 # ZaumZeug — Architecture
 
-**Last updated:** 2026-07-28 (E4-S01 DSPy module loader done)  
+**Last updated:** 2026-07-28 (E4-S02a compile CLI + Phase 2 schema done)  
 
 **Related:** [PRD](prd.md) · [Ideation archive](ideation-stage.md) · [Stories index](stories/00-README.md)
 

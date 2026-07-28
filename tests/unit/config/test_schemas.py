@@ -141,3 +141,68 @@ def test_e3_s03_ac5_unknown_builtin_id_fails_with_list(tmp_path: Path) -> None:
     assert "not_a_real_tool" in message
     assert "web_fetch" in message
     assert "available" in message.lower()
+
+
+# --- E4-S02a / E4.2 ---
+
+
+def test_e4_s02a_ac1_phase2_compile_schema_validates(tmp_path: Path) -> None:
+    """AC-1: Phase 2 compile section validates via extended Pydantic schemas."""
+    from zaumzeug.config import CompileConfig
+
+    path = _write_yaml(
+        tmp_path / "agent.yaml",
+        {
+            "name": "researcher",
+            "default_model_id": "mock",
+            "agent": {"system_prompt": "prompts/system.md"},
+            "compile": {
+                "module": "modules.researcher:ResearchModule",
+                "task_model_id": "mock",
+                "reflection_model_id": "strong",
+                "trainset": "data/train.jsonl",
+                "valset": "data/val.jsonl",
+                "budget": "medium",
+            },
+        },
+    )
+
+    config = load_agent_config(path)
+
+    assert config.compile is not None
+    assert isinstance(config.compile, CompileConfig)
+    assert config.compile.module == "modules.researcher:ResearchModule"
+    assert config.compile.task_model_id == "mock"
+    assert config.compile.reflection_model_id == "strong"
+    assert config.compile.auto == "medium"  # budget alias
+    assert config.compile.optimizer == "dspy.GEPA"
+
+    # Missing module fails schema validation.
+    bad = _write_yaml(
+        tmp_path / "bad-agent.yaml",
+        {
+            "name": "researcher",
+            "compile": {"enabled": True, "trainset": "data/train.jsonl"},
+        },
+    )
+    with pytest.raises(ConfigValidationError) as exc_info:
+        load_agent_config(bad)
+    assert "module" in str(exc_info.value).lower()
+
+    # Conflicting budget knobs rejected.
+    conflict = _write_yaml(
+        tmp_path / "conflict-agent.yaml",
+        {
+            "name": "researcher",
+            "compile": {
+                "module": "modules.researcher:ResearchModule",
+                "auto": "light",
+                "max_metric_calls": 10,
+            },
+        },
+    )
+    with pytest.raises(ConfigValidationError) as conflict_info:
+        load_agent_config(conflict)
+    assert "budget" in str(conflict_info.value).lower() or "exactly one" in str(
+        conflict_info.value
+    ).lower()

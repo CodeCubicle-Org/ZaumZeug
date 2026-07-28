@@ -206,3 +206,63 @@ def test_e2_s03_ac4_error_names_path_and_suggests_fix(tmp_path: Path) -> None:
     assert str(agent_dir / "agent.yaml") in message
     assert err.suggestion is not None
     assert "compile" in err.suggestion.lower()
+
+
+def test_e4_s02a_ac2_compile_requires_module(tmp_path: Path) -> None:
+    """AC-2: zaumzeug compile requires resolvable compile.module per agent."""
+    harness_dir, _ = _layout(
+        tmp_path,
+        agent_yaml={
+            "name": "researcher",
+            "agent": {"system_prompt": "prompts/system.md"},
+        },
+    )
+
+    with pytest.raises(AgentResolutionError) as exc_info:
+        resolve_agent_compile(
+            harness_dir,
+            harness_name="example",
+            agent_name="researcher",
+        )
+
+    err = exc_info.value
+    assert "compile.module" in str(err)
+    assert err.suggestion is not None
+    assert "compile.module" in err.suggestion
+
+    # Empty / invalid compile section also fails (Phase 2 schema).
+    harness_dir_empty, _ = _layout(
+        tmp_path / "empty-module",
+        agent_yaml={
+            "name": "researcher",
+            "compile": {"module": "   "},
+        },
+    )
+    with pytest.raises(AgentResolutionError) as empty_info:
+        resolve_agent_compile(
+            harness_dir_empty,
+            harness_name="example",
+            agent_name="researcher",
+        )
+    assert "compile" in str(empty_info.value).lower()
+
+    harness_dir_ok, _ = _layout(
+        tmp_path / "with-module",
+        agent_yaml={
+            "name": "researcher",
+            "default_model_id": "mock",
+            "compile": {
+                "module": "modules.researcher:ResearchModule",
+                "task_model_id": "mock",
+                "reflection_model_id": "mock",
+            },
+        },
+    )
+    result = resolve_agent_compile(
+        harness_dir_ok,
+        harness_name="example",
+        agent_name="researcher",
+    )
+    assert result.compile_module == "modules.researcher:ResearchModule"
+    assert result.compile_config.task_model_id == "mock"
+    assert result.compile_config.reflection_model_id == "mock"

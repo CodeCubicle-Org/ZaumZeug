@@ -10,10 +10,10 @@
 HarnessDevelopment/
 ├── src/zaumzeug/          # SDK internals
 │   ├── cli.py
-│   ├── config/               # Pydantic schemas, loaders (E2-S01), models merge (E2-S02), resolver (E2-S03)
+│   ├── config/               # Pydantic schemas, loaders (E2-S01), models merge (E2-S02), resolver (E2-S03); CompileConfig (E4-S02a)
 │   ├── doctor/               # Preflight checks — pass/warn/fail (E2-S04a–S04c)
 │   ├── runtime/              # ModelRouter (E3-S01, E3-S05), factory (E3-S00), tools/ (E3-S03)
-│   ├── compile/              # DSPy loader, GEPA runner, export contract
+│   ├── compile/              # DSPy loader (E4-S01); CLI runner + LM preflight (E4-S02a); GEPA → E4-S02b; export contract
 │   ├── deploy/               # usr-harnesses/ → deploy/ packager
 │   ├── eval/                 # Optional DeepEval bridge
 │   ├── serve/                # validate_serve + dry-run (E2-S05); Hayhooks runner (E3-S02, done)
@@ -102,6 +102,8 @@ usr-harnesses/<harness-name>/
 | Lifecycle hooks | `agents/<agent-name>/hooks.py` | Per-agent sensors |
 
 **Implementation (E4-S01, 2026-07-28):** Compile-time loader `zaumzeug.compile.module_loader.load_dspy_module()` imports `compile.module` relative to `agents/<agent-name>/` (prepends that directory to `sys.path`; rejects traversal). Expects `module.path:ClassName` pointing at a `dspy.Module` subclass under `modules/`. Not used by serve/runtime. Tests: `tests/unit/compile/test_module_loader.py`.
+
+**Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile <harness> [--agent]` validates Phase 2 `CompileConfig` on `agent.yaml`, loads the DSPy module, and preflights task/reflection LM ids against the merged registry + `.env` (`compile/runner.py`, `compile/gepa_runner.py`). GEPA not invoked yet.
 
 #### 3.3.1 Model config files (naming)
 

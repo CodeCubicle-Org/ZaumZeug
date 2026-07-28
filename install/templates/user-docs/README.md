@@ -28,4 +28,4 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 - **`zaumzeug init <name>`** — scaffold a new harness under `usr-harnesses/`
 - **`zaumzeug serve <harness>`** — interactive chat with the workflow **entry** agent
 - **`zaumzeug run <harness>`** — run serial workflow stages in order
-- **`zaumzeug compile <harness>`** — optimize agents (Phase 2+) and regenerate `docs/workflow-diagram.md`
+- **`zaumzeug compile <harness>`** — validate Phase 2 compile config + load DSPy modules + LM preflight (E4-S02a); GEPA optimization and workflow diagram follow in later E4 stories

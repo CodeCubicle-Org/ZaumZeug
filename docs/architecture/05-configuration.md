@@ -162,7 +162,21 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E2-S03, 2026-07-08):** Per-agent serve/compile resolution via `zaumzeug.config.resolver` — `artifact` > `system_prompt` > error at serve; `compile.module` required at compile; `resolve_serve_entry()` reads `workflow.yaml` `entry`. Exported from `zaumzeug.config` for doctor, serve, and compile commands.
 
-**Implementation (E4-S01, 2026-07-28):** `zaumzeug.compile.module_loader.load_dspy_module()` consumes `resolve_agent_compile()` and instantiates the DSPy `Module` named by `compile.module` (`module.path:ClassName`). Import errors include the expected file under `agents/<name>/modules/`. Serve/runtime do not import `zaumzeug.compile`. Tests: `tests/unit/compile/test_module_loader.py`. CLI `compile` wire-up → E4-S02a.
+**Implementation (E4-S01, 2026-07-28):** `zaumzeug.compile.module_loader.load_dspy_module()` consumes `resolve_agent_compile()` and instantiates the DSPy `Module` named by `compile.module` (`module.path:ClassName`). Import errors include the expected file under `agents/<name>/modules/`. Serve/runtime do not import `zaumzeug.compile`. Tests: `tests/unit/compile/test_module_loader.py`.
+
+**Implementation (E4-S02a, 2026-07-28):** Phase 2 `CompileConfig` on `agent.yaml` (`src/zaumzeug/config/schemas.py`). `zaumzeug compile <harness> [--agent]` via `compile/runner.py` validates schema, loads the DSPy module, and preflights task/reflection LM ids against the merged registry + `.env` (`compile/gepa_runner.preflight_compile_lms`). GEPA is not invoked yet (E4-S02b). Tests: `pytest … -k e4_s02a` (4 passed, 0 skipped).
+
+Example Phase 2 `compile` section:
+
+```yaml
+compile:
+  module: modules.researcher:ResearchModule
+  task_model_id: mock          # must exist in merged agents-models.yaml
+  reflection_model_id: mock
+  trainset: data/train.jsonl
+  valset: data/val.jsonl
+  budget: medium               # alias for auto: light|medium|heavy
+```
 
 **Implementation (E2-S04a, 2026-07-08):** `zaumzeug doctor` in `src/zaumzeug/doctor/` — environment checks (Python 3.11+, package import, `.env`/API keys), harness and workflow config validation, per-agent model registry checks, runtime path checks via `resolve_agent_serve()`, port conflict warn. CLI: optional harness name (project-wide scan when omitted), `--verbose`, `--json`. Tests: `tests/unit/cli/test_doctor.py`, `tests/integration/test_doctor.py`.
 

@@ -62,8 +62,20 @@ def _doctor_command(args: argparse.Namespace) -> int:
 
 def _compile_command(args: argparse.Namespace) -> int:
     configure_logging(verbose=args.verbose)
-    print("zaumzeug compile: not implemented yet", file=sys.stderr)
-    return 0
+    from zaumzeug.compile import CompileError, format_compile_result, run_compile
+
+    try:
+        result = run_compile(
+            args.harness_name,
+            agent_name=args.agent,
+        )
+    except CompileError as exc:
+        print(str(exc), file=sys.stderr)
+        if exc.suggestion:
+            print(f"Suggestion: {exc.suggestion}", file=sys.stderr)
+        return 1
+    print(format_compile_result(result))
+    return result.exit_code
 
 
 def _serve_command(args: argparse.Namespace) -> int:
@@ -227,7 +239,20 @@ def build_parser() -> argparse.ArgumentParser:
         cmd = sub.add_parser(name, help=f"{name} command (stub)")
         cmd.set_defaults(_handler=_stub_command(name))
 
-    compile_cmd = sub.add_parser("compile", help="compile harness artifacts (stub)")
+    compile_cmd = sub.add_parser(
+        "compile",
+        help="validate compile config and load DSPy modules (GEPA in E4-S02b)",
+    )
+    compile_cmd.add_argument(
+        "harness_name",
+        help="harness name under usr-harnesses/",
+    )
+    compile_cmd.add_argument(
+        "--agent",
+        default=None,
+        metavar="NAME",
+        help="compile a single agent (default: all agents with compile.module)",
+    )
     compile_cmd.add_argument(
         "--verbose",
         action="store_true",

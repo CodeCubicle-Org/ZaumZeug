@@ -218,7 +218,7 @@ Full **pipeline exposure** ships in **Phase 4** (RAG and production hardening). 
 | **`zaumzeug serve <harness>`** | Runs the **`entry`** agent only (interactive) |
 | **`zaumzeug run <harness>`** | Runs all **`stages`** in order (agents + pipelines) |
 | **`zaumzeug run <harness> --from <stage>`** | Partial run from a given stage (debug) |
-| **`zaumzeug compile <harness>`** | Regenerates **`docs/workflow-diagram.md`**; per-agent GEPA when configured (Phase 2+) |
+| **`zaumzeug compile <harness>`** | Validates Phase 2 `compile` config, loads DSPy modules, preflights LM ids (E4-S02a). GEPA artifacts + `docs/workflow-diagram.md` follow in later E4 stories |
 | **`zaumzeug doctor <harness>`** | Validates `workflow.yaml` (schema + agent refs), `harness.yaml`, models, runtime paths; warns on stale diagram |
 | **`zaumzeug serve <harness> --dry-run`** | Same workflow validation path as doctor before resolving the entry agent |
 

@@ -6,7 +6,7 @@ fix without reading SDK source (PRD E2.1 / Architecture §6.2, §6.6).
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 from pydantic_core import InitErrorDetails, PydanticCustomError
@@ -175,6 +175,59 @@ class AgentToolsConfig(BaseModel):
         return self
 
 
+class CompileConfig(BaseModel):
+    """Phase 2 ``compile`` section in ``agents/<name>/agent.yaml`` (Architecture §6.2).
+
+    GEPA budget uses exactly one of ``auto`` / ``max_metric_calls`` / ``max_full_evals``.
+    Ideation ``budget:`` is accepted as an alias for ``auto``.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    module: str
+    enabled: bool = True
+    optimizer: str = "dspy.GEPA"
+    trainset: str | None = None
+    valset: str | None = None
+    task_model_id: str | None = None
+    reflection_model_id: str | None = None
+    auto: Literal["light", "medium", "heavy"] | None = None
+    max_metric_calls: int | None = None
+    max_full_evals: int | None = None
+    budget: Literal["light", "medium", "heavy"] | None = None
+
+    @field_validator("module")
+    @classmethod
+    def _module_non_empty(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("`compile.module` must be a non-empty DSPy Module import path")
+        return value.strip()
+
+    @model_validator(mode="after")
+    def _normalize_budget(self) -> CompileConfig:
+        auto = self.auto
+        if auto is None and self.budget is not None:
+            auto = self.budget
+
+        budget_flags = (
+            (auto is not None)
+            + (self.max_metric_calls is not None)
+            + (self.max_full_evals is not None)
+        )
+        if budget_flags > 1:
+            raise ValueError(
+                "compile budget: set exactly one of `auto` (or `budget`), "
+                "`max_metric_calls`, or `max_full_evals`"
+            )
+
+        updates: dict[str, Any] = {}
+        if auto is not None and self.auto != auto:
+            updates["auto"] = auto
+        if updates:
+            return self.model_copy(update=updates)
+        return self
+
+
 class AgentConfig(BaseModel):
     """Root schema for ``agents/<name>/agent.yaml`` (Phase 1+)."""
 
@@ -185,6 +238,7 @@ class AgentConfig(BaseModel):
     default_model_id: str | None = None
     agent: AgentSectionConfig | None = None
     tools: AgentToolsConfig | None = None
+    compile: CompileConfig | None = None
 
     @field_validator("name")
     @classmethod
