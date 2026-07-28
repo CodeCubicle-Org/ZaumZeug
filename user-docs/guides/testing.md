@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers · SDK contributors |
-| **Last updated** | 2026-07-28 |
+| **Last updated** | 2026-07-29 (E5-S09c target install --verify) |
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
@@ -441,7 +441,7 @@ deploy:
 | `warn` | If `eval:` configured, run `zaumzeug eval`; print failures; **continue** deploy. |
 | `block` | If `eval:` configured, run `zaumzeug eval`; **abort** deploy on any failure. |
 
-CLI override: `zaumzeug deploy <name> --eval-gate block`. If `eval:` is absent, `block` / `warn` are a no-op. After the gate, deploy writes `deploy/<name>/` per Architecture §10.1 (E5-S01 packager + E5-S02 copy matrix: exclude `modules/`/`data/`/`eval/`/`skills/`; include referenced runtime assets + pinned artifacts). Ops then ships: copy bundle → `target_install` → create `.env` → `zaumzeug serve <name> --deploy` or `HARNESS_ROOT=deploy zaumzeug serve <name>` (**Done** E5-S03 / E5-S04 / E5-S05 — loads only the bundle; same OpenAI REST as dev; runtime-only install, no DSPy/GEPA/DeepEval). Default git policy ignores `deploy/` and compile artifacts (**Done** E5-S07 — optional release force-add or CI `upload-artifact`; see [Deploy and ship — Git policy](deploy.md#git-policy-for-deploy-bundles)). Platform policy (**Done** E5-S08): Linux-first production; OS-neutral bundle; Win/macOS best-effort not CI-gated; Linux CI `deploy` → `serve --deploy` smoke — see [Platforms](deploy.md#platforms). Target install core (**Done** E5-S09a): optional `.venv`, `pip install zaumzeug` (runtime only), `.env` seed — see [Deploy and ship — Target install](deploy.md#target-install--win--macos--linux). Wrappers (**Done** E5-S09b): `target-install.sh` / `.ps1` forward flags and exit codes. See [Deploy and ship](deploy.md), [CLI — zaumzeug deploy](../reference/cli.md#zaumzeug-deploy), and [CLI — serve](../reference/cli.md#zaumzeug-serve).
+CLI override: `zaumzeug deploy <name> --eval-gate block`. If `eval:` is absent, `block` / `warn` are a no-op. After the gate, deploy writes `deploy/<name>/` per Architecture §10.1 (E5-S01 packager + E5-S02 copy matrix: exclude `modules/`/`data/`/`eval/`/`skills/`; include referenced runtime assets + pinned artifacts). Ops then ships: copy bundle → `target_install` → create `.env` → `zaumzeug serve <name> --deploy` or `HARNESS_ROOT=deploy zaumzeug serve <name>` (**Done** E5-S03 / E5-S04 / E5-S05 — loads only the bundle; same OpenAI REST as dev; runtime-only install, no DSPy/GEPA/DeepEval). Default git policy ignores `deploy/` and compile artifacts (**Done** E5-S07 — optional release force-add or CI `upload-artifact`; see [Deploy and ship — Git policy](deploy.md#git-policy-for-deploy-bundles)). Platform policy (**Done** E5-S08): Linux-first production; OS-neutral bundle; Win/macOS best-effort not CI-gated; Linux CI `deploy` → `serve --deploy` smoke — see [Platforms](deploy.md#platforms). Target install (**Done** E5-S09a/b/c): optional `.venv`, `pip install zaumzeug` (runtime only), `.env` seed, wrappers, optional `--verify` (doctor `--deploy` + serve `--deploy --dry-run`) — see [Deploy and ship — Target install](deploy.md#target-install--win--macos--linux). See [Deploy and ship](deploy.md), [CLI — zaumzeug deploy](../reference/cli.md#zaumzeug-deploy), and [CLI — serve](../reference/cli.md#zaumzeug-serve).
 
 ---
 
@@ -511,5 +511,5 @@ zaumzeug compile example --dry-run
 ## Related guides
 
 - [Multi-agent workflow](multi-agent-workflow.md) — `workflow.yaml` and stage routing under test
-- [Deploy and ship](deploy.md) — copy → `target_install` → `.env` → `serve --deploy` (E5-S05); git policy for bundles (E5-S07); platforms / Linux CI smoke (E5-S08); target install core (E5-S09a); shell wrappers (E5-S09b)
+- [Deploy and ship](deploy.md) — copy → `target_install` → `.env` → `serve --deploy` (E5-S05); git policy for bundles (E5-S07); platforms / Linux CI smoke (E5-S08); target install + `--verify` (E5-S09a/b/c)
 - [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_ROOT=deploy` (E5-S04), `HARNESS_LIVE_LLM`, debugpy, serve/compile `--dry-run`, serve `--deploy` (E5-S03), `doctor`, `eval` / `--trace` / `--base-url`, GEPA ↔ DeepEval bridge, Phase 1 security notes

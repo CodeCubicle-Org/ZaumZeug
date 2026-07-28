@@ -27,6 +27,8 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 **Implementation (E5-S08, 2026-07-29):** Deploy platform policy (Linux-first + OS-neutral bundle + Linux CI deploy→serve smoke) — [user-docs/guides/deploy.md](../../user-docs/guides/deploy.md#platforms); Architecture [§10.6](07-deploy-packaging.md#106-deploy-platform-targets).
 
+**Implementation (E5-S09a/b/c, 2026-07-29):** Target install (core / wrappers / `--verify`) — [user-docs/guides/deploy.md](../../user-docs/guides/deploy.md#target-install--win--macos--linux); Architecture [§10.7](07-deploy-packaging.md#107-target-runtime-install-script).
+
 **Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` wired from `zaumzeug serve` and `zaumzeug compile` when `--verbose` or `HARNESS_LOG_LEVEL=DEBUG`. Structured request context via `log_request()`; API keys redacted in log output.
 
 **Implementation (E3-S02, 2026-07-20):** `src/zaumzeug/serve/runner.py` — `validate_serve()` → `build_agent()` → Hayhooks `create_app` / `run_app` on `127.0.0.1` and `serve.hayhooks.port`. OpenAI routes via Hayhooks registry (`/v1/chat/completions`, `GET /v1/models`). Production `--deploy` path closed by [E5-S03](../stories/epic-stories/43-story.md) (2026-07-28).

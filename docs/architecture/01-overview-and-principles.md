@@ -124,7 +124,7 @@ Requirements: **[PRD G4](../prd.md#3-goals)**, **[E1.7](../prd.md#epic-e1--onboa
 
 | Rule | Implementation |
 |---|---|
-| **Single install implementation** | All install logic in `install/client_install.py` / `install/target_install.py` (stdlib + `pathlib`); `.sh` / `.ps1` wrappers delegate only (**Done** E1-S01/S02 client; **Done** E5-S09a/b target — [§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)) |
+| **Single install implementation** | All install logic in `install/client_install.py` / `install/target_install.py` (stdlib + `pathlib`); `.sh` / `.ps1` wrappers delegate only (**Done** E1-S01/S02 client; **Done** E5-S09a/b/c target — [§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)) |
 | **CI matrix (Win / macOS / Linux)** | **Done** (E1-S07, 2026-07-22) — [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml); Python 3.11; install wrappers → doctor → dry-run → `ci_serve_smoke.py` → contract + unit/integration pytest. **Phase 2+ Linux deploy smoke** ✅ (E5-S08, 2026-07-29) — `zaumzeug deploy example` → `ci_serve_smoke.py example --deploy` on `ubuntu-latest` only |
 | **No hardcoded paths** | SDK and install use `pathlib.Path`; no `/` or `\` literals for harness roots, venv, or artifacts |
 | **OS detection** | `platform.system()` for venv paths (`Scripts` vs `bin`), activation hints, and optional shell-specific messaging — not duplicated in shell scripts |

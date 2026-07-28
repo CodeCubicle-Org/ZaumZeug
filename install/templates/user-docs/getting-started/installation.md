@@ -115,7 +115,7 @@ Sizes are **approximate ranges**, not guarantees. The first `pip install` usuall
 | **Repo + harness folders** (excluding artifacts) | **< 50 MB** |
 | **Compile artifacts** (`usr-harnesses/*/artifacts/`) | Variable over time |
 
-**Production target install** (after copying `deploy/<name>/` to a server or desktop): runtime `zaumzeug` only — **no** DSPy, GEPA, or DeepEval — about **~500 MB–1.5 GB** for the venv. Python 3.11+ must already be on the target. Prefer the bundled OS wrappers (`target-install.sh` / `target-install.ps1` — **Done** E5-S09b) or `python target_install.py`. Full ship workflow (copy → install → `.env` → serve): [Deploy and ship](../guides/deploy.md). After install, run from a project root that contains `deploy/<name>/`:
+**Production target install** (after copying `deploy/<name>/` to a server or desktop): runtime `zaumzeug` only — **no** DSPy, GEPA, or DeepEval — about **~500 MB–1.5 GB** for the venv. Python 3.11+ must already be on the target. Prefer the bundled OS wrappers (`target-install.sh` / `target-install.ps1` — **Done** E5-S09b) or `python target_install.py`. Optional `--verify` runs `zaumzeug doctor <name> --deploy` then `zaumzeug serve <name> --deploy --dry-run` (**Done** E5-S09c). Full ship workflow (copy → install → `.env` → serve): [Deploy and ship](../guides/deploy.md). After install, run from a project root that contains `deploy/<name>/`:
 
 ```bash
 zaumzeug doctor <name> --deploy

@@ -77,7 +77,7 @@ Python **3.11+** must already be on PATH. From this directory:
 | **macOS / Linux** | `./target-install.sh` |
 | **Any OS** | `python target_install.py` |
 
-`target_install` creates an optional `.venv`, runs `pip install zaumzeug` (**runtime only** — no `[dev]`, `[eval]`, DSPy, GEPA, or DeepEval), verifies `manifest.json` + `harness.yaml`, and seeds `.env` from `.env.example` when missing (never overwrites). Shell wrappers (`target-install.sh` / `.ps1`) forward flags and exit codes. Optional `--verify` (doctor + serve dry-run) lands in E5-S09c.
+`target_install` creates an optional `.venv`, runs `pip install zaumzeug` (**runtime only** — no `[dev]`, `[eval]`, DSPy, GEPA, or DeepEval), verifies `manifest.json` + `harness.yaml`, and seeds `.env` from `.env.example` when missing (never overwrites). Shell wrappers (`target-install.sh` / `.ps1`) forward flags and exit codes. Optional `--verify` runs `zaumzeug doctor <name> --deploy` then `zaumzeug serve <name> --deploy --dry-run` (non-zero exit on failure).
 
 ---
 

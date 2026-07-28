@@ -44,9 +44,11 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E5-S05, 2026-07-28):** Ops ship path documented — copy → `target_install` → `.env` → `zaumzeug serve --deploy`. Docs: `README.deploy.md`, [user-docs/guides/deploy.md](../user-docs/guides/deploy.md), root README production note. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s05`) + `test_e5_s05_ac5_no_env_in_bundle`.
 
-**Implementation (E5-S09a, 2026-07-29):** `install/target_install.py` core — optional `.venv`, `pip install zaumzeug` (runtime only), `.env` seed, preflight. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s09_*`). `--verify` → E5-S09c.
+**Implementation (E5-S09a, 2026-07-29):** `install/target_install.py` core — optional `.venv`, `pip install zaumzeug` (runtime only), `.env` seed, preflight. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s09_*`).
 
 **Implementation (E5-S09b, 2026-07-29):** `install/target-install.sh` / `.ps1` forward args to sibling `target_install.py` with exit-code parity; bundled in each `deploy/<name>/`. Tests: `e5_s09b_*` + `test_e5_s09_ac7_scripts_in_bundle`.
+
+**Implementation (E5-S09c, 2026-07-29):** `--verify` runs `zaumzeug doctor <name> --deploy` then `zaumzeug serve <name> --deploy --dry-run` from the project root; non-zero exit on failure. Tests: `e5_s09_ac4` / `e5_s09_ac6` / `e5_s09c_*`.
 
 **Implementation (E5-S07, 2026-07-28):** Deploy git policy — scaffolding ensures `/deploy/` + `usr-harnesses/*/artifacts/`; release force-add and CI upload documented. See [§10.4](07-deploy-packaging.md#104-git-and-gitignore); tests `test_e5_s07_ac1_gitignore_deploy_and_artifacts`.
 

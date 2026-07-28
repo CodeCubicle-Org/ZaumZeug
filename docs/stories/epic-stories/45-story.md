@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/45-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 |
+| **Last modified** | 2026-07-29 |
 | **Story ID** | E5-S05 |
 | **Status** | Done |
 | **Epic** | [E5 — Deploy Packaging](../06-epic.md) |
@@ -24,7 +24,7 @@
 | **Feature** | E5.5 |
 | **Persona** | Ops / platform · Harness developer |
 | **Priority** | P0 |
-| **Prerequisites** | [E5-S03](43-story.md#e5-s03-zaumzeug-serve-deploy) ✅ (2026-07-28) · [E5-S09c](49.3-story.md#e5-s09c-target-install-verify-integration) *(full `--verify` automation later; stub + docs ship now)* |
+| **Prerequisites** | [E5-S03](43-story.md#e5-s03-zaumzeug-serve-deploy) ✅ (2026-07-28) · [E5-S09c](49.3-story.md#e5-s09c-target-install-verify-integration) ✅ (2026-07-29) |
 
 ### User story
 
@@ -89,5 +89,5 @@ Per [Story verification](../00-README.md#story-verification-required). **Docs + 
 
 - Ship path authored in bundle `README.deploy.md` template and [user-docs/guides/deploy.md](../../../user-docs/guides/deploy.md); root README production note links the guide.
 - Runtime-only contract asserted via pyproject core deps + `target_install` / docs wording; `.env` exclusion covered by packager integration test (explicit plant of secrets under project + harness).
-- Target install core **Done** ([E5-S09a](49.1-story.md), 2026-07-29) — venv / `pip install zaumzeug` / `.env` seed. Wrappers **Done** ([E5-S09b](49.2-story.md), 2026-07-29). `--verify` → [E5-S09c](49.3-story.md).
+- Target install **Done** ([E5-S09a](49.1-story.md)–[E5-S09c](49.3-story.md), 2026-07-29) — venv / `pip install zaumzeug` / `.env` seed / wrappers / `--verify`.
 ---

@@ -1,5 +1,5 @@
-# Story: E5-S05 / E5.5 · E5-S09a / E5.9 · E5-S09b / E5.9
-"""E5-S05 / E5-S09a / E5-S09b — Target ship workflow, install core, shell wrappers."""
+# Story: E5-S05 / E5.5 · E5-S09a / E5.9 · E5-S09b / E5.9 · E5-S09c / E5.9
+"""E5-S05 / E5-S09a / E5-S09b / E5-S09c — Target ship, install, wrappers, verify."""
 
 from __future__ import annotations
 
@@ -578,3 +578,181 @@ def test_e5_s09b_ac3_wrapper_exit_code_parity(tmp_path: Path) -> None:
 
         if not ran:
             pytest.skip("neither bash nor PowerShell available for exit-code parity check")
+
+
+# --- E5-S09c / E5.9 — target install --verify -----------------------------
+
+
+def _zaumzeug_cli_cmds(calls: list[list[str]]) -> list[list[str]]:
+    """Return subprocess argv lists that invoke ``-m zaumzeug <subcommand>``."""
+    return [
+        c
+        for c in calls
+        if "-m" in c and "zaumzeug" in c and len(c) > c.index("zaumzeug") + 1
+    ]
+
+
+def test_e5_s09_ac4_verify_runs_doctor_deploy(
+    target_install: ModuleType,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-1: ``--verify`` runs ``zaumzeug doctor <name> --deploy``."""
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], **_kwargs: Any) -> Any:
+        calls.append(list(cmd))
+        return _fake_completed(stdout="ok\n")
+
+    monkeypatch.setattr(target_install.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        target_install,
+        "resolve_install_python",
+        lambda *_a, **_k: Path(sys.executable),
+    )
+
+    deploy_dir = tmp_path / "deploy" / "example"
+    _seed_minimal_bundle(deploy_dir)
+
+    code = target_install.run_install(deploy_dir, skip_venv=True, verify=True)
+    assert code == 0
+
+    cli = _zaumzeug_cli_cmds(calls)
+    doctor = [c for c in cli if "doctor" in c]
+    assert doctor, f"expected doctor --deploy call; got {calls}"
+    doctor_cmd = doctor[0]
+    assert doctor_cmd[-3:] == ["doctor", "example", "--deploy"]
+    assert doctor_cmd[-4] == "zaumzeug"
+
+
+def test_e5_s09_ac6_verify_runs_serve_dry_run(
+    target_install: ModuleType,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-2: ``--verify`` runs ``zaumzeug serve <name> --deploy --dry-run``."""
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], **_kwargs: Any) -> Any:
+        calls.append(list(cmd))
+        return _fake_completed(stdout="ok\n")
+
+    monkeypatch.setattr(target_install.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        target_install,
+        "resolve_install_python",
+        lambda *_a, **_k: Path(sys.executable),
+    )
+
+    deploy_dir = tmp_path / "deploy" / "example"
+    _seed_minimal_bundle(deploy_dir)
+
+    code = target_install.run_install(deploy_dir, skip_venv=True, verify=True)
+    assert code == 0
+
+    cli = _zaumzeug_cli_cmds(calls)
+    serve = [c for c in cli if "serve" in c]
+    assert serve, f"expected serve --deploy --dry-run call; got {calls}"
+    serve_cmd = serve[0]
+    assert serve_cmd[-4:] == ["serve", "example", "--deploy", "--dry-run"]
+    # Doctor must run before serve dry-run.
+    doctor_idx = next(i for i, c in enumerate(cli) if "doctor" in c)
+    serve_idx = next(i for i, c in enumerate(cli) if "serve" in c)
+    assert doctor_idx < serve_idx
+
+
+def test_e5_s09_ac6_skip_venv_and_verify_flags(
+    target_install: ModuleType,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-3: ``--skip-venv`` and ``--verify`` work together (passthrough to core)."""
+    args = target_install.parse_args(["--skip-venv", "--verify"])
+    assert args.skip_venv is True
+    assert args.verify is True
+
+    created: list[Path] = []
+    FakeBuilder = _fake_venv_builder(target_install)
+
+    class TrackingBuilder(FakeBuilder):  # type: ignore[valid-type,misc]
+        def create(self, env_dir: str | Path) -> None:
+            created.append(Path(env_dir))
+            super().create(env_dir)
+
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], **_kwargs: Any) -> Any:
+        calls.append(list(cmd))
+        return _fake_completed(stdout="ok\n")
+
+    monkeypatch.setattr(target_install.venv, "EnvBuilder", TrackingBuilder)
+    monkeypatch.setattr(target_install.subprocess, "run", fake_run)
+
+    deploy_dir = tmp_path / "deploy" / "example"
+    _seed_minimal_bundle(deploy_dir)
+
+    code = target_install.run_install(
+        deploy_dir,
+        skip_venv=True,
+        verify=True,
+    )
+    assert code == 0
+    assert created == []
+    assert not (deploy_dir / ".venv").exists()
+
+    cli = _zaumzeug_cli_cmds(calls)
+    assert any("doctor" in c and "--deploy" in c for c in cli)
+    assert any(
+        "serve" in c and "--deploy" in c and "--dry-run" in c for c in cli
+    )
+
+
+def test_e5_s09c_ac4_verify_fails_on_bad_bundle(
+    target_install: ModuleType,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-4: Non-zero exit when doctor or serve dry-run fails under ``--verify``."""
+    monkeypatch.setattr(
+        target_install,
+        "resolve_install_python",
+        lambda *_a, **_k: Path(sys.executable),
+    )
+
+    # Doctor fails → overall install exits non-zero; serve must not run.
+    doctor_calls: list[list[str]] = []
+
+    def doctor_fails(cmd: list[str], **_kwargs: Any) -> Any:
+        doctor_calls.append(list(cmd))
+        if "doctor" in cmd:
+            return _fake_completed(returncode=1, stderr="doctor fail\n")
+        return _fake_completed(stdout="ok\n")
+
+    monkeypatch.setattr(target_install.subprocess, "run", doctor_fails)
+    deploy_dir = tmp_path / "deploy" / "bad_doctor"
+    _seed_minimal_bundle(deploy_dir)
+    code = target_install.main(
+        ["--deploy-dir", str(deploy_dir), "--skip-venv", "--verify"]
+    )
+    assert code == 1
+    assert any("doctor" in c for c in doctor_calls)
+    assert not any("serve" in c for c in doctor_calls)
+
+    # Serve dry-run fails after doctor passes.
+    serve_calls: list[list[str]] = []
+
+    def serve_fails(cmd: list[str], **_kwargs: Any) -> Any:
+        serve_calls.append(list(cmd))
+        if "serve" in cmd:
+            return _fake_completed(returncode=1, stderr="serve fail\n")
+        return _fake_completed(stdout="ok\n")
+
+    monkeypatch.setattr(target_install.subprocess, "run", serve_fails)
+    other = tmp_path / "deploy" / "bad_serve"
+    _seed_minimal_bundle(other)
+    code = target_install.main(
+        ["--deploy-dir", str(other), "--skip-venv", "--verify"]
+    )
+    assert code == 1
+    assert any("doctor" in c for c in serve_calls)
+    assert any("serve" in c for c in serve_calls)

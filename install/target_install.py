@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Target runtime install for a ZaumZeug deploy bundle (Architecture §10.7 / E5-S09a).
+"""Target runtime install for a ZaumZeug deploy bundle (Architecture §10.7 / E5-S09).
 
 Prepares a production host after ops copies ``deploy/<name>/``:
 
@@ -8,8 +8,9 @@ Prepares a production host after ops copies ``deploy/<name>/``:
 3. Optional ``.venv`` beside the bundle (unless ``--skip-venv``)
 4. ``pip install zaumzeug`` — runtime only (no ``[dev]``, ``[eval]``, DSPy, GEPA, DeepEval)
 5. Seed ``.env`` from ``.env.example`` when missing (never overwrite)
+6. Optional ``--verify`` — ``zaumzeug doctor <name> --deploy`` then
+   ``zaumzeug serve <name> --deploy --dry-run`` (E5-S09c)
 
-``--verify`` (doctor ``--deploy`` + serve ``--deploy --dry-run``) lands in E5-S09c.
 Shell wrappers: ``target-install.sh`` / ``target-install.ps1`` (E5-S09b).
 
 Usage (from the deploy bundle directory)::
@@ -17,6 +18,8 @@ Usage (from the deploy bundle directory)::
     python target_install.py
     python target_install.py --deploy-dir /path/to/deploy/my_agent
     python target_install.py --skip-venv
+    python target_install.py --verify
+    python target_install.py --skip-venv --verify
 """
 
 from __future__ import annotations
@@ -39,6 +42,7 @@ __all__ = [
     "parse_args",
     "preflight_bundle",
     "run_install",
+    "run_verify",
 ]
 
 
@@ -68,7 +72,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--verify",
         action="store_true",
-        help="Reserved for E5-S09c (doctor --deploy + serve --deploy --dry-run)",
+        help=(
+            "after install, run zaumzeug doctor <name> --deploy and "
+            "zaumzeug serve <name> --deploy --dry-run (non-zero exit on failure)"
+        ),
     )
     return parser.parse_args(argv)
 
@@ -259,11 +266,45 @@ def seed_dotenv(deploy_dir: Path) -> str:
     return "created"
 
 
+def run_verify(
+    python: Path,
+    *,
+    project_root: Path,
+    harness_name: str,
+) -> None:
+    """Run doctor ``--deploy`` then serve ``--deploy --dry-run`` (E5-S09c).
+
+    Delegates to the installed CLI — does not reimplement doctor or serve
+    validation. Raises :class:`TargetInstallError` on non-zero exit.
+    """
+    print(f"Running zaumzeug doctor {harness_name} --deploy (--verify) …")
+    run_command(
+        [str(python), "-m", "zaumzeug", "doctor", harness_name, "--deploy"],
+        cwd=project_root,
+        what=f"zaumzeug doctor {harness_name} --deploy",
+    )
+    print(
+        f"Running zaumzeug serve {harness_name} --deploy --dry-run (--verify) …"
+    )
+    run_command(
+        [
+            str(python),
+            "-m",
+            "zaumzeug",
+            "serve",
+            harness_name,
+            "--deploy",
+            "--dry-run",
+        ],
+        cwd=project_root,
+        what=f"zaumzeug serve {harness_name} --deploy --dry-run",
+    )
+
+
 def print_next_steps(
     deploy_dir: Path,
     *,
     skip_venv: bool,
-    verify_reserved: bool,
 ) -> None:
     harness_name = deploy_dir.name
     project_root = resolve_project_root(deploy_dir)
@@ -281,12 +322,6 @@ def print_next_steps(
         "  # containers / systemd: HARNESS_ROOT=deploy "
         f"zaumzeug serve {harness_name}"
     )
-    if verify_reserved:
-        print()
-        print(
-            "Note: --verify (doctor --deploy + serve --deploy --dry-run) "
-            "lands in E5-S09c."
-        )
 
 
 def run_install(
@@ -335,7 +370,15 @@ def run_install(
             "inside the bundle)"
         )
 
-    print_next_steps(deploy_dir, skip_venv=skip_venv, verify_reserved=verify)
+    if verify:
+        project_root = resolve_project_root(deploy_dir)
+        run_verify(
+            python,
+            project_root=project_root,
+            harness_name=deploy_dir.name,
+        )
+
+    print_next_steps(deploy_dir, skip_venv=skip_venv)
     print("Target install completed successfully.")
     return 0
 

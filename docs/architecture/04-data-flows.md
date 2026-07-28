@@ -180,4 +180,6 @@ production failure → trace → dataset row → zaumzeug eval (optional) → GE
 **Implementation (E5-S07, 2026-07-28):** Deploy git policy — default `.gitignore` includes `/deploy/` and `usr-harnesses/*/artifacts/`; documented release force-add and CI `upload-artifact` options. See [§10.4](07-deploy-packaging.md#104-git-and-gitignore).
 
 **Implementation (E5-S08, 2026-07-29):** Deploy platform policy — Linux-first production matrix; OS-neutral bundle assertions; Linux CI `zaumzeug deploy` → `serve --deploy` smoke. See [§10.6](07-deploy-packaging.md#106-deploy-platform-targets).
+
+**Implementation (E5-S09a/b/c, 2026-07-29):** Target install — optional `.venv`, runtime `pip install zaumzeug`, `.env` seed, sh/ps1 wrappers, `--verify` (doctor `--deploy` + serve `--deploy --dry-run`). See [§10.7](07-deploy-packaging.md#107-target-runtime-install-script); tests `test_target_install.py`.
 ---

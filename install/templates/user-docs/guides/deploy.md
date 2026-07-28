@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Ops / platform · Harness developers |
-| **Last updated** | 2026-07-29 (E5-S09b shell wrappers) |
+| **Last updated** | 2026-07-29 (E5-S09c target install --verify) |
 
 Ship a production harness to a clean server **without** DSPy, GEPA, or DeepEval on the target. Compile and eval stay on the developer machine (or CI); the target only runs Haystack via `zaumzeug`.
 
@@ -25,7 +25,7 @@ target:  copy folder  →  target_install  →  create .env  →  zaumzeug serve
 |---|---|---|
 | 1. Package | Dev / CI | `zaumzeug deploy <name>` writes `deploy/<name>/` (stripped yaml, pinned artifacts, `manifest.json`, `README.deploy.md`, target install scripts) |
 | 2. Copy | Ops | Copy **only** `deploy/<name>/` to the target (no `usr-harnesses/` required) |
-| 3. Install | Target | Run bundled `target_install` → `pip install zaumzeug` (**runtime only**) |
+| 3. Install | Target | Run bundled `target_install` → `pip install zaumzeug` (**runtime only**); optional `--verify` runs doctor + serve dry-run |
 | 4. Secrets | Target | Create `.env` from `.env.example` if needed — **never** ship `.env` in the bundle |
 | 5. Serve | Target | `zaumzeug serve <name> --deploy` (or `HARNESS_ROOT=deploy`) |
 
@@ -57,16 +57,25 @@ After the bundle is on the host, run install **from inside** `deploy/<name>/` (o
 | **Any OS** | `python target_install.py` |
 | **From repo `install/`** | `python install/target_install.py --deploy-dir deploy/<name>` |
 
-What install does (Architecture §10.7; core **Done** E5-S09a; wrappers **Done** E5-S09b):
+What install does (Architecture §10.7; **Done** E5-S09a/b/c):
 
 1. Preflight — require Python 3.11+, `harness.yaml`, and `manifest.json`
 2. Optional `.venv` beside the bundle (unless `--skip-venv`)
 3. `pip install zaumzeug` — **not** `zaumzeug[dev]` or `zaumzeug[eval]`
 4. Seed `.env` from `.env.example` when missing (**never** overwrite an existing `.env`)
-5. Optional `--verify` — `zaumzeug doctor <name> --deploy` then `zaumzeug serve <name> --deploy --dry-run` (E5-S09c)
+5. Optional `--verify` — `zaumzeug doctor <name> --deploy` then `zaumzeug serve <name> --deploy --dry-run`
 6. Print serve next steps
 
 Shell wrappers (`target-install.sh` / `.ps1`) forward all flags to `target_install.py` and return the same exit code.
+
+```bash
+# Optional post-install health check (E5-S09c)
+./target-install.sh --verify
+./target-install.sh --skip-venv --verify
+python target_install.py --deploy-dir deploy/<name> --verify
+```
+
+Non-zero exit if `doctor --deploy` or `serve --deploy --dry-run` fails.
 
 ---
 
