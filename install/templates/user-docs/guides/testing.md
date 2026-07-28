@@ -441,7 +441,7 @@ deploy:
 | `warn` | If `eval:` configured, run `zaumzeug eval`; print failures; **continue** deploy. |
 | `block` | If `eval:` configured, run `zaumzeug eval`; **abort** deploy on any failure. |
 
-CLI override: `zaumzeug deploy <name> --eval-gate block`. If `eval:` is absent, `block` / `warn` are a no-op. See [CLI — zaumzeug deploy](../reference/cli.md#zaumzeug-deploy).
+CLI override: `zaumzeug deploy <name> --eval-gate block`. If `eval:` is absent, `block` / `warn` are a no-op. After the gate, deploy writes `deploy/<name>/` (stripped yaml, pinned artifacts, `manifest.json`, `README.deploy.md`, target install scripts — E5-S01). See [CLI — zaumzeug deploy](../reference/cli.md#zaumzeug-deploy).
 
 ---
 
@@ -499,7 +499,7 @@ zaumzeug compile example --dry-run
 | Phase | Testing deliverables |
 |---|---|
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
-| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (**Done** E6-S05 — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**Done** E6-S06 — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**Done** E6-S07 — `tests/unit/eval/test_gepa_bridge.py`) |
+| **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (**Done** E6-S05 — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**Done** E6-S06 — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**Done** E6-S07 — `tests/unit/eval/test_gepa_bridge.py`), `zaumzeug deploy` packager (**Done** E5-S01 — `tests/integration/deploy/test_deploy.py`) |
 | **3** | MCP integration tests, tool-correctness eval |
 | **4** | Production trace ratchet, `@observe` / Confident AI sync |
 

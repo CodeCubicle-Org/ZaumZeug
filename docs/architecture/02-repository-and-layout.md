@@ -14,7 +14,7 @@ HarnessDevelopment/
 │   ├── doctor/               # Preflight checks — pass/warn/fail (E2-S04a–S04c, E4-S05 artifact_module, E4-S07 pinned_artifact)
 │   ├── runtime/              # ModelRouter (E3-S01, E3-S05), factory (E3-S00), tools/ (E3-S03), input_rewrite preprocess (E4-S03b)
 │   ├── compile/              # DSPy loader; CLI + GEPA + --dry-run; export; workflow diagram; immutable runs (E4-S01–S08)
-│   ├── deploy/               # Eval gate ✅ (E6-S03 / E5-S06); full usr-harnesses/ → deploy/ packager → E5-S01
+│   ├── deploy/               # Packager ✅ E5-S01 (doctor + eval gate + write_deploy_bundle); gate ✅ E6-S03/E5-S06; exclude/strip helpers ✅ E6-S04 / E5-S01; golden matrix → E5-S02
 │   ├── eval/                 # Optional DeepEval bridge — [eval] extra + require_deepeval() (E6-S01); zaumzeug eval runner (E6-S02); invoked by deploy gate (E6-S03); harness eval/ pytest scaffold (E6-S04); trace export + --trace (E6-S05); Mode C --base-url (E6-S06); GEPA bridge append_failed_eval_to_train + deepeval_gepa_metric (E6-S07)
 │   ├── serve/                # validate_serve + dry-run (E2-S05); Hayhooks runner (E3-S02; input_rewrite on request path E4-S03b)
 │   ├── integrations/         # mock (E3-S05), haystack provider map (E3-S01); DSPy, GEPA, LiteLLM adapters
@@ -139,7 +139,7 @@ Secrets remain in `.env` only; all model files hold provider + model id + genera
 | Script | Scope | When |
 |---|---|---|
 | `install/client_install.py` | **Dev machine once** — venv, editable install, `usr-harnesses/example/`, user-docs skeleton, global `config/models.yaml`, `.env.example` | First clone or new dev machine |
-| `install/target_install.py` | **Target machine once per deploy** — runtime `pip install zaumzeug`, optional venv, `zaumzeug doctor --deploy`, `.env` hints | After copying `deploy/<name>/` to desktop PC or server |
+| `install/target_install.py` | **Target machine once per deploy** — runtime `pip install zaumzeug`, optional venv, `zaumzeug doctor --deploy`, `.env` hints | After copying `deploy/<name>/` to desktop PC or server. **E5-S01 (2026-07-28):** stub + wrappers ship in each bundle (preflight `harness.yaml` + `manifest.json`); full install → [E5-S09](../stories/epic-stories/49.1-story.md) |
 | `zaumzeug init <name>` | **Per harness** — scaffold `usr-harnesses/<name>/` from template | Additional harnesses after project setup |
 | `zaumzeug install-project` | **PyPI consumer cwd** — scaffold only (no editable install); reuses scaffold logic | **Deferred** until `zaumzeug` is published ([E1-S08](../stories/epic-stories/25-story.md); open #3 resolved 2026-07-22) |
 

@@ -25,7 +25,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P1 |
 | **Status** | Done (2026-07-28) — shipped early with [E6-S03](36-story.md) (build order) |
-| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) *(packager body still pending)* · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ |
+| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) ✅ · [E6-S02](35-story.md#e6-s02-zaumzeug-eval-command) ✅ |
 
 ### User story
 
@@ -88,6 +88,6 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 - `DeployConfig.eval_gate` on `HarnessConfig`; `deploy` removed from `PHASE_GATED_FIELDS`.
 - `apply_eval_gate` / `package_harness` in `deploy/packager.py`; CLI `zaumzeug deploy --eval-gate`.
-- Placeholder bundle write until [E5-S01](41-story.md) lands full copy rules; gate is the single source of truth.
+- Full bundle write landed in [E5-S01](41-story.md) (`write_deploy_bundle`); gate remains the single source of truth for eval-before-pack.
 
 ---

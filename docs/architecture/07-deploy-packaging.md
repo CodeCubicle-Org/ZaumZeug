@@ -49,9 +49,11 @@ Requirements: [PRD E5.2](../prd.md#epic-e5--deploy-packaging-phase-2).
 
 Idempotent — overwrites `deploy/<name>/`. Future: `zaumzeug export` tarball of bundle.
 
-**Implementation (E6-S03 / E5-S06, 2026-07-28):** Step 2 (eval gate) is live in `src/zaumzeug/deploy/packager.py` (`apply_eval_gate` → `package_harness`); CLI `zaumzeug deploy --eval-gate`. Steps 1 and 3–6 (doctor preflight, stripped yaml, pin/copy, manifest, target install scripts) remain [E5-S01](../stories/epic-stories/41-story.md).
+**Implementation (E6-S03 / E5-S06, 2026-07-28):** Step 2 (eval gate) is live in `src/zaumzeug/deploy/packager.py` (`apply_eval_gate` → `package_harness`); CLI `zaumzeug deploy --eval-gate`.
 
-**Implementation (E6-S04, 2026-07-28):** `deploy/copy_rules.py` exports `is_excluded_from_deploy()` so `eval/` (and other §10.1 dev-only paths) are marked excluded before full E5-S02 packager copy lands. Shared test: `tests/unit/deploy/test_copy_rules.py::test_e5_s02_excludes_eval`.
+**Implementation (E5-S01, 2026-07-28):** Steps 1 and 3–6 are live: doctor preflight → `write_deploy_bundle` (stripped yaml, pin/copy, merged harness `models.yaml`, `manifest.json`, `README.deploy.md` from `install/templates/deploy/`, target install scripts from `install/`). Tests: `tests/integration/deploy/test_deploy.py` (`e5_s01`). Full include/pin golden matrix remains [E5-S02](../stories/epic-stories/42-story.md); full `target_install` behaviour remains [E5-S09](../stories/epic-stories/49.1-story.md).
+
+**Implementation (E6-S04, 2026-07-28):** `deploy/copy_rules.py` exports `is_excluded_from_deploy()` so `eval/` (and other §10.1 dev-only paths) are marked excluded. Strip helpers (`strip_harness_yaml` / `strip_agent_yaml`) landed with E5-S01. Shared test: `tests/unit/deploy/test_copy_rules.py::test_e5_s02_excludes_eval`.
 
 ### 10.3 Deploy `manifest.json`
 
@@ -69,7 +71,9 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 
 `target_install` preflight verifies this file plus `harness.yaml` in the bundle directory.
 
-**Implementation (E4-S07, 2026-07-28):** Pin contract — `artifact_run_id` (string or per-agent map) selects an immutable compile run; `zaumzeug doctor --deploy` validates the pinned `artifact-manifest.json`. Writing this field via `zaumzeug deploy` is [E5-S01](../stories/epic-stories/41-story.md). Dev-side rollback (pin `agent.artifact` without re-GEPA): [user-docs/guides/compile.md](../user-docs/guides/compile.md#rollback-to-a-pinned-run). Tests: `tests/integration/deploy/test_deploy_pin.py`.
+**Implementation (E4-S07, 2026-07-28):** Pin contract — `artifact_run_id` (string or per-agent map) selects an immutable compile run; `zaumzeug doctor --deploy` validates the pinned `artifact-manifest.json`. Dev-side rollback (pin `agent.artifact` without re-GEPA): [user-docs/guides/compile.md](../user-docs/guides/compile.md#rollback-to-a-pinned-run). Tests: `tests/integration/deploy/test_deploy_pin.py`.
+
+**Implementation (E5-S01, 2026-07-28):** `zaumzeug deploy` writes `manifest.json` with per-agent `artifact_run_id` map (empty `{}` when all agents use `system_prompt` only). Tests: `tests/integration/deploy/test_deploy.py::test_e5_s01_ac2_manifest_json_schema`.
 
 ### 10.4 Git and `.gitignore`
 
@@ -149,5 +153,7 @@ Runs on the **target machine** after the user copies `deploy/<name>/` — deskto
 | **Any OS** | `python deploy/my_agent/target_install.py` |
 
 Bundled copy lives at `deploy/<name>/target_install.py` so the folder is self-describing when copied alone.
+
+**Implementation (E5-S01, 2026-07-28):** `install/target_install.py` + `target-install.sh` / `target-install.ps1` exist and are copied into every bundle. The scripts currently preflight `harness.yaml` + `manifest.json` and print next steps; full venv / `pip install zaumzeug` / doctor `--deploy` / `--verify` remains [E5-S09](../stories/epic-stories/49.1-story.md).
 
 ---

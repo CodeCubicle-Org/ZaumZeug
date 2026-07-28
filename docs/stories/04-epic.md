@@ -381,7 +381,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 ### Definition of done
 
-- [x] Deploy copies diagram per E5-S02 *(contract documented; packager copy lands in E5-S02)*
+- [x] Deploy copies diagram per E5-S02 *(contract documented; packager copy ✅ E5-S01; golden matrix remains E5-S02)*
 - [x] Verification checklist complete; all ACs traced to tests
 
 ---

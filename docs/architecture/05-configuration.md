@@ -148,7 +148,9 @@ If `eval:` absent, `eval_gate: block` is a no-op (nothing to run).
 
 Requirements: [PRD E5.6](../prd.md#epic-e5--deploy-packaging-phase-2), [E6.3](../prd.md#epic-e6--evaluation-and-quality-phase-2-optional).
 
-**Implementation (E5-S06 / E6-S03, 2026-07-28):** Single source of truth in [`deploy/packager.py`](../../src/zaumzeug/deploy/packager.py) — `apply_eval_gate()` / `package_harness()`; `DeployConfig` on `HarnessConfig`; CLI `zaumzeug deploy --eval-gate`. Tests: `tests/unit/deploy/test_eval_gate.py` (7 passed). Full stripped-bundle copy rules remain [E5-S01](../stories/epic-stories/41-story.md).
+**Implementation (E5-S06 / E6-S03, 2026-07-28):** Single source of truth in [`deploy/packager.py`](../../src/zaumzeug/deploy/packager.py) — `apply_eval_gate()` / `package_harness()`; `DeployConfig` on `HarnessConfig`; CLI `zaumzeug deploy --eval-gate`. Tests: `tests/unit/deploy/test_eval_gate.py` (7 passed).
+
+**Implementation (E5-S01, 2026-07-28):** Full bundle write via `write_deploy_bundle` (doctor preflight → gate → strip/pin/manifest/README/target install scripts). Tests: `tests/integration/deploy/test_deploy.py` (8 passed, 0 skipped). Full include/pin golden matrix remains [E5-S02](../stories/epic-stories/42-story.md).
 
 ### 6.5 Builtin tools catalog
 

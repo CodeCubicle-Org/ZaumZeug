@@ -144,7 +144,7 @@ agent:
 4. Run `zaumzeug doctor <harness>` — it validates the pin has a readable `artifact-manifest.json` and **warns** when the pin differs from `artifacts/current`.
 5. `zaumzeug serve <harness>` loads the pinned run.
 
-Deploy bundles pin the same way via `deploy/<name>/manifest.json` → `artifact_run_id` (per-agent map). Writing that field is `zaumzeug deploy` ([E5-S01](../../docs/stories/epic-stories/41-story.md)); `zaumzeug doctor --deploy` already validates the pinned run.
+Deploy bundles pin the same way via `deploy/<name>/manifest.json` → `artifact_run_id` (per-agent map). `zaumzeug deploy` writes that field ([E5-S01](../../docs/stories/epic-stories/41-story.md) ✅, 2026-07-28); `zaumzeug doctor --deploy` validates the pinned run.
 
 ## Runtime input rewrite
 

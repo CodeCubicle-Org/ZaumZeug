@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/42-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E6-S04 early `eval/` exclude slice) |
+| **Last modified** | 2026-07-28 (E6-S04 early `eval/` exclude; E5-S01 strip helpers) |
 | **Story ID** | E5-S02 |
 | **Epic** | [E5 — Deploy Packaging](../06-epic.md) |
 | **Phase** | 2 |
@@ -79,5 +79,9 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 ### Early slice (E6-S04, 2026-07-28)
 
-`deploy/copy_rules.py` + `test_e5_s02_excludes_eval` assert `eval/` (and other §10.1 dev-only paths) are marked excluded. Full packager copy/include/pin matrix remains this story.
+`deploy/copy_rules.py` + `test_e5_s02_excludes_eval` assert `eval/` (and other §10.1 dev-only paths) are marked excluded.
+
+### Early slice (E5-S01, 2026-07-28)
+
+Packager body uses `strip_harness_yaml` / `strip_agent_yaml` and the exclude policy when writing `deploy/<name>/`. Full include/pin golden matrix + `test_deploy_golden.py` remain this story.
 ---

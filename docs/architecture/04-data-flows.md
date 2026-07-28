@@ -116,6 +116,8 @@ Deploy pins **each agent's** selected run under `deploy/<harness>/agents/<agent-
 
 Legacy alias: compile / serve accept `manifest.json` during migration (**implemented** E4-S03a via `find_artifact_manifest` / resolver); v1 canonical name is **`artifact-manifest.json`**.
 
+**Implementation (E5-S01, 2026-07-28):** `write_deploy_bundle` writes deploy `manifest.json` (and copies `docs/workflow-diagram.md` into the bundle). Tests: `tests/integration/deploy/test_deploy.py`.
+
 ### 5.4 Workflow diagram (compile)
 
 At **`zaumzeug compile <harness>`**, the SDK **always** regenerates harness workflow documentation (even when no agent runs GEPA). Use **`zaumzeug compile <harness> --workflow-diagram-only`** to refresh the diagram without LLM or GEPA work.
@@ -134,7 +136,7 @@ At **`zaumzeug compile <harness>`**, the SDK **always** regenerates harness work
 - `zaumzeug doctor` **warns** when `workflow.yaml` is newer than `docs/workflow-diagram.md` (or diagram missing).
 
 **Implementation (E4-S08, 2026-07-28):** `compile/workflow_diagram.py` — `write_workflow_diagram()` / `render_workflow_diagram()`; invoked from `run_compile` after GEPA (and on `--workflow-diagram-only`). Doctor: `check_workflow_diagram_staleness()` (E2-S04b) compares file mtimes under each harness; missing diagram suggests `zaumzeug compile <harness> --workflow-diagram-only`.
-- `zaumzeug deploy` copies `docs/` into `deploy/<harness>/docs/` ([§10.1](07-deploy-packaging.md#101-dev-vs-deploy)).
+- `zaumzeug deploy` copies `docs/` into `deploy/<harness>/docs/` ([§10.1](07-deploy-packaging.md#101-dev-vs-deploy)) — **Done** E5-S01.
 - Per-agent GEPA (`zaumzeug compile <harness> --agent <name>`) still refreshes the harness-level diagram.
 
 Requirements: [PRD E4.7](../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2).

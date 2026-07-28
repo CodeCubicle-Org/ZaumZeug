@@ -149,7 +149,7 @@ def _eval_command(args: argparse.Namespace) -> int:
 
 
 def _deploy_command(args: argparse.Namespace) -> int:
-    """Package harness for production — eval gate (E5-S06 / E6-S03); bundle E5-S01."""
+    """Package harness for production — doctor, eval gate, full bundle (E5-S01)."""
     configure_logging(verbose=args.verbose)
     from zaumzeug.deploy.packager import DeployError, package_harness
 
@@ -309,7 +309,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     deploy_cmd = sub.add_parser(
         "deploy",
-        help="package a harness for production (eval gate; full packager E5-S01)",
+        help="package a harness for production (doctor, eval gate, deploy bundle)",
     )
     deploy_cmd.add_argument(
         "harness_name",

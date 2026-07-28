@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-28 (E6-S07 GEPA ↔ DeepEval bridge)  
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S07 **Done**; E5-S06 **Done** early with E6-S03; next E5-S01 packager body)  
+**Last updated:** 2026-07-28 (E5-S01 `zaumzeug deploy` packager)  
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S07 **Done**; E5-S06 **Done** early with E6-S03; E5-S01 **Done**; next E5-S02 copy rules)  
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -316,7 +316,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E4.4 | Haystack GEPA evaluator (Pattern B) | **Done** (E4-S04, 2026-07-28) — `compile/gepa_adapter.py`: `HaystackGepaAdapter` + `optimize_haystack_artifact`; modes `single-task` \| `multi-task` \| `generalization`; `CompileConfig` `optimizer`/`mode`/`seed_artifact`. CLI `zaumzeug compile` remains Pattern A. Tests: `tests/unit/compile/test_gepa_adapter.py` (5 passed, 0 skipped). |
 | E4.5 | Post-compile serve | **Done** (E4-S05, 2026-07-28) — After compile, serve/run prefer valid `agent.artifact` over hand-edited `system_prompt`; `compile.module` not imported at serve; optional `input_rewrite` preprocess; doctor warns on stale `source_hash`. Tests: 12 passed, 0 skipped (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). Docs: [guides/compile.md — Serve after compile](user-docs/guides/compile.md#serve-after-compile). |
 | E4.6 | `--dry-run` on compile | **Done** (E4-S06, 2026-07-28) — `zaumzeug compile --dry-run` validates Phase 2 schema, resolves module imports, prints task/reflection registry; no GEPA, no LLM calls, no artifacts. Tests: `tests/integration/compile/test_compile_dry_run.py` (5 passed). Docs: [CLI reference](user-docs/reference/cli.md#zaumzeug-compile). |
-| E4.7 | Workflow diagram | **Done** (E4-S08, 2026-07-28) — Every `zaumzeug compile` regenerates `docs/workflow-diagram.md` (Mermaid) from `workflow.yaml` + resolved agents/models; `--workflow-diagram-only` skips GEPA; doctor warns if stale; deploy copies to `deploy/<harness>/docs/` (E5-S02). ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-compile).) |
+| E4.7 | Workflow diagram | **Done** (E4-S08, 2026-07-28) — Every `zaumzeug compile` regenerates `docs/workflow-diagram.md` (Mermaid) from `workflow.yaml` + resolved agents/models; `--workflow-diagram-only` skips GEPA; doctor warns if stale; deploy copies to `deploy/<harness>/docs/` (**Done** E5-S01; golden matrix E5-S02). ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-compile).) |
 
 **Phase 2 compile scope (resolved):** **Pattern A** (`dspy.GEPA`) is the default `zaumzeug compile` path — optimize prompts/signatures via DSPy modules, export to Haystack artifacts. **Optional within Pattern A:** compile-time GEPA on **input rewrite/clarify templates** (how the harness preprocesses user messages — not optimization of end-user chat at runtime). **Pattern B** (`optimize_anything` / Haystack evaluator) **shipped early** (E4-S04, 2026-07-28) as a programmatic adapter + schema; not wired into the CLI compile path yet.
 
@@ -330,7 +330,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 | ID | Feature | Acceptance criteria |
 |---|---|---|
-| E5.1 | `zaumzeug deploy` | **AC:** Writes `deploy/<name>/` with stripped yaml, `workflow.yaml`, per-agent runtime files, `docs/workflow-diagram.md`, pinned per-agent artifacts, `manifest.json`, `README.deploy.md`, target install scripts. |
+| E5.1 | `zaumzeug deploy` | **Done** (E5-S01, 2026-07-28). **AC:** Writes `deploy/<name>/` with stripped yaml, `workflow.yaml`, per-agent runtime files, `docs/workflow-diagram.md`, pinned per-agent artifacts, `manifest.json`, `README.deploy.md`, target install scripts. Tests: `tests/integration/deploy/test_deploy.py` (8 passed, 0 skipped). |
 | E5.2 | Exclude dev files | **AC:** Packager copy rules per [Architecture §10.1](architecture/07-deploy-packaging.md#101-dev-vs-deploy): `agents/<name>/` runtime subset; exclude `modules/`, `data/`, `eval/`, `skills/`; include `docs/workflow-diagram.md`. |
 | E5.3 | `zaumzeug serve --deploy` | **AC:** Loads only from `deploy/<name>/`; same API as dev serve. |
 | E5.4 | `HARNESS_ROOT=deploy` | **AC:** Env var forces deploy root for serve/mcp/acp/run. Default dev root is `usr-harnesses/`. |
@@ -338,7 +338,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E5.6 | Deploy eval gate | **Done** (E5-S06 / E6-S03, 2026-07-28). **AC:** `deploy.eval_gate` (`skip` \| `warn` \| `block`) and `--eval-gate` CLI override behave per [Architecture §6.4](architecture/05-configuration.md#64-deploy-eval-gate). |
 | E5.7 | Deploy git policy | **AC:** Default `.gitignore` includes `deploy/` and `usr-harnesses/*/artifacts/`; documented option to commit `deploy/<name>/` for audited releases; CI may build and upload bundle as artifact. |
 | E5.8 | Deploy platform policy | **AC:** Documented platform matrix in `README.deploy.md` and [Architecture §10.6](architecture/07-deploy-packaging.md#106-deploy-platform-targets): **dev** (install, serve, compile, deploy CLI) on Win/macOS/Linux; **production serve** Linux-first (VM, bare metal, Docker/Kubernetes). Bundle is OS-neutral Python + pinned artifacts. Windows/macOS production serve is supported but not CI-gated in v1. Optional container path referenced (E8.5). |
-| E5.9 | Target runtime install script | **AC:** `install/target_install.py` (+ `target-install.sh` / `target-install.ps1` wrappers) runs on the **target machine** (desktop PC or server) after the user copies `deploy/<name>/`. Assumes Python 3.11+ preinstalled; creates optional `.venv`; `pip install zaumzeug` (runtime only); runs `zaumzeug doctor <name> --deploy`; prints `.env` setup from `.env.example` if present (never overwrites `.env`). Idempotent; cross-platform Win/macOS/Linux. Supports `--skip-venv`, `--verify` (doctor + serve dry-run). Also shipped inside each `deploy/<name>/` bundle (E5.1). |
+| E5.9 | Target runtime install script | **AC:** `install/target_install.py` (+ `target-install.sh` / `target-install.ps1` wrappers) runs on the **target machine** (desktop PC or server) after the user copies `deploy/<name>/`. Assumes Python 3.11+ preinstalled; creates optional `.venv`; `pip install zaumzeug` (runtime only); runs `zaumzeug doctor <name> --deploy`; prints `.env` setup from `.env.example` if present (never overwrites `.env`). Idempotent; cross-platform Win/macOS/Linux. Supports `--skip-venv`, `--verify` (doctor + serve dry-run). Also shipped inside each `deploy/<name>/` bundle (E5.1). **Partial (E5-S01, 2026-07-28):** stubs + wrappers copied into bundles (preflight only); full install → E5-S09. |
 
 **Story seeds:** Deploy after compile; serve --deploy on clean venv without usr-harnesses folder; `target_install` on Windows desktop and Linux server; serve --deploy smoke on Linux CI (Phase 2).
 
@@ -421,7 +421,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | **0** | Ideation complete → PRD + architecture | — |
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
-| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S07](stories/epic-stories/40-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); next [E5-S01](stories/epic-stories/41-story.md) |
+| **2** | Compile, deploy, optional eval | E4, E5, E6 — **in progress:** E4 **Done** 2026-07-28; [E6-S01](stories/epic-stories/34-story.md)–[E6-S07](stories/epic-stories/40-story.md) **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early); [E5-S01](stories/epic-stories/41-story.md) **Done** 2026-07-28; next [E5-S02](stories/epic-stories/42-story.md) |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
 | **4** | RAG, auth, production ratchet, A2A | E8 |
 

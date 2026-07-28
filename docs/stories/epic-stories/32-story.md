@@ -65,7 +65,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 |---|---|
 | AC-1 | **manual:** user-docs rollback steps; config pin path documented |
 | AC-2 | `tests/integration/test_doctor.py::test_e4_s07_ac2_doctor_validates_pinned_manifest` |
-| AC-3 | `tests/integration/deploy/test_deploy_pin.py::test_e4_s07_ac3_deploy_manifest_artifact_run_id` *(shared E5-S01 — contract via doctor `--deploy`; packager write lands in E5-S01)* |
+| AC-3 | `tests/integration/deploy/test_deploy_pin.py::test_e4_s07_ac3_deploy_manifest_artifact_run_id` *(shared E5-S01 — contract via doctor `--deploy`; packager write ✅ [E5-S01](41-story.md))* |
 | AC-4 | `tests/integration/compile/test_rollback.py::test_e4_s07_ac4_compile_twice_pin_first_serve_first` |
 
 - [x] Every AC row above has a passing test or documented manual exception

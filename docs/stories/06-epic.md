@@ -5,8 +5,8 @@
 | **Document** | Epic E5 user stories |
 | **File** | `docs/stories/06-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E5-S06 done early with E6-S03) |
-| **Status** | In progress (eval gate Done; packager body pending E5-S01) |
+| **Last modified** | 2026-07-28 (E5-S01 done) |
+| **Status** | In progress (E5-S01 + E5-S06 Done; next E5-S02 copy rules) |
 | **Build order** | **6 of 8** (after E4 compile + E6-S02 eval for eval gate) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -26,7 +26,7 @@
 ### Story implementation order (within this epic)
 
 1. **E5-S02** — Copy rules *(can start with packager design)*
-2. **E5-S01** — `zaumzeug deploy`
+2. **E5-S01** — `zaumzeug deploy` ✅ (2026-07-28)
 3. **E5-S09a** → **E5-S09b** → **E5-S09c** — Target install *(core, wrappers, verify)*
 4. **E5-S03** → **E5-S04** — serve `--deploy` + `HARNESS_ROOT`
 5. **E5-S05** → **E5-S08** — Ops docs and platform policy
@@ -42,6 +42,7 @@
 | **Feature** | E5.1 |
 | **Persona** | Harness developer |
 | **Priority** | P0 |
+| **Status** | Done (2026-07-28) — canonical: [41-story.md](epic-stories/41-story.md) |
 
 ### User story
 
@@ -55,18 +56,18 @@ As a **harness developer**, I want `zaumzeug deploy <name>` to produce a product
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Writes `deploy/<name>/` with stripped yaml, `workflow.yaml`, per-agent runtime files, `docs/workflow-diagram.md`, pinned artifacts
-- [ ] **AC-2** Writes `manifest.json` per §10.3 schema
-- [ ] **AC-3** Writes `README.deploy.md` with ops instructions
-- [ ] **AC-4** Copies `target_install.py` plus `target-install.sh` / `target-install.ps1` into bundle
-- [ ] **AC-5** Idempotent — overwrites existing `deploy/<name>/`
+- [x] **AC-1** Writes `deploy/<name>/` with stripped yaml, `workflow.yaml`, per-agent runtime files, `docs/workflow-diagram.md`, pinned artifacts
+- [x] **AC-2** Writes `manifest.json` per §10.3 schema
+- [x] **AC-3** Writes `README.deploy.md` with ops instructions
+- [x] **AC-4** Copies `target_install.py` plus `target-install.sh` / `target-install.ps1` into bundle
+- [x] **AC-5** Idempotent — overwrites existing `deploy/<name>/`
 
 ### Implementation tasks (build)
 
-- [ ] Implement full `src/zaumzeug/deploy/packager.py` copy rules *(module + eval gate exist from E5-S06 / E6-S03)*
-- [ ] Run preflight doctor before pack
+- [x] Implement full `src/zaumzeug/deploy/packager.py` copy rules *(module + eval gate exist from E5-S06 / E6-S03)*
+- [x] Run preflight doctor before pack
 - [x] Apply eval gate (E5-S06) ✅ (2026-07-28)
-- [ ] Generate `README.deploy.md` from template
+- [x] Generate `README.deploy.md` from template
 
 ### Verification (after build)
 
@@ -80,14 +81,15 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-4 | `tests/integration/deploy/test_deploy.py::test_e5_s01_ac4_target_install_scripts_in_bundle` |
 | AC-5 | `tests/integration/deploy/test_deploy.py::test_e5_s01_ac5_idempotent_overwrite` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/deploy/test_deploy.py -v -k e5_s01` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/deploy/test_deploy.py -v -k e5_s01` passes (7 passed, 0 skipped; 1 deselected)
+- [x] `pytest tests/integration/deploy/test_deploy.py -v` passes (8 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Deploy after compile story seed passes
-- [ ] Bundle is self-describing when copied alone
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Deploy after compile story seed passes
+- [x] Bundle is self-describing when copied alone
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---
 
@@ -143,7 +145,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 - [ ] Golden test: example zaumzeug deploy contents match matrix
 - [ ] Verification checklist complete; all ACs traced to tests
 
-**Early slice (E6-S04, 2026-07-28):** `deploy/copy_rules.py` + `test_e5_s02_excludes_eval` assert `eval/` exclusion policy; full packager copy matrix remains this story.
+**Early slice (E6-S04, 2026-07-28):** `deploy/copy_rules.py` + `test_e5_s02_excludes_eval` assert `eval/` exclusion policy. **Early slice (E5-S01, 2026-07-28):** packager uses strip helpers + exclude policy when writing bundles; full include/pin golden matrix remains this story.
 ---
 
 ## E5-S03 — `zaumzeug serve --deploy`
@@ -305,7 +307,7 @@ Per [Story verification](00-README.md#story-verification-required). **Docs + int
 | **Persona** | Harness developer |
 | **Priority** | P1 |
 | **Status** | Done (2026-07-28) — shipped early with E6-S03; canonical: [46-story.md](epic-stories/46-story.md) |
-| **Prerequisites** | [E5-S01](#e5-s01-zaumzeug-deploy-command) *(packager body still pending)* · [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) ✅ |
+| **Prerequisites** | [E5-S01](#e5-s01-zaumzeug-deploy-command) ✅ · [E6-S02](../05-epic.md#e6-s02-zaumzeug-eval-command) ✅ |
 
 ### User story
 
