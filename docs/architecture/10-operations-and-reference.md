@@ -105,7 +105,7 @@ Run harness eval: `zaumzeug eval <harness>` or `deepeval test run usr-harnesses/
 | Phase | Debug/test deliverables |
 |---|---|
 | 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06), OpenAI REST contract ✅ (E3-S07) |
-| 2 | compile `--dry-run`, export golden tests (**E4-S03a Done** — `tests/compile/`), trace → `LLMTestCase`, optional `zaumzeug eval` |
+| 2 | compile `--dry-run`, export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), trace → `LLMTestCase`, optional `zaumzeug eval` |
 | 3 | MCP integration tests, tool correctness eval when DeepEval present |
 | 4 | `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
 

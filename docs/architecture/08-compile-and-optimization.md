@@ -6,7 +6,7 @@
 
 ## 12. Integration patterns
 
-**Phase scope (resolved):** **Phase 2 v1** ships **Pattern A** only (`dspy.GEPA` → export → Haystack). **Pattern B** (`optimize_anything`) is specified for a **later phase (Phase 4+)** — see E4.4 / `compile/gepa_adapter.py`.
+**Phase scope (resolved):** **Phase 2 v1** ships **Pattern A** (`dspy.GEPA` → export → Haystack) as the default `zaumzeug compile` path. **Pattern B** (`optimize_anything`) shipped early as `compile/gepa_adapter.py` (E4-S04, 2026-07-28).
 
 ### Pattern A — Default *(Phase 2 v1)*
 
@@ -31,15 +31,17 @@ DSPy and GEPA never run in production. End-user chat is never a GEPA optimizatio
 
 ### Pattern B — `optimize_anything` *(deferred — Phase 4+)*
 
+> **Shipped early (E4-S04, 2026-07-28):** adapter + schema are available; see implementation note below. Originally scoped to Phase 4+.
+
 Optimize Haystack-native artifacts (pipeline YAML, prompt files) directly:
 
 1. Seed artifact → evaluator runs `Agent.run()` / `Pipeline.run()`, captures trace.
 2. Returns `score` + textual feedback (Actionable Side Information).
-3. `gepa.optimize_anything(artifact=seed, evaluator=eval_fn, mode=...)`.
+3. `optimize_haystack_artifact(...)` / `gepa.optimize_anything(artifact=seed, evaluator=eval_fn, mode=...)`.
 
 **Optimization modes:** `single-task` | `multi-task` | `generalization` (train/val split — best for production).
 
-**Gap (when Pattern B ships):** GEPA has LangChain adapter but **no Haystack adapter yet** — build `compile/gepa_adapter.py` (PRD E4.4).
+**Implementation (E4-S04, 2026-07-28):** `compile/gepa_adapter.py` — `HaystackGepaAdapter` + `optimize_haystack_artifact`; mode fields on `CompileConfig`. CLI `zaumzeug compile` remains Pattern A; Pattern B is the programmatic adapter path.
 
 ### Pattern C — DSPy tools mirror Haystack (eval only)
 

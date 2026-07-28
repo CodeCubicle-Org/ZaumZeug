@@ -5,7 +5,7 @@
 | **Document** | Epic E8 user stories |
 | **File** | `docs/stories/08-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-07-28 (E4-S04 shipped; Pattern B no longer blocked here) |
 | **Status** | Backlog |
 | **Build order** | **8 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -15,7 +15,7 @@
 |---|---|
 | **Phase** | 4 |
 | **Epic** | E8 |
-| **Outcome** | Pipelines, auth, observability, optional A2A; optional **`optimize_anything`** compile ([E4-S04](../04-epic.md#e4-s04-haystack-gepa-evaluator-wrapper-deferred)) |
+| **Outcome** | Pipelines, auth, observability, optional A2A. Pattern B / `optimize_anything` is **Done** in E4 ([E4-S04](../04-epic.md#e4-s04-haystack-gepa-evaluator-wrapper)); optional deeper pipeline-artifact use with RAG remains open. |
 | **Depends on** | [E5](06-epic.md) · [E6](05-epic.md) · [E7](07-epic.md) |
 | **Blocks** | — (completes v1 roadmap) |
 | **PRD** | [Epic E8](../prd.md#epic-e8--rag-and-production-hardening-phase-4) |
@@ -31,7 +31,8 @@
 4. **E8-S05** — Dockerfile template
 5. **E8-S06** — DeepEval observe
 6. **E8-S04** — A2A *(if open #5 resolves to Phase 4)*
-7. **E4-S04** *(from [04-epic](04-epic.md))* — `optimize_anything` / Haystack GEPA evaluator *(optional with RAG)*
+
+*(E4-S04 Pattern B evaluator ✅ 2026-07-28 — no longer queued under E8.)*
 
 ---
 

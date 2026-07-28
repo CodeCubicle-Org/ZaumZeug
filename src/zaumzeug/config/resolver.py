@@ -59,7 +59,7 @@ class CompileResolution:
 
     harness_name: str
     agent_name: str
-    compile_module: str
+    compile_module: str | None
     agent_yaml_path: Path
     compile_config: CompileConfig
     default_model_id: str | None = None
@@ -238,7 +238,8 @@ def resolve_agent_compile(
             agent_name=agent_name,
             suggestion=(
                 f"Fix Phase 2 `compile` fields in {agent_yaml_path} "
-                "(requires `module`; optional task/reflection model ids and GEPA budget)"
+                "(Pattern A: `module`; Pattern B: optimizer optimize_anything + "
+                "mode + seed_artifact; optional task/reflection model ids and GEPA budget)"
             ),
         ) from exc
 

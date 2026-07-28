@@ -178,15 +178,21 @@ class AgentToolsConfig(BaseModel):
 class CompileConfig(BaseModel):
     """Phase 2 ``compile`` section in ``agents/<name>/agent.yaml`` (Architecture §6.2).
 
+    **Pattern A (default):** ``optimizer: dspy.GEPA`` requires ``module``.
+    **Pattern B (E4-S04):** ``optimizer: optimize_anything`` requires ``mode`` +
+    ``seed_artifact`` (no DSPy module path).
+
     GEPA budget uses exactly one of ``auto`` / ``max_metric_calls`` / ``max_full_evals``.
     Ideation ``budget:`` is accepted as an alias for ``auto``.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    module: str
+    module: str | None = None
     enabled: bool = True
     optimizer: str = "dspy.GEPA"
+    mode: Literal["single-task", "multi-task", "generalization"] | None = None
+    seed_artifact: str | None = None
     trainset: str | None = None
     valset: str | None = None
     task_model_id: str | None = None
@@ -198,13 +204,27 @@ class CompileConfig(BaseModel):
 
     @field_validator("module")
     @classmethod
-    def _module_non_empty(cls, value: str) -> str:
+    def _module_non_empty(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         if not value.strip():
             raise ValueError("`compile.module` must be a non-empty DSPy Module import path")
         return value.strip()
 
+    @field_validator("seed_artifact")
+    @classmethod
+    def _seed_artifact_non_empty(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        if not value.strip():
+            raise ValueError(
+                "`compile.seed_artifact` must be a non-empty path "
+                "(prompt / pipeline YAML relative to the agent folder)"
+            )
+        return value.strip()
+
     @model_validator(mode="after")
-    def _normalize_budget(self) -> CompileConfig:
+    def _normalize_budget_and_pattern(self) -> CompileConfig:
         auto = self.auto
         if auto is None and self.budget is not None:
             auto = self.budget
@@ -223,6 +243,59 @@ class CompileConfig(BaseModel):
         updates: dict[str, Any] = {}
         if auto is not None and self.auto != auto:
             updates["auto"] = auto
+
+        pattern_b = self.optimizer.strip() in {
+            "optimize_anything",
+            "gepa.optimize_anything",
+        }
+        if pattern_b:
+            if self.mode is None:
+                raise ValueError(
+                    "compile.mode is required for optimize_anything "
+                    "(single-task | multi-task | generalization)"
+                )
+            if self.seed_artifact is None:
+                raise ValueError(
+                    "compile.seed_artifact is required for optimize_anything "
+                    "(path to seed prompt / pipeline YAML under the agent folder)"
+                )
+            if self.mode == "multi-task" and not self.trainset:
+                raise ValueError(
+                    "compile.trainset is required when compile.mode is multi-task"
+                )
+            if self.mode == "generalization" and (
+                not self.trainset or not self.valset
+            ):
+                raise ValueError(
+                    "compile.trainset and compile.valset are required when "
+                    "compile.mode is generalization"
+                )
+            if self.mode == "single-task" and self.valset:
+                raise ValueError(
+                    "compile.valset must be omitted when compile.mode is single-task"
+                )
+            if self.mode == "multi-task" and self.valset:
+                raise ValueError(
+                    "compile.valset must be omitted when compile.mode is multi-task "
+                    "(use generalization for train/val)"
+                )
+        else:
+            if self.module is None:
+                raise ValueError(
+                    "`compile.module` is required for Pattern A (dspy.GEPA); "
+                    "or set optimizer: optimize_anything with mode + seed_artifact"
+                )
+            if self.mode is not None:
+                raise ValueError(
+                    "compile.mode is only valid with optimizer: optimize_anything "
+                    "(Pattern B)"
+                )
+            if self.seed_artifact is not None:
+                raise ValueError(
+                    "compile.seed_artifact is only valid with optimizer: "
+                    "optimize_anything (Pattern B)"
+                )
+
         if updates:
             return self.model_copy(update=updates)
         return self

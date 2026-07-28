@@ -19,6 +19,7 @@ from zaumzeug.compile.gepa_runner import (
     invoke_gepa,
     preflight_compile_lms,
 )
+from zaumzeug.compile.gepa_adapter import is_optimize_anything_optimizer
 from zaumzeug.compile.module_loader import ModuleLoaderError, load_dspy_module_from_resolution
 from zaumzeug.config import (
     AgentResolutionError,
@@ -63,7 +64,7 @@ class CompileAgentResult:
     """Per-agent compile outcome including GEPA artifacts (E4-S02b)."""
 
     agent_name: str
-    module_ref: str
+    module_ref: str | None
     lm_plan: CompileLmPlan
     module_instance: Any
     gepa_invoked: bool = False
@@ -149,6 +150,23 @@ def run_compile(
                 agent_name=exc.agent_name or name,
                 suggestion=exc.suggestion,
             ) from exc
+
+        if is_optimize_anything_optimizer(resolution.compile_config.optimizer):
+            raise CompileError(
+                (
+                    f"Harness '{harness_name}' agent '{name}': Pattern B "
+                    "(optimizer: optimize_anything) is supported via "
+                    "`zaumzeug.compile.gepa_adapter.optimize_haystack_artifact`; "
+                    "`zaumzeug compile` still runs Pattern A (dspy.GEPA) only."
+                ),
+                path=resolution.agent_yaml_path,
+                harness_name=harness_name,
+                agent_name=name,
+                suggestion=(
+                    "Use compile.module + dspy.GEPA for the CLI, or call "
+                    "optimize_haystack_artifact() with mode + seed_artifact"
+                ),
+            )
 
         try:
             module_instance = load_dspy_module_from_resolution(resolution)

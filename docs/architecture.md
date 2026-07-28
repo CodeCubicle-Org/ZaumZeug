@@ -1,6 +1,6 @@
 # ZaumZeug — Architecture
 
-**Last updated:** 2026-07-28 (E4-S03b runtime `input_rewrite` preprocess done)  
+**Last updated:** 2026-07-28 (E4-S04 Pattern B / Haystack GEPA evaluator shipped)  
 
 **Related:** [PRD](prd.md) · [Ideation archive](ideation-stage.md) · [Stories index](stories/00-README.md)
 
@@ -83,7 +83,7 @@ flowchart TB
 | 05 | Configuration | [05-configuration.md](architecture/05-configuration.md) | YAML schema, model merge, eval, ModelRouter |
 | 06 | Runtime and protocols | [06-runtime-and-protocols.md](architecture/06-runtime-and-protocols.md) | CLI layering, MCP/ACP/REST, web layouts |
 | 07 | Deploy packaging | [07-deploy-packaging.md](architecture/07-deploy-packaging.md) | Packager, manifest, target install, platform matrix |
-| 08 | Compile and optimization | [08-compile-and-optimization.md](architecture/08-compile-and-optimization.md) | GEPA patterns A/B/C; optional runtime `input_rewrite` (E4-S03b ✅) |
+| 08 | Compile and optimization | [08-compile-and-optimization.md](architecture/08-compile-and-optimization.md) | GEPA patterns A/B/C; Pattern A CLI; Pattern B adapter ✅ (E4-S04); optional runtime `input_rewrite` (E4-S03b ✅) |
 | 09 | SDK module map | [09-sdk-module-map.md](architecture/09-sdk-module-map.md) | Epic → module table |
 | 10 | Operations and reference | [10-operations-and-reference.md](architecture/10-operations-and-reference.md) | Debug/test pyramid, testing playbook, security, anti-patterns, ecosystem, links |
 

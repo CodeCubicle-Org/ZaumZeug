@@ -5,8 +5,8 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E4-S03b done; next E4-S05) |
-| **Status** | In progress (E4-S01–S03b done) |
+| **Last modified** | 2026-07-28 (E4-S04 done; next E4-S05) |
+| **Status** | In progress (E4-S01–S04 done) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -22,19 +22,18 @@
 | **Architecture** | [§5.1–5.3](../architecture/04-data-flows.md#51-default-pattern-compile-deploy-serve) · [§12 Pattern A](../architecture/08-compile-and-optimization.md#pattern-a-default-phase-2-v1) · [§11 #6–7](../architecture/09-sdk-module-map.md#11-sdk-modules-to-build) |
 | **Journey** | [Journey B](../prd.md#72-journey-b--full-lifecycle-phase-23) · [Journey C](../prd.md#73-journey-c--improve-after-failure-phase-2) |
 | **External** | [DSPy GEPA](https://dspy.ai/api/optimizers/GEPA/overview) |
-| **Scope (resolved)** | **Phase 2 v1:** `dspy.GEPA` only (Pattern A). **Optional:** compile-time input rewrite/clarify templates (E4-S03). **`optimize_anything`** → Phase 4+ ([E4-S04](#e4-s04-haystack-gepa-evaluator-wrapper-deferred)) |
+| **Scope (resolved)** | **Phase 2 v1 CLI:** `dspy.GEPA` (Pattern A). **Optional:** compile-time input rewrite/clarify templates (E4-S03). **`optimize_anything` / Pattern B** shipped as adapter + schema ([E4-S04](#e4-s04-haystack-gepa-evaluator-wrapper), 2026-07-28) |
 
 ### Story implementation order (within this epic)
 
 1. **E4-S01** — DSPy module loader ✅ (2026-07-28)
 2. **E4-S02a** → **E4-S02b** — Compile schema + GEPA runner ✅ (2026-07-28)
 3. **E4-S03a** ✅ → **E4-S03b** ✅ — Export contract + runtime preprocess
-4. **E4-S05** — Post-compile serve uses artifact
-5. **E4-S06** — Compile `--dry-run`
-6. **E4-S07** — Artifact rollback to pinned run
-7. **E4-S08** — Workflow diagram at compile
-
-*(Deferred: **E4-S04** — `optimize_anything` / Haystack evaluator, Phase 4+)*
+4. **E4-S04** — Haystack GEPA evaluator / Pattern B ✅ (2026-07-28)
+5. **E4-S05** — Post-compile serve uses artifact
+6. **E4-S06** — Compile `--dry-run`
+7. **E4-S07** — Artifact rollback to pinned run
+8. **E4-S08** — Workflow diagram at compile
 
 ---
 
@@ -117,18 +116,18 @@ See epic-stories for full AC → test mapping. Runtime `input_rewrite` preproces
 
 **E4-S03a Done (2026-07-28):** `compile/export.py` maps `dump_state()` → Haystack prompts / `agent.json` / `artifact-manifest.json`; optional `input_rewrite`; legacy `manifest.json` accepted. Tests: `pytest … -k e4_s03` (7 passed).
 
-**E4-S03b Done (2026-07-28):** `runtime/preprocess.py` + `build_agent_bundle()` apply fixed `input_rewrite` before `Agent.run` on serve/run (no DSPy). Tests: `pytest … -k e4_s03b` (7 passed). Next: [E4-S05](epic-stories/30-story.md).
+**E4-S03b Done (2026-07-28):** `runtime/preprocess.py` + `build_agent_bundle()` apply fixed `input_rewrite` before `Agent.run` on serve/run (no DSPy). Tests: `pytest … -k e4_s03b` (7 passed). **E4-S04 Done (2026-07-28):** Pattern B `compile/gepa_adapter.py` + `CompileConfig` mode/seed_artifact. Tests: `pytest tests/unit/compile/test_gepa_adapter.py -v` (5 passed, 0 skipped). Next: [E4-S05](epic-stories/30-story.md).
 
 ---
 
-## E4-S04 — Haystack GEPA evaluator wrapper *(deferred)*
+## E4-S04 — Haystack GEPA evaluator wrapper
 
 | Field | Value |
 |---|---|
 | **Feature** | E4.4 |
 | **Persona** | SDK maintainer |
-| **Priority** | Deferred (Phase 4+) |
-| **Status** | Not in Phase 2 v1 — Pattern B (`optimize_anything`) |
+| **Priority** | P1 (shipped early; was Deferred Phase 4+) |
+| **Status** | Done (2026-07-28) — see [29-story.md](epic-stories/29-story.md) |
 
 ### User story
 
@@ -139,30 +138,32 @@ As an **SDK maintainer**, I want a Haystack adapter for GEPA `optimize_anything`
 - [PRD E4.4](../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2)
 - [Architecture §12 Pattern B](../architecture/08-compile-and-optimization.md#pattern-b-optimize-anything-deferred-phase-4)
 - [GEPA optimize_anything](https://gepa-ai.github.io/gepa/blog/2026/02/18/introducing-optimize-anything/)
+- [Story file](epic-stories/29-story.md)
 
-### When to implement
+### Acceptance criteria
 
-- [ ] **Phase 4+** — after RAG / pipeline exposure (E8.1) or when a concrete use case requires direct artifact optimization
-- [ ] Phase 2 ships **Pattern A only** (`dspy.GEPA` → export); this story is optional until then
+- [x] **AC-1** Evaluator wrapper supports `optimize_anything` pattern
+- [x] **AC-2** Modes: `single-task`, `multi-task`, `generalization`
+- [x] **AC-3** Integrates with Haystack agent execution for trace collection
 
-### Acceptance criteria (when shipped)
+### Implementation tasks (build)
 
-- [ ] **AC-1** Evaluator wrapper supports `optimize_anything` pattern
-- [ ] **AC-2** Modes: `single-task`, `multi-task`, `generalization`
-- [ ] **AC-3** Integrates with Haystack agent execution for trace collection
+- [x] Implement in `src/zaumzeug/compile/gepa_adapter.py` ([Architecture §11 #8](../architecture/09-sdk-module-map.md#11-sdk-modules-to-build))
+- [x] Document mode selection in compile config schema
 
-### Implementation tasks (when unblocked)
+### Verification (after build)
 
-- [ ] Implement in `src/zaumzeug/compile/gepa_adapter.py` ([Architecture §11 #8](../architecture/09-sdk-module-map.md#11-sdk-modules-to-build))
-- [ ] Document mode selection in compile config schema
+| AC | Test |
+|---|---|
+| AC-1 | `tests/unit/compile/test_gepa_adapter.py::test_e4_s04_ac1_optimize_anything_pattern` |
+| AC-2 | `tests/unit/compile/test_gepa_adapter.py::test_e4_s04_ac2_modes_single_multi_generalization` |
+| AC-3 | `tests/unit/compile/test_gepa_adapter.py::test_e4_s04_ac3_haystack_agent_trace_collection` |
 
-### Verification (when unblocked)
-
-Apply [Story verification](00-README.md#story-verification-required). `tests/unit/compile/test_gepa_adapter.py` with AC-1–AC-3 mapping.
+- [x] `pytest tests/unit/compile/test_gepa_adapter.py -v` passes (5 passed, 0 skipped)
 
 ### Definition of done
 
-- [ ] Documented as Pattern B alongside Pattern A in user-docs compile guide
+- [x] Documented as Pattern B alongside Pattern A in user-docs compile guide
 
 ---
 

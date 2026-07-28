@@ -115,6 +115,22 @@ def load_dspy_module_from_resolution(resolution: CompileResolution) -> Any:
     """Instantiate the DSPy module described by a compile resolution."""
     agent_dir = resolution.agent_yaml_path.parent.resolve()
     module_ref = resolution.compile_module
+    if not module_ref:
+        raise ModuleLoaderError(
+            (
+                f"Harness '{resolution.harness_name}' agent '{resolution.agent_name}': "
+                "Pattern A compile requires `compile.module` (DSPy Module import path). "
+                "For Pattern B use `zaumzeug.compile.gepa_adapter.optimize_haystack_artifact`."
+            ),
+            path=resolution.agent_yaml_path,
+            harness_name=resolution.harness_name,
+            agent_name=resolution.agent_name,
+            module_ref=module_ref,
+            suggestion=(
+                "Set compile.module for dspy.GEPA, or call optimize_haystack_artifact "
+                "when optimizer is optimize_anything"
+            ),
+        )
     try:
         module_name, class_name = parse_compile_module_ref(module_ref)
     except ModuleLoaderError as exc:

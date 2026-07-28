@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E4-S03b done) |
+| **Last modified** | 2026-07-28 (E4-S04 done) |
 | **Status** | Active |
 
 ---
@@ -67,8 +67,9 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E4-S02b](epic-stories/27.2-story.md) — GEPA runner and artifacts | Done | 2026-07-28 |
 | [E4-S03a](epic-stories/28.1-story.md) — Export contract and manifest | Done | 2026-07-28 |
 | [E4-S03b](epic-stories/28.2-story.md) — Runtime `input_rewrite` preprocess | Done | 2026-07-28 |
+| [E4-S04](epic-stories/29-story.md) — Haystack GEPA evaluator wrapper (Pattern B) | Done | 2026-07-28 |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done. [E1-S08](epic-stories/25-story.md) (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved 2026-07-22). Phase 2 in progress: [E4-S01](epic-stories/26-story.md)–[E4-S03b](epic-stories/28.2-story.md) done. Next build: [E4-S05](epic-stories/30-story.md).
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done. [E1-S08](epic-stories/25-story.md) (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved 2026-07-22). Phase 2 in progress: [E4-S01](epic-stories/26-story.md)–[E4-S04](epic-stories/29-story.md) done. Next build: [E4-S05](epic-stories/30-story.md).
 
 ---
 
@@ -117,11 +118,11 @@ E4-S02b  GEPA runner + artifacts ✅ (2026-07-28)
    ↓
 E4-S03a  Export contract + manifest ✅ (2026-07-28)
 E4-S03b  Runtime input_rewrite preprocess ✅ (2026-07-28)
+E4-S04  Haystack GEPA evaluator / Pattern B ✅ (2026-07-28)
 E4-S05  Post-compile serve uses artifact
 E4-S06  compile --dry-run
 E4-S07  Artifact rollback
 E4-S08  Workflow diagram at compile
-*(E4-S04 deferred — Pattern B / optimize_anything, Phase 4+)*
 ```
 
 ## Validation summary (2026-07-05, re-checked)
@@ -151,7 +152,7 @@ Cross-checked against [PRD §8](../prd.md#8-functional-requirements-epics) and [
 | PRD E4 story seed (artifact rollback) | Added **E4-S07** |
 | E5 before E6 broke eval gate dependency | Swapped files: **05=E6**, **06=E5** |
 | E1 before E2/E3 broke CI/doctor/serve | Moved E1 to **03-epic.md** |
-| GEPA scope open | **Resolved:** Phase 2 = Pattern A; optional input rewrite at compile; E4-S04 deferred Phase 4+ |
+| GEPA scope open | **Resolved:** Phase 2 CLI = Pattern A; optional input rewrite at compile; Pattern B (E4-S04) shipped 2026-07-28 as adapter + schema |
 | Serial multi-agent workflow (no E9) | **E2-S07** `workflow.yaml`; **E3-S08** `zaumzeug run`; folded into E2/E3/E4/E5 |
 | Workflow diagram at compile | **E4-S08** — `docs/workflow-diagram.md` on every `zaumzeug compile` |
 | User guide: workflow + pipelines | [user-docs/guides/multi-agent-workflow.md](../user-docs/guides/multi-agent-workflow.md) |
@@ -165,9 +166,8 @@ Cross-checked against [PRD §8](../prd.md#8-functional-requirements-epics) and [
 |---|---|---|
 | `zaumzeug install-project` + PyPI publish | [E1-S08](epic-stories/25-story.md) | Open #3 **resolved** (2026-07-22): dual path; implement with package publish |
 | A2A defer | E8-S04 | PRD open #5 |
-| Haystack GEPA evaluator (Pattern B) | E4-S04 | Deferred Phase 4+ |
 
-**Resolved:** **`install/` vs `install-project` (open #3)** — both coexist; clone+`install/` for Phase 1–4 v1; CLI deferred until PyPI publish — [E1-S08](epic-stories/25-story.md). **Production auth (Phase 4)** — Traefik proxy-only; no in-process SDK auth in v1 — [E8-S02](08-epic.md#e8-s02-production-auth). Product name **ZaumZeug** (PyPI `zaumzeug`, CLI `zaumzeug`) — [Architecture §3.2](../architecture/02-repository-and-layout.md#32-package-naming). **GEPA Phase 2 = Pattern A** (`dspy.GEPA` only); **optional input rewrite/clarify templates** at compile time (E4-S03/E4-S05); **`optimize_anything` / Pattern B** deferred to Phase 4+ — [E4-S04](04-epic.md#e4-s04-haystack-gepa-evaluator-wrapper-deferred). **Hayhooks self-hosted** — `zaumzeug serve|mcp` on target host (Docker via E8-S05); Haystack Enterprise Platform not in v1 scope — [Architecture §8.2](../architecture/06-runtime-and-protocols.md#82-harness-vs-raw-hayhooks).
+**Resolved:** **`install/` vs `install-project` (open #3)** — both coexist; clone+`install/` for Phase 1–4 v1; CLI deferred until PyPI publish — [E1-S08](epic-stories/25-story.md). **Production auth (Phase 4)** — Traefik proxy-only; no in-process SDK auth in v1 — [E8-S02](08-epic.md#e8-s02-production-auth). Product name **ZaumZeug** (PyPI `zaumzeug`, CLI `zaumzeug`) — [Architecture §3.2](../architecture/02-repository-and-layout.md#32-package-naming). **GEPA Phase 2 = Pattern A** (`dspy.GEPA` default CLI); **optional input rewrite/clarify templates** at compile time (E4-S03/E4-S05); **`optimize_anything` / Pattern B** shipped early as adapter + schema ([E4-S04](epic-stories/29-story.md), 2026-07-28) — CLI remains Pattern A. **Hayhooks self-hosted** — `zaumzeug serve|mcp` on target host (Docker via E8-S05); Haystack Enterprise Platform not in v1 scope — [Architecture §8.2](../architecture/06-runtime-and-protocols.md#82-harness-vs-raw-hayhooks).
 
 ---
 
@@ -212,7 +212,7 @@ Every story follows **build first, verify second**. A story is **not done** unti
 
 - **Pure documentation** stories (e.g. E1-S06, E7-S08, E8-S02): Verification uses a **manual** checklist mapped to ACs; no pytest required unless link/content assertions are added later. (E1-S05 added path/content tests in `tests/unit/docs/`.)
 - **CI orchestration** (E1-S07): Verification is the workflow itself; individual ACs trace to workflow steps/jobs.
-- **Deferred** stories (E1-S08 until PyPI publish, E4-S04, E8-S04): Verification section omitted until implementation starts; template still applies when implemented.
+- **Deferred** stories (E1-S08 until PyPI publish, E8-S04): Verification section omitted until implementation starts; template still applies when implemented.
 
 ### Example Verification block
 

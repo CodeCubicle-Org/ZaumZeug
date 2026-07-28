@@ -168,7 +168,9 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E4-S02b, 2026-07-28):** `invoke_gepa()` runs GEPA, wires LiteLLM strings, respects budget, writes `artifacts/<run_id>/` + `current`. Tests: `pytest … -k e4_s02` (8 passed).
 
-Example Phase 2 `compile` section:
+**Implementation (E4-S04, 2026-07-28):** Pattern B schema on the same `CompileConfig` — `optimizer: optimize_anything` requires `mode` + `seed_artifact` (and train/val rules per mode). Runtime entry: `zaumzeug.compile.gepa_adapter.optimize_haystack_artifact`. `zaumzeug compile` rejects Pattern B with an actionable error (CLI stays Pattern A). Tests: `tests/unit/compile/test_gepa_adapter.py` (5 passed, 0 skipped).
+
+Example Phase 2 `compile` section (**Pattern A** — default CLI):
 
 ```yaml
 compile:
@@ -178,6 +180,18 @@ compile:
   trainset: data/train.jsonl
   valset: data/val.jsonl
   budget: medium               # alias for auto: light|medium|heavy
+```
+
+Example **Pattern B** (`optimize_anything` — programmatic; modes: `single-task` | `multi-task` | `generalization`):
+
+```yaml
+compile:
+  optimizer: optimize_anything
+  mode: generalization
+  seed_artifact: prompts/system.md
+  trainset: data/train.jsonl
+  valset: data/val.jsonl
+  auto: light
 ```
 
 **Implementation (E2-S04a, 2026-07-08):** `zaumzeug doctor` in `src/zaumzeug/doctor/` — environment checks (Python 3.11+, package import, `.env`/API keys), harness and workflow config validation, per-agent model registry checks, runtime path checks via `resolve_agent_serve()`, port conflict warn. CLI: optional harness name (project-wide scan when omitted), `--verbose`, `--json`. Tests: `tests/unit/cli/test_doctor.py`, `tests/integration/test_doctor.py`.
