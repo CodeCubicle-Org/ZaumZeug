@@ -67,6 +67,8 @@ Phase 1 path: install → `zaumzeug serve example` with **mock** → optional `.
 
 Useful next commands: `zaumzeug doctor`, `zaumzeug init <name>`, `zaumzeug run <name>`, `zaumzeug serve <name> --dry-run`, `zaumzeug compile <name> --dry-run`, `zaumzeug compile <name> --workflow-diagram-only`.
 
+For batch / local-model runs, `zaumzeug run` supports optional `runtime.retry`, agent `output.format: json`, and INFO stage logs (`HARNESS_LOG_LEVEL=INFO`) — see [Run reliability](user-docs/guides/multi-agent-workflow.md#run-reliability-zaumzeug-run) (E8-S07).
+
 ---
 
 ## Optional extras

@@ -301,6 +301,19 @@ class CompileConfig(BaseModel):
         return self
 
 
+class AgentOutputConfig(BaseModel):
+    """Optional ``output`` block in ``agent.yaml`` (E8-S07 / E8.7).
+
+    ``format: json`` validates stage assistant text as JSON after
+    ``zaumzeug run`` (stdlib parse + markdown fence strip). JSON Schema
+    (``output.schema``) is deferred.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    format: Literal["json"]
+
+
 class AgentConfig(BaseModel):
     """Root schema for ``agents/<name>/agent.yaml`` (Phase 1+)."""
 
@@ -312,6 +325,7 @@ class AgentConfig(BaseModel):
     agent: AgentSectionConfig | None = None
     tools: AgentToolsConfig | None = None
     compile: CompileConfig | None = None
+    output: AgentOutputConfig | None = None
 
     @field_validator("name")
     @classmethod
@@ -394,6 +408,33 @@ class DeployConfig(BaseModel):
     eval_gate: EvalGateMode = "skip"
 
 
+class RuntimeRetryConfig(BaseModel):
+    """Harness-level retry policy for ``zaumzeug run`` stages (E8-S07 / E8.7).
+
+    Applied per stage after a successful agent build: retries ``Agent.run`` and
+    optional JSON output validation. Default ``max_attempts: 1`` preserves
+    one-shot behavior. Schema rejects ``max_attempts < 1``.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    max_attempts: int = Field(default=1, ge=1)
+    initial_delay_s: float = Field(default=1.0, ge=0.0)
+    backoff: float = Field(default=2.0, ge=0.0)
+
+
+class HarnessRuntimeConfig(BaseModel):
+    """Optional ``runtime`` section of ``harness.yaml`` (E8-S07 / E8.7).
+
+    Currently used by ``run_workflow`` / ``zaumzeug run`` only — serve/HTTP
+    does not yet share this reliability layer.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    retry: RuntimeRetryConfig = Field(default_factory=RuntimeRetryConfig)
+
+
 class HarnessConfig(BaseModel):
     """Root schema for ``harness.yaml`` (Architecture §6.6 Phase 1+)."""
 
@@ -405,6 +446,7 @@ class HarnessConfig(BaseModel):
     serve: ServeConfig | None = None
     eval: EvalConfig | None = None
     deploy: DeployConfig | None = None
+    runtime: HarnessRuntimeConfig | None = None
 
     @model_validator(mode="before")
     @classmethod

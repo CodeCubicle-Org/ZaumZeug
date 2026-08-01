@@ -17,6 +17,7 @@ from zaumzeug.doctor.checks import (
     check_env_for_live_models,
     check_mcp_uv_presence,
     check_package_import,
+    check_phase_gated_agent_tools,
     check_port_conflict,
     check_python_version,
 )
@@ -233,7 +234,12 @@ def test_e2_s04_ac8_mcp_without_uv_warns(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """AC-2 (E2-S04b): warn when MCP is configured but uv is missing."""
+    """AC-2 (E2-S04b): warn when MCP is configured but uv is missing.
+
+    Preserved for Phase 3+; CURRENT_SDK_PHASE is patched so phase-gated
+    tools do not fail first (E8-S07 owns pre-Phase-3 failure).
+    """
+    monkeypatch.setattr("zaumzeug.doctor.checks.CURRENT_SDK_PHASE", 3)
     project_root = tmp_path / "project"
     _minimal_harness(
         project_root,
@@ -262,3 +268,122 @@ def test_e2_s04_ac8_mcp_without_uv_warns(
     harness_dir = project_root / "usr-harnesses" / "example"
     direct = check_mcp_uv_presence("example", harness_dir)
     assert direct.severity == "warn"
+
+
+def test_e8_s07_ac5_phase_gated_mcp_fails_not_false_pass(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-5: phase-gated tools.mcp fails; mcp_uv must not false-green."""
+    project_root = tmp_path / "project"
+    _minimal_harness(
+        project_root,
+        agent_yaml={
+            "name": "researcher",
+            "agent": {"system_prompt": "prompts/system.md"},
+            "tools": {
+                "mcp": [
+                    {
+                        "name": "filesystem",
+                        "command": "uv",
+                        "args": ["run", "mcp-server-filesystem", "/workspace"],
+                    }
+                ]
+            },
+        },
+    )
+    monkeypatch.setattr(
+        "zaumzeug.doctor.checks.shutil.which",
+        lambda cmd: "/usr/bin/uv" if cmd == "uv" else None,
+    )
+
+    report = run_doctor(harness_name="example", project_root=project_root)
+    gated = [c for c in report.checks if c.name == "phase_gated_tools"]
+    assert gated
+    assert gated[0].severity == "fail"
+    assert "Phase 3" in gated[0].message
+    assert report.exit_code != 0
+
+    mcp_uv = [c for c in report.checks if c.name == "mcp_uv"]
+    assert mcp_uv
+    assert "MCP configured and `uv` is available" not in mcp_uv[0].message
+
+    harness_dir = project_root / "usr-harnesses" / "example"
+    assert check_phase_gated_agent_tools("example", harness_dir).severity == "fail"
+
+
+def test_e8_s07_ac5_phase_gated_mcp_fails_in_deploy_mode(tmp_path: Path) -> None:
+    """AC-5: phase-gated tools.mcp fails under doctor --deploy too."""
+    import json
+
+    from zaumzeug.config.resolver import ARTIFACT_MANIFEST
+
+    project_root = tmp_path / "project"
+    deploy_dir = project_root / "deploy" / "example"
+    _write_yaml(
+        deploy_dir / "harness.yaml",
+        {"name": "example", "serve": {"hayhooks": {"port": 1416}}},
+    )
+    _write_yaml(
+        deploy_dir / "workflow.yaml",
+        {"entry": "researcher", "stages": [{"agent": "researcher"}]},
+    )
+    agent_dir = deploy_dir / "agents" / "researcher"
+    _write_yaml(
+        agent_dir / "agent.yaml",
+        {
+            "name": "researcher",
+            "agent": {"artifact": "artifacts/20260624-001"},
+            "tools": {
+                "mcp": [
+                    {
+                        "name": "filesystem",
+                        "command": "uv",
+                        "args": ["run", "mcp-server-filesystem", "/tmp"],
+                    }
+                ]
+            },
+        },
+    )
+    _write_yaml(
+        agent_dir / "agents-models.yaml",
+        {
+            "default_model_id": "mock",
+            "models": {
+                "mock": {"provider": "mock", "model": "harness-fixture"},
+            },
+        },
+    )
+    artifact_dir = agent_dir / "artifacts" / "20260624-001"
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    (artifact_dir / ARTIFACT_MANIFEST).write_text(
+        json.dumps({"version": 1, "module_hash": "abc"}),
+        encoding="utf-8",
+    )
+    (artifact_dir / "prompts").mkdir(parents=True, exist_ok=True)
+    (artifact_dir / "prompts" / "system.md").write_text("prompt", encoding="utf-8")
+    (deploy_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "build_id": "test-build-id",
+                "source_git_sha": "abc123",
+                "harness_yaml_hash": "sha256-deadbeef",
+                "artifact_run_id": "20260624-001",
+                "created_at": "2026-08-01T00:00:00Z",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = run_doctor(
+        harness_name="example",
+        project_root=project_root,
+        deploy=True,
+    )
+    gated = [c for c in report.checks if c.name == "phase_gated_tools"]
+    assert gated
+    assert gated[0].severity == "fail"
+    assert "Phase 3" in gated[0].message
+    assert report.exit_code != 0
+    # Dev-only mcp_uv remains skipped in deploy; phase_gated_tools covers the fail.
+    assert not any(c.name == "mcp_uv" for c in report.checks)

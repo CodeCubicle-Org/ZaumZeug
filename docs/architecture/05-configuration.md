@@ -46,8 +46,10 @@ Requirements: [PRD E2.2](../prd.md#epic-e2--configuration-and-validation-phase-1
 | Section | File | Phase | Wires | Epic |
 |---|---|---|---|---|
 | `harness` root | `harness.yaml` | 1+ | name, serve, deploy, eval, optional harness `models` | E2, E3, E5, E6 |
+| `runtime` | `harness.yaml` | 1+ | Stage retry for `zaumzeug run` (`runtime.retry`) ✅ (E8-S07) | E8 |
 | `workflow` | `workflow.yaml` | 1+ | Serial stage graph; agent + pipeline references | E2, E3 |
 | `agent` | `agents/<name>/agent.yaml` | 1+ | Per-role Haystack agent, tools, compile, hooks | E2, E3, E4, E7 |
+| `output` | `agent.yaml` | 1+ | Optional stage output check (`format: json`) for `zaumzeug run` ✅ (E8-S07) | E8 |
 | `agents-models` | `agents/<name>/agents-models.yaml` | 1+ | Per-agent LLM registry; stage-scoped `ModelRouter` | E2, E3 |
 | `tools.builtin` | `agent.yaml` | 1+ | SDK catalog (`web_fetch` first) | E3 |
 | `tools.mcp` | `agent.yaml` | 3 | `MCPToolset` | E7 |
@@ -175,6 +177,8 @@ Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validatio
 
 **Implementation (E2-S01, 2026-07-08):** Phase 1 `harness.yaml` root fields are validated by `zaumzeug.config.load_harness()` → `HarnessConfig` (`src/zaumzeug/config/schemas.py`, `loader.py`). Phase-gated keys (`compile`, `serve.acp`, …) fail with a phase hint. **`eval` unblocked by E6-S02** (validated as `EvalConfig` when present). **`deploy` unblocked by E6-S03 / E5-S06** (validated as `DeployConfig` with `eval_gate`).
 
+**Implementation (E8-S07, 2026-08-01):** Optional `runtime` on `HarnessConfig` (`HarnessRuntimeConfig` / `RuntimeRetryConfig`) and optional `output` on `AgentConfig` (`AgentOutputConfig`, `format: json` only). Consumed by `run_workflow` / `zaumzeug run` — stage build once, retry `Agent.run` + JSON parse with backoff; INFO stage lifecycle via `log_request(..., stage=...)`. **Serve/HTTP does not yet share this reliability layer** (follow-up). Doctor `phase_gated_tools` fails on `tools.mcp` / `tools.custom` when `CURRENT_SDK_PHASE < 3` (default and `--deploy`). Tests: `tests/unit/runtime/test_workflow_reliability.py`, `tests/integration/test_workflow_reliability.py`, `tests/unit/cli/test_doctor.py` (`-k e8_s07`).
+
 **Implementation (E2-S02, 2026-07-08):** Per-agent model registries merge via `zaumzeug.config.load_merged_agent_models()` (`models.py`).
 
 **Implementation (E2-S07, 2026-07-08):** `workflow.yaml` validated by `zaumzeug.config.load_workflow()` → `WorkflowConfig` / `WorkflowStage` (`schemas.py`, `loader.py`). Requires non-empty `entry` and `stages`; each stage is exactly `agent` or `pipeline`; `parallelism` is Phase 2 (phase hint in Phase 1). Cross-checks: every `agent` ref (including `entry`) resolves to `agents/<name>/agent.yaml`; agent folder names match `agent.yaml` `name`; no duplicate agent names. Wired into `zaumzeug doctor` (`check_workflow_config`), `zaumzeug serve --dry-run` (`validate_serve`), and `resolve_serve_entry()`. Tests: `tests/unit/config/test_workflow_schema.py`.
@@ -217,9 +221,9 @@ compile:
 
 **Implementation (E2-S04a, 2026-07-08):** `zaumzeug doctor` in `src/zaumzeug/doctor/` — environment checks (Python 3.11+, package import, `.env`/API keys), harness and workflow config validation, per-agent model registry checks, runtime path checks via `resolve_agent_serve()`, port conflict warn. CLI: optional harness name (project-wide scan when omitted), `--verbose`, `--json`. Tests: `tests/unit/cli/test_doctor.py`, `tests/integration/test_doctor.py`.
 
-**Implementation (E2-S04b, 2026-07-08):** Phase-aware warn checks: MCP without `uv` on PATH (`mcp_uv`), stale or missing `docs/workflow-diagram.md` (`workflow_diagram`). Historically also warned on `eval` in Phase 1 (`eval_section`) — **superseded by E6-S02** (`eval` removed from `PHASE_GATED_FIELDS`; doctor no longer emits that warn). `load_harness_for_doctor()` still strips remaining warned keys before validation so exit code stays 0 when only warnings fire.
+**Implementation (E2-S04b, 2026-07-08):** Phase-aware warn checks: MCP without `uv` on PATH (`mcp_uv`), stale or missing `docs/workflow-diagram.md` (`workflow_diagram`). Historically also warned on `eval` in Phase 1 (`eval_section`) — **superseded by E6-S02** (`eval` removed from `PHASE_GATED_FIELDS`; doctor no longer emits that warn). `load_harness_for_doctor()` still strips remaining warned keys before validation so exit code stays 0 when only warnings fire. **E8-S07:** when `CURRENT_SDK_PHASE < 3`, `tools.mcp` / `tools.custom` **fail** via `phase_gated_tools` (dev + `--deploy`); `mcp_uv` no longer false-greens “MCP configured and `uv` available” for that case.
 
-**Implementation (E2-S04c, 2026-07-08):** `zaumzeug doctor --deploy` (or `HARNESS_ROOT=deploy`) resolves harnesses under `deploy/<name>/`. Validates deploy `manifest.json` (§10.3 schema) and pinned `artifact-manifest.json` paths when `artifact_run_id` is a per-agent map; reuses E2-S04a core checks (config, models, runtime paths, port). Dev-only warnings (`mcp_uv`, `workflow_diagram`, `artifact_module`) are skipped in deploy mode. Root resolution: `src/zaumzeug/config/harness_root.py`.
+**Implementation (E2-S04c, 2026-07-08):** `zaumzeug doctor --deploy` (or `HARNESS_ROOT=deploy`) resolves harnesses under `deploy/<name>/`. Validates deploy `manifest.json` (§10.3 schema) and pinned `artifact-manifest.json` paths when `artifact_run_id` is a per-agent map; reuses E2-S04a core checks (config, models, runtime paths, port). Dev-only warnings (`mcp_uv`, `workflow_diagram`, `artifact_module`) are skipped in deploy mode. **E8-S07:** `phase_gated_tools` still runs in deploy mode (fail on `tools.mcp` / `tools.custom` when `CURRENT_SDK_PHASE < 3`). Root resolution: `src/zaumzeug/config/harness_root.py`.
 
 **Implementation (E5-S04, 2026-07-28):** Canonical env-aware API `resolve_harness_path()` in `config/harness_root.py` — `HARNESS_ROOT=deploy` forces `deploy/` for serve / mcp / acp (and doctor / run). Tests: `tests/unit/deploy/test_harness_root.py`.
 
@@ -252,7 +256,22 @@ models: models.yaml    # optional harness-wide aliases
 serve:
   hayhooks:
     port: 1416
+
+# Optional — zaumzeug run only (E8-S07). Omit or max_attempts: 1 = one-shot.
+# runtime:
+#   retry:
+#     max_attempts: 3
+#     initial_delay_s: 1.0
+#     backoff: 2.0
 ```
+
+**`runtime.retry` fields (E8-S07):**
+
+| Field | Default | Purpose |
+|---|---|---|
+| `max_attempts` | `1` | Attempts per stage for `Agent.run` + optional JSON check (`>= 1`) |
+| `initial_delay_s` | `1.0` | Sleep before retry 2: `initial_delay_s * backoff^(attempt-1)` |
+| `backoff` | `2.0` | Exponential backoff multiplier |
 
 **`usr-harnesses/example/agents/researcher/agent.yaml`:**
 
@@ -263,6 +282,9 @@ agent:
   system_prompt: prompts/system.md
 tools:
   builtin: [web_fetch]
+# Optional — zaumzeug run only (E8-S07). Omit = plain str, no JSON check.
+# output:
+#   format: json
 compile:                                 # Phase 2 — GEPA (E4-S02b)
   module: modules.researcher:ResearchModule
   task_model_id: mock
@@ -271,6 +293,8 @@ compile:                                 # Phase 2 — GEPA (E4-S02b)
   valset: data/val.jsonl
   auto: light
 ```
+
+**`output.format: json` (E8-S07):** After each `zaumzeug run` stage, strip a single optional markdown code fence (e.g. a `json`-tagged fence) and `json.loads` the text. Empty / invalid JSON is retryable under `runtime.retry`. No JSON Schema in this feature.
 
 **`usr-harnesses/example/agents/researcher/agents-models.yaml`:**
 

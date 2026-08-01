@@ -6,6 +6,7 @@
 | **File** | `docs/stories/epic-stories/64-story.md` |
 | **Created** | 2026-08-01 |
 | **Last modified** | 2026-08-01 |
+| **Status** | Done (2026-08-01) |
 | **Story ID** | E8-S07 |
 | **Epic** | [E8 — RAG and Production Hardening](../08-epic.md) |
 | **Phase** | 4 *(pull-forward OK after E5 — does not require E7)* |
@@ -109,22 +110,22 @@ output:
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Failures raised during live stage generation (`Agent.run` / provider errors) are caught and re-raised as `WorkflowError` with `harness_name`, `agent_name`, and `stage` set (same shape as config/resolution failures). Cause chained via `__cause__`. Applies to `run_workflow` only.
-- [ ] **AC-2** Optional harness-level `runtime.retry` on `harness.yaml` is applied to **each stage’s attempts**. Default `max_attempts: 1` preserves current behavior; schema enforces `max_attempts >= 1`. **Retryable:** any exception from `Agent.run` after a successful build, and output-validation failures (AC-4). **Not retryable:** model resolution, agent build, message prep/preprocess, or config errors — agent build and message construction happen **once** per stage outside the attempt loop. Backoff: `initial_delay_s × backoff^(attempt-1)`. After exhaustion, final `WorkflowError` includes attempt count.
-- [ ] **AC-3** Each stage emits structured logs through `log_request()` at **INFO** for start, success, retry, and failure — with `harness`, `agent`, `model_id`, and **`stage`** (structured key required; add `stage` to `_STRUCTURED_KEYS` / `log_request`). Prompt/response **bodies are not logged** by default (lengths optional). Reconstructible stage order requires `HARNESS_LOG_LEVEL=INFO` or `zaumzeug run --verbose` (document this contract; default WARNING stays unchanged for non-stage noise).
-- [ ] **AC-4** Optional `output.format: json` on `agent.yaml` validates stage text as JSON (stdlib parse; strip common markdown fences first). Invalid output (including empty text) raises typed `WorkflowError` and participates in retry (AC-2). Agents without `output` behave as today (plain `str`, no validation). **No `output.schema` / JSON Schema in this story.**
-- [ ] **AC-5** When `CURRENT_SDK_PHASE < 3` and an agent declares `tools.mcp` or `tools.custom`, `zaumzeug doctor` **and** `zaumzeug doctor --deploy` **fail** (severity `fail`, non-zero exit) with a Phase 3 / unavailable message — they must **not** report a green “MCP configured and `uv` available” (or equivalent) for config that `run_workflow` would reject. The phase-gated check must run in both modes (today `mcp_uv` is skipped under `--deploy`; fix that for this failure). Uv-missing remains a separate concern once MCP is actually allowed.
-- [ ] **AC-6** User-docs document `runtime.retry`, `output.format: json`, fence stripping, and the `HARNESS_LOG_LEVEL=INFO` / `--verbose` stage-log contract (include a local-Ollama-oriented example). Architecture §6.2 / §6.6 document the `runtime` and `output` config fields. Follow-up note: serve/HTTP does not yet share this reliability layer.
+- [x] **AC-1** Failures raised during live stage generation (`Agent.run` / provider errors) are caught and re-raised as `WorkflowError` with `harness_name`, `agent_name`, and `stage` set (same shape as config/resolution failures). Cause chained via `__cause__`. Applies to `run_workflow` only.
+- [x] **AC-2** Optional harness-level `runtime.retry` on `harness.yaml` is applied to **each stage’s attempts**. Default `max_attempts: 1` preserves current behavior; schema enforces `max_attempts >= 1`. **Retryable:** any exception from `Agent.run` after a successful build, and output-validation failures (AC-4). **Not retryable:** model resolution, agent build, message prep/preprocess, or config errors — agent build and message construction happen **once** per stage outside the attempt loop. Backoff: `initial_delay_s × backoff^(attempt-1)`. After exhaustion, final `WorkflowError` includes attempt count.
+- [x] **AC-3** Each stage emits structured logs through `log_request()` at **INFO** for start, success, retry, and failure — with `harness`, `agent`, `model_id`, and **`stage`** (structured key required; add `stage` to `_STRUCTURED_KEYS` / `log_request`). Prompt/response **bodies are not logged** by default (lengths optional). Reconstructible stage order requires `HARNESS_LOG_LEVEL=INFO` or `zaumzeug run --verbose` (document this contract; default WARNING stays unchanged for non-stage noise).
+- [x] **AC-4** Optional `output.format: json` on `agent.yaml` validates stage text as JSON (stdlib parse; strip common markdown fences first). Invalid output (including empty text) raises typed `WorkflowError` and participates in retry (AC-2). Agents without `output` behave as today (plain `str`, no validation). **No `output.schema` / JSON Schema in this story.**
+- [x] **AC-5** When `CURRENT_SDK_PHASE < 3` and an agent declares `tools.mcp` or `tools.custom`, `zaumzeug doctor` **and** `zaumzeug doctor --deploy` **fail** (severity `fail`, non-zero exit) with a Phase 3 / unavailable message — they must **not** report a green “MCP configured and `uv` available” (or equivalent) for config that `run_workflow` would reject. The phase-gated check must run in both modes (today `mcp_uv` is skipped under `--deploy`; fix that for this failure). Uv-missing remains a separate concern once MCP is actually allowed.
+- [x] **AC-6** User-docs document `runtime.retry`, `output.format: json`, fence stripping, and the `HARNESS_LOG_LEVEL=INFO` / `--verbose` stage-log contract (include a local-Ollama-oriented example). Architecture §6.2 / §6.6 document the `runtime` and `output` config fields. Follow-up note: serve/HTTP does not yet share this reliability layer.
 
 ### Implementation tasks (build)
 
-- [ ] Add `RuntimeRetryConfig` / `HarnessRuntimeConfig` to harness schema (`max_attempts >= 1`); wire into `run_workflow` only
-- [ ] Split stage loop: build + message prep once → attempt loop around `agent.run` + optional JSON check
-- [ ] Wrap live generation exceptions as `WorkflowError` (AC-1); do not retry build/config/prep failures
-- [ ] Extend `log_request()` with required `stage` structured key; emit stage lifecycle at INFO; document INFO/`--verbose` contract
-- [ ] Add optional `AgentOutputConfig` with `format: json` only + fence-stripping JSON validator after `_assistant_text`
-- [ ] Fix doctor (default **and** `--deploy`): **fail** on phase-gated `tools.mcp` / `tools.custom`; stop false-green `mcp_uv` pass for that case
-- [ ] Document `runtime.retry` and `output.format` in user-docs and Architecture §6.2 / §6.6 (AC-6)
+- [x] Add `RuntimeRetryConfig` / `HarnessRuntimeConfig` to harness schema (`max_attempts >= 1`); wire into `run_workflow` only
+- [x] Split stage loop: build + message prep once → attempt loop around `agent.run` + optional JSON check
+- [x] Wrap live generation exceptions as `WorkflowError` (AC-1); do not retry build/config/prep failures
+- [x] Extend `log_request()` with required `stage` structured key; emit stage lifecycle at INFO; document INFO/`--verbose` contract
+- [x] Add optional `AgentOutputConfig` with `format: json` only + fence-stripping JSON validator after `_assistant_text`
+- [x] Fix doctor (default **and** `--deploy`): **fail** on phase-gated `tools.mcp` / `tools.custom`; stop false-green `mcp_uv` pass for that case
+- [x] Document `runtime.retry` and `output.format` in user-docs and Architecture §6.2 / §6.6 (AC-6)
 
 ### Verification (after build)
 
@@ -141,18 +142,18 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-6 | **manual:** user-docs cover retry / `output.format` / fence strip / INFO log contract + Ollama example; Architecture §6.2 / §6.6 document `runtime` + `output`; serve follow-up noted |
 | Regression | `pytest tests/integration/test_workflow_run.py -v` passes (E3-S08 unchanged with defaults) |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/runtime/test_workflow_reliability.py tests/integration/test_workflow_reliability.py tests/unit/cli/test_doctor.py -k e8_s07 -v` passes
-- [ ] `pytest tests/integration/test_workflow_run.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/runtime/test_workflow_reliability.py tests/integration/test_workflow_reliability.py tests/unit/cli/test_doctor.py -k e8_s07 -v` passes
+- [x] `pytest tests/integration/test_workflow_run.py -v` passes
 
 ### Definition of done
 
-- [ ] Defaults preserve pre-story behavior (`max_attempts: 1`, no `output` → no validation)
-- [ ] Existing E3-S08 workflow integration tests still pass
-- [ ] Run-path only — no claim that serve/HTTP shares retry/validation yet (follow-up noted in user-docs)
-- [ ] User-docs cover `runtime.retry`, `output.format: json`, fence stripping, and `HARNESS_LOG_LEVEL=INFO` / `--verbose` for stage logs (local-Ollama-oriented example)
-- [ ] Architecture §6.2 / §6.6 document `runtime` and `output`
-- [ ] No OpenTelemetry dependency or span API; no `jsonschema` dependency
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Defaults preserve pre-story behavior (`max_attempts: 1`, no `output` → no validation)
+- [x] Existing E3-S08 workflow integration tests still pass
+- [x] Run-path only — no claim that serve/HTTP shares retry/validation yet (follow-up noted in user-docs)
+- [x] User-docs cover `runtime.retry`, `output.format: json`, fence stripping, and `HARNESS_LOG_LEVEL=INFO` / `--verbose` for stage logs (local-Ollama-oriented example)
+- [x] Architecture §6.2 / §6.6 document `runtime` and `output`
+- [x] No OpenTelemetry dependency or span API; no `jsonschema` dependency
+- [x] Verification checklist complete; all ACs traced to tests
 
 ---

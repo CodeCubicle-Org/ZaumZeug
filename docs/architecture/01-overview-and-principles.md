@@ -115,7 +115,7 @@ Each workflow stage runs **one Haystack `Agent` loop** for that step. The harnes
 
 - **MCP as tool boundary** — schema + timeout + idempotency + consistent error shape.
 - **Guides + sensors** — ~70% compliance from optimized prompts (guides); ~100% enforcement from hooks/metrics (sensors).
-- **Failure ladder** — retry → fallback → partial answer → human escalation.
+- **Failure ladder** — retry → fallback → partial answer → human escalation. **Partial (E8-S07, 2026-08-01):** harness-level retry on `zaumzeug run` / `run_workflow` only (`runtime.retry`); model fallback and the rest of the ladder remain later.
 - **One agent loop per workflow stage** — each agent role gets its own loop when its stage runs; the harness workflow chains stages (serial first, parallel fan-out later). Do not collapse multi-stage research into one exhaustive agent session.
 
 ### 2.5 Cross-platform portability

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers |
-| **Last updated** | 2026-07-05 |
+| **Last updated** | 2026-08-01 |
 
 A **harness** is not a single agent. It is a **workflow** (who runs, in what order) plus a **collection of agents** (each with its own prompts, tools, and LLM config). This guide explains `workflow.yaml`, how **pipeline** stages differ from **agent** stages, and where **looping and branching** belong in Phase 1.
 
@@ -223,6 +223,76 @@ Full **pipeline exposure** ships in **Phase 4** (RAG and production hardening). 
 | **`zaumzeug compile <harness> --workflow-diagram-only`** | Regenerates `docs/workflow-diagram.md` from `workflow.yaml` without GEPA or LLM calls |
 | **`zaumzeug doctor <harness>`** | Validates `workflow.yaml` (schema + agent refs), `harness.yaml`, models, runtime paths; warns on stale diagram |
 | **`zaumzeug serve <harness> --dry-run`** | Same workflow validation path as doctor before resolving the entry agent |
+
+---
+
+## Run reliability (`zaumzeug run`)
+
+Batch and local-model runs can flake (timeouts, empty replies, non-JSON). **`zaumzeug run`** has a narrow reliability layer on the serial workflow path. **`zaumzeug serve` / HTTP does not share it yet** — use `run` for batch reviews that need retry and JSON checks.
+
+### Retry (`harness.yaml`)
+
+```yaml
+# harness.yaml — defaults keep one-shot behavior (max_attempts: 1)
+runtime:
+  retry:
+    max_attempts: 3
+    initial_delay_s: 1.0
+    backoff: 2.0   # delay = initial_delay_s * backoff^(attempt-1)
+```
+
+Per stage: models + agent build + message prep run **once**; only `Agent.run` and optional JSON validation retry. Config/build errors fail immediately (no retry).
+
+### JSON stage output (`agent.yaml`)
+
+```yaml
+# agents/<name>/agent.yaml — omit = plain string, no validation
+output:
+  format: json
+```
+
+After the stage, the SDK strips a single optional markdown code fence (for example a `json`-tagged fence) and parses with stdlib `json`. Empty text fails and is retryable. There is no JSON Schema check in this release.
+
+### Stage logs
+
+Each stage emits structured INFO logs via `log_request` with `harness`, `agent`, `model_id`, and **`stage`** (start / success / retry / failure). Prompt and response bodies are **not** logged by default.
+
+| How to see stage logs | Effect |
+|---|---|
+| `HARNESS_LOG_LEVEL=INFO zaumzeug run <harness> …` | INFO stage lifecycle (default CLI level is WARNING) |
+| `zaumzeug run <harness> --verbose` | DEBUG (includes stage INFO) |
+
+### Local Ollama example
+
+```yaml
+# agents/researcher/agents-models.yaml
+default_model_id: local
+models:
+  local:
+    provider: openai_compatible
+    model: llama3.2
+    api_base_url: http://127.0.0.1:11434/v1
+```
+
+```yaml
+# harness.yaml
+runtime:
+  retry:
+    max_attempts: 3
+    initial_delay_s: 1.0
+    backoff: 2.0
+```
+
+```yaml
+# agents/researcher/agent.yaml
+output:
+  format: json
+```
+
+```bash
+# Reconstruct stage order while batching against Ollama
+HARNESS_LOG_LEVEL=INFO zaumzeug run example --input "Return a JSON object with key summary"
+```
 
 ---
 

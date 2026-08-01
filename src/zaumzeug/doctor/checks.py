@@ -354,28 +354,93 @@ def check_eval_section_phase_hint(harness_name: str, harness_dir: Path) -> Check
     )
 
 
-def check_mcp_uv_presence(harness_name: str, harness_dir: Path) -> CheckResult:
-    """AC-2 (E2-S04b): Warn when MCP tools are configured but ``uv`` is missing."""
+def _iter_agent_yaml_tools(
+    harness_dir: Path,
+) -> list[tuple[str, dict[str, Any]]]:
+    """Return ``(agent_folder_name, tools_dict)`` for each agent with a tools block."""
     agents_dir = harness_dir / "agents"
+    if not agents_dir.is_dir():
+        return []
+    found: list[tuple[str, dict[str, Any]]] = []
+    for agent_dir in sorted(agents_dir.iterdir()):
+        if not agent_dir.is_dir():
+            continue
+        agent_yaml = agent_dir / "agent.yaml"
+        if not agent_yaml.is_file():
+            continue
+        data = yaml.safe_load(agent_yaml.read_text(encoding="utf-8")) or {}
+        tools = data.get("tools")
+        if isinstance(tools, dict):
+            found.append((agent_dir.name, tools))
+    return found
+
+
+def check_phase_gated_agent_tools(
+    harness_name: str,
+    harness_dir: Path,
+) -> CheckResult:
+    """AC-5 (E8-S07): Fail when ``tools.mcp`` / ``tools.custom`` are used before Phase 3.
+
+    Runs in default and ``--deploy`` modes so doctor cannot green-light config
+    that ``run_workflow`` would reject. Does not strip phase-gated keys.
+    """
+    gated: list[str] = []
+    if CURRENT_SDK_PHASE < 3:
+        for agent_name, tools in _iter_agent_yaml_tools(harness_dir):
+            if tools.get("mcp"):
+                gated.append(f"agents/{agent_name}/agent.yaml: tools.mcp")
+            if tools.get("custom"):
+                gated.append(f"agents/{agent_name}/agent.yaml: tools.custom")
+
+    if gated:
+        listed = "; ".join(gated)
+        return CheckResult(
+            name="phase_gated_tools",
+            severity="fail",
+            message=(
+                f"{listed} — unavailable until Phase 3 "
+                f"(CURRENT_SDK_PHASE={CURRENT_SDK_PHASE}). "
+                "Remove tools.mcp / tools.custom or wait for MCP/custom tool support."
+            ),
+            harness=harness_name,
+        )
+
+    return CheckResult(
+        name="phase_gated_tools",
+        severity="pass",
+        message="No phase-gated agent tools (mcp/custom) blocking current phase",
+        harness=harness_name,
+    )
+
+
+def check_mcp_uv_presence(harness_name: str, harness_dir: Path) -> CheckResult:
+    """AC-2 (E2-S04b): Warn when MCP tools are configured but ``uv`` is missing.
+
+    When ``CURRENT_SDK_PHASE < 3``, does not claim MCP is ready — phase gating is
+    reported by :func:`check_phase_gated_agent_tools` instead (E8-S07 AC-5).
+    """
     mcp_configured = False
-    if agents_dir.is_dir():
-        for agent_dir in sorted(agents_dir.iterdir()):
-            if not agent_dir.is_dir():
-                continue
-            agent_yaml = agent_dir / "agent.yaml"
-            if not agent_yaml.is_file():
-                continue
-            data = yaml.safe_load(agent_yaml.read_text(encoding="utf-8")) or {}
-            tools = data.get("tools")
-            if isinstance(tools, dict) and tools.get("mcp"):
-                mcp_configured = True
-                break
+    for _agent_name, tools in _iter_agent_yaml_tools(harness_dir):
+        if tools.get("mcp"):
+            mcp_configured = True
+            break
 
     if not mcp_configured:
         return CheckResult(
             name="mcp_uv",
             severity="pass",
             message="No MCP tools configured",
+            harness=harness_name,
+        )
+
+    if CURRENT_SDK_PHASE < 3:
+        return CheckResult(
+            name="mcp_uv",
+            severity="pass",
+            message=(
+                "tools.mcp is Phase 3; see phase_gated_tools check "
+                "(uv check applies once MCP is allowed)"
+            ),
             harness=harness_name,
         )
 

@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-07-29 (E5-S09c target install --verify — epic E5 complete)
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 in progress (E4 **Done**; E6-S01–S07 **Done**; E5 **Done** including E5-S09c `--verify`; next E7-S01)
+**Last updated:** 2026-08-01 (E8-S07 workflow run reliability — pull-forward Done)
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); next E7-S01
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -298,7 +298,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E3.3 | Builtin tools | **AC:** Phase 1 ships `web_fetch`; catalog in [Architecture §6.5](architecture/05-configuration.md#65-builtin-tools-catalog). |
 | E3.4 | Example harness | **AC:** `example` uses multi-agent layout ([Architecture §6.6](architecture/05-configuration.md#66-phase-1-config-schema)): `agents/researcher/`, `workflow.yaml` (one stage), `web_fetch`, `default_model_id: mock`; `zaumzeug serve example` works without `.env`. |
 | E3.5 | Mock model profile | **AC:** `mock` provider in `agents-models.yaml`; canned responses from `tests/fixtures/responses/`; CI uses mock exclusively. |
-| E3.6 | `zaumzeug run` (serial workflow) | **AC:** Executes `workflow.yaml` stages in order; each agent stage uses that agent's config and `agents-models.yaml`; passes prior stage output as context to next; pipeline stages invoke exposed Haystack pipelines (when present). Fails fast on missing agent. **Serial only** in Phase 1. |
+| E3.6 | `zaumzeug run` (serial workflow) | **AC:** Executes `workflow.yaml` stages in order; each agent stage uses that agent's config and `agents-models.yaml`; passes prior stage output as context to next; pipeline stages invoke exposed Haystack pipelines (when present). Fails fast on missing agent. **Serial only** in Phase 1. Run-path reliability (retry / JSON / stage logs) → [E8.7](#epic-e8--rag-and-production-hardening-phase-4) ✅. |
 
 **Story seeds:** Integration test with mock LM; OpenAI-shaped request/response contract test — **Done** (E3-S07, 2026-07-21).
 
@@ -393,7 +393,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E8.4 | Optional A2A | **AC:** `serve.a2a: true` hosts agent card (if prioritized). |
 | E8.5 | Dockerfile template | **AC:** Optional generated `deploy/<name>/Dockerfile`. |
 | E8.6 | DeepEval production observe | **AC:** Optional `@observe` + Confident AI sync (opt-in). |
-| E8.7 | Workflow run reliability | **AC:** **`zaumzeug run` / `run_workflow` only** (serve/HTTP follow-up). Live generation failures → typed `WorkflowError` with stage context; harness-level `runtime.retry` (`max_attempts >= 1`, default 1; build + message prep once per stage; retry any `Agent.run` / JSON-parse failure with backoff; no retry on config/build/prep errors); stage lifecycle via `log_request()` at INFO with structured `stage` key (no prompt/output bodies by default; reconstructible with `HARNESS_LOG_LEVEL=INFO` / `--verbose`; **no OpenTelemetry**); optional agent `output.format: json` (stdlib parse + markdown fence strip; empty fails; **no JSON Schema in this feature**); `zaumzeug doctor` **and** `doctor --deploy` **fail** on phase-gated `tools.mcp` / `tools.custom` (no false-green `mcp_uv`); user-docs + Architecture §6 document config/log contract. Story: [64-story.md](stories/epic-stories/64-story.md). May pull forward after E5 (does not require E7). |
+| E8.7 | Workflow run reliability | **Done** (E8-S07, 2026-08-01). **`zaumzeug run` / `run_workflow` only** (serve/HTTP follow-up). Live generation → typed `WorkflowError` with stage context; `runtime.retry` (`max_attempts >= 1`, default 1; build once; retry `Agent.run` / JSON parse); INFO `log_request` with structured `stage`; optional `output.format: json` (fence strip; no JSON Schema); doctor + `doctor --deploy` fail on phase-gated `tools.mcp` / `tools.custom`. Story: [64-story.md](stories/epic-stories/64-story.md). |
 
 ---
 
@@ -406,7 +406,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 | `zaumzeug init` | 1 | E1 |
 | `zaumzeug doctor` | 1 | E2 |
 | `zaumzeug serve [--deploy]` | 1–2 | E3, E5 (**E5-S03 Done** 2026-07-28 — production root; **E5-S04 Done** — `HARNESS_ROOT=deploy`) |
-| `zaumzeug run [--deploy]` | 1–2 | E3, E5 (`HARNESS_ROOT=deploy` via E5-S04) |
+| `zaumzeug run [--deploy]` | 1–4 | E3, E5 (`HARNESS_ROOT=deploy` via E5-S04); **E8.7 Done** (E8-S07, 2026-08-01) — retry / JSON / stage logs on run path |
 | `zaumzeug compile [--workflow-diagram-only]` | 2 | E4 |
 | `zaumzeug deploy` | 2 | E5 |
 | `zaumzeug eval` | 2 | E6 (optional) |
@@ -424,7 +424,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
 | **2** | Compile, deploy, optional eval | E4, E5, E6 — **E4** **Done** 2026-07-28; **E6** **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early with E6-S03); **E5** **Done** 2026-07-29 ([E5-S01](stories/epic-stories/41-story.md)–[E5-S09c](stories/epic-stories/49.3-story.md)). Phase 2 remaining work is Phase 3+ (E7/E8) only from this epic set. |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
-| **4** | RAG, auth, production ratchet, A2A | E8 |
+| **4** | RAG, auth, production ratchet, A2A | E8 — **E8.7 Done** (E8-S07, 2026-08-01; pull-forward after E5) |
 
 ---
 

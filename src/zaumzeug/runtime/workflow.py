@@ -1,7 +1,11 @@
-"""Serial workflow executor for ``zaumzeug run`` (E3-S08 / E3.6)."""
+"""Serial workflow executor for ``zaumzeug run`` (E3-S08 / E3.6, E8-S07 / E8.7)."""
 
 from __future__ import annotations
 
+import json
+import logging
+import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -11,16 +15,29 @@ from haystack.dataclasses import ChatMessage
 from zaumzeug.config import (
     AgentResolutionError,
     ConfigValidationError,
+    load_agent_config,
     load_harness,
     load_merged_agent_models,
     load_workflow,
 )
 from zaumzeug.config.harness_root import resolve_harness_path
-from zaumzeug.config.schemas import WorkflowConfig, WorkflowStage
+from zaumzeug.config.schemas import (
+    RuntimeRetryConfig,
+    WorkflowConfig,
+    WorkflowStage,
+)
 from zaumzeug.doctor.project import find_project_root
+from zaumzeug.logging import get_logger, log_request
 from zaumzeug.runtime.factory import RuntimeFactoryError, build_agent_bundle
 from zaumzeug.runtime.model_router import ModelRouter, ModelRouterError
 from zaumzeug.runtime.preprocess import preprocess_openai_messages
+
+_FENCE_RE = re.compile(
+    r"^\s*```(?:json)?\s*\n?(.*?)\n?\s*```\s*$",
+    re.DOTALL | re.IGNORECASE,
+)
+
+_logger = get_logger("runtime.workflow")
 
 
 class WorkflowError(RuntimeError):
@@ -100,6 +117,30 @@ def _assistant_text(result: dict[str, Any]) -> str:
     return ""
 
 
+def strip_markdown_json_fence(text: str) -> str:
+    """Strip a single optional markdown code fence wrapping JSON text."""
+    match = _FENCE_RE.match(text)
+    if match:
+        return match.group(1).strip()
+    return text.strip()
+
+
+def validate_json_stage_output(text: str) -> None:
+    """Validate stage assistant text as JSON (stdlib parse after fence strip).
+
+    Empty text fails. Raises :class:`ValueError` on invalid output (retryable).
+    """
+    if not text or not text.strip():
+        raise ValueError("empty assistant text is not valid JSON")
+    candidate = strip_markdown_json_fence(text)
+    if not candidate:
+        raise ValueError("empty assistant text is not valid JSON")
+    try:
+        json.loads(candidate)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"stage output is not valid JSON: {exc}") from exc
+
+
 def _select_stages(
     workflow: WorkflowConfig,
     *,
@@ -149,6 +190,13 @@ def _run_pipeline_stage_stub(
     )
 
 
+def _retry_config(harness_config: Any) -> RuntimeRetryConfig:
+    runtime = getattr(harness_config, "runtime", None)
+    if runtime is None:
+        return RuntimeRetryConfig()
+    return runtime.retry
+
+
 def run_workflow(
     harness_name: str,
     *,
@@ -162,6 +210,11 @@ def run_workflow(
     Each agent stage loads ``agents/<name>/`` config and that agent's merged
     ``agents-models.yaml``, builds a Haystack Agent via the runtime factory,
     and forwards prior stage output as context to the next stage.
+
+    Reliability (E8-S07): live ``Agent.run`` / JSON-output failures are typed
+    ``WorkflowError``s, optionally retried per ``runtime.retry``, with INFO
+    stage lifecycle logs via ``log_request(..., stage=...)``. Build and message
+    prep run once per stage (not retried).
     """
     root = Path(project_root) if project_root is not None else find_project_root()
     harness_path = resolve_harness_path(root, harness_name, deploy_flag=deploy)
@@ -185,6 +238,7 @@ def run_workflow(
         harness_name=harness_name,
     )
     harness_models = _resolve_harness_models_path(harness_path, harness_config.models)
+    retry = _retry_config(harness_config)
 
     result = WorkflowRunResult(harness_name=harness_name)
     prior_output: str | None = None
@@ -197,14 +251,20 @@ def run_workflow(
         agent_name = stage.agent
         assert agent_name is not None
         agent_name = agent_name.strip()
+        model_id: str | None = None
 
+        # --- build + message prep once (not retryable) ---
         try:
+            agent_config = load_agent_config(
+                harness_path / "agents" / agent_name / "agent.yaml"
+            )
             merged = load_merged_agent_models(
                 project_root=root,
                 harness_dir=harness_path,
                 harness_models_path=harness_models,
                 agent_name=agent_name,
             )
+            model_id = merged.default_model_id
             router = ModelRouter(merged, project_root=root)
             built = build_agent_bundle(
                 harness_path,
@@ -223,8 +283,6 @@ def run_workflow(
                 ChatMessage.from_openai_dict_format(message)
                 for message in openai_messages
             ]
-            run_result = built.agent.run(messages=chat_messages)
-            output = _assistant_text(run_result)
         except AgentResolutionError as exc:
             raise WorkflowError(
                 str(exc),
@@ -239,13 +297,101 @@ def run_workflow(
                 agent_name=agent_name,
                 stage=sid,
             ) from exc
+        except WorkflowError:
+            raise
+        except Exception as exc:
+            raise WorkflowError(
+                f"Harness '{harness_name}' agent '{agent_name}': {exc}",
+                harness_name=harness_name,
+                agent_name=agent_name,
+                stage=sid,
+            ) from exc
+
+        require_json = (
+            agent_config.output is not None and agent_config.output.format == "json"
+        )
+        log_request(
+            _logger,
+            "workflow stage start",
+            harness=harness_name,
+            agent=agent_name,
+            model_id=model_id,
+            stage=sid,
+            level=logging.INFO,
+        )
+
+        # --- attempt loop: agent.run + optional JSON check ---
+        output = ""
+        last_error: BaseException | None = None
+        for attempt in range(1, retry.max_attempts + 1):
+            try:
+                run_result = built.agent.run(messages=chat_messages)
+                output = _assistant_text(run_result)
+                if require_json:
+                    validate_json_stage_output(output)
+                last_error = None
+                break
+            except Exception as exc:
+                last_error = exc
+                if attempt < retry.max_attempts:
+                    delay = retry.initial_delay_s * (retry.backoff ** (attempt - 1))
+                    log_request(
+                        _logger,
+                        (
+                            f"workflow stage retry "
+                            f"(attempt {attempt}/{retry.max_attempts}): {exc}"
+                        ),
+                        harness=harness_name,
+                        agent=agent_name,
+                        model_id=model_id,
+                        stage=sid,
+                        level=logging.INFO,
+                    )
+                    if delay > 0:
+                        time.sleep(delay)
+                    continue
+                break
+
+        if last_error is not None:
+            log_request(
+                _logger,
+                (
+                    f"workflow stage failure "
+                    f"after {retry.max_attempts} attempt(s): {last_error}"
+                ),
+                harness=harness_name,
+                agent=agent_name,
+                model_id=model_id,
+                stage=sid,
+                level=logging.INFO,
+            )
+            raise WorkflowError(
+                (
+                    f"Harness '{harness_name}' agent '{agent_name}' stage "
+                    f"{sid!r}: live generation failed after "
+                    f"{retry.max_attempts} attempt(s): {last_error}"
+                ),
+                harness_name=harness_name,
+                agent_name=agent_name,
+                stage=sid,
+            ) from last_error
+
+        log_request(
+            _logger,
+            "workflow stage success",
+            harness=harness_name,
+            agent=agent_name,
+            model_id=model_id,
+            stage=sid,
+            level=logging.INFO,
+        )
 
         result.stages.append(
             StageResult(
                 stage_id=sid,
                 kind="agent",
                 output=output,
-                model_id=merged.default_model_id,
+                model_id=model_id,
             )
         )
         prior_output = output

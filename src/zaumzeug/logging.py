@@ -17,7 +17,14 @@ _SECRET_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"(?i)(bearer\s+)([^\s]+)"),
 )
 
-_STRUCTURED_KEYS = ("model_id", "tool", "artifact_path", "harness", "agent")
+_STRUCTURED_KEYS = (
+    "model_id",
+    "tool",
+    "artifact_path",
+    "harness",
+    "agent",
+    "stage",
+)
 
 _configured = False
 
@@ -138,9 +145,16 @@ def log_request(
     artifact_path: str | None = None,
     harness: str | None = None,
     agent: str | None = None,
+    stage: str | None = None,
     level: int = logging.DEBUG,
 ) -> None:
-    """Log a request-scoped message with structured routing context."""
+    """Log a request-scoped message with structured routing context.
+
+    Workflow stage lifecycle (``zaumzeug run``) passes ``stage`` and uses
+    ``level=logging.INFO``. Reconstruct stage order with
+    ``HARNESS_LOG_LEVEL=INFO`` or ``zaumzeug run --verbose`` (default WARNING
+    suppresses stage INFO noise).
+    """
     extra: dict[str, Any] = {}
     if model_id is not None:
         extra["model_id"] = model_id
@@ -152,6 +166,8 @@ def log_request(
         extra["harness"] = harness
     if agent is not None:
         extra["agent"] = agent
+    if stage is not None:
+        extra["stage"] = stage
     logger.log(level, message, extra=extra)
 
 

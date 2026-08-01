@@ -19,6 +19,7 @@ from zaumzeug.doctor.checks import (
     check_mcp_uv_presence,
     check_model_registry,
     check_package_import,
+    check_phase_gated_agent_tools,
     check_pinned_artifact,
     check_port_conflict,
     check_python_version,
@@ -133,6 +134,8 @@ def run_doctor(
             if harness_cfg.serve and harness_cfg.serve.hayhooks:
                 port = harness_cfg.serve.hayhooks.port
         checks.append(check_port_conflict(name, port=port))
+        # Phase-gated mcp/custom must fail in default and --deploy (E8-S07 AC-5).
+        checks.append(check_phase_gated_agent_tools(name, harness_dir))
         if not deploy_mode:
             checks.append(check_mcp_uv_presence(name, harness_dir))
             checks.append(check_workflow_diagram_staleness(name, harness_dir))

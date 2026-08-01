@@ -5,7 +5,7 @@
 | **Document** | Epic E8 user stories |
 | **File** | `docs/stories/08-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-01 (E8-S07 workflow reliability story from adoption eval) |
+| **Last modified** | 2026-08-01 (E8-S07 Done) |
 | **Status** | Backlog |
 | **Build order** | **8 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -25,7 +25,7 @@
 
 ### Story implementation order (within this epic)
 
-1. **E8-S07** — Workflow run reliability and stage transparency *(P0; pull-forward OK after E5)*
+1. **E8-S07** — Workflow run reliability and stage transparency ✅ *(2026-08-01; P0 pull-forward)*
 2. **E8-S01** — Pipeline exposure / RAG
 3. **E8-S03** — Trace → dataset ratchet
 4. **E8-S02** — Production auth *(Traefik proxy-only — resolved)*
@@ -374,16 +374,16 @@ As a **client integrator running local or flaky model backends**, I want `run_wo
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Live generation failures on `run_workflow` → typed `WorkflowError` with harness/agent/stage
-- [ ] **AC-2** Harness-level `runtime.retry` (`max_attempts >= 1`, default 1); build + message prep once; retry only `agent.run` + JSON check
-- [ ] **AC-3** Stage lifecycle via `log_request()` at INFO with structured `stage` key; reconstructible with INFO / `--verbose`
-- [ ] **AC-4** Optional agent `output.format: json` (parse + fence strip; empty fails; no JSON Schema)
-- [ ] **AC-5** Doctor **and** `doctor --deploy` **fail** on phase-gated `tools.mcp` / `tools.custom`
-- [ ] **AC-6** User-docs + Architecture §6 document `runtime` / `output` and log contract
+- [x] **AC-1** Live generation failures on `run_workflow` → typed `WorkflowError` with harness/agent/stage
+- [x] **AC-2** Harness-level `runtime.retry` (`max_attempts >= 1`, default 1); build + message prep once; retry only `agent.run` + JSON check
+- [x] **AC-3** Stage lifecycle via `log_request()` at INFO with structured `stage` key; reconstructible with INFO / `--verbose`
+- [x] **AC-4** Optional agent `output.format: json` (parse + fence strip; empty fails; no JSON Schema)
+- [x] **AC-5** Doctor **and** `doctor --deploy` **fail** on phase-gated `tools.mcp` / `tools.custom`
+- [x] **AC-6** User-docs + Architecture §6 document `runtime` / `output` and log contract
 
 ### Implementation tasks (build)
 
-- [ ] See [64-story.md](epic-stories/64-story.md) for tasks, config sketches, retry boundary, and verification table
+- [x] See [64-story.md](epic-stories/64-story.md) for tasks, config sketches, retry boundary, and verification table — **Done** (2026-08-01)
 
 ### Verification (after build)
 
@@ -396,10 +396,10 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-6 | **manual:** user-docs + Architecture §6 |
 | Regression | `tests/integration/test_workflow_run.py` (E3-S08 defaults) |
 
-- [ ] `pytest … -k e8_s07 -v` and `pytest tests/integration/test_workflow_run.py -v` pass
+- [x] `pytest … -k e8_s07 -v` and `pytest tests/integration/test_workflow_run.py -v` pass
 
 ### Definition of done
 
-- [ ] Defaults preserve pre-story behavior; E3-S08 regression green; run-path only; no OTel / no `jsonschema`
-- [ ] User-docs + Architecture §6 cover `runtime.retry` and `output.format`
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Defaults preserve pre-story behavior; E3-S08 regression green; run-path only; no OTel / no `jsonschema`
+- [x] User-docs + Architecture §6 cover `runtime.retry` and `output.format`
+- [x] Verification checklist complete; all ACs traced to tests

@@ -37,6 +37,8 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 **Implementation (E3-S08, 2026-07-21):** `src/zaumzeug/runtime/workflow.py` — `run_workflow()` executes `workflow.yaml` stages serially; per-stage `ModelRouter` + `build_agent()`; prior stage output prepended as a user message; `--from <stage>` partial runs; pipeline stages raise a Phase-1 stub error (full invoke Phase 4). CLI: `zaumzeug run <harness> [--from STAGE] [--input TEXT]`. Tests: `tests/integration/test_workflow_run.py` (`-k e3_s08`).
 
+**Implementation (E8-S07, 2026-08-01):** Run-path reliability on the same `run_workflow()` — typed live-generation `WorkflowError` (harness/agent/stage); optional `runtime.retry` (build once, retry `Agent.run` + JSON check); INFO stage lifecycle via `log_request(..., stage=...)`; optional agent `output.format: json` (fence strip). **Serve/HTTP does not share this layer yet.** Docs: [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md#run-reliability-zaumzeug-run). Tests: `tests/unit/runtime/test_workflow_reliability.py`, `tests/integration/test_workflow_reliability.py` (`-k e8_s07`).
+
 **Implementation (E1-S04, 2026-07-22):** `src/zaumzeug/scaffold/` — `init_harness()` scaffolds `usr-harnesses/<name>/` from `install/templates/harness/` (Phase 1 minimal harness: serve + optional models, workflow, mock agent + system prompt). CLI: `zaumzeug init <name> [--force]`. Safe path-segment names; fail-fast if the folder exists unless `--force`. Tests: `tests/unit/cli/test_init.py`. Docs: [project-setup.md](../../user-docs/getting-started/project-setup.md).
 
 ### 8.2 `harness` vs raw `hayhooks`
@@ -53,8 +55,9 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 | `zaumzeug serve <harness> --dry-run` | Validate `harness.yaml`, `workflow.yaml`, and resolved paths; print summary — no Hayhooks bind, no LLM ([E2-S05](../stories/epic-stories/06-story.md), [E2-S07](../stories/epic-stories/08-story.md)); combine with `--deploy` for production bundles |
 | `zaumzeug serve <harness> --verbose` | Enable SDK + Haystack debug logging ([E2-S06](../stories/epic-stories/07-story.md)); equivalent to `HARNESS_LOG_LEVEL=DEBUG` |
 | `zaumzeug compile <harness> --verbose` | Same structured logging for compile path ([E2-S06](../stories/epic-stories/07-story.md)) |
-| `zaumzeug run <harness>` | **Serial workflow:** executes `workflow.yaml` stages in order; stage-scoped `ModelRouter` per agent ([PRD E3.6](../prd.md#epic-e3--runtime-and-local-serve-phase-1)) |
+| `zaumzeug run <harness>` | **Serial workflow:** executes `workflow.yaml` stages in order; stage-scoped `ModelRouter` per agent ([PRD E3.6](../prd.md#epic-e3--runtime-and-local-serve-phase-1)); optional retry / JSON / stage logs ([PRD E8.7](../prd.md#epic-e8--rag-and-production-hardening-phase-4) / E8-S07) |
 | `zaumzeug run <harness> --from <stage>` | Partial run from a workflow stage (debug) |
+| `HARNESS_LOG_LEVEL=INFO zaumzeug run …` | Reconstruct stage start/success/retry/failure (default WARNING hides INFO stage logs; `--verbose` also works) |
 
 Production targets bare metal, VM, or container — not Haystack Enterprise Platform ([PRD §12 resolved](../prd.md#12-open-decisions-blockers-for-some-stories)).
 

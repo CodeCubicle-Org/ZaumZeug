@@ -8,7 +8,7 @@ ZaumZeug command-line interface reference for harness developers.
 
 | Variable | Values | Effect |
 |---|---|---|
-| `HARNESS_LOG_LEVEL` | `DEBUG`, `INFO`, `WARNING`, `ERROR` | Sets SDK and Haystack log verbosity (same effect as `--verbose` when `DEBUG`) |
+| `HARNESS_LOG_LEVEL` | `DEBUG`, `INFO`, `WARNING`, `ERROR` | Sets SDK and Haystack log verbosity (`DEBUG` ≈ `--verbose`). Use **`INFO`** with `zaumzeug run` to see stage lifecycle (`stage=…`); default `WARNING` hides those INFO lines |
 | `HARNESS_ROOT` | `deploy` | Force production root (`deploy/<name>/`) for **serve**, **mcp**, **acp**, and other root-aware commands (`doctor`, `run`) instead of `usr-harnesses/`. Equivalent to `--deploy`. Use in containers / systemd so the flag is not required on every invocation. Default when unset: `usr-harnesses/` |
 | `HARNESS_LIVE_LLM` | `1` | Opt-in live provider e2e (`pytest tests/e2e`). Unset in default CI — mock profile only |
 
@@ -145,14 +145,15 @@ zaumzeug run <harness> [--from STAGE] [--input TEXT] [--deploy] [--verbose]
 | `--from STAGE` | Start from this workflow stage id (agent or pipeline name) — skip earlier stages |
 | `--input TEXT` | User input passed to each agent stage (also receives prior stage output as context) |
 | `--deploy` | Load harness from `deploy/<name>/` (or set `HARNESS_ROOT=deploy`) |
-| `--verbose` | Enable SDK and Haystack structured debug logging |
+| `--verbose` | Enable SDK and Haystack structured debug logging (includes stage INFO lifecycle) |
 
 ```bash
 zaumzeug run example --input "Summarize the latest release notes"
 zaumzeug run example --from reviewer --input "Check the draft"
+HARNESS_LOG_LEVEL=INFO zaumzeug run example --input "…"   # stage start/success/retry/failure
 ```
 
-**Behavior:** Stages run top-to-bottom from `workflow.yaml`. Prior stage assistant text is prepended as a user message before `--input` for the next agent. Pipeline stages are not executable in Phase 1 (schema allowed; full invoke is Phase 4). Resolution errors include harness and agent names.
+**Behavior:** Stages run top-to-bottom from `workflow.yaml`. Prior stage assistant text is prepended as a user message before `--input` for the next agent. Pipeline stages are not executable in Phase 1 (schema allowed; full invoke is Phase 4). Live generation failures become typed `WorkflowError` with harness / agent / stage. Optional `runtime.retry` on `harness.yaml` retries `Agent.run` (and optional `output.format: json`) per stage; build/config errors are not retried. Stage lifecycle logs use structured `stage` at INFO — set `HARNESS_LOG_LEVEL=INFO` or `--verbose` (default WARNING hides them). See [Multi-agent workflow — Run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run). **Serve/HTTP does not yet share this reliability layer.**
 
 ---
 
@@ -297,13 +298,13 @@ zaumzeug doctor [<harness>] [--deploy] [--verbose] [--json]
 | `--json` | Emit machine-readable JSON report |
 | `--deploy` | Validate deploy bundle under `deploy/` (or set `HARNESS_ROOT=deploy`) |
 
-**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig` and `deploy:` / `DeployConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. Warnings (non-blocking): MCP without `uv`, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02), `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06), `zaumzeug eval --trace` for captured failures (E6-S05), `zaumzeug eval --base-url` for Mode C staging/debug (E6-S06), and `zaumzeug.eval.gepa_bridge` for failed-eval → train / optional DeepEval GEPA metrics (E6-S07).
+**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig`, `deploy:` / `DeployConfig`, and `runtime:` / `RuntimeRetryConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. **Failing (blocking):** when `CURRENT_SDK_PHASE < 3`, agents declaring `tools.mcp` or `tools.custom` — `phase_gated_tools` fails in default **and** `--deploy` modes so doctor cannot green-light config that `zaumzeug run` would reject (E8-S07). Warnings (non-blocking): MCP without `uv` (only once MCP is phase-allowed), stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02), `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06), `zaumzeug eval --trace` for captured failures (E6-S05), `zaumzeug eval --base-url` for Mode C staging/debug (E6-S06), and `zaumzeug.eval.gepa_bridge` for failed-eval → train / optional DeepEval GEPA metrics (E6-S07).
 
-Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack debug logs on serve, compile, eval, or deploy, use `--verbose` on those commands or `HARNESS_LOG_LEVEL=DEBUG`.
+Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack debug logs on serve, compile, eval, deploy, or run, use `--verbose` on those commands or `HARNESS_LOG_LEVEL` (`INFO` for run stage lifecycle; `DEBUG` for full request noise).
 
 ---
 
 ## Related
 
 - [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, `--trace` / Journey C, Mode C `--base-url`, GEPA ↔ DeepEval bridge, deploy eval gates
-- [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml` and agent routing
+- [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml`, agent routing, [run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run) (`runtime.retry`, `output.format: json`, stage logs)
