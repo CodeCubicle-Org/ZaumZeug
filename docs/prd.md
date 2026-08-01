@@ -383,7 +383,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 ### Epic E8 — RAG and production hardening (Phase 4)
 
-**Outcome:** Pipelines, auth, observability, optional A2A.
+**Outcome:** Pipelines, auth, observability, workflow run reliability, optional A2A.
 
 | ID | Feature | Acceptance criteria |
 |---|---|---|
@@ -393,6 +393,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E8.4 | Optional A2A | **AC:** `serve.a2a: true` hosts agent card (if prioritized). |
 | E8.5 | Dockerfile template | **AC:** Optional generated `deploy/<name>/Dockerfile`. |
 | E8.6 | DeepEval production observe | **AC:** Optional `@observe` + Confident AI sync (opt-in). |
+| E8.7 | Workflow run reliability | **AC:** **`zaumzeug run` / `run_workflow` only** (serve/HTTP follow-up). Live generation failures → typed `WorkflowError` with stage context; harness-level `runtime.retry` (`max_attempts >= 1`, default 1; build + message prep once per stage; retry any `Agent.run` / JSON-parse failure with backoff; no retry on config/build/prep errors); stage lifecycle via `log_request()` at INFO with structured `stage` key (no prompt/output bodies by default; reconstructible with `HARNESS_LOG_LEVEL=INFO` / `--verbose`; **no OpenTelemetry**); optional agent `output.format: json` (stdlib parse + markdown fence strip; empty fails; **no JSON Schema in this feature**); `zaumzeug doctor` **and** `doctor --deploy` **fail** on phase-gated `tools.mcp` / `tools.custom` (no false-green `mcp_uv`); user-docs + Architecture §6 document config/log contract. Story: [64-story.md](stories/epic-stories/64-story.md). May pull forward after E5 (does not require E7). |
 
 ---
 

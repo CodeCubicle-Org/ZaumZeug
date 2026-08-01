@@ -5,7 +5,7 @@
 | **Document** | Epic E8 user stories |
 | **File** | `docs/stories/08-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E4-S04 shipped; Pattern B no longer blocked here) |
+| **Last modified** | 2026-08-01 (E8-S07 workflow reliability story from adoption eval) |
 | **Status** | Backlog |
 | **Build order** | **8 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -25,14 +25,16 @@
 
 ### Story implementation order (within this epic)
 
-1. **E8-S01** — Pipeline exposure / RAG
-2. **E8-S03** — Trace → dataset ratchet
-3. **E8-S02** — Production auth *(Traefik proxy-only — resolved)*
-4. **E8-S05** — Dockerfile template
-5. **E8-S06** — DeepEval observe
-6. **E8-S04** — A2A *(if open #5 resolves to Phase 4)*
+1. **E8-S07** — Workflow run reliability and stage transparency *(P0; pull-forward OK after E5)*
+2. **E8-S01** — Pipeline exposure / RAG
+3. **E8-S03** — Trace → dataset ratchet
+4. **E8-S02** — Production auth *(Traefik proxy-only — resolved)*
+5. **E8-S05** — Dockerfile template
+6. **E8-S06** — DeepEval observe
+7. **E8-S04** — A2A *(if open #5 resolves to Phase 4)*
 
 *(E4-S04 Pattern B evaluator ✅ 2026-07-28 — no longer queued under E8.)*
+*(E8-S07 added 2026-08-01 from adoption evaluation — run-path retry, typed live errors, INFO logs with structured `stage`, `output.format: json` only, doctor fail on phase-gated MCP in default + `--deploy`, docs AC-6. No OTel / no JSON Schema / serve path follow-up.)*
 
 ---
 
@@ -346,4 +348,58 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 ### Definition of done
 
 - [ ] Default production deploy has no DeepEval dependency (E5-S05)
+- [ ] Verification checklist complete; all ACs traced to tests
+
+---
+
+## E8-S07 — Workflow run reliability and stage transparency
+
+| Field | Value |
+|---|---|
+| **Feature** | E8.7 |
+| **Persona** | Client integrator · Harness developer · Ops |
+| **Priority** | P0 |
+| **Prerequisites** | [E3-S08](epic-stories/17-story.md) ✅ · [E2-S06](epic-stories/07-story.md) ✅ · [E2-S04b](epic-stories/05.2-story.md) ✅ |
+| **Pull-forward** | Yes — after E5; does **not** require E7 |
+
+### User story
+
+As a **client integrator running local or flaky model backends**, I want `run_workflow` to surface stage-scoped failures, optionally retry them, validate JSON stage outputs, and emit structured stage logs — so batch reviews are reliable without OpenTelemetry or call-site workarounds.
+
+### References
+
+- [PRD E8.7](../prd.md#epic-e8--rag-and-production-hardening-phase-4)
+- [Architecture §2.4 — failure ladder](../architecture/01-overview-and-principles.md#24-industry-patterns)
+- Full story: [64-story.md](epic-stories/64-story.md)
+
+### Acceptance criteria
+
+- [ ] **AC-1** Live generation failures on `run_workflow` → typed `WorkflowError` with harness/agent/stage
+- [ ] **AC-2** Harness-level `runtime.retry` (`max_attempts >= 1`, default 1); build + message prep once; retry only `agent.run` + JSON check
+- [ ] **AC-3** Stage lifecycle via `log_request()` at INFO with structured `stage` key; reconstructible with INFO / `--verbose`
+- [ ] **AC-4** Optional agent `output.format: json` (parse + fence strip; empty fails; no JSON Schema)
+- [ ] **AC-5** Doctor **and** `doctor --deploy` **fail** on phase-gated `tools.mcp` / `tools.custom`
+- [ ] **AC-6** User-docs + Architecture §6 document `runtime` / `output` and log contract
+
+### Implementation tasks (build)
+
+- [ ] See [64-story.md](epic-stories/64-story.md) for tasks, config sketches, retry boundary, and verification table
+
+### Verification (after build)
+
+Per [Story verification](00-README.md#story-verification-required). Test file header: `# Story: E8-S07 / E8.7`.
+
+| AC | Test |
+|---|---|
+| AC-1–4 | `tests/unit/runtime/test_workflow_reliability.py` · `tests/integration/test_workflow_reliability.py` (`-k e8_s07`) |
+| AC-5 | `tests/unit/cli/test_doctor.py` (`test_e8_s07_ac5_*`, incl. deploy mode) |
+| AC-6 | **manual:** user-docs + Architecture §6 |
+| Regression | `tests/integration/test_workflow_run.py` (E3-S08 defaults) |
+
+- [ ] `pytest … -k e8_s07 -v` and `pytest tests/integration/test_workflow_run.py -v` pass
+
+### Definition of done
+
+- [ ] Defaults preserve pre-story behavior; E3-S08 regression green; run-path only; no OTel / no `jsonschema`
+- [ ] User-docs + Architecture §6 cover `runtime.retry` and `output.format`
 - [ ] Verification checklist complete; all ACs traced to tests
