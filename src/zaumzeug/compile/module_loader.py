@@ -146,6 +146,10 @@ def load_dspy_module_from_resolution(resolution: CompileResolution) -> Any:
     expected_file = _expected_module_file(agent_dir, module_name)
 
     with _agent_import_path(agent_dir):
+        # Generic names like ``modules.researcher`` collide across harnesses
+        # (and pytest tmp dirs) if a prior import is left in ``sys.modules``.
+        importlib.invalidate_caches()
+        _drop_cached_import_chain(module_name)
         try:
             module = importlib.import_module(module_name)
         except ImportError as exc:
@@ -253,6 +257,24 @@ def _validate_import_name(module_name: str, *, module_ref: str) -> None:
 
 def _expected_module_file(agent_dir: Path, module_name: str) -> Path:
     return agent_dir.joinpath(*module_name.split(".")).with_suffix(".py")
+
+
+def _drop_cached_import_chain(module_name: str) -> None:
+    """Remove ``module_name`` and ancestor packages from ``sys.modules``.
+
+    Agent-relative imports share names across harness folders. Leaving a
+    parent package cached keeps its stale ``__path__``, so the next import
+    never sees the current agent directory.
+    """
+    parts = module_name.split(".")
+    names = [".".join(parts[:i]) for i in range(1, len(parts) + 1)]
+    drop: set[str] = set()
+    for name in names:
+        drop.add(name)
+        prefix = name + "."
+        drop.update(key for key in sys.modules if key.startswith(prefix))
+    for key in drop:
+        sys.modules.pop(key, None)
 
 
 def _ensure_module_file_under_agent(

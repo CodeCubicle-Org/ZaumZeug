@@ -16,7 +16,7 @@
 | [GEPA](https://github.com/gepa-ai/gepa) | Optimization | `gepa` | `dspy.GEPA`, `optimize_anything` — offline |
 | [DeepEval](https://github.com/confident-ai/deepeval) | Dev eval (optional) | `deepeval` via `[eval]` extra ✅ (E6-S01); `zaumzeug eval` ✅ (E6-S02); deploy gate ✅ (E6-S03 / E5-S06); `eval/` pytest scaffold ✅ (E6-S04); trace → test case ✅ (E6-S05); Mode C HTTP `--base-url` ✅ (E6-S06); GEPA ↔ DeepEval bridge ✅ (E6-S07) | Regression tests; not required for production serve |
 
-Optional: `mcp-haystack` only if a specific Haystack MCP integration requires it — **primary MCP serving** is via Hayhooks (`zaumzeug mcp`).
+Optional: Hayhooks `[chainlit]` extra for embedded GUI — **primary MCP serving** is via Hayhooks (`zaumzeug mcp`). `mcp-haystack` is a **runtime** dependency for `MCPToolset` (E7-S01).
 
 ### 4.2 Library boundaries (when to use what)
 
@@ -29,7 +29,7 @@ Optional: `mcp-haystack` only if a specific Haystack MCP integration requires it
 
 GEPA requires **task LM** and **reflection LM** as separate config roles (LiteLLM strings from `models.yaml`). Budget: `auto="light"|"medium"|"heavy"` or `max_metric_calls`.
 
-**Implementation (E4-S01, 2026-07-28):** DSPy enters the SDK only via `zaumzeug.compile.module_loader` (lazy import). Serve/runtime keep zero DSPy imports (verified by unit tests).
+**Implementation (E4-S01, 2026-07-28):** DSPy enters the SDK only via `zaumzeug.compile.module_loader` (lazy import). Serve/runtime keep zero DSPy imports (verified by unit tests). **2026-08-14:** loader invalidates import caches and drops the cached dotted-name chain before load so two harnesses (or pytest tmp dirs) that share `modules.researcher` do not collide.
 
 **Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile` loads modules and preflights LMs without invoking GEPA.
 
@@ -66,7 +66,7 @@ Canonical package layout. Root `pyproject.toml` exists as of E2-S00 (2026-07-08)
 
 | Group | Install command | Includes | Excludes |
 |---|---|---|---|
-| **Runtime** (core) | `pip install zaumzeug` | `haystack-ai`, `hayhooks`, `httpx`, `litellm`, `pydantic`, `pyyaml`, CLI entry `zaumzeug` | `dspy-ai`, `gepa`, `deepeval` |
+| **Runtime** (core) | `pip install zaumzeug` | `haystack-ai`, `hayhooks`, `mcp>=1.8.0,<2`, `mcp-haystack`, `httpx`, `litellm`, `pydantic`, `pyyaml`, CLI entry `zaumzeug` | `dspy-ai`, `gepa`, `deepeval` |
 | **`[dev]`** extra | `pip install -e ".[dev]"` | Runtime + **`dspy-ai`**, **`gepa`**, test stack ([§4.5](#45-test-dependencies)), `debugpy`, editable SDK | Provider Haystack integrations (user-installed) |
 | **`[eval]`** extra | `pip install "zaumzeug[eval]"` | `deepeval` (requires runtime core) | — |
 
@@ -97,6 +97,8 @@ dependencies = [
   "hayhooks",
   "httpx",
   "litellm",
+  "mcp>=1.8.0,<2",
+  "mcp-haystack",
   "pydantic>=2",
   "pyyaml",
 ]
@@ -133,7 +135,7 @@ Test libraries ship in **`[dev]`** (SDK repo) and **`[eval]`** (optional harness
 | **pytest-recording** *(optional)* | Integration | 2+ | VCR cassettes for re-recordable provider HTTP when mock profile is insufficient |
 | **deepeval** | Harness eval | 2+ (`[eval]`) ✅ E6-S01 / CLI ✅ E6-S02 / deploy gate ✅ E6-S03 / pytest scaffold ✅ E6-S04 / trace ✅ E6-S05 / Mode C ✅ E6-S06 / GEPA bridge ✅ E6-S07 | Optional LLM regression via `zaumzeug eval` or `usr-harnesses/<name>/eval/test_*.py` ([E6](../stories/05-epic.md)); import guard in `zaumzeug.eval`; `deploy.eval_gate` on release ([E5-S06](../stories/epic-stories/46-story.md)); `init --with-eval` scaffold; `eval --trace`; Mode C `--base-url` staging/debug; failed→train + optional DeepEval GEPA metric |
 
-**Not in v1 `[dev]` pins (bring your own if needed):** `pytest-cov` (coverage signal), `freezegun` (time determinism), MCP stub transports (Phase 3 — see [E7-S01](../stories/07-epic.md#e7-s01-mcp-tool-configuration)).
+**Not in v1 `[dev]` pins (bring your own if needed):** `pytest-cov` (coverage signal), `freezegun` (time determinism). MCP serve tests use Starlette `TestClient` against `zaumzeug mcp` (**Done** [E7-S01](../stories/07-epic.md#e7-s01-mcp-tool-configuration) — `tests/integration/mcp/`); no extra stub-transport pin.
 
 **Mock-first default:** CI and local default runs use the **`mock`** model profile and file fixtures under `tests/fixtures/responses/` — no API keys. Live LLM and cassette re-record are opt-in ([§13.6](10-operations-and-reference.md#136-testing-playbook)).
 

@@ -6,6 +6,13 @@ from zaumzeug.runtime.tools.catalog import (
     create_builtin_tool,
     validate_builtin_tool_ids,
 )
+from zaumzeug.runtime.tools.mcp import (
+    MCP_DEFAULT_TIMEOUT_S,
+    McpBoundaryError,
+    build_mcp_toolsets,
+    format_mcp_error,
+    jsonrpc_error,
+)
 from zaumzeug.runtime.tools.web_fetch import (
     FETCH_TIMEOUT_S,
     MAX_RESPONSE_BYTES,
@@ -18,14 +25,19 @@ from zaumzeug.runtime.tools.web_fetch import (
 
 __all__ = [
     "FETCH_TIMEOUT_S",
+    "MCP_DEFAULT_TIMEOUT_S",
     "MAX_RESPONSE_BYTES",
+    "McpBoundaryError",
     "WebFetch",
     "WebFetchError",
     "available_builtin_tool_ids",
     "build_builtin_tools",
+    "build_mcp_toolsets",
     "create_builtin_tool",
     "fetch_url",
+    "format_mcp_error",
     "is_public_host",
+    "jsonrpc_error",
     "validate_builtin_tool_ids",
     "validate_fetch_url",
 ]

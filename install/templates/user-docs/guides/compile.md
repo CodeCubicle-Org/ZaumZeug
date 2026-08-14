@@ -66,7 +66,7 @@ result = optimize_haystack_artifact(
 zaumzeug compile <harness> [--agent NAME] [--dry-run | --workflow-diagram-only]
 ```
 
-Use `--dry-run` to validate Phase 2 compile config, resolve `compile.module` imports, and print task/reflection model ids **without** running GEPA or writing artifacts (mirrors `zaumzeug serve --dry-run`).
+Use `--dry-run` to validate Phase 2 compile config, resolve `compile.module` imports, and print task/reflection model ids **without** running GEPA or writing artifacts (mirrors `zaumzeug serve --dry-run`). Each compile load imports from the **current** agent folder; the same dotted name (for example `modules.researcher:ResearchModule`) in another agent is not reused from a previous import in the same process.
 
 Use `--workflow-diagram-only` to regenerate `docs/workflow-diagram.md` (Mermaid flowchart from `workflow.yaml` + resolved agent models) without GEPA or LLM calls. Every full compile also refreshes that diagram.
 

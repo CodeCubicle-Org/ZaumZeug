@@ -10,7 +10,7 @@ from zaumzeug.doctor import run_doctor
 from zaumzeug.logging import configure_logging
 from zaumzeug.runtime.workflow import WorkflowError, run_workflow
 from zaumzeug.scaffold import ScaffoldError, init_harness
-from zaumzeug.serve import format_dry_run, run_serve, validate_serve
+from zaumzeug.serve import format_dry_run, run_mcp, run_serve, validate_serve
 from zaumzeug.serve.dry_run import dry_run_to_json
 
 
@@ -34,6 +34,13 @@ def _stub_command(name: str) -> Callable[[argparse.Namespace], int]:
         return 0
 
     return _run
+
+
+def _mcp_command(args: argparse.Namespace) -> int:
+    """Serve the harness as MCP at ``{host}:{mcp_port}/mcp`` (E7-S01)."""
+    configure_logging(verbose=args.verbose)
+    port: int | None = args.port
+    return run_mcp(args.harness_name, deploy=args.deploy, port=port)
 
 
 def _protocol_root_stub(name: str) -> Callable[[argparse.Namespace], int]:
@@ -354,23 +361,49 @@ def build_parser() -> argparse.ArgumentParser:
         cmd = sub.add_parser(name, help=f"{name} command (stub)")
         cmd.set_defaults(_handler=_stub_command(name))
 
-    for protocol in ("mcp", "acp"):
-        protocol_cmd = sub.add_parser(
-            protocol,
-            help=f"{protocol} command (stub; respects HARNESS_ROOT / --deploy)",
-        )
-        protocol_cmd.add_argument(
-            "harness_name",
-            nargs="?",
-            default=None,
-            help="harness name under usr-harnesses/ (or deploy/ with --deploy)",
-        )
-        protocol_cmd.add_argument(
-            "--deploy",
-            action="store_true",
-            help="load harness from deploy/<name>/ (or HARNESS_ROOT=deploy)",
-        )
-        protocol_cmd.set_defaults(_handler=_protocol_root_stub(protocol))
+    mcp_cmd = sub.add_parser(
+        "mcp",
+        help="serve harness as MCP at {host}:{mcp_port}/mcp",
+    )
+    mcp_cmd.add_argument(
+        "harness_name",
+        help="harness name under usr-harnesses/ (or deploy/ with --deploy)",
+    )
+    mcp_cmd.add_argument(
+        "--deploy",
+        action="store_true",
+        help="load harness from deploy/<name>/ (or HARNESS_ROOT=deploy)",
+    )
+    mcp_cmd.add_argument(
+        "--verbose",
+        action="store_true",
+        help="enable SDK and Haystack debug logging",
+    )
+    mcp_cmd.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        metavar="N",
+        help="override serve.hayhooks.mcp_port from harness.yaml",
+    )
+    mcp_cmd.set_defaults(_handler=_mcp_command)
+
+    acp_cmd = sub.add_parser(
+        "acp",
+        help="acp command (stub; respects HARNESS_ROOT / --deploy)",
+    )
+    acp_cmd.add_argument(
+        "harness_name",
+        nargs="?",
+        default=None,
+        help="harness name under usr-harnesses/ (or deploy/ with --deploy)",
+    )
+    acp_cmd.add_argument(
+        "--deploy",
+        action="store_true",
+        help="load harness from deploy/<name>/ (or HARNESS_ROOT=deploy)",
+    )
+    acp_cmd.set_defaults(_handler=_protocol_root_stub("acp"))
 
     deploy_cmd = sub.add_parser(
         "deploy",

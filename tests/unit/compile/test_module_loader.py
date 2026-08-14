@@ -134,6 +134,45 @@ def test_e4_s01_ac1_valid_module_loads(tmp_path: Path) -> None:
     assert type(instance).__name__ == "ResearchModule"
 
 
+def test_e4_s01_reloads_same_module_name_from_other_agent_dir(tmp_path: Path) -> None:
+    """Same compile.module name must load from the current agent folder, not sys.modules."""
+    first_dir, second_dir = tmp_path / "first", tmp_path / "second"
+
+    def _load(root: Path) -> Path:
+        harness_dir, agent_dir = _layout(
+            root,
+            agent_yaml={
+                "name": "researcher",
+                "compile": {"module": "modules.researcher:ResearchModule"},
+            },
+        )
+        written = _write_module(
+            agent_dir,
+            relative="modules/researcher.py",
+            source=VALID_MODULE_SOURCE,
+        )
+        instance = load_dspy_module(
+            harness_dir,
+            harness_name="example",
+            agent_name="researcher",
+        )
+        loaded_file = Path(sys.modules["modules.researcher"].__file__).resolve()
+        assert type(instance).__name__ == "ResearchModule"
+        assert loaded_file == written.resolve()
+        return loaded_file
+
+    try:
+        first_file = _load(first_dir)
+        second_file = _load(second_dir)
+    finally:
+        _purge_import("modules")
+        _purge_import("modules.researcher")
+
+    assert first_file != second_file
+    assert first_dir.resolve() in first_file.parents
+    assert second_dir.resolve() in second_file.parents
+
+
 def test_e4_s01_ac2_not_imported_on_serve_path() -> None:
     """AC-2: serve/runtime must not import DSPy, GEPA, or zaumzeug.compile."""
     offenders: list[str] = []

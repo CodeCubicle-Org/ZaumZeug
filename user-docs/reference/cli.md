@@ -132,6 +132,47 @@ Use this to isolate Haystack/Hayhooks issues from harness YAML or SDK wiring. Pr
 
 ---
 
+## `zaumzeug mcp`
+
+Serve the harness as an MCP server for Cursor, Claude Desktop, and other MCP hosts. The workflow **entry** agent is exposed as an MCP tool. External MCP servers declared in `tools.mcp` are wired into the agent as Haystack `MCPToolset`s.
+
+```bash
+zaumzeug mcp <harness> [--deploy] [--verbose] [--port N]
+```
+
+| Flag | Description |
+|---|---|
+| `--deploy` | Load harness **only** from `deploy/<name>/` (or `HARNESS_ROOT=deploy`); requires a valid `manifest.json` |
+| `--verbose` | Enable SDK and Haystack debug logging |
+| `--port N` | Override `serve.hayhooks.mcp_port` from harness.yaml (default **1417**) |
+
+**Bind:** `127.0.0.1` only (same Phase 1 localhost rule as `zaumzeug serve`).
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /mcp` | MCP Streamable HTTP (JSON-RPC 2.0) |
+| `GET /status` | Health check (`{"status": "ok"}`) |
+
+```bash
+zaumzeug mcp example
+# Cursor / Claude Desktop URL:
+# http://127.0.0.1:1417/mcp
+```
+
+Declare client MCP servers on an agent with `tools.mcp` in `agent.yaml` (stdio via `command`/`args`, or HTTP via `url`):
+
+```yaml
+tools:
+  mcp:
+    - name: filesystem
+      command: uv
+      args: ["run", "mcp-server-filesystem", "/workspace"]
+```
+
+`zaumzeug doctor` warns (non-blocking) when stdio MCP is configured but `uv` is not on PATH. MCP JSON-RPC errors use `{jsonrpc, error: {code, message, data}}` with `data.ok: false`.
+
+---
+
 ## `zaumzeug run`
 
 Execute `workflow.yaml` stages serially (multi-agent orchestration). Each agent stage loads that agent's config and merged `agents-models.yaml`, builds a Haystack Agent via the runtime factory, and forwards prior stage output as context to the next stage.
@@ -298,7 +339,7 @@ zaumzeug doctor [<harness>] [--deploy] [--verbose] [--json]
 | `--json` | Emit machine-readable JSON report |
 | `--deploy` | Validate deploy bundle under `deploy/` (or set `HARNESS_ROOT=deploy`) |
 
-**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig`, `deploy:` / `DeployConfig`, and `runtime:` / `RuntimeRetryConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. **Failing (blocking):** when `CURRENT_SDK_PHASE < 3`, agents declaring `tools.mcp` or `tools.custom` — `phase_gated_tools` fails in default **and** `--deploy` modes so doctor cannot green-light config that `zaumzeug run` would reject (E8-S07). Warnings (non-blocking): MCP without `uv` (only once MCP is phase-allowed), stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02), `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06), `zaumzeug eval --trace` for captured failures (E6-S05), `zaumzeug eval --base-url` for Mode C staging/debug (E6-S06), and `zaumzeug.eval.gepa_bridge` for failed-eval → train / optional DeepEval GEPA metrics (E6-S07).
+**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig`, `deploy:` / `DeployConfig`, and `runtime:` / `RuntimeRetryConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. **Failing (blocking):** when `CURRENT_SDK_PHASE < 3`, agents declaring `tools.custom` — `phase_gated_tools` fails in default **and** `--deploy` modes so doctor cannot green-light config that `zaumzeug run` would reject (E8-S07; `tools.mcp` is allowed as of E7-S01). Warnings (non-blocking): MCP without `uv` when stdio `tools.mcp` is configured, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02), `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06), `zaumzeug eval --trace` for captured failures (E6-S05), `zaumzeug eval --base-url` for Mode C staging/debug (E6-S06), and `zaumzeug.eval.gepa_bridge` for failed-eval → train / optional DeepEval GEPA metrics (E6-S07).
 
 Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack debug logs on serve, compile, eval, deploy, or run, use `--verbose` on those commands or `HARNESS_LOG_LEVEL` (`INFO` for run stage lifecycle; `DEBUG` for full request noise).
 

@@ -1,6 +1,6 @@
 # ZaumZeug — Architecture
 
-**Last updated:** 2026-08-01 (E8-S07 workflow run reliability — pull-forward Done)
+**Last updated:** 2026-08-14 (E7-S01 MCP tool configuration; E4-S01 module import isolation)
 
 **Related:** [PRD](prd.md) · [Ideation archive](ideation-stage.md) · [Stories index](stories/00-README.md)
 

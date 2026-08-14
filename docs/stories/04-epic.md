@@ -5,7 +5,7 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E4-S08 done — epic complete) |
+| **Last modified** | 2026-08-14 (E4-S01 module import isolation)
 | **Status** | Done (E4-S01–S08, 2026-07-28) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -76,12 +76,13 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC | Test |
 |---|---|
 | AC-1 | `tests/unit/compile/test_module_loader.py::test_e4_s01_ac1_valid_module_loads` |
+| AC-1 (isolation) | `tests/unit/compile/test_module_loader.py::test_e4_s01_reloads_same_module_name_from_other_agent_dir` |
 | AC-2 | `tests/unit/compile/test_module_loader.py::test_e4_s01_ac2_not_imported_on_serve_path` |
 | AC-3 | `tests/unit/compile/test_module_loader.py::test_e4_s01_ac3_invalid_path_actionable_error` |
 | AC-4 | `tests/unit/compile/test_module_loader.py::test_e4_s01_ac4_requires_dspy_module_subclass` |
 
 - [x] Every AC row above has a passing test or documented manual exception
-- [x] `pytest tests/unit/compile/test_module_loader.py -v` passes (4 passed, 0 skipped)
+- [x] `pytest tests/unit/compile/test_module_loader.py -v` passes (6 passed, 0 skipped)
 
 ### Definition of done
 
@@ -93,6 +94,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 - `zaumzeug.compile.module_loader.load_dspy_module()` resolves `compile.module` via `resolve_agent_compile`, prepends `agents/<name>/` to `sys.path`, imports `module.path:ClassName`, and requires a `dspy.Module` subclass.
 - Path segments reject traversal; post-import `__file__` must stay under the agent directory.
 - DSPy imported lazily in the loader only; AST check keeps `serve/` / `runtime/` free of `dspy` / `gepa` / `zaumzeug.compile`. CLI `compile` wired in E4-S02a (2026-07-28).
+- **2026-08-14:** Loader drops a stale `sys.modules` chain before import so the same `compile.module` name from another agent folder is not reused (`test_e4_s01_reloads_same_module_name_from_other_agent_dir`).
 
 ---
 

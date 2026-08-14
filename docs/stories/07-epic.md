@@ -5,8 +5,8 @@
 | **Document** | Epic E7 user stories |
 | **File** | `docs/stories/07-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
-| **Status** | Backlog |
+| **Last modified** | 2026-08-14 (E7-S01 Done) |
+| **Status** | In progress (E7-S01 Done 2026-08-14) |
 | **Build order** | **7 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -54,16 +54,16 @@ As a **harness developer**, I want MCP tools declared in yaml, so that my agent 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `tools.mcp` in yaml wires Haystack `MCPToolset`
-- [ ] **AC-2** `zaumzeug mcp <name>` serves MCP at `{host}:{mcp_port}/mcp`
-- [ ] **AC-3** Doctor warns when MCP configured but `uv` missing (non-blocking where applicable)
-- [ ] **AC-4** MCP errors return consistent shape per Architecture MCP boundary patterns
+- [x] **AC-1** `tools.mcp` in yaml wires Haystack `MCPToolset`
+- [x] **AC-2** `zaumzeug mcp <name>` serves MCP at `{host}:{mcp_port}/mcp`
+- [x] **AC-3** Doctor warns when MCP configured but `uv` missing (non-blocking where applicable)
+- [x] **AC-4** MCP errors return consistent shape per Architecture MCP boundary patterns
 
 ### Implementation tasks (build)
 
-- [ ] Extend config schema for `tools.mcp` entries
-- [ ] Implement MCP server boot in `src/zaumzeug/serve/mcp.py`
-- [ ] Add `mcp` subcommand to `src/zaumzeug/cli.py`
+- [x] Extend config schema for `tools.mcp` entries
+- [x] Implement MCP server boot in `src/zaumzeug/serve/mcp.py`
+- [x] Add `mcp` subcommand to `src/zaumzeug/cli.py`
 
 ### Verification (after build)
 
@@ -72,17 +72,23 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC | Test |
 |---|---|
 | AC-1 | `tests/integration/mcp/test_mcp_config.py::test_e7_s01_ac1_yaml_wires_mcp_toolset` |
+| AC-1 (schema) | `tests/unit/config/test_schemas.py::test_e7_s01_mcp_schema_and_mcp_port` |
 | AC-2 | `tests/integration/mcp/test_mcp_server.py::test_e7_s01_ac2_mcp_endpoint_serves` |
 | AC-3 | `tests/unit/cli/test_doctor.py::test_e7_s01_ac3_mcp_without_uv_warns` *(extends E2-S04)* |
 | AC-4 | `tests/integration/mcp/test_mcp_server.py::test_e7_s01_ac4_error_shape_consistent` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/mcp/ -v -k e7_s01` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/mcp/ -v -k e7_s01` passes
+- [x] Full suite `pytest tests -q` (2026-08-14): 314 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate)
 
 ### Definition of done
 
-- [ ] Documented endpoint in CLI reference and user-docs
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Documented endpoint in CLI reference and user-docs
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-14)
+
+Canonical detail: [50-story.md](epic-stories/50-story.md). `tools.mcp` → `MCPToolset`; `zaumzeug mcp` at `{mcp_port}/mcp` (default 1417); doctor `mcp_uv` warn for stdio without `uv`; JSON-RPC error envelope with `data.ok: false`.
 
 ---
 

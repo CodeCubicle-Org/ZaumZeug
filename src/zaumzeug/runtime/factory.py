@@ -22,6 +22,7 @@ from zaumzeug.config.resolver import (
 from zaumzeug.runtime.model_router import ModelRouter
 from zaumzeug.runtime.preprocess import PreprocessError, load_input_rewrite_template
 from zaumzeug.runtime.tools.catalog import build_builtin_tools
+from zaumzeug.runtime.tools.mcp import McpBoundaryError, build_mcp_toolsets
 
 _ARTIFACT_SYSTEM_PROMPT = Path("prompts") / "system.md"
 
@@ -90,9 +91,25 @@ def load_input_rewrite(resolution: ServeResolution) -> str | None:
         raise RuntimeFactoryError(str(exc)) from exc
 
 
+def _mcp_entries(agent_data: dict[str, Any]) -> list[Any]:
+    tools_section = agent_data.get("tools")
+    if not isinstance(tools_section, dict):
+        return []
+    mcp = tools_section.get("mcp")
+    if not isinstance(mcp, list):
+        return []
+    return list(mcp)
+
+
 def build_agent_tools(agent_data: dict[str, Any]) -> list[Any]:
-    """Build Haystack tools from ``tools.builtin`` in agent config."""
-    return build_builtin_tools(_builtin_tool_ids(agent_data))
+    """Build Haystack tools from ``tools.builtin`` and ``tools.mcp``."""
+    tools: list[Any] = []
+    tools.extend(build_builtin_tools(_builtin_tool_ids(agent_data)))
+    try:
+        tools.extend(build_mcp_toolsets(_mcp_entries(agent_data)))
+    except McpBoundaryError as exc:
+        raise RuntimeFactoryError(str(exc)) from exc
+    return tools
 
 
 def build_agent_bundle(

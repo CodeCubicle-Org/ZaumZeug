@@ -112,7 +112,7 @@ usr-harnesses/<harness-name>/
 | Prompts / skills | `agents/<agent-name>/prompts/`, `skills/` | Per-agent; GEPA-optimized |
 | Lifecycle hooks | `agents/<agent-name>/hooks.py` | Per-agent sensors |
 
-**Implementation (E4-S01, 2026-07-28):** Compile-time loader `zaumzeug.compile.module_loader.load_dspy_module()` imports `compile.module` relative to `agents/<agent-name>/` (prepends that directory to `sys.path`; rejects traversal). Expects `module.path:ClassName` pointing at a `dspy.Module` subclass under `modules/`. Not used by serve/runtime. Tests: `tests/unit/compile/test_module_loader.py`.
+**Implementation (E4-S01, 2026-07-28):** Compile-time loader `zaumzeug.compile.module_loader.load_dspy_module()` imports `compile.module` relative to `agents/<agent-name>/` (prepends that directory to `sys.path`; rejects traversal). Expects `module.path:ClassName` pointing at a `dspy.Module` subclass under `modules/`. Not used by serve/runtime. **2026-08-14:** drops a stale `sys.modules` chain before import so the same dotted name from another agent folder is not reused. Tests: `tests/unit/compile/test_module_loader.py`.
 
 **Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile <harness> [--agent]` validates Phase 2 `CompileConfig` on `agent.yaml`, loads the DSPy module, and preflights task/reflection LM ids against the merged registry + `.env` (`compile/runner.py`, `compile/gepa_runner.py`).
 

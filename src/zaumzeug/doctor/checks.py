@@ -379,16 +379,15 @@ def check_phase_gated_agent_tools(
     harness_name: str,
     harness_dir: Path,
 ) -> CheckResult:
-    """AC-5 (E8-S07): Fail when ``tools.mcp`` / ``tools.custom`` are used before Phase 3.
+    """Fail when remaining Phase-3 tool sections are used before they ship.
 
+    ``tools.mcp`` is allowed (E7-S01). ``tools.custom`` stays gated until E7-S02.
     Runs in default and ``--deploy`` modes so doctor cannot green-light config
     that ``run_workflow`` would reject. Does not strip phase-gated keys.
     """
     gated: list[str] = []
     if CURRENT_SDK_PHASE < 3:
         for agent_name, tools in _iter_agent_yaml_tools(harness_dir):
-            if tools.get("mcp"):
-                gated.append(f"agents/{agent_name}/agent.yaml: tools.mcp")
             if tools.get("custom"):
                 gated.append(f"agents/{agent_name}/agent.yaml: tools.custom")
 
@@ -400,7 +399,7 @@ def check_phase_gated_agent_tools(
             message=(
                 f"{listed} — unavailable until Phase 3 "
                 f"(CURRENT_SDK_PHASE={CURRENT_SDK_PHASE}). "
-                "Remove tools.mcp / tools.custom or wait for MCP/custom tool support."
+                "Remove tools.custom or wait for custom tool support."
             ),
             harness=harness_name,
         )
@@ -414,33 +413,36 @@ def check_phase_gated_agent_tools(
 
 
 def check_mcp_uv_presence(harness_name: str, harness_dir: Path) -> CheckResult:
-    """AC-2 (E2-S04b): Warn when MCP tools are configured but ``uv`` is missing.
+    """AC-3 (E7-S01) / AC-2 (E2-S04b): Warn when stdio MCP is configured but ``uv`` is missing.
 
-    When ``CURRENT_SDK_PHASE < 3``, does not claim MCP is ready — phase gating is
-    reported by :func:`check_phase_gated_agent_tools` instead (E8-S07 AC-5).
+    HTTP ``url`` entries do not require ``uv``. Non-blocking (exit 0).
     """
-    mcp_configured = False
+    stdio_configured = False
+    http_only = False
     for _agent_name, tools in _iter_agent_yaml_tools(harness_dir):
-        if tools.get("mcp"):
-            mcp_configured = True
-            break
+        mcp = tools.get("mcp")
+        if not isinstance(mcp, list) or not mcp:
+            continue
+        for item in mcp:
+            if not isinstance(item, dict):
+                continue
+            if item.get("command"):
+                stdio_configured = True
+            elif item.get("url"):
+                http_only = True
 
-    if not mcp_configured:
+    if not stdio_configured:
+        if http_only:
+            return CheckResult(
+                name="mcp_uv",
+                severity="pass",
+                message="HTTP MCP servers configured; `uv` is not required",
+                harness=harness_name,
+            )
         return CheckResult(
             name="mcp_uv",
             severity="pass",
             message="No MCP tools configured",
-            harness=harness_name,
-        )
-
-    if CURRENT_SDK_PHASE < 3:
-        return CheckResult(
-            name="mcp_uv",
-            severity="pass",
-            message=(
-                "tools.mcp is Phase 3; see phase_gated_tools check "
-                "(uv check applies once MCP is allowed)"
-            ),
             harness=harness_name,
         )
 

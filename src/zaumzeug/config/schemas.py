@@ -24,7 +24,6 @@ PHASE_GATED_FIELDS: dict[tuple[str, ...], int] = {
     ("serve", "acp"): 3,
     ("serve", "a2a"): 4,
     ("serve", "expose"): 4,
-    ("serve", "hayhooks", "mcp_port"): 3,
     ("serve", "hayhooks", "chainlit"): 3,
 }
 
@@ -62,11 +61,12 @@ def _reject_phase_gated_keys(
 
 
 class HayhooksConfig(BaseModel):
-    """Hayhooks bind settings under ``serve.hayhooks`` (Phase 1)."""
+    """Hayhooks bind settings under ``serve.hayhooks`` (Phase 1+)."""
 
     model_config = ConfigDict(extra="forbid")
 
     port: int = 1416
+    mcp_port: int = 1417
 
     @model_validator(mode="before")
     @classmethod
@@ -148,13 +148,52 @@ class AgentSectionConfig(BaseModel):
     artifact: str | None = None
 
 
+class McpServerConfig(BaseModel):
+    """One ``tools.mcp`` entry — stdio (``command``) or HTTP (``url``) (E7-S01)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    command: str | None = None
+    args: list[str] = Field(default_factory=list)
+    url: str | None = None
+    timeout_s: float = Field(default=30.0, gt=0)
+    tool_names: list[str] | None = None
+    env: dict[str, str] | None = None
+
+    @field_validator("name")
+    @classmethod
+    def _name_non_empty(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("`name` must be a non-empty MCP server name")
+        return value.strip()
+
+    @field_validator("command", "url")
+    @classmethod
+    def _strip_optional(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        stripped = value.strip()
+        return stripped or None
+
+    @model_validator(mode="after")
+    def _exactly_one_transport(self) -> McpServerConfig:
+        has_command = bool(self.command)
+        has_url = bool(self.url)
+        if has_command == has_url:
+            raise ValueError(
+                "each tools.mcp entry must have exactly one of `command` (stdio) or `url` (HTTP)"
+            )
+        return self
+
+
 class AgentToolsConfig(BaseModel):
     """``tools`` block in ``agent.yaml`` (Architecture §6.5)."""
 
     model_config = ConfigDict(extra="forbid")
 
     builtin: list[str] = Field(default_factory=list)
-    mcp: list[dict[str, Any]] | None = None
+    mcp: list[McpServerConfig] | None = None
     custom: list[str] | None = None
 
     @field_validator("builtin")
@@ -168,8 +207,6 @@ class AgentToolsConfig(BaseModel):
     @model_validator(mode="after")
     def _phase_gate_tool_sections(self) -> AgentToolsConfig:
         if CURRENT_SDK_PHASE < 3:
-            if self.mcp:
-                raise ValueError("`mcp` is Phase 3")
             if self.custom:
                 raise ValueError("`custom` is Phase 3")
         return self

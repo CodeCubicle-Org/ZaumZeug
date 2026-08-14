@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 complete for **E4** / **E6** / **E5** (2026-07-28 / 2026-07-29). Phase 4 pull-forward: **[E8-S07](docs/stories/epic-stories/64-story.md)** (workflow run reliability — `runtime.retry`, stage INFO logs, `output.format: json`, doctor phase-gated MCP fail) **done** (2026-08-01). Next: [E7-S01](docs/stories/epic-stories/50-story.md) (MCP tool configuration). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 complete for **E4** / **E6** / **E5** (2026-07-28 / 2026-07-29). Phase 4 pull-forward: **[E8-S07](docs/stories/epic-stories/64-story.md)** (workflow run reliability — `runtime.retry`, stage INFO logs, `output.format: json`, doctor fail on phase-gated `tools.custom`) **done** (2026-08-01). Phase 3 start: **[E7-S01](docs/stories/epic-stories/50-story.md)** (MCP tool configuration — `tools.mcp` → `MCPToolset`, `zaumzeug mcp`) **done** (2026-08-14). Next: [E7-S02](docs/stories/epic-stories/51-story.md) (custom tool loader). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -154,13 +154,13 @@ deepeval test run usr-harnesses/<name>/eval/   # Optional pytest scaffold (E6-S0
 zaumzeug deploy <harness>             # Doctor + eval gate + write deploy/<name>/ (E5-S01)
 zaumzeug deploy <harness> --eval-gate block  # Override deploy.eval_gate for one run
 zaumzeug init <name> --with-eval      # Scaffold harness + optional eval/ DeepEval tests (E6-S04)
+zaumzeug mcp <harness>                # Serve MCP at http://127.0.0.1:{mcp_port}/mcp (E7-S01; default 1417)
 ```
 
 **Planned:**
 
 ```bash
-zaumzeug mcp <harness>        # Serve via Model Context Protocol (E7)
-zaumzeug acp <harness>        # Agent Client Protocol adapter (E7)
+zaumzeug acp <harness>        # Agent Client Protocol adapter (E7-S05)
 ```
 
 ---

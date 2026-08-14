@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-08-01 (E8-S07 workflow run reliability — pull-forward Done)
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); next E7-S01
+**Last updated:** 2026-08-14 (E7-S01 MCP tool configuration; E4-S01 module import isolation)
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01 **Done** (2026-08-14); next E7-S02
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -310,7 +310,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 | ID | Feature | Acceptance criteria |
 |---|---|---|
-| E4.1 | DSPy module loader | **Done** (E4-S01, 2026-07-28) — `zaumzeug.compile.module_loader.load_dspy_module()` loads `compile.module` (`module.path:ClassName`) from `agents/<name>/agent.yaml`; safe agent-dir `sys.path`; validates `dspy.Module` subclass; compile-only (not on serve/runtime import graph). Tests: `tests/unit/compile/test_module_loader.py`. |
+| E4.1 | DSPy module loader | **Done** (E4-S01, 2026-07-28; import isolation 2026-08-14) — `zaumzeug.compile.module_loader.load_dspy_module()` loads `compile.module` (`module.path:ClassName`) from `agents/<name>/agent.yaml`; safe agent-dir `sys.path`; drops a stale `sys.modules` chain before import so the same dotted name from another agent folder is not reused; validates `dspy.Module` subclass; compile-only (not on serve/runtime import graph). Tests: `tests/unit/compile/test_module_loader.py`. |
 | E4.2 | GEPA compile | **Done** (E4-S02a+b, 2026-07-28) — Phase 2 `CompileConfig`; `zaumzeug compile` loads modules, preflights LMs, runs `dspy.GEPA` (stub for mock/CI), writes `artifacts/<run_id>/` + `current`. Tests: `-k e4_s02`. |
 | E4.3 | Export contract | **AC:** `dump_state()` maps to Haystack `system_prompt`, tool descriptions, pipeline Jinja templates; `artifact-manifest.json` per run; golden snapshot tests. Optional input rewrite template per agent. **E4-S03a Done** (2026-07-28); **E4-S03b Done** (2026-07-28) — runtime preprocess. |
 | E4.4 | Haystack GEPA evaluator (Pattern B) | **Done** (E4-S04, 2026-07-28) — `compile/gepa_adapter.py`: `HaystackGepaAdapter` + `optimize_haystack_artifact`; modes `single-task` \| `multi-task` \| `generalization`; `CompileConfig` `optimizer`/`mode`/`seed_artifact`. CLI `zaumzeug compile` remains Pattern A. Tests: `tests/unit/compile/test_gepa_adapter.py` (5 passed, 0 skipped). |
@@ -368,7 +368,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 | ID | Feature | Acceptance criteria |
 |---|---|---|
-| E7.1 | MCP tool config | **AC:** `tools.mcp` in yaml wires `MCPToolset`; `zaumzeug mcp` serves `{port}/mcp`. (Protocols: [Architecture §9](architecture/06-runtime-and-protocols.md#9-client-access-and-protocols).) |
+| E7.1 | MCP tool config | **Done** (E7-S01, 2026-08-14). Typed `tools.mcp` (`command` xor `url`) wires Haystack `MCPToolset`; `zaumzeug mcp` serves `{host}:{mcp_port}/mcp` (default **1417**); doctor `mcp_uv` warns on stdio MCP without `uv`; JSON-RPC errors use `{jsonrpc, error: {code, message, data}}` with `data.ok: false`. (Protocols: [Architecture §9](architecture/06-runtime-and-protocols.md#9-client-access-and-protocols).) |
 | E7.2 | Custom tool loader | **AC:** `tools.custom` imports from harness folder; registered as Haystack tools. |
 | E7.3 | Cursor MCP setup | **AC:** Documented `mcp.json` → `http://localhost:{mcp_port}/mcp`; install may write `.cursor/mcp.json.example` or `--cursor-mcp` for live file. |
 | E7.4 | Chainlit | **AC:** `serve.hayhooks.chainlit: true` serves `/chat` on same port (embedded GUI). |
@@ -377,7 +377,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E7.7 | Extended builtin catalog | **AC:** Phase 3 builtins beyond `web_fetch` per [Architecture §6.5](architecture/05-configuration.md#65-builtin-tools-catalog). |
 | E7.8 | Web client layouts | **AC:** Document co-located deployment patterns (Chainlit embedded, Open WebUI + Hayhooks, SPA + Nginx proxy) per [Architecture §9.4](architecture/06-runtime-and-protocols.md#94-web-deployment-layouts). |
 
-**Story seeds:** MCP integration test with stub transport; tool correctness eval when DeepEval present.
+**Story seeds:** MCP integration tests **Done** (E7-S01 — `tests/integration/mcp/`, Starlette `TestClient`; no extra stub-transport pin). Remaining: custom tools (E7-S02); Cursor `mcp.json` (E7-S03); tool correctness eval when DeepEval present.
 
 ---
 
@@ -393,7 +393,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E8.4 | Optional A2A | **AC:** `serve.a2a: true` hosts agent card (if prioritized). |
 | E8.5 | Dockerfile template | **AC:** Optional generated `deploy/<name>/Dockerfile`. |
 | E8.6 | DeepEval production observe | **AC:** Optional `@observe` + Confident AI sync (opt-in). |
-| E8.7 | Workflow run reliability | **Done** (E8-S07, 2026-08-01). **`zaumzeug run` / `run_workflow` only** (serve/HTTP follow-up). Live generation → typed `WorkflowError` with stage context; `runtime.retry` (`max_attempts >= 1`, default 1; build once; retry `Agent.run` / JSON parse); INFO `log_request` with structured `stage`; optional `output.format: json` (fence strip; no JSON Schema); doctor + `doctor --deploy` fail on phase-gated `tools.mcp` / `tools.custom`. Story: [64-story.md](stories/epic-stories/64-story.md). |
+| E8.7 | Workflow run reliability | **Done** (E8-S07, 2026-08-01). **`zaumzeug run` / `run_workflow` only** (serve/HTTP follow-up). Live generation → typed `WorkflowError` with stage context; `runtime.retry` (`max_attempts >= 1`, default 1; build once; retry `Agent.run` / JSON parse); INFO `log_request` with structured `stage`; optional `output.format: json` (fence strip; no JSON Schema); doctor + `doctor --deploy` fail on phase-gated `tools.custom` (`tools.mcp` allowed as of E7-S01). Story: [64-story.md](stories/epic-stories/64-story.md). |
 
 ---
 
@@ -410,7 +410,8 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 | `zaumzeug compile [--workflow-diagram-only]` | 2 | E4 |
 | `zaumzeug deploy` | 2 | E5 |
 | `zaumzeug eval` | 2 | E6 (optional) |
-| `zaumzeug mcp` / `zaumzeug acp` | 3 | E7 (`HARNESS_ROOT=deploy` stub wiring **Done** E5-S04; full protocol → E7) |
+| `zaumzeug mcp` | 3 | E7 **Done** E7-S01 (2026-08-14); `HARNESS_ROOT=deploy` / `--deploy` honour E5-S04; full deploy-bundle story E7-S06 |
+| `zaumzeug acp` | 3 | E7 (`HARNESS_ROOT=deploy` stub wiring **Done** E5-S04; full protocol → E7-S05) |
 
 **Future commands (not Phase 1–4 v1):** `zaumzeug export <name>` (tarball of `deploy/`); `zaumzeug replay <name> --trace` (trace replay); `zaumzeug install-project` (PyPI consumer scaffold — [E1-S08](stories/epic-stories/25-story.md); deferred until package publish).
 

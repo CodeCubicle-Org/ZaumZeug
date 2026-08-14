@@ -69,7 +69,10 @@ class AgentPipelineWrapper(BasePipelineWrapper):
         self.pipeline = self._agent
 
     def run_api(self, question: str) -> str:
-        """Handle ``POST /{pipeline}/run``."""
+        """Run the harness entry agent with a user question.
+
+        Exposed as an MCP tool when serving via ``zaumzeug mcp``.
+        """
         text = preprocess_user_text(self._input_rewrite_template, question)
         result = self._agent.run(messages=[ChatMessage.from_user(text)])
         return _assistant_text(result)
@@ -139,6 +142,7 @@ def _register_agent_pipeline(
     agent: Agent,
     router: ModelRouter,
     input_rewrite_template: str | None = None,
+    skip_mcp: bool = True,
 ) -> AgentPipelineWrapper:
     """Register a factory-built agent as a Hayhooks pipeline (OpenAI + /run)."""
     if registry.get(pipeline_name) is not None:
@@ -159,7 +163,7 @@ def _register_agent_pipeline(
         metadata={
             "description": f"ZaumZeug harness entry agent ({pipeline_name})",
             "request_model": None,
-            "skip_mcp": True,
+            "skip_mcp": skip_mcp,
             "skip_a2a": True,
             "a2a_card": None,
         },

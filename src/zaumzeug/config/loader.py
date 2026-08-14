@@ -106,7 +106,7 @@ def strip_eval_for_doctor_validation(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def strip_phase_gated_agent_tools(data: dict[str, Any]) -> dict[str, Any]:
-    """Remove phase-gated ``tools`` keys before workflow cross-validation in Phase 1."""
+    """Remove remaining phase-gated ``tools`` keys before workflow cross-validation."""
     stripped = dict(data)
     tools = stripped.get("tools")
     if not isinstance(tools, dict):
@@ -114,7 +114,6 @@ def strip_phase_gated_agent_tools(data: dict[str, Any]) -> dict[str, Any]:
 
     tools_copy = dict(tools)
     if CURRENT_SDK_PHASE < 3:
-        tools_copy.pop("mcp", None)
         tools_copy.pop("custom", None)
     stripped["tools"] = tools_copy
     return stripped

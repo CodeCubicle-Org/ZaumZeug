@@ -206,3 +206,58 @@ def test_e4_s02a_ac1_phase2_compile_schema_validates(tmp_path: Path) -> None:
     assert "budget" in str(conflict_info.value).lower() or "exactly one" in str(
         conflict_info.value
     ).lower()
+
+
+# --- E7-S01 / E7.1 ---
+
+
+def test_e7_s01_mcp_schema_and_mcp_port(tmp_path: Path) -> None:
+    """tools.mcp entries and serve.hayhooks.mcp_port validate (E7-S01)."""
+    from zaumzeug.config.schemas import McpServerConfig
+
+    path = _write_yaml(
+        tmp_path / "agent.yaml",
+        {
+            "name": "researcher",
+            "agent": {"system_prompt": "prompts/system.md"},
+            "tools": {
+                "mcp": [
+                    {
+                        "name": "filesystem",
+                        "command": "uv",
+                        "args": ["run", "mcp-server-filesystem", "/workspace"],
+                    }
+                ]
+            },
+        },
+    )
+    config = load_agent_config(path)
+    assert config.tools is not None
+    assert config.tools.mcp is not None
+    assert len(config.tools.mcp) == 1
+    entry = config.tools.mcp[0]
+    assert isinstance(entry, McpServerConfig)
+    assert entry.name == "filesystem"
+    assert entry.command == "uv"
+
+    harness_path = _write_yaml(
+        tmp_path / "harness.yaml",
+        {"name": "example", "serve": {"hayhooks": {"port": 1416, "mcp_port": 1417}}},
+    )
+    harness = load_harness(harness_path)
+    assert harness.serve is not None
+    assert harness.serve.hayhooks is not None
+    assert harness.serve.hayhooks.mcp_port == 1417
+
+    both = _write_yaml(
+        tmp_path / "bad-agent.yaml",
+        {
+            "name": "researcher",
+            "tools": {
+                "mcp": [{"name": "broken", "command": "uv", "url": "http://localhost:9/mcp"}]
+            },
+        },
+    )
+    with pytest.raises(ConfigValidationError) as exc_info:
+        load_agent_config(both)
+    assert "command" in str(exc_info.value).lower() or "url" in str(exc_info.value).lower()

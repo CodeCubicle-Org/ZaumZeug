@@ -33,6 +33,8 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 **Implementation (E3-S02, 2026-07-20):** `src/zaumzeug/serve/runner.py` — `validate_serve()` → `build_agent()` → Hayhooks `create_app` / `run_app` on `127.0.0.1` and `serve.hayhooks.port`. OpenAI routes via Hayhooks registry (`/v1/chat/completions`, `GET /v1/models`). Production `--deploy` path closed by [E5-S03](../stories/epic-stories/43-story.md) (2026-07-28).
 
+**Implementation (E7-S01, 2026-08-14):** `src/zaumzeug/serve/mcp.py` — `zaumzeug mcp <name>` validates like serve, builds the entry agent, registers it with `skip_mcp=False`, and starts Hayhooks MCP (`create_mcp_server` / `create_starlette_app`) on `127.0.0.1`:`serve.hayhooks.mcp_port` (default 1417). Endpoints: `POST /mcp`, `GET /status`. Malformed `POST /mcp` returns JSON-RPC 2.0 `{jsonrpc, error: {code, message, data}}` with `data.ok: false`. `zaumzeug serve` keeps `skip_mcp=True`. `tools.mcp` → Haystack `MCPToolset` in `runtime/tools/mcp.py`. Tests: `tests/integration/mcp/` (`-k e7_s01`).
+
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract tests on ephemeral localhost port; optional request `model_id` overrides the entry agent's ModelRouter registry (`AgentPipelineWrapper`). Tests: `tests/integration/test_openai_contract.py` (`-k e3_s07`).
 
 **Implementation (E3-S08, 2026-07-21):** `src/zaumzeug/runtime/workflow.py` — `run_workflow()` executes `workflow.yaml` stages serially; per-stage `ModelRouter` + `build_agent()`; prior stage output prepended as a user message; `--from <stage>` partial runs; pipeline stages raise a Phase-1 stub error (full invoke Phase 4). CLI: `zaumzeug run <harness> [--from STAGE] [--input TEXT]`. Tests: `tests/integration/test_workflow_run.py` (`-k e3_s08`).
@@ -49,7 +51,7 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 |---|---|
 | `zaumzeug init <name>` | Scaffold `usr-harnesses/<name>/` from template ([E1-S04](../stories/epic-stories/21-story.md)); `--force` overwrites |
 | `zaumzeug install-project` | **Deferred** — PyPI consumer scaffold (no editable install); after package publish ([E1-S08](../stories/epic-stories/25-story.md)) |
-| `zaumzeug serve <harness>` | Interactive: workflow `entry` agent via Hayhooks (`/v1/chat/completions`, optional MCP/ACP) |
+| `zaumzeug mcp <harness>` | Hayhooks MCP Streamable HTTP on `serve.hayhooks.mcp_port` (default **1417**) — `{host}:{mcp_port}/mcp` ✅ (E7-S01) |
 | `zaumzeug serve <harness> --deploy` | Same OpenAI REST as dev serve, loads **only** `deploy/<name>/` (manifest required; no `usr-harnesses/`) ([E5-S03](../stories/epic-stories/43-story.md)) |
 | `HARNESS_ROOT=deploy` | Env equivalent of `--deploy` for serve / mcp / acp (and doctor / run); preferred in containers / systemd ([E5-S04](../stories/epic-stories/44-story.md)) |
 | `zaumzeug serve <harness> --dry-run` | Validate `harness.yaml`, `workflow.yaml`, and resolved paths; print summary — no Hayhooks bind, no LLM ([E2-S05](../stories/epic-stories/06-story.md), [E2-S07](../stories/epic-stories/08-story.md)); combine with `--deploy` for production bundles |

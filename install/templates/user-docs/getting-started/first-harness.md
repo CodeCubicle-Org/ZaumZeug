@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | New developers |
-| **Last updated** | 2026-08-01 |
+| **Last updated** | 2026-08-14 |
 
 This walkthrough uses the shipped **`example`** harness — a general research agent with one workflow stage and the mock model profile. You can chat locally without API keys. Phase 2 also ships a compile seed (`compile.module` + train/val data) so `zaumzeug compile example` works offline via stub GEPA.
 
@@ -53,6 +53,8 @@ From the project root (after install / editable SDK setup):
 ```bash
 zaumzeug doctor example
 zaumzeug serve example
+# MCP for Cursor / Claude Desktop (default port 1417):
+# zaumzeug mcp example
 # or batch all workflow stages (mock):
 # HARNESS_LOG_LEVEL=INFO zaumzeug run example --input "Summarize this topic"
 ```

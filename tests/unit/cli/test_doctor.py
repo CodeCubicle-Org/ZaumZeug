@@ -234,12 +234,7 @@ def test_e2_s04_ac8_mcp_without_uv_warns(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """AC-2 (E2-S04b): warn when MCP is configured but uv is missing.
-
-    Preserved for Phase 3+; CURRENT_SDK_PHASE is patched so phase-gated
-    tools do not fail first (E8-S07 owns pre-Phase-3 failure).
-    """
-    monkeypatch.setattr("zaumzeug.doctor.checks.CURRENT_SDK_PHASE", 3)
+    """AC-2 (E2-S04b): warn when MCP is configured but uv is missing."""
     project_root = tmp_path / "project"
     _minimal_harness(
         project_root,
@@ -270,11 +265,19 @@ def test_e2_s04_ac8_mcp_without_uv_warns(
     assert direct.severity == "warn"
 
 
+def test_e7_s01_ac3_mcp_without_uv_warns(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-3 (E7-S01): doctor warns when MCP configured but ``uv`` is missing (non-blocking)."""
+    test_e2_s04_ac8_mcp_without_uv_warns(tmp_path, monkeypatch)
+
+
 def test_e8_s07_ac5_phase_gated_mcp_fails_not_false_pass(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """AC-5: phase-gated tools.mcp fails; mcp_uv must not false-green."""
+    """AC-5: phase-gated tools.custom fails; mcp_uv must not false-green MCP."""
     project_root = tmp_path / "project"
     _minimal_harness(
         project_root,
@@ -282,13 +285,7 @@ def test_e8_s07_ac5_phase_gated_mcp_fails_not_false_pass(
             "name": "researcher",
             "agent": {"system_prompt": "prompts/system.md"},
             "tools": {
-                "mcp": [
-                    {
-                        "name": "filesystem",
-                        "command": "uv",
-                        "args": ["run", "mcp-server-filesystem", "/workspace"],
-                    }
-                ]
+                "custom": ["tools.my_tool:MyTool"],
             },
         },
     )
@@ -302,6 +299,7 @@ def test_e8_s07_ac5_phase_gated_mcp_fails_not_false_pass(
     assert gated
     assert gated[0].severity == "fail"
     assert "Phase 3" in gated[0].message
+    assert "tools.custom" in gated[0].message
     assert report.exit_code != 0
 
     mcp_uv = [c for c in report.checks if c.name == "mcp_uv"]
@@ -313,7 +311,7 @@ def test_e8_s07_ac5_phase_gated_mcp_fails_not_false_pass(
 
 
 def test_e8_s07_ac5_phase_gated_mcp_fails_in_deploy_mode(tmp_path: Path) -> None:
-    """AC-5: phase-gated tools.mcp fails under doctor --deploy too."""
+    """AC-5: phase-gated tools.custom fails under doctor --deploy too."""
     import json
 
     from zaumzeug.config.resolver import ARTIFACT_MANIFEST
@@ -335,13 +333,7 @@ def test_e8_s07_ac5_phase_gated_mcp_fails_in_deploy_mode(tmp_path: Path) -> None
             "name": "researcher",
             "agent": {"artifact": "artifacts/20260624-001"},
             "tools": {
-                "mcp": [
-                    {
-                        "name": "filesystem",
-                        "command": "uv",
-                        "args": ["run", "mcp-server-filesystem", "/tmp"],
-                    }
-                ]
+                "custom": ["tools.my_tool:MyTool"],
             },
         },
     )

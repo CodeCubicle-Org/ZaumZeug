@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/50-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-08-14 |
 | **Story ID** | E7-S01 |
+| **Status** | Done (2026-08-14) |
 | **Epic** | [E7 — Tools, MCP, and ACP](../07-epic.md) |
 | **Phase** | 3 |
 | **Epic build order** | 7 of 8 |
@@ -57,16 +58,16 @@ tools:
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `tools.mcp` in yaml wires Haystack `MCPToolset`
-- [ ] **AC-2** `zaumzeug mcp <name>` serves MCP at `{host}:{mcp_port}/mcp`
-- [ ] **AC-3** Doctor warns when MCP configured but `uv` missing (non-blocking where applicable)
-- [ ] **AC-4** MCP errors return consistent shape per Architecture MCP boundary patterns
+- [x] **AC-1** `tools.mcp` in yaml wires Haystack `MCPToolset`
+- [x] **AC-2** `zaumzeug mcp <name>` serves MCP at `{host}:{mcp_port}/mcp`
+- [x] **AC-3** Doctor warns when MCP configured but `uv` missing (non-blocking where applicable)
+- [x] **AC-4** MCP errors return consistent shape per Architecture MCP boundary patterns
 
 ### Implementation tasks (build)
 
-- [ ] Extend config schema for `tools.mcp` entries
-- [ ] Implement MCP server boot in `src/zaumzeug/serve/mcp.py`
-- [ ] Add `mcp` subcommand to `src/zaumzeug/cli.py`
+- [x] Extend config schema for `tools.mcp` entries
+- [x] Implement MCP server boot in `src/zaumzeug/serve/mcp.py`
+- [x] Add `mcp` subcommand to `src/zaumzeug/cli.py`
 
 ### Verification (after build)
 
@@ -75,16 +76,26 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC | Test |
 |---|---|
 | AC-1 | `tests/integration/mcp/test_mcp_config.py::test_e7_s01_ac1_yaml_wires_mcp_toolset` |
+| AC-1 (schema) | `tests/unit/config/test_schemas.py::test_e7_s01_mcp_schema_and_mcp_port` |
 | AC-2 | `tests/integration/mcp/test_mcp_server.py::test_e7_s01_ac2_mcp_endpoint_serves` |
 | AC-3 | `tests/unit/cli/test_doctor.py::test_e7_s01_ac3_mcp_without_uv_warns` *(extends E2-S04b)* |
 | AC-4 | `tests/integration/mcp/test_mcp_server.py::test_e7_s01_ac4_error_shape_consistent` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/mcp/ -v -k e7_s01` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/mcp/ -v -k e7_s01` passes
+- [x] Full suite `pytest tests -q` (2026-08-14): 314 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate)
 
 ### Definition of done
 
-- [ ] Documented endpoint in CLI reference and user-docs
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Documented endpoint in CLI reference and user-docs
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-14)
+
+- `McpServerConfig`: `name` + exactly one of `command` (stdio) or `url` (HTTP); optional `args`, `timeout_s` (default 30), `tool_names`, `env`. `HayhooksConfig.mcp_port` default **1417** (removed from `PHASE_GATED_FIELDS`). `tools.mcp` unblocked; `tools.custom` still gated until E7-S02. `CURRENT_SDK_PHASE` stays **1**.
+- Runtime: `runtime/tools/mcp.py` builds Haystack `MCPToolset` (`eager_connect=False`, 30s timeouts) from `tools.mcp`; factory appends toolsets to builtins.
+- Serve: `serve/mcp.py` (`prepare_mcp` / `run_mcp`) registers the entry pipeline with `skip_mcp=False`; Hayhooks `create_mcp_server` + `create_starlette_app`; bind `127.0.0.1` only. `zaumzeug serve` keeps `skip_mcp=True`. Malformed `POST /mcp` returns JSON-RPC 2.0 `{jsonrpc, error: {code, message, data}}` with `data.ok: false`.
+- CLI: `zaumzeug mcp <harness> [--deploy] [--verbose] [--port N]`. Doctor `mcp_uv` warns (non-blocking) when stdio MCP is configured and `uv` is missing; HTTP-only MCP does not require `uv`.
+- Compile follow-up (same session): DSPy loader drops stale `sys.modules` before import — [E4-S01](26-story.md).
 
 ---

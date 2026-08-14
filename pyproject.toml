@@ -26,6 +26,8 @@ dependencies = [
   "httpx",
   "jinja2",
   "litellm",
+  "mcp>=1.8.0,<2",
+  "mcp-haystack",
   "pydantic>=2",
   "pyyaml",
 ]

@@ -134,7 +134,8 @@ def run_doctor(
             if harness_cfg.serve and harness_cfg.serve.hayhooks:
                 port = harness_cfg.serve.hayhooks.port
         checks.append(check_port_conflict(name, port=port))
-        # Phase-gated mcp/custom must fail in default and --deploy (E8-S07 AC-5).
+        # Phase-gated custom tools must fail in default and --deploy (E8-S07).
+        # tools.mcp is allowed (E7-S01); uv presence is a separate warn.
         checks.append(check_phase_gated_agent_tools(name, harness_dir))
         if not deploy_mode:
             checks.append(check_mcp_uv_presence(name, harness_dir))

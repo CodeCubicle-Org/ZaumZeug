@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/26-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 |
+| **Last modified** | 2026-08-14 (module import isolation)
 | **Story ID** | E4-S01 |
 | **Status** | Done |
 | **Epic** | [E4 — Compile and GEPA Pipeline](../04-epic.md) |
@@ -78,12 +78,13 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC | Test |
 |---|---|
 | AC-1 | `tests/unit/compile/test_module_loader.py::test_e4_s01_ac1_valid_module_loads` |
+| AC-1 (isolation) | `tests/unit/compile/test_module_loader.py::test_e4_s01_reloads_same_module_name_from_other_agent_dir` |
 | AC-2 | `tests/unit/compile/test_module_loader.py::test_e4_s01_ac2_not_imported_on_serve_path` |
 | AC-3 | `tests/unit/compile/test_module_loader.py::test_e4_s01_ac3_invalid_path_actionable_error` |
 | AC-4 | `tests/unit/compile/test_module_loader.py::test_e4_s01_ac4_requires_dspy_module_subclass` |
 
 - [x] Every AC row above has a passing test or documented manual exception
-- [x] `pytest tests/unit/compile/test_module_loader.py -v` passes (4 passed, 0 skipped)
+- [x] `pytest tests/unit/compile/test_module_loader.py -v` passes (6 passed, 0 skipped)
 
 ### Definition of done
 
@@ -96,5 +97,10 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 - Path segments reject traversal (`..`, separators); post-import `__file__` must stay under the agent directory.
 - DSPy is imported lazily inside the loader only; `serve/` and `runtime/` stay free of `dspy` / `gepa` / `zaumzeug.compile` (AST-checked). CLI `compile` + GEPA runner completed in [E4-S02a](27.1-story.md) / [E4-S02b](27.2-story.md) (2026-07-28).
 - Public exports: `load_dspy_module`, `load_dspy_module_from_resolution`, `parse_compile_module_ref`, `ModuleLoaderError` from `zaumzeug.compile`.
+
+### Implementation notes (2026-08-14)
+
+- Before `import_module`, the loader calls `importlib.invalidate_caches()` and drops the cached dotted name plus ancestor packages (`_drop_cached_import_chain`). Generic names such as `modules.researcher` must resolve from the **current** agent folder, not a prior harness (or pytest tmp dir) left in `sys.modules`.
+- Isolation test: `test_e4_s01_reloads_same_module_name_from_other_agent_dir`. Full suite 2026-08-14: 314 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate).
 
 ---
