@@ -22,6 +22,7 @@ from zaumzeug.config.resolver import (
 from zaumzeug.runtime.model_router import ModelRouter
 from zaumzeug.runtime.preprocess import PreprocessError, load_input_rewrite_template
 from zaumzeug.runtime.tools.catalog import build_builtin_tools
+from zaumzeug.runtime.tools.custom import CustomToolError, build_custom_tools
 from zaumzeug.runtime.tools.mcp import McpBoundaryError, build_mcp_toolsets
 
 _ARTIFACT_SYSTEM_PROMPT = Path("prompts") / "system.md"
@@ -101,14 +102,38 @@ def _mcp_entries(agent_data: dict[str, Any]) -> list[Any]:
     return list(mcp)
 
 
-def build_agent_tools(agent_data: dict[str, Any]) -> list[Any]:
-    """Build Haystack tools from ``tools.builtin`` and ``tools.mcp``."""
+def _custom_entries(agent_data: dict[str, Any]) -> list[Any]:
+    tools_section = agent_data.get("tools")
+    if not isinstance(tools_section, dict):
+        return []
+    custom = tools_section.get("custom")
+    if not isinstance(custom, list):
+        return []
+    return list(custom)
+
+
+def build_agent_tools(
+    agent_data: dict[str, Any],
+    *,
+    agent_dir: Path | str | None = None,
+) -> list[Any]:
+    """Build Haystack tools from ``tools.builtin``, ``tools.mcp``, and ``tools.custom``."""
     tools: list[Any] = []
     tools.extend(build_builtin_tools(_builtin_tool_ids(agent_data)))
     try:
         tools.extend(build_mcp_toolsets(_mcp_entries(agent_data)))
     except McpBoundaryError as exc:
         raise RuntimeFactoryError(str(exc)) from exc
+    custom_entries = _custom_entries(agent_data)
+    if custom_entries:
+        if agent_dir is None:
+            raise RuntimeFactoryError(
+                "tools.custom requires the agent directory to import modules"
+            )
+        try:
+            tools.extend(build_custom_tools(custom_entries, agent_dir=agent_dir))
+        except CustomToolError as exc:
+            raise RuntimeFactoryError(str(exc)) from exc
     return tools
 
 
@@ -127,7 +152,10 @@ def build_agent_bundle(
         agent_name=agent_name,
     )
     agent_config = load_agent_config(resolution.agent_yaml_path)
-    tools = build_agent_tools(agent_config.model_dump(exclude_none=True))
+    tools = build_agent_tools(
+        agent_config.model_dump(exclude_none=True),
+        agent_dir=resolution.agent_yaml_path.parent,
+    )
     system_prompt = load_system_prompt(resolution)
     input_rewrite_template = load_input_rewrite(resolution)
     chat_generator = router.build_generator(agent_config.default_model_id)
@@ -154,7 +182,8 @@ def build_agent(
     """Build a single Haystack ``Agent`` from harness config and a stage-scoped router.
 
     Shared by serve, MCP, and ACP (E3-S02+) — one factory, no nested agent loops.
-    Uses ``resolve_agent_serve()`` (E2-S03) and the builtin tool catalog (E3-S03).
+    Uses ``resolve_agent_serve()`` (E2-S03), the builtin tool catalog (E3-S03),
+    MCP toolsets (E7-S01), and custom tools from ``agents/<name>/tools/`` (E7-S02).
     Prefer :func:`build_agent_bundle` when the caller needs ``input_rewrite``.
     """
     return build_agent_bundle(

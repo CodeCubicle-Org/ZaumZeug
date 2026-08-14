@@ -49,6 +49,7 @@ from zaumzeug.doctor.project import find_project_root
 from zaumzeug.doctor.report import DoctorReport
 from zaumzeug.doctor.runner import run_doctor
 from zaumzeug.eval.runner import EvalError, EvalResult, format_eval_result, run_eval
+from zaumzeug.runtime.tools.custom import CustomToolError, custom_tool_source_rel
 
 __all__ = [
     "DEFAULT_EVAL_GATE",
@@ -450,7 +451,10 @@ def _copy_runtime_tools_and_hooks(
             for entry in custom:
                 if not isinstance(entry, str) or not entry.strip():
                     continue
-                rel = entry.strip().replace("\\", "/")
+                try:
+                    rel = custom_tool_source_rel(entry.strip())
+                except CustomToolError:
+                    rel = entry.strip().replace("\\", "/")
                 src = src_agent_dir / rel
                 if not src.is_file():
                     raise DeployError(

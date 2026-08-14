@@ -4,6 +4,7 @@
 # Story: E4-S05 / E4.5
 # Story: E4-S07
 # Story: E4-S08 / E4.7
+# Story: E7-S02 / E7.2
 """E2-S04 — `zaumzeug doctor` checks (integration); E4-S05/S07/S08 artifact/diagram checks."""
 
 from __future__ import annotations
@@ -629,3 +630,47 @@ def test_e4_s07_ac2_doctor_validates_pinned_manifest(tmp_path: Path) -> None:
     assert pin_pass
     assert run_b in pin_pass[0].message
     assert aligned.exit_code == 0
+
+
+def test_e7_s02_ac3_import_error_at_doctor(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-3: custom tool import errors fail doctor with the module path."""
+    monkeypatch.chdir(tmp_path)
+    project_root = tmp_path / "project"
+    agent_yaml = {
+        "name": "researcher",
+        "default_model_id": "mock",
+        "agent": {"system_prompt": "prompts/system.md"},
+        "tools": {"custom": ["tools.broken"]},
+    }
+    agent_models = {
+        "default_model_id": "mock",
+        "models": {
+            "mock": {"provider": "mock", "model": "harness-fixture"},
+        },
+    }
+    _harness_layout(
+        project_root,
+        harness_name="example",
+        agent_yaml=agent_yaml,
+        agent_models=agent_models,
+    )
+    tools_dir = project_root / "usr-harnesses" / "example" / "agents" / "researcher" / "tools"
+    tools_dir.mkdir(parents=True, exist_ok=True)
+    (tools_dir / "__init__.py").write_text("", encoding="utf-8")
+    (tools_dir / "broken.py").write_text(
+        "import definitely_not_a_zaumzeug_module_e7s02  # noqa: F401\n",
+        encoding="utf-8",
+    )
+
+    report = run_doctor(harness_name="example", project_root=project_root)
+    custom_fails = [
+        c for c in report.checks if c.name == "custom_tools" and c.severity == "fail"
+    ]
+    assert custom_fails
+    message = custom_fails[0].message
+    assert "tools.broken" in message
+    assert "broken.py" in message or str(tools_dir / "broken.py") in message
+    assert report.exit_code != 0

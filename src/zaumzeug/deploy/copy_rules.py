@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any, Literal
 
+from zaumzeug.runtime.tools.custom import CustomToolError, custom_tool_source_rel
+
 __all__ = [
     "ALWAYS_INCLUDED_HARNESS_FILES",
     "CopyEntry",
@@ -174,7 +176,10 @@ def _custom_tool_refs(agent_data: Mapping[str, Any]) -> list[str]:
     refs: list[str] = []
     for entry in custom:
         if isinstance(entry, str) and entry.strip():
-            refs.append(_posix(entry.strip()))
+            try:
+                refs.append(custom_tool_source_rel(entry.strip()))
+            except CustomToolError:
+                refs.append(_posix(entry.strip()))
     return list(dict.fromkeys(refs))
 
 

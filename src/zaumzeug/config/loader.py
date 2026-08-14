@@ -106,17 +106,12 @@ def strip_eval_for_doctor_validation(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def strip_phase_gated_agent_tools(data: dict[str, Any]) -> dict[str, Any]:
-    """Remove remaining phase-gated ``tools`` keys before workflow cross-validation."""
-    stripped = dict(data)
-    tools = stripped.get("tools")
-    if not isinstance(tools, dict):
-        return stripped
+    """Identity helper — ``tools.mcp`` (E7-S01) and ``tools.custom`` (E7-S02) are allowed.
 
-    tools_copy = dict(tools)
-    if CURRENT_SDK_PHASE < 3:
-        tools_copy.pop("custom", None)
-    stripped["tools"] = tools_copy
-    return stripped
+    Kept so workflow cross-validation has a stable hook if a later tool section
+    is phase-gated again.
+    """
+    return dict(data)
 
 
 def load_harness_for_doctor(path: Path | str) -> HarnessConfig:

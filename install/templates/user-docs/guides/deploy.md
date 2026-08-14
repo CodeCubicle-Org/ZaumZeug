@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Ops / platform · Harness developers |
-| **Last updated** | 2026-07-29 (E5-S09c target install --verify) |
+| **Last updated** | 2026-08-14 (E7-S02 custom tools in copy matrix) |
 
 Ship a production harness to a clean server **without** DSPy, GEPA, or DeepEval on the target. Compile and eval stay on the developer machine (or CI); the target only runs Haystack via `zaumzeug`.
 
@@ -28,6 +28,8 @@ target:  copy folder  →  target_install  →  create .env  →  zaumzeug serve
 | 3. Install | Target | Run bundled `target_install` → `pip install zaumzeug` (**runtime only**); optional `--verify` runs doctor + serve dry-run |
 | 4. Secrets | Target | Create `.env` from `.env.example` if needed — **never** ship `.env` in the bundle |
 | 5. Serve | Target | `zaumzeug serve <name> --deploy` (or `HARNESS_ROOT=deploy`) |
+
+Python files listed in an agent's `tools.custom` are copied into the bundle (`tools/search_docs.py`, dotted `tools.search_docs`, or `tools.search_docs:attr` all resolve to `tools/search_docs.py`). Extra `.py` files under `tools/` stay in the dev tree. See [Custom tools](custom-tools.md).
 
 ---
 
@@ -175,6 +177,7 @@ Remove or restore the ignore later with `git rm -r --cached deploy/<name>/` if y
 
 ## Related
 
+- [Custom tools](custom-tools.md) — listed `tools.custom` files ship in the bundle; extras stay in the dev tree
 - Bundle ops sheet: `deploy/<name>/README.deploy.md`
 - [Platforms](#platforms) (E5-S08) — Linux-first production; OS-neutral bundle; Win/macOS best-effort
 - [Git policy for deploy bundles](#git-policy-for-deploy-bundles) (E5-S07)

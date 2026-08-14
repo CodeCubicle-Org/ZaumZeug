@@ -261,3 +261,32 @@ def test_e7_s01_mcp_schema_and_mcp_port(tmp_path: Path) -> None:
     with pytest.raises(ConfigValidationError) as exc_info:
         load_agent_config(both)
     assert "command" in str(exc_info.value).lower() or "url" in str(exc_info.value).lower()
+
+
+def test_e7_s02_custom_schema_allows_module_paths(tmp_path: Path) -> None:
+    """tools.custom module paths validate (E7-S02); empty entries are rejected."""
+    path = _write_yaml(
+        tmp_path / "agent.yaml",
+        {
+            "name": "researcher",
+            "agent": {"system_prompt": "prompts/system.md"},
+            "tools": {"custom": ["tools/search_docs.py", "tools.calculator:calculator"]},
+        },
+    )
+    config = load_agent_config(path)
+    assert config.tools is not None
+    assert config.tools.custom == [
+        "tools/search_docs.py",
+        "tools.calculator:calculator",
+    ]
+
+    blank = _write_yaml(
+        tmp_path / "blank-custom.yaml",
+        {
+            "name": "researcher",
+            "tools": {"custom": ["  "]},
+        },
+    )
+    with pytest.raises(ConfigValidationError) as exc_info:
+        load_agent_config(blank)
+    assert "custom" in str(exc_info.value).lower()

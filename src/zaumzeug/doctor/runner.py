@@ -13,6 +13,7 @@ from zaumzeug.config import load_harness_for_doctor
 from zaumzeug.doctor.checks import (
     _live_providers,
     check_artifact_module_staleness,
+    check_custom_tools,
     check_deploy_manifest,
     check_env_for_live_models,
     check_harness_config,
@@ -134,9 +135,10 @@ def run_doctor(
             if harness_cfg.serve and harness_cfg.serve.hayhooks:
                 port = harness_cfg.serve.hayhooks.port
         checks.append(check_port_conflict(name, port=port))
-        # Phase-gated custom tools must fail in default and --deploy (E8-S07).
-        # tools.mcp is allowed (E7-S01); uv presence is a separate warn.
+        # tools.mcp (E7-S01) and tools.custom (E7-S02) are allowed; import
+        # errors for custom tools fail with the module path (dev + --deploy).
         checks.append(check_phase_gated_agent_tools(name, harness_dir))
+        checks.extend(check_custom_tools(name, harness_dir))
         if not deploy_mode:
             checks.append(check_mcp_uv_presence(name, harness_dir))
             checks.append(check_workflow_diagram_staleness(name, harness_dir))

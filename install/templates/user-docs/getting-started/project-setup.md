@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers |
-| **Last updated** | 2026-07-22 |
+| **Last updated** | 2026-08-14 |
 
 After [installation](installation.md), use this guide to add harnesses beyond the shipped `example` and to understand the project layout.
 
@@ -71,4 +71,5 @@ Edit `agents/agent/prompts/system.md`, tools, and models as needed. For a fuller
 
 - [CLI reference](../reference/cli.md) — `init`, `doctor`, `serve`, `run`
 - [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml` and stages
+- [Custom tools](../guides/custom-tools.md) — `tools.custom` Python modules under `agents/<name>/tools/`
 - [Installation](installation.md) — first-time project scaffold

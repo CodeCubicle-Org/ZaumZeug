@@ -273,13 +273,29 @@ def test_e7_s01_ac3_mcp_without_uv_warns(
     test_e2_s04_ac8_mcp_without_uv_warns(tmp_path, monkeypatch)
 
 
+def _write_custom_search_tool(agent_dir: Path) -> None:
+    tools_dir = agent_dir / "tools"
+    tools_dir.mkdir(parents=True, exist_ok=True)
+    (tools_dir / "__init__.py").write_text("", encoding="utf-8")
+    (tools_dir / "my_tool.py").write_text(
+        "from haystack.tools import create_tool_from_function\n"
+        "\n"
+        "def ping(query: str) -> str:\n"
+        '    """Echo query for doctor tests."""\n'
+        "    return query\n"
+        "\n"
+        "MyTool = create_tool_from_function(ping, name='ping')\n",
+        encoding="utf-8",
+    )
+
+
 def test_e8_s07_ac5_phase_gated_mcp_fails_not_false_pass(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """AC-5: phase-gated tools.custom fails; mcp_uv must not false-green MCP."""
+    """AC-5 residual: tools.custom is allowed (E7-S02); phase_gated_tools passes."""
     project_root = tmp_path / "project"
-    _minimal_harness(
+    harness_dir = _minimal_harness(
         project_root,
         agent_yaml={
             "name": "researcher",
@@ -289,6 +305,7 @@ def test_e8_s07_ac5_phase_gated_mcp_fails_not_false_pass(
             },
         },
     )
+    _write_custom_search_tool(harness_dir / "agents" / "researcher")
     monkeypatch.setattr(
         "zaumzeug.doctor.checks.shutil.which",
         lambda cmd: "/usr/bin/uv" if cmd == "uv" else None,
@@ -297,21 +314,21 @@ def test_e8_s07_ac5_phase_gated_mcp_fails_not_false_pass(
     report = run_doctor(harness_name="example", project_root=project_root)
     gated = [c for c in report.checks if c.name == "phase_gated_tools"]
     assert gated
-    assert gated[0].severity == "fail"
-    assert "Phase 3" in gated[0].message
-    assert "tools.custom" in gated[0].message
-    assert report.exit_code != 0
+    assert gated[0].severity == "pass"
+    custom = [c for c in report.checks if c.name == "custom_tools"]
+    assert custom
+    assert custom[0].severity == "pass"
+    assert report.exit_code == 0
 
     mcp_uv = [c for c in report.checks if c.name == "mcp_uv"]
     assert mcp_uv
     assert "MCP configured and `uv` is available" not in mcp_uv[0].message
 
-    harness_dir = project_root / "usr-harnesses" / "example"
-    assert check_phase_gated_agent_tools("example", harness_dir).severity == "fail"
+    assert check_phase_gated_agent_tools("example", harness_dir).severity == "pass"
 
 
 def test_e8_s07_ac5_phase_gated_mcp_fails_in_deploy_mode(tmp_path: Path) -> None:
-    """AC-5: phase-gated tools.custom fails under doctor --deploy too."""
+    """AC-5 residual: tools.custom is allowed under doctor --deploy (E7-S02)."""
     import json
 
     from zaumzeug.config.resolver import ARTIFACT_MANIFEST
@@ -337,6 +354,7 @@ def test_e8_s07_ac5_phase_gated_mcp_fails_in_deploy_mode(tmp_path: Path) -> None
             },
         },
     )
+    _write_custom_search_tool(agent_dir)
     _write_yaml(
         agent_dir / "agents-models.yaml",
         {
@@ -374,8 +392,10 @@ def test_e8_s07_ac5_phase_gated_mcp_fails_in_deploy_mode(tmp_path: Path) -> None
     )
     gated = [c for c in report.checks if c.name == "phase_gated_tools"]
     assert gated
-    assert gated[0].severity == "fail"
-    assert "Phase 3" in gated[0].message
-    assert report.exit_code != 0
-    # Dev-only mcp_uv remains skipped in deploy; phase_gated_tools covers the fail.
+    assert gated[0].severity == "pass"
+    custom = [c for c in report.checks if c.name == "custom_tools"]
+    assert custom
+    assert custom[0].severity == "pass"
+    assert report.exit_code == 0
+    # Dev-only mcp_uv remains skipped in deploy.
     assert not any(c.name == "mcp_uv" for c in report.checks)

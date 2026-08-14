@@ -89,5 +89,6 @@ Global defaults can live in `config/models.yaml`; harness and agent files deep-m
 
 - Scaffold another harness — see [Project setup](project-setup.md) (`zaumzeug init <name>`; add `--with-eval` for optional DeepEval tests under `eval/`).
 - Add stages or agents — see [Multi-agent workflow](../guides/multi-agent-workflow.md).
+- Add Python tools under `agents/<name>/tools/` — see [Custom tools](../guides/custom-tools.md).
 - Testing and the mock profile — see [Testing](../guides/testing.md).
 - CLI flags — see [CLI reference](../reference/cli.md) (`compile`, `serve`, `run`, …).

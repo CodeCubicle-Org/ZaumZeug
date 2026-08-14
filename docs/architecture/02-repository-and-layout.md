@@ -11,8 +11,8 @@ HarnessDevelopment/
 ├── src/zaumzeug/          # SDK internals
 │   ├── cli.py
 │   ├── config/               # Pydantic schemas, loaders (E2-S01), models merge (E2-S02), resolver (E2-S03); CompileConfig (E4-S02a)
-│   ├── doctor/               # Preflight checks — pass/warn/fail (E2-S04a–S04c, E4-S05 artifact_module, E4-S07 pinned_artifact)
-│   ├── runtime/              # ModelRouter (E3-S01, E3-S05), factory (E3-S00), tools/ (E3-S03), input_rewrite preprocess (E4-S03b)
+│   ├── doctor/               # Preflight checks — pass/warn/fail (E2-S04a–S04c, E4-S05 artifact_module, E4-S07 pinned_artifact, E7-S02 custom_tools)
+│   ├── runtime/              # ModelRouter (E3-S01, E3-S05), factory (E3-S00), tools/ (E3-S03, E7-S01 MCP, E7-S02 custom), input_rewrite preprocess (E4-S03b)
 │   ├── compile/              # DSPy loader; CLI + GEPA + --dry-run; export; workflow diagram; immutable runs (E4-S01–S08)
 │   ├── deploy/               # Packager ✅ E5-S01; copy matrix ✅ E5-S02 (`resolve_deploy_copy_plan`); gate ✅ E6-S03/E5-S06; exclude/strip ✅ E6-S04 / E5-S01
 │   ├── eval/                 # Optional DeepEval bridge — [eval] extra + require_deepeval() (E6-S01); zaumzeug eval runner (E6-S02); invoked by deploy gate (E6-S03); harness eval/ pytest scaffold (E6-S04); trace export + --trace (E6-S05); Mode C --base-url (E6-S06); GEPA bridge append_failed_eval_to_train + deepeval_gepa_metric (E6-S07)
@@ -102,7 +102,7 @@ usr-harnesses/<harness-name>/
 | Per-agent LLM | `agents/<agent-name>/agents-models.yaml` | Independent provider/model per agent |
 | Workflow | `workflow.yaml` | Serial stages; `parallelism` per stage (later) |
 | Custom agent logic | `agents/<agent-name>/modules/*.py` | DSPy `Module`; `compile.module` in `agent.yaml` (`module.path:ClassName`) |
-| Custom tools | `agents/<agent-name>/tools/*.py` | `tools.custom` in `agent.yaml` |
+| Custom tools | `agents/<agent-name>/tools/*.py` | `tools.custom` in `agent.yaml` ✅ (E7-S02) |
 | Custom pipelines | `pipelines/` | YAML or `PipelineWrapper`; `serve.expose` in `harness.yaml` |
 | GEPA metrics | `agents/<agent-name>/modules/metrics.py` | Textual feedback per agent; optional DeepEval `.measure()` via `deepeval_gepa_metric` (E6-S07) |
 | DeepEval tests | `eval/test_*.py` | Harness-level; may target specific agents |
@@ -113,6 +113,8 @@ usr-harnesses/<harness-name>/
 | Lifecycle hooks | `agents/<agent-name>/hooks.py` | Per-agent sensors |
 
 **Implementation (E4-S01, 2026-07-28):** Compile-time loader `zaumzeug.compile.module_loader.load_dspy_module()` imports `compile.module` relative to `agents/<agent-name>/` (prepends that directory to `sys.path`; rejects traversal). Expects `module.path:ClassName` pointing at a `dspy.Module` subclass under `modules/`. Not used by serve/runtime. **2026-08-14:** drops a stale `sys.modules` chain before import so the same dotted name from another agent folder is not reused. Tests: `tests/unit/compile/test_module_loader.py`.
+
+**Implementation (E7-S02, 2026-08-14):** Runtime loader `zaumzeug.runtime.tools.custom.load_custom_tools()` imports `tools.custom` relative to `agents/<name>/` (same sys.path + cache-drop pattern). Registers Haystack `ComponentTool` / `Tool`. Tests: `tests/unit/runtime/tools/test_custom_loader.py`.
 
 **Implementation (E4-S02a, 2026-07-28):** `zaumzeug compile <harness> [--agent]` validates Phase 2 `CompileConfig` on `agent.yaml`, loads the DSPy module, and preflights task/reflection LM ids against the merged registry + `.env` (`compile/runner.py`, `compile/gepa_runner.py`).
 

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers |
-| **Last updated** | 2026-08-01 |
+| **Last updated** | 2026-08-14 |
 
 A **harness** is not a single agent. It is a **workflow** (who runs, in what order) plus a **collection of agents** (each with its own prompts, tools, and LLM config). This guide explains `workflow.yaml`, how **pipeline** stages differ from **agent** stages, and where **looping and branching** belong in Phase 1.
 
@@ -323,5 +323,6 @@ These may appear in later releases; they are **not** required to build a Phase 1
 ## Related reading
 
 - [Getting started — first harness](../getting-started/first-harness.md)
+- [Custom tools](custom-tools.md) — `tools.custom` Python modules under `agents/<name>/tools/`
 - [CLI reference](../reference/cli.md) — `serve`, `run`, `compile`, `--verbose`, `HARNESS_LOG_LEVEL`
 - Generated diagram: **`usr-harnesses/<harness>/docs/workflow-diagram.md`** after compile (or `--workflow-diagram-only`)

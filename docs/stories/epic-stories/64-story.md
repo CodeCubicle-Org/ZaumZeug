@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/64-story.md` |
 | **Created** | 2026-08-01 |
-| **Last modified** | 2026-08-01 |
+| **Last modified** | 2026-08-14 (E7-S02 follow-up: `tools.custom` unblocked) |
 | **Status** | Done (2026-08-01) |
 | **Story ID** | E8-S07 |
 | **Epic** | [E8 — RAG and Production Hardening](../08-epic.md) |
@@ -155,5 +155,9 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 - [x] Architecture §6.2 / §6.6 document `runtime` and `output`
 - [x] No OpenTelemetry dependency or span API; no `jsonschema` dependency
 - [x] Verification checklist complete; all ACs traced to tests
+
+### Follow-up (E7-S02, 2026-08-14)
+
+AC-5 shipped as a doctor **fail** on phase-gated `tools.mcp` / `tools.custom`. That gate is gone: [E7-S01](50-story.md) unblocked `tools.mcp`; [E7-S02](51-story.md) unblocked `tools.custom`. The AC-5 tests still run under the original names but now write a real `tools/my_tool.py` and assert `phase_gated_tools` **pass** plus `custom_tools` **pass** (dev and `--deploy`). Import errors fail `custom_tools` with the module path instead of a phase-gated message.
 
 ---

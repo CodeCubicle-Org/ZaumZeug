@@ -5,7 +5,7 @@
 | **Document** | Epic E8 user stories |
 | **File** | `docs/stories/08-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-01 (E8-S07 Done) |
+| **Last modified** | 2026-08-14 (E8-S07 AC-5 follow-up: `tools.custom` unblocked by E7-S02) |
 | **Status** | Backlog |
 | **Build order** | **8 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -378,7 +378,7 @@ As a **client integrator running local or flaky model backends**, I want `run_wo
 - [x] **AC-2** Harness-level `runtime.retry` (`max_attempts >= 1`, default 1); build + message prep once; retry only `agent.run` + JSON check
 - [x] **AC-3** Stage lifecycle via `log_request()` at INFO with structured `stage` key; reconstructible with INFO / `--verbose`
 - [x] **AC-4** Optional agent `output.format: json` (parse + fence strip; empty fails; no JSON Schema)
-- [x] **AC-5** Doctor **and** `doctor --deploy` **fail** on phase-gated `tools.mcp` / `tools.custom`
+- [x] **AC-5** Doctor **and** `doctor --deploy` **fail** on phase-gated `tools.mcp` / `tools.custom` *(shipped 2026-08-01; superseded: `tools.mcp` allowed as of [E7-S01](epic-stories/50-story.md); `tools.custom` allowed as of [E7-S02](epic-stories/51-story.md) — doctor `custom_tools` fails on import errors instead)*
 - [x] **AC-6** User-docs + Architecture §6 document `runtime` / `output` and log contract
 
 ### Implementation tasks (build)

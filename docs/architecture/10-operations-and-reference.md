@@ -58,9 +58,11 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` sets SDK (`zaumzeug`) and Haystack loggers to DEBUG when `zaumzeug serve|compile --verbose` or `HARNESS_LOG_LEVEL=DEBUG`. `log_request()` emits structured per-request context (`model_id`, `tool`, `artifact_path`). `SecretRedactingFilter` redacts API keys and bearer tokens. CLI reference: `user-docs/reference/cli.md`. Tests: `tests/unit/test_logging.py`.
 
-**Implementation (E8-S07, 2026-08-01):** `log_request()` adds structured `stage`; `zaumzeug run` emits INFO stage lifecycle (start / success / retry / failure) with `harness`, `agent`, `model_id`, `stage`. Reconstruct with `HARNESS_LOG_LEVEL=INFO` or `zaumzeug run --verbose` (default WARNING unchanged). Doctor `phase_gated_tools` fails on phase-gated `tools.custom` in default and `--deploy` modes (`tools.mcp` allowed as of E7-S01). Tests: `tests/unit/runtime/test_workflow_reliability.py`, `tests/unit/cli/test_doctor.py` (`-k e8_s07`).
+**Implementation (E8-S07, 2026-08-01):** `log_request()` adds structured `stage`; `zaumzeug run` emits INFO stage lifecycle (start / success / retry / failure) with `harness`, `agent`, `model_id`, `stage`. Reconstruct with `HARNESS_LOG_LEVEL=INFO` or `zaumzeug run --verbose` (default WARNING unchanged). Tests: `tests/unit/runtime/test_workflow_reliability.py`, `tests/unit/cli/test_doctor.py` (`-k e8_s07`).
 
 **Implementation (E7-S01, 2026-08-14):** `zaumzeug mcp <name>` — Hayhooks MCP at `{host}:{mcp_port}/mcp`. Doctor `mcp_uv` warns (non-blocking) when stdio `tools.mcp` is configured but `uv` is missing. Tests: `tests/integration/mcp/` (`-k e7_s01`). Full suite 2026-08-14: 314 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate). Compile loader drops stale `sys.modules` before import ([E4-S01](../stories/epic-stories/26-story.md)).
+
+**Implementation (E7-S02, 2026-08-14):** Doctor `custom_tools` imports listed `tools.custom` modules in default **and** `--deploy` modes; import errors **fail** with the module path and expected file. `phase_gated_tools` is a no-op pass (nothing left gated; `CURRENT_SDK_PHASE` stays 1). Loader: `runtime/tools/custom.py`. Tests: `tests/unit/runtime/tools/test_custom_loader.py`, `tests/integration/test_doctor.py::test_e7_s02_ac3_import_error_at_doctor`. Full suite 2026-08-14: 320 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate).
 
 **Implementation (E2-S07, 2026-07-08):** `workflow.yaml` schema validation via `load_workflow()` — `workflow_config` check in doctor; `validate_serve()` fails fast on invalid workflow before entry resolution. Tests: `tests/unit/config/test_workflow_schema.py`.
 
@@ -152,7 +154,7 @@ Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace da
 |---|---|
 | 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06), OpenAI REST contract ✅ (E3-S07) |
 | 2 | compile `--dry-run` (**E4-S06 Done** — `tests/integration/compile/test_compile_dry_run.py`), export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), `zaumzeug eval` (**E6-S02 Done** — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**E6-S04 Done** — `tests/integration/eval/test_deepeval_scaffold.py`), trace → `LLMTestCase` (**E6-S05 Done** — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**E6-S06 Done** — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**E6-S07 Done** — `tests/unit/eval/test_gepa_bridge.py`) |
-| 3 | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`, Starlette `TestClient`); tool correctness eval when DeepEval present |
+| 3 | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`, Starlette `TestClient`); custom tool loader ✅ (**E7-S02** — `tests/unit/runtime/tools/test_custom_loader.py`, doctor `custom_tools`); tool correctness eval when DeepEval present |
 | 4 | Run reliability ✅ (**E8-S07** — retry / JSON / stage logs / `phase_gated_tools`; serve path follow-up); `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
 
 Also compatible: Promptfoo, Ragas, custom pytest — no DeepEval lock-in.

@@ -204,12 +204,18 @@ class AgentToolsConfig(BaseModel):
         validate_builtin_tool_ids(value)
         return value
 
-    @model_validator(mode="after")
-    def _phase_gate_tool_sections(self) -> AgentToolsConfig:
-        if CURRENT_SDK_PHASE < 3:
-            if self.custom:
-                raise ValueError("`custom` is Phase 3")
-        return self
+    @field_validator("custom")
+    @classmethod
+    def _validate_custom_entries(cls, value: list[str] | None) -> list[str] | None:
+        if value is None:
+            return None
+        cleaned: list[str] = []
+        for item in value:
+            stripped = item.strip()
+            if not stripped:
+                raise ValueError("tools.custom entries must be non-empty strings")
+            cleaned.append(stripped)
+        return cleaned
 
 
 class CompileConfig(BaseModel):

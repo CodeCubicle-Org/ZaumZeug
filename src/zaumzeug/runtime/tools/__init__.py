@@ -1,10 +1,16 @@
-"""Builtin agent tools and phase-aware catalog (Architecture §6.5)."""
+"""Builtin, MCP, and custom agent tools (Architecture §6.5)."""
 
 from zaumzeug.runtime.tools.catalog import (
     available_builtin_tool_ids,
     build_builtin_tools,
     create_builtin_tool,
     validate_builtin_tool_ids,
+)
+from zaumzeug.runtime.tools.custom import (
+    CustomToolError,
+    build_custom_tools,
+    load_custom_tools,
+    parse_custom_tool_ref,
 )
 from zaumzeug.runtime.tools.mcp import (
     MCP_DEFAULT_TIMEOUT_S,
@@ -27,17 +33,21 @@ __all__ = [
     "FETCH_TIMEOUT_S",
     "MCP_DEFAULT_TIMEOUT_S",
     "MAX_RESPONSE_BYTES",
+    "CustomToolError",
     "McpBoundaryError",
     "WebFetch",
     "WebFetchError",
     "available_builtin_tool_ids",
     "build_builtin_tools",
+    "build_custom_tools",
     "build_mcp_toolsets",
     "create_builtin_tool",
     "fetch_url",
     "format_mcp_error",
     "is_public_host",
     "jsonrpc_error",
+    "load_custom_tools",
+    "parse_custom_tool_ref",
     "validate_builtin_tool_ids",
     "validate_fetch_url",
 ]

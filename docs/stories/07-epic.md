@@ -5,8 +5,8 @@
 | **Document** | Epic E7 user stories |
 | **File** | `docs/stories/07-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-14 (E7-S01 Done) |
-| **Status** | In progress (E7-S01 Done 2026-08-14) |
+| **Last modified** | 2026-08-14 (E7-S02 Done) |
+| **Status** | In progress (E7-S02 Done 2026-08-14) |
 | **Build order** | **7 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -111,16 +111,16 @@ As a **harness developer**, I want Python tools under `tools/` loaded from confi
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `tools.custom` imports modules from harness folder
-- [ ] **AC-2** Tools registered as Haystack `ComponentTool` (or equivalent)
-- [ ] **AC-3** Import errors fail at doctor/ serve with module path
-- [ ] **AC-4** Custom tools copied to deploy when listed in yaml *(packager row **Done** early with [E5-S02](epic-stories/42-story.md), 2026-07-28; loader remains this story)*
+- [x] **AC-1** `tools.custom` imports modules from harness folder
+- [x] **AC-2** Tools registered as Haystack `ComponentTool` (or equivalent)
+- [x] **AC-3** Import errors fail at doctor/ serve with module path
+- [x] **AC-4** Custom tools copied to deploy when listed in yaml *(packager row **Done** early with [E5-S02](epic-stories/42-story.md), 2026-07-28; loader remains this story)*
 
 ### Implementation tasks (build)
 
-- [ ] Implement loader in `src/zaumzeug/runtime/tools/custom.py`
-- [ ] Validate tool registration at startup
-- [ ] Example custom tool in user-docs guide
+- [x] Implement loader in `src/zaumzeug/runtime/tools/custom.py`
+- [x] Validate tool registration at startup
+- [x] Example custom tool in user-docs guide
 
 ### Verification (after build)
 
@@ -132,15 +132,19 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-2 | `tests/unit/runtime/tools/test_custom_loader.py::test_e7_s02_ac2_registers_component_tool` |
 | AC-3 | `tests/integration/test_doctor.py::test_e7_s02_ac3_import_error_at_doctor` |
 | AC-4 | **shared early:** `tests/unit/deploy/test_copy_rules.py::test_e7_s02_ac4_custom_tools_in_deploy` *(packager copy landed with [E5-S02](epic-stories/42-story.md), 2026-07-28)* |
-| AC-2 | **optional:** ToolCorrectnessMetric in example harness `eval/` when DeepEval present |
+| AC-2 | **optional:** ToolCorrectnessMetric in example harness `eval/` when DeepEval present — **not added** (example eval stays the E6-S04 substring metric; guide covers registration) |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/runtime/tools/test_custom_loader.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/runtime/tools/test_custom_loader.py -v` passes
 
 ### Definition of done
 
-- [ ] Deploy bundle includes referenced `tools/*.py` only
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Deploy bundle includes referenced `tools/*.py` only
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-14)
+
+Canonical detail: [51-story.md](epic-stories/51-story.md). `tools.custom` → Haystack `ComponentTool` / `Tool`; doctor `custom_tools` fails with module path; packager copies listed `tools/*.py` only.
 
 ---
 

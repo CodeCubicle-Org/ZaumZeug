@@ -379,37 +379,67 @@ def check_phase_gated_agent_tools(
     harness_name: str,
     harness_dir: Path,
 ) -> CheckResult:
-    """Fail when remaining Phase-3 tool sections are used before they ship.
+    """Pass when no remaining Phase-3+ tool sections are gated.
 
-    ``tools.mcp`` is allowed (E7-S01). ``tools.custom`` stays gated until E7-S02.
-    Runs in default and ``--deploy`` modes so doctor cannot green-light config
-    that ``run_workflow`` would reject. Does not strip phase-gated keys.
+    ``tools.mcp`` is allowed (E7-S01). ``tools.custom`` is allowed (E7-S02).
+    Kept as a stable check so a later gated section can fail here again.
     """
-    gated: list[str] = []
-    if CURRENT_SDK_PHASE < 3:
-        for agent_name, tools in _iter_agent_yaml_tools(harness_dir):
-            if tools.get("custom"):
-                gated.append(f"agents/{agent_name}/agent.yaml: tools.custom")
-
-    if gated:
-        listed = "; ".join(gated)
-        return CheckResult(
-            name="phase_gated_tools",
-            severity="fail",
-            message=(
-                f"{listed} — unavailable until Phase 3 "
-                f"(CURRENT_SDK_PHASE={CURRENT_SDK_PHASE}). "
-                "Remove tools.custom or wait for custom tool support."
-            ),
-            harness=harness_name,
-        )
-
     return CheckResult(
         name="phase_gated_tools",
         severity="pass",
         message="No phase-gated agent tools (mcp/custom) blocking current phase",
         harness=harness_name,
     )
+
+
+def check_custom_tools(harness_name: str, harness_dir: Path) -> list[CheckResult]:
+    """AC-3 (E7-S02): Import ``tools.custom`` modules; fail with module path.
+
+    Runs in default and ``--deploy`` modes so doctor matches serve/run.
+    """
+    from zaumzeug.runtime.tools.custom import CustomToolError, load_custom_tools
+
+    results: list[CheckResult] = []
+    found_any = False
+    for agent_name, tools in _iter_agent_yaml_tools(harness_dir):
+        custom = tools.get("custom")
+        if not isinstance(custom, list) or not custom:
+            continue
+        found_any = True
+        agent_dir = harness_dir / "agents" / agent_name
+        try:
+            loaded = load_custom_tools(custom, agent_dir=agent_dir)
+        except CustomToolError as exc:
+            results.append(
+                CheckResult(
+                    name="custom_tools",
+                    severity="fail",
+                    message=str(exc),
+                    harness=harness_name,
+                )
+            )
+            continue
+        results.append(
+            CheckResult(
+                name="custom_tools",
+                severity="pass",
+                message=(
+                    f"agents/{agent_name}: loaded {len(loaded)} custom tool(s)"
+                ),
+                harness=harness_name,
+            )
+        )
+
+    if not found_any:
+        return [
+            CheckResult(
+                name="custom_tools",
+                severity="pass",
+                message="No tools.custom entries",
+                harness=harness_name,
+            )
+        ]
+    return results
 
 
 def check_mcp_uv_presence(harness_name: str, harness_dir: Path) -> CheckResult:

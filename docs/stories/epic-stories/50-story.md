@@ -92,7 +92,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 ### Implementation notes (2026-08-14)
 
-- `McpServerConfig`: `name` + exactly one of `command` (stdio) or `url` (HTTP); optional `args`, `timeout_s` (default 30), `tool_names`, `env`. `HayhooksConfig.mcp_port` default **1417** (removed from `PHASE_GATED_FIELDS`). `tools.mcp` unblocked; `tools.custom` still gated until E7-S02. `CURRENT_SDK_PHASE` stays **1**.
+- `McpServerConfig`: `name` + exactly one of `command` (stdio) or `url` (HTTP); optional `args`, `timeout_s` (default 30), `tool_names`, `env`. `HayhooksConfig.mcp_port` default **1417** (removed from `PHASE_GATED_FIELDS`). `tools.mcp` unblocked; `tools.custom` stayed gated until [E7-S02](51-story.md) (**Done** 2026-08-14). `CURRENT_SDK_PHASE` stays **1**.
 - Runtime: `runtime/tools/mcp.py` builds Haystack `MCPToolset` (`eager_connect=False`, 30s timeouts) from `tools.mcp`; factory appends toolsets to builtins.
 - Serve: `serve/mcp.py` (`prepare_mcp` / `run_mcp`) registers the entry pipeline with `skip_mcp=False`; Hayhooks `create_mcp_server` + `create_starlette_app`; bind `127.0.0.1` only. `zaumzeug serve` keeps `skip_mcp=True`. Malformed `POST /mcp` returns JSON-RPC 2.0 `{jsonrpc, error: {code, message, data}}` with `data.ok: false`.
 - CLI: `zaumzeug mcp <harness> [--deploy] [--verbose] [--port N]`. Doctor `mcp_uv` warns (non-blocking) when stdio MCP is configured and `uv` is missing; HTTP-only MCP does not require `uv`.
