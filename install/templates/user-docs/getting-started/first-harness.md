@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | New developers |
-| **Last updated** | 2026-08-14 |
+| **Last updated** | 2026-08-21 |
 
 This walkthrough uses the shipped **`example`** harness — a general research agent with one workflow stage and the mock model profile. You can chat locally without API keys. Phase 2 also ships a compile seed (`compile.module` + train/val data) so `zaumzeug compile example` works offline via stub GEPA.
 
@@ -55,6 +55,7 @@ zaumzeug doctor example
 zaumzeug serve example
 # MCP for Cursor / Claude Desktop (default port 1417):
 # zaumzeug mcp example
+# Point Cursor at http://localhost:1417/mcp — see Cursor MCP setup
 # or batch all workflow stages (mock):
 # HARNESS_LOG_LEVEL=INFO zaumzeug run example --input "Summarize this topic"
 ```
@@ -90,5 +91,6 @@ Global defaults can live in `config/models.yaml`; harness and agent files deep-m
 - Scaffold another harness — see [Project setup](project-setup.md) (`zaumzeug init <name>`; add `--with-eval` for optional DeepEval tests under `eval/`).
 - Add stages or agents — see [Multi-agent workflow](../guides/multi-agent-workflow.md).
 - Add Python tools under `agents/<name>/tools/` — see [Custom tools](../guides/custom-tools.md).
+- Connect Cursor over MCP — see [Cursor MCP setup](../guides/cursor-mcp.md).
 - Testing and the mock profile — see [Testing](../guides/testing.md).
 - CLI flags — see [CLI reference](../reference/cli.md) (`compile`, `serve`, `run`, …).

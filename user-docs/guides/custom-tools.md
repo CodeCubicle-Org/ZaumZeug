@@ -97,3 +97,4 @@ Keep modules inside `agents/<name>/tools/` — traversal (`../`) and absolute pa
 - [CLI — doctor](../reference/cli.md#zaumzeug-doctor) — `custom_tools` check
 - Builtin catalog (`web_fetch`) is separate: `tools.builtin` in `agent.yaml`
 - External MCP servers: `tools.mcp` — see [CLI — mcp](../reference/cli.md#zaumzeug-mcp)
+- Cursor as MCP host: [Cursor MCP setup](cursor-mcp.md)

@@ -165,7 +165,7 @@ Secrets remain in `.env` only; all model files hold provider + model id + genera
 
 **Implementation (E5-S09b, 2026-07-29):** Thin OS wrappers `install/target-install.sh` and `install/target-install.ps1` locate Python 3.11+, forward all args to sibling `target_install.py` (works under `install/` and inside `deploy/<name>/`), propagate exit code. Bundled by packager `TARGET_INSTALL_FILES`. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s09b_*`) + `test_deploy.py::test_e5_s09_ac7_scripts_in_bundle`.
 
-**Implementation (E1-S03, 2026-07-22):** `scaffold_project()` in `client_install.py` — copy-if-missing from `install/templates/` for `usr-harnesses/example/` (skip with `--no-example`), `config/models.yaml` (from `models.example.yaml`), `.env.example`, `.cursor/mcp.json.example`, `user-docs/` skeleton; seeds `.env` only when missing; merges `.gitignore` entries (`.venv`, `.env`, `deploy/`, `artifacts/`). Live `.cursor/mcp.json` via `--cursor-mcp` → [E7-S03](../stories/epic-stories/52-story.md). Tests: `tests/unit/install/test_scaffolding.py`.
+**Implementation (E1-S03, 2026-07-22; `--cursor-mcp` live write E7-S03, 2026-08-21):** `scaffold_project()` in `client_install.py` — copy-if-missing from `install/templates/` for `usr-harnesses/example/` (skip with `--no-example`), `config/models.yaml` (from `models.example.yaml`), `.env.example`, `.cursor/mcp.json.example`, `user-docs/` skeleton; seeds `.env` only when missing; merges `.gitignore` entries (`.venv`, `.env`, `deploy/`, `artifacts/`). `--cursor-mcp` writes live `.cursor/mcp.json` (copy-if-missing; never overwrite). Tests: `tests/unit/install/test_scaffolding.py`, `tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json`.
 
 **Implementation (E5-S07, 2026-07-28):** Scaffolding also ensures `usr-harnesses/*/artifacts/` (Architecture §10.4). Release-commit / CI upload policy: [§10.4](07-deploy-packaging.md#104-git-and-gitignore).
 
@@ -185,11 +185,13 @@ user-docs/
 │   ├── multi-agent-workflow.md   # workflow.yaml, agents vs pipelines, control flow
 │   ├── compile.md                # GEPA compile / export / rollback
 │   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05); git policy (E5-S07); platforms (E5-S08); target install + --verify (E5-S09a/b/c)
+│   ├── custom-tools.md           # tools.custom → ComponentTool / Tool (E7-S02)
+│   ├── cursor-mcp.md             # Cursor mcp.json → localhost:{mcp_port}/mcp (E7-S03)
 │   └── testing.md                # unit, integration, eval; mock profile; CI tiers
 └── reference/cli.md
 ```
 
-Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [project-setup.md](../../user-docs/getting-started/project-setup.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [compile.md](../../user-docs/guides/compile.md), [deploy.md](../../user-docs/guides/deploy.md), [testing.md](../../user-docs/guides/testing.md).
+Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [project-setup.md](../../user-docs/getting-started/project-setup.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [compile.md](../../user-docs/guides/compile.md), [deploy.md](../../user-docs/guides/deploy.md), [custom-tools.md](../../user-docs/guides/custom-tools.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md), [testing.md](../../user-docs/guides/testing.md).
 
 **Implementation (E1-S03, 2026-07-22):** Install copies `install/templates/user-docs/` into project `user-docs/` (copy-if-missing). Content completeness (installation prerequisites / troubleshooting) → [E1-S05](../stories/epic-stories/22-story.md).
 
@@ -198,6 +200,8 @@ Install copies this tree from `install/templates/user-docs/` ([§3.4](02-reposit
 **Implementation (E5-S05, 2026-07-28):** [user-docs/guides/deploy.md](../../user-docs/guides/deploy.md) — target ship workflow (copy → `target_install` → `.env` → `zaumzeug serve --deploy`); Win/macOS/Linux table; runtime-only deps. Bundle mirror: `install/templates/deploy/README.deploy.md`. Tests: `tests/integration/deploy/test_target_install.py`.
 
 **Implementation (E5-S08, 2026-07-29):** Platform matrix (§10.6) in the same `deploy.md` / `README.deploy.md` — Linux-first production, OS-neutral bundle, Win/macOS best-effort not CI-gated, E8-S05 Dockerfile forward ref. Linux CI: `deploy` → `serve --deploy` smoke.
+
+**Implementation (E7-S03, 2026-08-21):** [user-docs/guides/cursor-mcp.md](../../user-docs/guides/cursor-mcp.md) — Cursor `mcp.json` → `http://localhost:{mcp_port}/mcp` (default 1417); install `--cursor-mcp` writes live `.cursor/mcp.json`; `uv` only for stdio `tools.mcp`. Tests: `tests/unit/install/test_scaffolding.py::test_e7_s03_ac2_mcp_json_example_scaffolded`, `tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json`.
 
 **Implementation (E1-S06, 2026-07-22):** Short new-contributor onboarding guide at root [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (product `README.md` unchanged) — vision, install table, `< 15 min` / `~1–2.5 GB` planning ranges, mock-first serve, optional extras, updating dependencies, abbreviated layout; links to [installation.md](../../user-docs/getting-started/installation.md) for depth. Tests: `tests/unit/docs/test_contributing_guide.py`.
 

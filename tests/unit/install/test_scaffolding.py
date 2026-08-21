@@ -1,10 +1,12 @@
 # Story: E1-S03 / E1.3
 # Story: E5-S07 / E5.7
-"""E1-S03 — Project scaffolding on install (unit); E5-S07 gitignore extension."""
+# Story: E7-S03 / E7.3
+"""E1-S03 — Project scaffolding on install (unit); E5-S07 gitignore; E7-S03 MCP example."""
 
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -171,3 +173,24 @@ def test_e1_s03_ac5_no_example_flag_skips_copy(
     # Other scaffolding still runs
     assert (tmp_path / "config" / "models.yaml").is_file()
     assert (tmp_path / ".env.example").is_file()
+
+
+def test_e7_s03_ac2_mcp_json_example_scaffolded(
+    client_install: ModuleType,
+    tmp_path: Path,
+) -> None:
+    """AC-2 (E7-S03): Install scaffolds ``.cursor/mcp.json.example`` with MCP URL."""
+    client_install.scaffold_project(tmp_path, no_example=True, cursor_mcp=False)
+
+    example_path = tmp_path / ".cursor" / "mcp.json.example"
+    assert example_path.is_file()
+    payload = json.loads(example_path.read_text(encoding="utf-8"))
+    url = payload["mcpServers"]["zaumzeug"]["url"]
+    assert url == "http://localhost:1417/mcp"
+    assert not (tmp_path / ".cursor" / "mcp.json").exists()
+
+    template = TEMPLATES_DIR / ".cursor" / "mcp.json.example"
+    assert template.is_file()
+    assert json.loads(template.read_text(encoding="utf-8"))["mcpServers"]["zaumzeug"][
+        "url"
+    ] == "http://localhost:1417/mcp"

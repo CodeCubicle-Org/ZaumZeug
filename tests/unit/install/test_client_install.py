@@ -1,5 +1,6 @@
 # Story: E1-S01 / E1.1
-"""E1-S01 — Cross-platform install script (unit)."""
+# Story: E7-S03 / E7.3
+"""E1-S01 — Cross-platform install script (unit); E7-S03 --cursor-mcp live write."""
 
 from __future__ import annotations
 
@@ -260,3 +261,49 @@ def test_e1_s01_ac7_pathlib_no_hardcoded_separators(client_install: ModuleType) 
         f"{offenders!r}. Use pathlib.Path parts instead (Architecture §2.5)."
     )
     assert "Path" in dir(client_install)
+
+
+def test_e7_s03_ac3_cursor_mcp_flag_writes_json(
+    client_install: ModuleType,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-3 (E7-S03): ``--cursor-mcp`` writes live ``.cursor/mcp.json`` (opt-in)."""
+    monkeypatch.setattr(
+        client_install.subprocess,
+        "run",
+        lambda *_a, **_k: _fake_completed(),
+    )
+    monkeypatch.setattr(
+        client_install,
+        "resolve_install_python",
+        lambda *_a, **_k: Path(sys.executable),
+    )
+
+    without_flag = tmp_path / "without"
+    without_flag.mkdir()
+    (without_flag / "pyproject.toml").write_text(
+        "[project]\nname='zaumzeug'\n", encoding="utf-8"
+    )
+    assert client_install.run_install(without_flag, skip_venv=True, cursor_mcp=False) == 0
+    assert (without_flag / ".cursor" / "mcp.json.example").is_file()
+    assert not (without_flag / ".cursor" / "mcp.json").exists()
+
+    with_flag = tmp_path / "with-flag"
+    with_flag.mkdir()
+    (with_flag / "pyproject.toml").write_text(
+        "[project]\nname='zaumzeug'\n", encoding="utf-8"
+    )
+    assert client_install.run_install(with_flag, skip_venv=True, cursor_mcp=True) == 0
+    live = with_flag / ".cursor" / "mcp.json"
+    example = with_flag / ".cursor" / "mcp.json.example"
+    assert live.is_file()
+    assert example.is_file()
+    live_text = live.read_text(encoding="utf-8")
+    assert "http://localhost:1417/mcp" in live_text
+    assert live_text == example.read_text(encoding="utf-8")
+
+    custom = '{"mcpServers": {"custom": {"url": "http://localhost:9999/mcp"}}}\n'
+    live.write_text(custom, encoding="utf-8")
+    assert client_install.run_install(with_flag, skip_venv=True, cursor_mcp=True) == 0
+    assert live.read_text(encoding="utf-8") == custom

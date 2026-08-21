@@ -171,6 +171,8 @@ tools:
 
 `zaumzeug doctor` warns (non-blocking) when stdio MCP is configured but `uv` is not on PATH. MCP JSON-RPC errors use `{jsonrpc, error: {code, message, data}}` with `data.ok: false`.
 
+Cursor setup (`.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`): [Cursor MCP setup](../guides/cursor-mcp.md).
+
 ---
 
 ## `zaumzeug run`
@@ -349,4 +351,5 @@ Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack
 
 - [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, `--trace` / Journey C, Mode C `--base-url`, GEPA ↔ DeepEval bridge, deploy eval gates
 - [Custom tools](../guides/custom-tools.md) — `tools.custom` Python modules, `ComponentTool` / `Tool`, doctor import errors
+- [Cursor MCP setup](../guides/cursor-mcp.md) — `.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`; `--cursor-mcp`; `uv` for stdio `tools.mcp`
 - [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml`, agent routing, [run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run) (`runtime.retry`, `output.format: json`, stage logs)

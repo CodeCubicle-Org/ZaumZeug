@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-08-14 (E7-S02 custom tool loader)
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01 **Done** (2026-08-14); E7-S02 **Done** (2026-08-14); next E7-S03
+**Last updated:** 2026-08-21 (E7-S03 Cursor MCP setup)
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01 **Done** (2026-08-14); E7-S02 **Done** (2026-08-14); E7-S03 **Done** (2026-08-21); next E7-S04
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -145,7 +145,7 @@ Users do **not** manually install Haystack, DSPy, GEPA, or LiteLLM for the defau
 |---|---|
 | Is setup complicated? | **No** — one install script, one venv, one editable install; idempotent re-run |
 | How long to first harness? | **Target < 15 minutes** on CI and typical broadband (mock model, no API keys); **up to ~30 minutes** on slow networks — see [§11](#11-success-metrics) |
-| What does install do? | Creates `.venv`, editable `[dev]` install, scaffolds `usr-harnesses/example/`, `user-docs/`, `config/models.yaml`, `.env.example` / seeded `.env` (never overwrite), `.cursor/mcp.json.example`, and `.gitignore` entries; optional `--verify` runs `zaumzeug doctor` |
+| What does install do? | Creates `.venv`, editable `[dev]` install, scaffolds `usr-harnesses/example/`, `user-docs/`, `config/models.yaml`, `.env.example` / seeded `.env` (never overwrite), `.cursor/mcp.json.example`, and `.gitignore` entries; optional `--verify` runs `zaumzeug doctor`; optional `--cursor-mcp` writes live `.cursor/mcp.json` (copy-if-missing) |
 
 **Install commands (must appear in README install table):**
 
@@ -198,7 +198,7 @@ No pinned size until `pyproject.toml` locks dependencies; README must set expect
 | **Compile / GEPA** | Included in `[dev]` | Offline prompt optimization (`zaumzeug compile`) |
 | **DeepEval** | `pip install "zaumzeug[eval]"` | Dev regression only — `[eval]` extra **Done** (E6-S01, 2026-07-28); `zaumzeug eval` CLI **Done** (E6-S02, 2026-07-28) |
 | **Provider plugins** | e.g. `openai-haystack`, `anthropic-haystack` | Only configured providers |
-| **MCP in Cursor** | `uv` + `--cursor-mcp` | Phase 3 IDE integration |
+| **MCP in Cursor** | `--cursor-mcp` writes live `.cursor/mcp.json`; `uv` only for stdio `tools.mcp` | **Done** (E7-S03, 2026-08-21) — [cursor-mcp.md](user-docs/guides/cursor-mcp.md) |
 | **Chainlit UI** | `hayhooks[chainlit]` | Phase 3 embedded `/chat` |
 
 #### Updating dependencies (must appear in README)
@@ -257,7 +257,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 |---|---|---|
 | E1.1 | Cross-platform install | **Done** (E1-S01, 2026-07-21) — `install/client_install.py` runs on Win/macOS/Linux with Python 3.11+; creates `.venv`; `pip install -e ".[dev]"` succeeds per [Architecture §4.4](architecture/03-technology-stack.md#44-pyprojecttoml-dependency-groups-phase-1-stub); idempotent re-run. Supports flags: `--verify`, `--no-example`, `--skip-venv`, `--cursor-mcp` (see [Architecture §3.4](architecture/02-repository-and-layout.md#34-install-scripts-dev-vs-target)). Three-OS CI matrix **Done** ([E1-S07](stories/epic-stories/24-story.md), 2026-07-22) — [`.github/workflows/ci-matrix.yml`](../.github/workflows/ci-matrix.yml). |
 | E1.2 | Install wrappers | **Done** (E1-S02, 2026-07-22) — `client-install.sh` and `client-install.ps1` delegate to `client_install.py` with forwarded flags; no duplicated install logic. Command table: [user-docs/getting-started/installation.md](../user-docs/getting-started/installation.md). Per-OS CI wrapper invocation **Done** ([E1-S07](stories/epic-stories/24-story.md), 2026-07-22) — matrix runs wrappers on Win/macOS/Linux. |
-| E1.3 | Project scaffolding | **Done** (E1-S03, 2026-07-22) — Install copies `usr-harnesses/example/`, `user-docs/` skeleton, `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`; updates `.gitignore` for `.venv`, `artifacts/`, `deploy/`, `.env`. Never overwrites existing `.env`. `--no-example` skips harness copy. Tests: `tests/unit/install/test_scaffolding.py`. Extended by **E5-S07** (2026-07-28): also ensures `usr-harnesses/*/artifacts/` (Architecture §10.4). |
+| E1.3 | Project scaffolding | **Done** (E1-S03, 2026-07-22) — Install copies `usr-harnesses/example/`, `user-docs/` skeleton, `config/models.yaml`, `.env.example`, `.cursor/mcp.json.example`; updates `.gitignore` for `.venv`, `artifacts/`, `deploy/`, `.env`. Never overwrites existing `.env`. `--no-example` skips harness copy. Tests: `tests/unit/install/test_scaffolding.py`. Extended by **E5-S07** (2026-07-28): also ensures `usr-harnesses/*/artifacts/` (Architecture §10.4). Extended by **E7-S03** (2026-08-21): `--cursor-mcp` writes live `.cursor/mcp.json` (copy-if-missing). |
 | E1.4 | `zaumzeug init` | **Done** (E1-S04, 2026-07-22) — `zaumzeug init <name>` scaffolds `usr-harnesses/<name>/` from `install/templates/harness/` (minimal `harness.yaml` with serve + optional `models`, workflow, mock agent + system prompt). Safe name validation; fails if exists unless `--force`. Module: `zaumzeug.scaffold`. Tests: `tests/unit/cli/test_init.py`. Docs: [project-setup.md](../user-docs/getting-started/project-setup.md). |
 | E1.5 | `user-docs/` skeleton | **Done** (E1-S05, 2026-07-22) — After install: `README.md`, `getting-started/` (installation, project-setup, first-harness), `reference/cli.md`, `guides/multi-agent-workflow.md`, `guides/testing.md`. **`getting-started/installation.md`** expands [§7.4](#74-user-installation-guide-content-for-readme--phase-1) (prerequisites, effort, disk ranges, optional extras, **updating dependencies**, troubleshooting). Structure per [Architecture §3.5](architecture/02-repository-and-layout.md#35-user-documentation). Tests: `tests/unit/docs/test_user_docs_skeleton.py`. |
 | E1.6 | Root README / new-contributor guide | **Done** (E1-S06, 2026-07-22) — Short entry point as root [`CONTRIBUTING.md`](../CONTRIBUTING.md) (product [`README.md`](../README.md) kept as overview): vision one-liner; install command table and quick start from [§7.4](#74-user-installation-guide-content-for-readme--phase-1) (prerequisites summary, **< 15 min target** / **~1–2.5 GB** dev venv planning ranges, mock-first serve, optional extras bullet list, **updating dependencies** summary with post-`git pull` re-install commands); first commands (`zaumzeug serve example`); abbreviated project layout; links to `user-docs/getting-started/installation.md` for depth — not a duplicate of user-docs. Tests: `tests/unit/docs/test_contributing_guide.py`. |
@@ -370,14 +370,14 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 |---|---|---|
 | E7.1 | MCP tool config | **Done** (E7-S01, 2026-08-14). Typed `tools.mcp` (`command` xor `url`) wires Haystack `MCPToolset`; `zaumzeug mcp` serves `{host}:{mcp_port}/mcp` (default **1417**); doctor `mcp_uv` warns on stdio MCP without `uv`; JSON-RPC errors use `{jsonrpc, error: {code, message, data}}` with `data.ok: false`. (Protocols: [Architecture §9](architecture/06-runtime-and-protocols.md#9-client-access-and-protocols).) |
 | E7.2 | Custom tool loader | **Done** (E7-S02, 2026-08-14). `tools.custom` imports from `agents/<name>/tools/`; registered as Haystack `ComponentTool` / `Tool`; import errors fail doctor/serve with module path; deploy copies listed `tools/*.py` only. Guide: [custom-tools.md](user-docs/guides/custom-tools.md). |
-| E7.3 | Cursor MCP setup | **AC:** Documented `mcp.json` → `http://localhost:{mcp_port}/mcp`; install may write `.cursor/mcp.json.example` or `--cursor-mcp` for live file. |
+| E7.3 | Cursor MCP setup | **Done** (E7-S03, 2026-08-21). Documented `mcp.json` → `http://localhost:{mcp_port}/mcp` (default **1417**); install scaffolds `.cursor/mcp.json.example`; `--cursor-mcp` writes live `.cursor/mcp.json` (copy-if-missing). `uv` required only for stdio `tools.mcp`. Guide: [cursor-mcp.md](user-docs/guides/cursor-mcp.md). |
 | E7.4 | Chainlit | **AC:** `serve.hayhooks.chainlit: true` serves `/chat` on same port (embedded GUI). |
 | E7.5 | ACP adapter | **AC:** `zaumzeug acp <name>` stdio process; Zed/JetBrains can register command. |
 | E7.6 | MCP + deploy | **AC:** `zaumzeug mcp <name> --deploy` works from production bundle. |
 | E7.7 | Extended builtin catalog | **AC:** Phase 3 builtins beyond `web_fetch` per [Architecture §6.5](architecture/05-configuration.md#65-builtin-tools-catalog). |
 | E7.8 | Web client layouts | **AC:** Document co-located deployment patterns (Chainlit embedded, Open WebUI + Hayhooks, SPA + Nginx proxy) per [Architecture §9.4](architecture/06-runtime-and-protocols.md#94-web-deployment-layouts). |
 
-**Story seeds:** MCP **Done** (E7-S01). Custom tools **Done** (E7-S02 — `tests/unit/runtime/tools/test_custom_loader.py`, doctor import-error check). Remaining: Cursor `mcp.json` (E7-S03); tool correctness eval when DeepEval present.
+**Story seeds:** MCP **Done** (E7-S01). Custom tools **Done** (E7-S02). Cursor MCP setup **Done** (E7-S03 — `user-docs/guides/cursor-mcp.md`, `--cursor-mcp` live write). Remaining: tool correctness eval when DeepEval present.
 
 ---
 

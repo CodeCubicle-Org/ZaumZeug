@@ -108,6 +108,8 @@ Product context: [PRD §5, §7](../prd.md#5-users-and-personas). Web UI choice: 
 
 Use when harness is a **capability** invoked by Cursor's (or another host's) agent. Limitations: no native IDE agent UX; host stays in control; not designed for agent-to-agent delegation.
 
+**Implementation (E7-S03, 2026-08-21):** Cursor setup guide [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md) — `mcp.json` URL `http://localhost:{mcp_port}/mcp` (default 1417); install scaffolds `.cursor/mcp.json.example`; `--cursor-mcp` writes live `.cursor/mcp.json` (copy-if-missing). `uv` is required only when the harness uses stdio `tools.mcp` servers. Tests: `tests/unit/install/test_scaffolding.py::test_e7_s03_ac2_mcp_json_example_scaffolded`, `tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json`.
+
 ### 9.3 ACP — when to use
 
 Use when harness **is** the primary agent in Zed/JetBrains/Neovim. Harness may still use MCP internally for its own tools. Limitations: Cursor does not generically adopt third-party ACP agents; more implementation work than MCP expose.

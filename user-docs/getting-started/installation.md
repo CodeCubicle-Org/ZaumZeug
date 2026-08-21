@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | New developers |
-| **Last updated** | 2026-08-14 |
+| **Last updated** | 2026-08-21 |
 
 Get from a fresh clone to a working ZaumZeug dev environment with one command. This page is the full walkthrough (prerequisites, effort, disk, extras, updates, troubleshooting). The short new-contributor summary is [CONTRIBUTING.md](../../CONTRIBUTING.md); it links here for depth.
 
@@ -30,7 +30,7 @@ You do **not** manually install Haystack, DSPy, GEPA, or LiteLLM for the default
 |---|---|
 | Is setup complicated? | **No** — one install script, one venv, one editable install; idempotent re-run |
 | How long to first harness? | **Target < 15 minutes** on typical broadband (mock model, no API keys); **up to ~30 minutes** on slow networks |
-| What does install do? | Creates `.venv`, editable `[dev]` install, scaffolds `usr-harnesses/example/`, `user-docs/`, `config/models.yaml`, `.env.example` / seeded `.env` (never overwrite), `.cursor/mcp.json.example`, and `.gitignore` entries; optional `--verify` runs `zaumzeug doctor` |
+| What does install do? | Creates `.venv`, editable `[dev]` install, scaffolds `usr-harnesses/example/`, `user-docs/`, `config/models.yaml`, `.env.example` / seeded `.env` (never overwrite), `.cursor/mcp.json.example`, and `.gitignore` entries; optional `--verify` runs `zaumzeug doctor`; optional `--cursor-mcp` writes live `.cursor/mcp.json` (copy-if-missing) |
 
 ---
 
@@ -68,7 +68,7 @@ Same flags on every platform (passed through wrappers unchanged):
 | `--verify` | Run `zaumzeug doctor` after install |
 | `--no-example` | Skip scaffolding the example harness |
 | `--skip-venv` | Use the current Python (CI / pre-activated venv) |
-| `--cursor-mcp` | Opt-in Cursor MCP config write (live `.cursor/mcp.json`) |
+| `--cursor-mcp` | Opt-in write of live `.cursor/mcp.json` from the example template (copy-if-missing). See [Cursor MCP setup](../guides/cursor-mcp.md). |
 
 ```powershell
 .\install\client-install.ps1 --verify
@@ -137,7 +137,7 @@ Not required to start a harness with the mock profile.
 | **Compile / GEPA** | Included in `[dev]` | Offline prompt optimization + Haystack export (`zaumzeug compile`, Pattern A) — Phase 2 (E4-S02b/S03a); `--dry-run` validates modules/registry without GEPA (**Done** E4-S06); Pattern B `optimize_anything` adapter (**Done** E4-S04 — `optimize_haystack_artifact`); runtime applies optional `input_rewrite` at serve/run (E4-S03b); pin/rollback to immutable `artifacts/<run_id>/` without re-GEPA (**Done** E4-S07); workflow diagram `docs/workflow-diagram.md` (**Done** E4-S08); live task/reflection models need API keys in `.env`. See [Compile and export](../guides/compile.md). |
 | **DeepEval** | `pip install "zaumzeug[eval]"` | Optional DeepEval for harness regression — **Done** (E6-S01, 2026-07-28): not in core install; missing import shows install hint. `zaumzeug eval` CLI **Done** (E6-S02, 2026-07-28). Deploy eval gate **Done** (E6-S03 / E5-S06, 2026-07-28): `deploy.eval_gate` / `zaumzeug deploy --eval-gate`. Harness `eval/` pytest scaffold **Done** (E6-S04, 2026-07-28): `zaumzeug init --with-eval` / `deepeval test run`. Trace → test case **Done** (E6-S05, 2026-07-28): `data/traces/` + `zaumzeug eval --trace`. Mode C HTTP black-box **Done** (E6-S06, 2026-07-28): `zaumzeug eval --base-url` (staging/debug). GEPA ↔ DeepEval bridge **Done** (E6-S07, 2026-07-28): `append_failed_eval_to_train`, shared val aliases, optional `modules/metrics.py`. See [Testing](../guides/testing.md) and [CLI — deploy](../reference/cli.md#zaumzeug-deploy). |
 | **Provider plugins** | e.g. `openai-haystack`, `anthropic-haystack` | Only for configured live providers |
-| **MCP serve** | included (`mcp`, `mcp-haystack`) | `zaumzeug mcp` serves `{host}:{mcp_port}/mcp` (default **1417**). `uv` is needed only for stdio `tools.mcp` servers (`zaumzeug doctor` warns if missing). Cursor live `mcp.json` write is still opt-in (`--cursor-mcp`). See [CLI — mcp](../reference/cli.md#zaumzeug-mcp). |
+| **MCP serve** | included (`mcp`, `mcp-haystack`) | `zaumzeug mcp` serves `{host}:{mcp_port}/mcp` (default **1417**). `uv` is needed only for stdio `tools.mcp` servers (`zaumzeug doctor` warns if missing). Cursor live `mcp.json` write is opt-in (`--cursor-mcp`). See [Cursor MCP setup](../guides/cursor-mcp.md) and [CLI — mcp](../reference/cli.md#zaumzeug-mcp). |
 | **Chainlit UI** | `hayhooks[chainlit]` | Phase 3 embedded `/chat` |
 
 ---

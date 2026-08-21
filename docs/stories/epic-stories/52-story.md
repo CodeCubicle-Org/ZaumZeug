@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/52-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-08-21 |
 | **Story ID** | E7-S03 |
+| **Status** | Done (2026-08-21) |
 | **Epic** | [E7 — Tools, MCP, and ACP](../07-epic.md) |
 | **Phase** | 3 |
 | **Epic build order** | 7 of 8 |
@@ -46,34 +47,42 @@ As a **Cursor user**, I want documented MCP setup, so that Cursor can invoke my 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Documented `mcp.json` → `http://localhost:{mcp_port}/mcp`
-- [ ] **AC-2** Install scaffolds `.cursor/mcp.json.example`
-- [ ] **AC-3** `--cursor-mcp` install flag may write live `.cursor/mcp.json` (opt-in)
-- [ ] **AC-4** Requires `uv` when harness uses MCP tool servers — documented
+- [x] **AC-1** Documented `mcp.json` → `http://localhost:{mcp_port}/mcp`
+- [x] **AC-2** Install scaffolds `.cursor/mcp.json.example`
+- [x] **AC-3** `--cursor-mcp` install flag may write live `.cursor/mcp.json` (opt-in)
+- [x] **AC-4** Requires `uv` when harness uses MCP tool servers — documented
 
 ### Implementation tasks (build)
 
-- [ ] Author Cursor setup guide in `user-docs/guides/cursor-mcp.md`
-- [ ] Template `mcp.json.example` with placeholder port
-- [ ] Wire `--cursor-mcp` in client_install (E1-S01)
+- [x] Author Cursor setup guide in `user-docs/guides/cursor-mcp.md`
+- [x] Template `mcp.json.example` with placeholder port
+- [x] Wire `--cursor-mcp` in client_install (E1-S01)
 
 ### Verification (after build)
 
-Per [Story verification](../00-README.md#story-verification-required). **Docs + scaffold** — manual E2E checklist.
+Per [Story verification](../00-README.md#story-verification-required). **Docs + scaffold** — manual E2E checklist. Test file header: `# Story: E7-S03 / E7.3`.
 
 | AC | Verification |
 |---|---|
-| AC-1 | **manual:** guide shows correct URL pattern |
+| AC-1 | **manual:** guide shows correct URL pattern — [cursor-mcp.md](../../../user-docs/guides/cursor-mcp.md) documents `http://localhost:{mcp_port}/mcp` (default **1417**) |
 | AC-2 | `tests/unit/install/test_scaffolding.py::test_e7_s03_ac2_mcp_json_example_scaffolded` |
 | AC-3 | `tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json` |
-| AC-4 | **manual:** guide documents `uv` requirement |
+| AC-4 | **manual:** guide documents `uv` requirement for stdio `tools.mcp` (HTTP Cursor → `zaumzeug mcp` does not need `uv`) |
 | AC-1–4 | **manual:** end-to-end checklist in `cursor-mcp.md` completed once |
 
-- [ ] Manual E2E checklist completed; automated ACs pass
+- [x] Manual E2E checklist completed; automated ACs pass
+- [x] `pytest tests/unit/install/test_scaffolding.py::test_e7_s03_ac2_mcp_json_example_scaffolded tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json -v` passes
+- [x] Full suite `pytest tests -q` (2026-08-21): 322 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate)
 
 ### Definition of done
 
-- [ ] End-to-end manual test checklist in guide
-- [ ] Verification checklist complete
+- [x] End-to-end manual test checklist in guide
+- [x] Verification checklist complete
+
+### Implementation notes (2026-08-21)
+
+- Guide: [cursor-mcp.md](../../../user-docs/guides/cursor-mcp.md) (mirrored in `install/templates/user-docs/guides/`). URL is `http://localhost:{mcp_port}/mcp`; template placeholder port **1417**.
+- `scaffold_project(..., cursor_mcp=True)` copy-if-missing writes live `.cursor/mcp.json` from the example (never overwrite). Flag off still scaffolds `.cursor/mcp.json.example` only.
+- `uv` is required only for stdio `tools.mcp` servers (`zaumzeug doctor` `mcp_uv` warn). Cursor talking to `zaumzeug mcp` over HTTP does not need `uv`.
 
 ---

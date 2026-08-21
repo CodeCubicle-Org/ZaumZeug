@@ -1,6 +1,6 @@
 # AI Harness — Ideation & Research (archive)
 
-**Last updated:** 2026-06-24 *(scaffolding marked Done — E1-S03, 2026-07-22; wrappers Done — E1-S02, 2026-07-22)*
+**Last updated:** 2026-08-21 *(Cursor MCP `--cursor-mcp` Done — E7-S03)*
 
 > **Structured outputs:** Requirement-level content from this archive is mirrored in **[prd.md](prd.md)** and **[architecture.md](architecture.md)**. This file retains full YAML examples, install script walkthroughs, and protocol essays.
 
@@ -331,7 +331,7 @@ Optional flags are identical on every platform: `--verify`, `--no-example`, `--s
 5. Environment hints (OS-aware)
    ├─ Print API keys to set in .env
    ├─ Write .cursor/mcp.json.example from install/templates/ *(Done — E1-S03)*
-   ├─ Optional `--cursor-mcp` live mcp.json → E7-S03
+   ├─ Optional `--cursor-mcp` live mcp.json *(Done — E7-S03, 2026-08-21)*
    └─ Print activation hint:
    │     Windows:  .venv\Scripts\Activate.ps1
    │     macOS/Linux:  source .venv/bin/activate
@@ -418,7 +418,7 @@ python install/client_install.py
 
 ### Scaffolding implementation *(Done — E1-S03, 2026-07-22)*
 
-Shipped in `install/client_install.py` → `scaffold_project()`: copy-if-missing from `install/templates/` for example harness, `config/models.yaml`, `.env.example`, seeded `.env` (never overwrite), `.cursor/mcp.json.example`, `user-docs/`, and `.gitignore` merge. Flag `--no-example` skips the harness tree. Tests: `tests/unit/install/test_scaffolding.py`. See [Architecture §3.4](architecture/02-repository-and-layout.md#34-install-scripts-dev-vs-target).
+Shipped in `install/client_install.py` → `scaffold_project()`: copy-if-missing from `install/templates/` for example harness, `config/models.yaml`, `.env.example`, seeded `.env` (never overwrite), `.cursor/mcp.json.example`, `user-docs/`, and `.gitignore` merge. Flag `--no-example` skips the harness tree. Flag `--cursor-mcp` writes live `.cursor/mcp.json` (copy-if-missing; **Done** E7-S03, 2026-08-21). Tests: `tests/unit/install/test_scaffolding.py`, `tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json`. See [Architecture §3.4](architecture/02-repository-and-layout.md#34-install-scripts-dev-vs-target).
 
 ### Wrapper implementation *(Done — E1-S02, 2026-07-22)*
 

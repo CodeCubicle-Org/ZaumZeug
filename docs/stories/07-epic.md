@@ -5,8 +5,8 @@
 | **Document** | Epic E7 user stories |
 | **File** | `docs/stories/07-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-14 (E7-S02 Done) |
-| **Status** | In progress (E7-S02 Done 2026-08-14) |
+| **Last modified** | 2026-08-21 (E7-S03 Done) |
+| **Status** | In progress (E7-S03 Done 2026-08-21) |
 | **Build order** | **7 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -24,10 +24,10 @@
 
 ### Story implementation order (within this epic)
 
-1. **E7-S02** — Custom tools
+1. **E7-S02** — Custom tools ✅
 2. **E7-S07** — Extended builtins
-3. **E7-S01** — MCP config + `zaumzeug mcp`
-4. **E7-S03** — Cursor setup
+3. **E7-S01** — MCP config + `zaumzeug mcp` ✅
+4. **E7-S03** — Cursor setup ✅
 5. **E7-S05** — ACP adapter
 6. **E7-S06** — MCP from deploy
 7. **E7-S04** → **E7-S08** — Chainlit + web layout docs
@@ -168,16 +168,16 @@ As a **Cursor user**, I want documented MCP setup, so that Cursor can invoke my 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Documented `mcp.json` → `http://localhost:{mcp_port}/mcp`
-- [ ] **AC-2** Install scaffolds `.cursor/mcp.json.example`
-- [ ] **AC-3** `--cursor-mcp` install flag may write live `.cursor/mcp.json` (opt-in)
-- [ ] **AC-4** Requires `uv` when harness uses MCP tool servers — documented
+- [x] **AC-1** Documented `mcp.json` → `http://localhost:{mcp_port}/mcp`
+- [x] **AC-2** Install scaffolds `.cursor/mcp.json.example`
+- [x] **AC-3** `--cursor-mcp` install flag may write live `.cursor/mcp.json` (opt-in)
+- [x] **AC-4** Requires `uv` when harness uses MCP tool servers — documented
 
 ### Implementation tasks (build)
 
-- [ ] Author Cursor setup guide in `user-docs/guides/cursor-mcp.md`
-- [ ] Template `mcp.json.example` with placeholder port
-- [ ] Wire `--cursor-mcp` in client_install (E1-S01)
+- [x] Author Cursor setup guide in `user-docs/guides/cursor-mcp.md`
+- [x] Template `mcp.json.example` with placeholder port
+- [x] Wire `--cursor-mcp` in client_install (E1-S01)
 
 ### Verification (after build)
 
@@ -185,18 +185,23 @@ Per [Story verification](00-README.md#story-verification-required). **Docs + sca
 
 | AC | Verification |
 |---|---|
-| AC-1 | **manual:** guide shows correct URL pattern |
+| AC-1 | **manual:** guide shows correct URL pattern — [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md) documents `http://localhost:{mcp_port}/mcp` (default **1417**) |
 | AC-2 | `tests/unit/install/test_scaffolding.py::test_e7_s03_ac2_mcp_json_example_scaffolded` |
 | AC-3 | `tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json` |
-| AC-4 | **manual:** guide documents `uv` requirement |
+| AC-4 | **manual:** guide documents `uv` requirement for stdio `tools.mcp` |
 | AC-1–4 | **manual:** end-to-end checklist in `cursor-mcp.md` completed once |
 
-- [ ] Manual E2E checklist completed; automated ACs pass
+- [x] Manual E2E checklist completed; automated ACs pass
+- [x] `pytest tests/unit/install/test_scaffolding.py::test_e7_s03_ac2_mcp_json_example_scaffolded tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json -v` passes
 
 ### Definition of done
 
-- [ ] End-to-end manual test checklist in guide
-- [ ] Verification checklist complete
+- [x] End-to-end manual test checklist in guide
+- [x] Verification checklist complete
+
+### Implementation notes (2026-08-21)
+
+Canonical detail: [52-story.md](epic-stories/52-story.md). Cursor `mcp.json` → `http://localhost:{mcp_port}/mcp` (default 1417); install `--cursor-mcp` writes live `.cursor/mcp.json`; `uv` only for stdio `tools.mcp`.
 
 ---
 

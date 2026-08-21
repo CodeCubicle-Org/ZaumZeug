@@ -69,7 +69,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--cursor-mcp",
         action="store_true",
-        help="opt-in write of Cursor MCP config (E7-S03; accepted here)",
+        help=(
+            "write live .cursor/mcp.json from the example template "
+            "(opt-in; copy-if-missing, never overwrite)"
+        ),
     )
     return parser.parse_args(argv)
 
@@ -294,10 +297,9 @@ def scaffold_project(
 ) -> None:
     """Scaffold project files from ``install/templates`` (idempotent, copy-if-missing).
 
-    ``--cursor-mcp`` live ``.cursor/mcp.json`` write is deferred to E7-S03; this
-    story always writes ``.cursor/mcp.json.example``.
+    Always writes ``.cursor/mcp.json.example``. When ``cursor_mcp`` is True,
+    also writes live ``.cursor/mcp.json`` (copy-if-missing; never overwrite).
     """
-    _ = cursor_mcp  # accepted for CLI parity; live mcp.json → E7-S03
     templates = templates_dir if templates_dir is not None else discover_templates_dir()
     if not templates.is_dir():
         raise ClientInstallError(
@@ -344,11 +346,19 @@ def scaffold_project(
         print("  .env: created from .env.example")
 
     mcp_src = templates / ".cursor" / "mcp.json.example"
-    mcp_dest = project_root / ".cursor" / "mcp.json.example"
-    if copy_file_if_missing(mcp_src, mcp_dest):
+    mcp_example_dest = project_root / ".cursor" / "mcp.json.example"
+    if copy_file_if_missing(mcp_src, mcp_example_dest):
         print("  Cursor mcp.json.example: created")
     else:
         print("  Cursor mcp.json.example: already present (left unchanged)")
+
+    if cursor_mcp:
+        mcp_live_dest = project_root / ".cursor" / "mcp.json"
+        live_src = mcp_example_dest if mcp_example_dest.is_file() else mcp_src
+        if copy_file_if_missing(live_src, mcp_live_dest):
+            print("  Cursor mcp.json: created (--cursor-mcp)")
+        else:
+            print("  Cursor mcp.json: already present (left unchanged)")
 
     # user-docs skeleton (PRD E1.3 / Architecture §3.4); content polish → E1-S05
     user_docs_src = templates / "user-docs"
