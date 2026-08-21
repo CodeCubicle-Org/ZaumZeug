@@ -1,0 +1,33 @@
+# Traefik v3 static config snippet (E8-S02).
+# Copy to the Traefik host (e.g. /etc/traefik/traefik.yml).
+# Do not put ACME account secrets, API keys, or bearer tokens in this file.
+# Fill email / storage paths on the target host.
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+
+providers:
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+certificatesResolvers:
+  le:
+    acme:
+      # Replace on the Traefik host. Placeholder only — not a credential.
+      email: ops@example.com
+      storage: /var/lib/traefik/acme.json
+      httpChallenge:
+        entryPoint: web
+
+api:
+  dashboard: false

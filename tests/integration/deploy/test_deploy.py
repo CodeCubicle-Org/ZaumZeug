@@ -436,3 +436,81 @@ def test_e5_s05_ac5_no_env_in_bundle(
     readme = (bundle / "README.deploy.md").read_text(encoding="utf-8")
     assert ".env" in readme
     assert "never" in readme.lower()
+
+
+_SECRET_MARKERS = (
+    "sk-secret",
+    "sk-live-",
+    "ghp_",
+    "BEGIN PRIVATE KEY",
+    "BEGIN RSA PRIVATE",
+    "$apr1$",
+    "eyJhbGciOi",
+)
+
+
+def test_e8_s02_ac6_no_secrets_in_bundle(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-6: deploy bundle YAML/snippets contain no auth credentials.
+
+    Auth lives in Traefik/host env on the target — never in harness.yaml,
+    traefik/*.yml, or packaged README. Extends E5-S05 ``.env`` exclusion.
+    """
+    monkeypatch.chdir(tmp_path)
+    _seed_deploy_harness(tmp_path)
+
+    (tmp_path / ".env").write_text("HARNESS_API_KEY=sk-secret-edge\n", encoding="utf-8")
+    (tmp_path / "usr-harnesses" / "example" / ".env").write_text(
+        "HARNESS_API_KEY=sk-secret-harness\n",
+        encoding="utf-8",
+    )
+
+    result = package_harness(
+        "example",
+        project_root=tmp_path,
+        run_doctor_fn=_ok_doctor,
+        output=io.StringIO(),
+    )
+    assert result.bundle_dir is not None
+    bundle = result.bundle_dir
+
+    assert not (bundle / ".env").exists()
+    env_leaks = [p for p in bundle.rglob(".env") if p.is_file()]
+    assert env_leaks == [], f".env must not appear in deploy bundle: {env_leaks}"
+
+    harness_data = yaml.safe_load((bundle / "harness.yaml").read_text(encoding="utf-8"))
+    assert "auth" not in harness_data
+    serve = harness_data.get("serve") or {}
+    assert "auth" not in serve
+
+    traefik_static = bundle / "traefik" / "traefik.yml"
+    traefik_dynamic = bundle / "traefik" / "dynamic.yml"
+    assert traefik_static.is_file()
+    assert traefik_dynamic.is_file()
+    dynamic = traefik_dynamic.read_text(encoding="utf-8")
+    assert "forwardAuth" in dynamic
+    assert "headers:" in dynamic
+    assert "Authorization: \"Bearer " not in dynamic
+    assert "Authorization: 'Bearer " not in dynamic
+    assert "customRequestHeaders" in dynamic
+    # Headers middleware must not inject a credential toward Hayhooks.
+    assert "Bearer sk-" not in dynamic
+
+    for path in bundle.rglob("*"):
+        if not path.is_file():
+            continue
+        if path.suffix.lower() not in {".md", ".yaml", ".yml", ".json", ".py", ".txt"}:
+            continue
+        content = path.read_text(encoding="utf-8", errors="ignore")
+        for marker in _SECRET_MARKERS:
+            assert marker not in content, (
+                f"secret marker {marker!r} leaked into {path.relative_to(bundle)}"
+            )
+
+    readme = (bundle / "README.deploy.md").read_text(encoding="utf-8")
+    assert "production-auth.md" in readme
+    assert "no built-in auth" in readme.lower()
+    assert "Traefik" in readme
+    assert "traefik/" in readme

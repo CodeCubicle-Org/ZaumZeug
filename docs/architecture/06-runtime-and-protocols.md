@@ -41,6 +41,8 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 **Implementation (E8-S01, 2026-08-21):** `serve.expose` unblocked from `PHASE_GATED_FIELDS`. Serve registers listed `pipelines/*.yaml` via Hayhooks `deploy_pipeline_yaml` as `POST /{id}/run`. `search_docs` builtin (catalog phase **4**) attaches to a RAG-named expose row. Workflow `pipeline:` stages invoke the same YAML. Docs: [pipelines.md](../../user-docs/guides/pipelines.md). Tests: `tests/integration/pipelines/test_serve_expose.py`.
 
+**Implementation (E8-S02, 2026-08-21):** Production HTTP is **proxy-only** — no `serve.auth`, Hayhooks unauthenticated behind Traefik (or Nginx/Caddy). Docs: [production-auth.md](../../user-docs/guides/production-auth.md). Tests: `tests/unit/docs/test_production_auth.py`.
+
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract tests on ephemeral localhost port; optional request `model_id` overrides the entry agent's ModelRouter registry (`AgentPipelineWrapper`). Tests: `tests/integration/test_openai_contract.py` (`-k e3_s07`).
 
 **Implementation (E3-S08, 2026-07-21):** `src/zaumzeug/runtime/workflow.py` — `run_workflow()` executes `workflow.yaml` stages serially; per-stage `ModelRouter` + `build_agent()`; prior stage output prepended as a user message; `--from <stage>` partial runs; pipeline stages invoke YAML listed in `serve.expose` (**Done** E8-S01). CLI: `zaumzeug run <harness> [--from STAGE] [--input TEXT]`. Tests: `tests/integration/test_workflow_run.py` (`-k e3_s08`).
@@ -145,6 +147,8 @@ Clients use OpenAI-shaped requests against your `baseURL` (e.g. `http://127.0.0.
 **Implementation (E7-S04, 2026-08-21):** Optional Chainlit GUI — `serve.hayhooks.chainlit: true` sets Hayhooks `chainlit_enabled` before `create_app()` so `/chat` shares the REST port. Requires `pip install "hayhooks[chainlit]"` (fail-fast install hint if missing). OpenAI `/v1/chat/completions` stays mounted. Docs: [web-deployment.md](../../user-docs/guides/web-deployment.md). Tests: `tests/integration/serve/test_chainlit.py`. PRD open #2 (primary web UI) remains open — Chainlit is one layout, not a product default.
 
 **Implementation (E7-S08, 2026-08-21):** Remaining §9.4 recipes in [web-deployment.md](../../user-docs/guides/web-deployment.md) — Open WebUI two-container (`OPENAI_API_BASE_URL=http://hayhooks:1416/v1`), SPA + Nginx (`/api/v1/` → `127.0.0.1:1416/v1/`), Next.js co-located (`OPENAI_BASE_URL=http://127.0.0.1:1416/v1`). Clients use the harness `baseURL`, not `api.openai.com`. Probes: `GET /v1/models`, `GET /docs`. Tests: `tests/unit/docs/test_web_deployment.py`. Open #2 remains open.
+
+**Implementation (E8-S02, 2026-08-21):** Production TLS/auth for these layouts is **proxy-only** — Traefik in front of Hayhooks (and optionally the SPA / Next.js host). Guide: [production-auth.md](../../user-docs/guides/production-auth.md). Tests: `tests/unit/docs/test_production_auth.py`.
 
 **Implementation (E7-S05, 2026-08-21):** `src/zaumzeug/serve/acp.py` — `zaumzeug acp <name>` validates like serve, builds the entry agent (including `tools.mcp`), and serves Agent Client Protocol JSON-RPC on stdio (`initialize`, `session/new`, `session/prompt`; logs on stderr). Zed/JetBrains registration: [acp.md](../../user-docs/guides/acp.md). Cursor remains MCP-primary. Tests: `tests/integration/acp/test_acp_stdio.py`.
 

@@ -5,8 +5,8 @@
 | **Document** | Epic E8 user stories |
 | **File** | `docs/stories/08-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-21 (E8-S01 pipeline exposure) |
-| **Status** | Active (E8-S07 / E8-S01 Done) |
+| **Last modified** | 2026-08-21 (E8-S02 production auth) |
+| **Status** | Active (E8-S07 / E8-S01 / E8-S02 Done) |
 | **Build order** | **8 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -27,8 +27,8 @@
 
 1. **E8-S07** — Workflow run reliability and stage transparency ✅ *(2026-08-01; P0 pull-forward)*
 2. **E8-S01** — Pipeline exposure / RAG ✅ *(2026-08-21)*
-3. **E8-S03** — Trace → dataset ratchet
-4. **E8-S02** — Production auth *(Traefik proxy-only — resolved)*
+3. **E8-S02** — Production auth ✅ *(2026-08-21; Traefik proxy-only)*
+4. **E8-S03** — Trace → dataset ratchet
 5. **E8-S05** — Dockerfile template
 6. **E8-S06** — DeepEval observe
 7. **E8-S04** — A2A *(if open #5 resolves to Phase 4)*
@@ -109,6 +109,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E8.2 |
 | **Persona** | Ops / platform |
 | **Priority** | P1 |
+| **Status** | Done (2026-08-21) |
 
 ### User story
 
@@ -126,39 +127,46 @@ As **ops**, I want an auth story for production serve, so that harness endpoints
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `user-docs/guides/production-auth.md` documents Traefik as the **reference** production pattern
-- [ ] **AC-2** Cover REST (`/v1/chat/completions`), MCP (`/mcp`), and Chainlit (`/chat`) path routing
-- [ ] **AC-3** Example Traefik static/dynamic config: TLS, Headers middleware (bearer validation) or ForwardAuth
-- [ ] **AC-4** `README.deploy.md` links to guide; notes Hayhooks has no built-in auth in v1
-- [ ] **AC-5** Document Nginx/Caddy as optional alternatives (same proxy-only principle)
-- [ ] **AC-6** No secrets in yaml or deploy bundle; auth credentials only in Traefik/env on target host
+- [x] **AC-1** `user-docs/guides/production-auth.md` documents Traefik as the **reference** production pattern
+- [x] **AC-2** Cover REST (`/v1/chat/completions`), MCP (`/mcp`), and Chainlit (`/chat`) path routing
+- [x] **AC-3** Example Traefik static/dynamic config: TLS, Headers middleware (bearer validation) or ForwardAuth
+- [x] **AC-4** `README.deploy.md` links to guide; notes Hayhooks has no built-in auth in v1
+- [x] **AC-5** Document Nginx/Caddy as optional alternatives (same proxy-only principle)
+- [x] **AC-6** No secrets in yaml or deploy bundle; auth credentials only in Traefik/env on target host
 
 ### Implementation tasks (build)
 
-- [ ] Author `user-docs/guides/production-auth.md` with Traefik examples
-- [ ] Add `deploy/<name>/` optional `traefik/` snippet or comment block in `README.deploy.md`
-- [ ] Cross-link from [E7-S08](07-epic.md) web-deployment guide — **forward link already in** [web-deployment.md](../../user-docs/guides/web-deployment.md) (2026-08-21); this task is the reverse link from `production-auth.md`
-- [ ] **Do not** add in-process auth to serve layer in v1
+- [x] Author `user-docs/guides/production-auth.md` with Traefik examples
+- [x] Add `deploy/<name>/` optional `traefik/` snippet or comment block in `README.deploy.md`
+- [x] Cross-link from [E7-S08](07-epic.md) web-deployment guide
+- [x] **Do not** add in-process auth to serve layer in v1
 
 ### Verification (after build)
 
-Per [Story verification](00-README.md#story-verification-required). **Docs-only** — manual checklist; confirm no SDK auth code added.
+Per [Story verification](00-README.md#story-verification-required). **Docs-only** with content-assertion tests plus AC-6 bundle scan. Test file header: `# Story: E8-S02 / E8.2`.
 
 | AC | Verification |
 |---|---|
-| AC-1 | **manual:** production-auth.md exists with Traefik as reference |
-| AC-2 | **manual:** REST, MCP, Chainlit paths documented |
-| AC-3 | **manual:** example Traefik config blocks present and valid YAML |
-| AC-4 | **manual:** README.deploy.md links to guide |
-| AC-5 | **manual:** Nginx/Caddy alternatives noted |
-| AC-6 | `tests/integration/deploy/test_deploy.py::test_e8_s02_ac6_no_secrets_in_bundle` *(extends deploy tests)* |
+| AC-1 | `tests/unit/docs/test_production_auth.py::test_e8_s02_ac1_traefik_is_reference_pattern` |
+| AC-2 | `tests/unit/docs/test_production_auth.py::test_e8_s02_ac2_rest_mcp_chainlit_paths` |
+| AC-3 | `tests/unit/docs/test_production_auth.py::test_e8_s02_ac3_traefik_static_dynamic_yaml` |
+| AC-4 | `tests/unit/docs/test_production_auth.py::test_e8_s02_ac4_readme_deploy_links_guide` |
+| AC-5 | `tests/unit/docs/test_production_auth.py::test_e8_s02_ac5_nginx_caddy_alternatives` |
+| AC-6 | `tests/integration/deploy/test_deploy.py::test_e8_s02_ac6_no_secrets_in_bundle` |
 
-- [ ] Manual checklist completed; no in-process auth in codebase
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] Full suite `pytest tests -q` (2026-08-21): 360 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate)
 
 ### Definition of done
 
-- [ ] Ops can deploy harness behind Traefik with TLS + bearer auth using docs only
-- [ ] Verification checklist complete
+- [x] Ops can deploy harness behind Traefik with TLS + bearer auth using docs only
+- [x] Verification checklist complete; no in-process `serve.auth`
+
+### Implementation notes (2026-08-21)
+
+- Guide: [production-auth.md](../../user-docs/guides/production-auth.md). Bundle `traefik/` snippets via packager. Schema rejects `serve.auth`.
+
+---
 
 ---
 
@@ -272,6 +280,7 @@ As **ops**, I want an optional generated Dockerfile in the deploy bundle, so tha
 
 - [PRD E8.5](../prd.md#epic-e8--rag-and-production-hardening-phase-4)
 - [E5-S08 — Platform policy](../06-epic.md#e5-s08-deploy-platform-policy) ✅ (2026-07-29)
+- [E8-S02 — Production auth](epic-stories/59-story.md) ✅ (2026-08-21)
 - [Architecture §10.6](../architecture/07-deploy-packaging.md#106-deploy-platform-targets)
 
 ### Acceptance criteria

@@ -68,7 +68,7 @@ zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose] [--port N]
 | `--verbose` | Enable SDK and Haystack debug logging |
 | `--port N` | Override `serve.hayhooks.port` from harness.yaml (CI smoke on an ephemeral free port) |
 
-**Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**), or `--port` when set. Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`). Pipelines listed in **`serve.expose`** are registered as **`POST /{id}/run`** (E8-S01). Optional **`serve.hayhooks.chainlit: true`** mounts Chainlit at `/chat` on the same port — requires `pip install "hayhooks[chainlit]"`. Open WebUI, SPA + Nginx, and Next.js layouts use the same REST `baseURL` (`http://127.0.0.1:1416/v1`, not `api.openai.com`) — see [Web deployment](../guides/web-deployment.md) and [Pipelines and RAG](../guides/pipelines.md).
+**Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**), or `--port` when set. Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`). Pipelines listed in **`serve.expose`** are registered as **`POST /{id}/run`** (E8-S01). Optional **`serve.hayhooks.chainlit: true`** mounts Chainlit at `/chat` on the same port — requires `pip install "hayhooks[chainlit]"`. Open WebUI, SPA + Nginx, and Next.js layouts use the same REST `baseURL` (`http://127.0.0.1:1416/v1`, not `api.openai.com`) — see [Web deployment](../guides/web-deployment.md) and [Pipelines and RAG](../guides/pipelines.md). Hayhooks has **no built-in auth** — production TLS/bearer lives at Traefik ([Production auth](../guides/production-auth.md)).
 
 **Behavior (`--deploy` / production):** Same OpenAI REST API as dev serve (`POST /v1/chat/completions`, `GET /v1/models`, `POST /<harness>/run`), but paths resolve under `deploy/<name>/` only — `usr-harnesses/` is never consulted. Fails fast when the deploy folder is missing or `manifest.json` is absent/invalid. Typical ops flow after `zaumzeug deploy <name>` and target install: `zaumzeug serve <name> --deploy`, `zaumzeug mcp <name> --deploy` (**Done** E7-S06 — same MCP surface as dev), or set `HARNESS_ROOT=deploy` in the container/systemd environment (see [Global environment](#global-environment)).
 
@@ -129,9 +129,9 @@ Use this to isolate Haystack/Hayhooks issues from harness YAML or SDK wiring. Pr
 
 ### Phase 1 security notes
 
-- **Bind:** `zaumzeug serve` listens on **`127.0.0.1` only**. Wide-open hosts (`0.0.0.0`) are rejected in Phase 1.
-- **Auth:** Hayhooks has no in-process auth in Phase 1 — keep serve on localhost; put Traefik (or similar) in front for production (Phase 4).
-- **Secrets:** API keys live in `.env` only — never in YAML, artifacts, or deploy bundles.
+- **Bind:** `zaumzeug serve` listens on **`127.0.0.1` only**. Wide-open hosts (`0.0.0.0`) are rejected.
+- **Auth:** Hayhooks has **no in-process auth** (no `serve.auth`). Keep serve on localhost; production TLS + bearer/ForwardAuth lives at Traefik (**Done** E8-S02) — [Production auth](../guides/production-auth.md).
+- **Secrets:** API keys live in `.env` only — never in YAML, artifacts, or deploy bundles. Auth credentials stay in Traefik/host env on the target.
 
 ---
 
@@ -411,3 +411,6 @@ Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack
 - [Cursor MCP setup](../guides/cursor-mcp.md) — `.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`; `--cursor-mcp`; `uv` for stdio `tools.mcp`
 - [ACP (Zed / JetBrains)](../guides/acp.md) — `zaumzeug acp` stdio JSON-RPC; Agent Client Protocol ≠ A2A; Cursor uses MCP
 - [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml`, agent routing, [run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run) (`runtime.retry`, `output.format: json`, stage logs)
+- [Web deployment](../guides/web-deployment.md) — Chainlit `/chat`, Open WebUI, SPA + Nginx, Next.js; OpenAI `baseURL` at the harness
+- [Production auth](../guides/production-auth.md) — Traefik proxy-only TLS + ForwardAuth; no `serve.auth` in v1
+- [Deploy and ship](../guides/deploy.md) — `zaumzeug deploy` → target install → `serve --deploy`

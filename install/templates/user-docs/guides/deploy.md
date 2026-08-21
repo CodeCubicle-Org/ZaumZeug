@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Ops / platform · Harness developers |
-| **Last updated** | 2026-08-21 (E8-S01 `serve.expose` pipeline copy) |
+| **Last updated** | 2026-08-21 (E8-S02 production auth — Traefik proxy-only) |
 
 Ship a production harness to a clean server **without** DSPy, GEPA, or DeepEval on the target. Compile and eval stay on the developer machine (or CI); the target only runs Haystack via `zaumzeug`.
 
@@ -123,7 +123,7 @@ zaumzeug serve <name>
 zaumzeug mcp <name>
 ```
 
-Same OpenAI REST surface as local serve (`POST /v1/chat/completions`, `GET /v1/models`, `GET /docs`). Point web clients at the harness `baseURL` (`http://127.0.0.1:1416/v1`), not `api.openai.com`. **`zaumzeug mcp <name> --deploy`** (or `HARNESS_ROOT=deploy`) exposes the same MCP surface as development (`POST /mcp`, `GET /status` on `serve.hayhooks.mcp_port`, default **1417**) — see [Cursor MCP setup](cursor-mcp.md). Optional **`GET /chat`** when the shipped `harness.yaml` has `serve.hayhooks.chainlit: true` and the target has `pip install "hayhooks[chainlit]"`. Open WebUI two-container, SPA + Nginx, and Next.js layouts: [Web deployment](web-deployment.md). Validate without binding:
+Same OpenAI REST surface as local serve (`POST /v1/chat/completions`, `GET /v1/models`, `GET /docs`). Point web clients at the harness `baseURL` (`http://127.0.0.1:1416/v1`), not `api.openai.com`. **`zaumzeug mcp <name> --deploy`** (or `HARNESS_ROOT=deploy`) exposes the same MCP surface as development (`POST /mcp`, `GET /status` on `serve.hayhooks.mcp_port`, default **1417**) — see [Cursor MCP setup](cursor-mcp.md). Optional **`GET /chat`** when the shipped `harness.yaml` has `serve.hayhooks.chainlit: true` and the target has `pip install "hayhooks[chainlit]"`. Open WebUI two-container, SPA + Nginx, and Next.js layouts: [Web deployment](web-deployment.md). **Hayhooks has no built-in auth in v1** — put Traefik (or Nginx/Caddy) in front for production TLS + bearer/ForwardAuth: [Production auth](production-auth.md). Validate without binding:
 
 ```bash
 zaumzeug serve <name> --deploy --dry-run
@@ -143,6 +143,16 @@ The `deploy/<name>/` bundle is **OS-neutral** (Python 3.11+ sources, YAML/JSON, 
 **Optional container path:** Generated Dockerfile in the bundle is Phase 4 ([E8-S05](../../docs/stories/epic-stories/62-story.md)). Until then, use `HARNESS_ROOT=deploy` in your own container image after `pip install zaumzeug`.
 
 See also [PRD §14 — Cross-platform support](../../docs/prd.md#cross-platform-support) and [Architecture §10.6](../../docs/architecture/07-deploy-packaging.md#106-deploy-platform-targets).
+
+---
+
+## Production auth (proxy-only)
+
+Hayhooks does **not** authenticate callers in v1 (`serve.auth` is not a schema field). Bind stays **127.0.0.1**. For a public hostname, terminate TLS and check credentials at the edge.
+
+**Reference:** Traefik (Headers middleware + ForwardAuth). Nginx and Caddy are the same idea. Each `deploy/<name>/` bundle includes optional `traefik/` YAML snippets — **no secrets**; set `HARNESS_API_KEY` / OIDC secrets on the Traefik host only.
+
+See [Production auth](production-auth.md).
 
 ---
 
@@ -191,5 +201,6 @@ Remove or restore the ignore later with `git rm -r --cached deploy/<name>/` if y
 - [CLI — deploy](../reference/cli.md#zaumzeug-deploy) · [CLI — serve](../reference/cli.md#zaumzeug-serve) · [CLI — mcp](../reference/cli.md#zaumzeug-mcp) · [CLI — acp](../reference/cli.md#zaumzeug-acp)
 - [Cursor MCP setup](cursor-mcp.md) — `zaumzeug mcp <name> --deploy` (same production root and MCP surface as dev)
 - [ACP (Zed / JetBrains)](acp.md) — `zaumzeug acp <name> --deploy` (same production root as serve)
+- [Production auth](production-auth.md) — Traefik reference (TLS + ForwardAuth); Hayhooks has no built-in auth in v1
 - [Testing — deploy gates](testing.md#deploy-eval-gate)
 - [Installation — production disk](../getting-started/installation.md#disk-space-planning-estimates)

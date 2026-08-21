@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 complete for **E4** / **E6** / **E5** (2026-07-28 / 2026-07-29). Phase 4 pull-forward: **[E8-S07](docs/stories/epic-stories/64-story.md)** (workflow run reliability — `runtime.retry`, stage INFO logs, `output.format: json`) **done** (2026-08-01). Phase 3: **[E7-S01](docs/stories/epic-stories/50-story.md)** (MCP) through **[E7-S08](docs/stories/epic-stories/57-story.md)** (web client deployment layouts) **done** (2026-08-21). Phase 4: **[E8-S01](docs/stories/epic-stories/58-story.md)** (pipeline exposure / RAG) **done** (2026-08-21). Next: [E8-S03](docs/stories/epic-stories/60-story.md) (trace → dataset ratchet). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 complete for **E4** / **E6** / **E5** (2026-07-28 / 2026-07-29). Phase 4 pull-forward: **[E8-S07](docs/stories/epic-stories/64-story.md)** (workflow run reliability — `runtime.retry`, stage INFO logs, `output.format: json`) **done** (2026-08-01). Phase 3: **[E7-S01](docs/stories/epic-stories/50-story.md)** (MCP) through **[E7-S08](docs/stories/epic-stories/57-story.md)** (web client deployment layouts) **done** (2026-08-21). Phase 4: **[E8-S01](docs/stories/epic-stories/58-story.md)** (pipeline exposure / RAG) and **[E8-S02](docs/stories/epic-stories/59-story.md)** (production auth — Traefik proxy-only) **done** (2026-08-21). Next: [E8-S03](docs/stories/epic-stories/60-story.md) (trace → dataset ratchet). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -184,7 +184,7 @@ zaumzeug acp <harness>                # Agent Client Protocol stdio JSON-RPC (E7
 | [Product Requirements (PRD)](docs/prd.md) | Goals, personas, epics, acceptance criteria, phases |
 | [Architecture](docs/architecture.md) | Technical design — stack, data flows, config, deploy |
 | [Epic stories](docs/stories/00-README.md) | Implementation backlog broken into epics and stories |
-| [User guides](user-docs/README.md) | How to build and run harnesses — install, workflow, compile, [deploy/ship](user-docs/guides/deploy.md), [ACP](user-docs/guides/acp.md), testing |
+| [User guides](user-docs/README.md) | How to build and run harnesses — install, workflow, compile, [deploy/ship](user-docs/guides/deploy.md), [production auth](user-docs/guides/production-auth.md), [ACP](user-docs/guides/acp.md), testing |
 | [Dependencies](dependencies.md) | External tools, libraries, and protocols |
 | [Competitive landscape](docs/competitive-landscape.md) | How ZaumZeug compares to other harness SDKs |
 
@@ -194,7 +194,7 @@ zaumzeug acp <harness>                # Agent Client Protocol stdio JSON-RPC (E7
 
 - **Harness developers** — Scaffold a harness, configure models and tools, compile, deploy
 - **SDK maintainers** — Extend the framework, examples, CI, and docs; deploy git policy (ignore vs release commit vs CI artifact) in [CONTRIBUTING.md](CONTRIBUTING.md#deploy-git-policy-maintainers)
-- **Ops / platform** — Copy `deploy/<name>/` → `target_install` → `.env` → `zaumzeug serve --deploy` or `zaumzeug mcp --deploy` (or `HARNESS_ROOT=deploy`). Linux-first production (VM / bare metal / Docker/K8s); Win/macOS best-effort. Full guide: [Deploy and ship](user-docs/guides/deploy.md).
+- **Ops / platform** — Copy `deploy/<name>/` → `target_install` → `.env` → `zaumzeug serve --deploy` or `zaumzeug mcp --deploy` (or `HARNESS_ROOT=deploy`). Put Traefik in front for TLS + auth ([Production auth](user-docs/guides/production-auth.md)). Linux-first production (VM / bare metal / Docker/K8s); Win/macOS best-effort. Full guide: [Deploy and ship](user-docs/guides/deploy.md).
 - **Client integrators** — Call a harness via REST, MCP, or ACP from an app or IDE
 
 ---

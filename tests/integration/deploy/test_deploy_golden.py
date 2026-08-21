@@ -155,7 +155,13 @@ def _stable_bundle_paths(paths: list[str]) -> list[str]:
         "target-install.ps1",
         "models.yaml",  # merged registry; content varies with global config/
     }
-    return [p for p in paths if p not in skip_names and not p.startswith("models.")]
+    return [
+        p
+        for p in paths
+        if p not in skip_names
+        and not p.startswith("models.")
+        and not p.startswith("traefik/")  # E8-S02 optional snippets; not §10.1 matrix
+    ]
 
 
 # Canonical §10.1 matrix paths for the golden example harness (E5-S02).

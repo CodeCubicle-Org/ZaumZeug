@@ -109,4 +109,5 @@ Only pipelines listed in `serve.expose` are copied to `deploy/<name>/pipelines/`
 - [Multi-agent workflow](multi-agent-workflow.md) — `pipeline:` stages vs agent stages
 - [Custom tools](custom-tools.md) — `search_docs` in the builtin catalog
 - [CLI — serve](../reference/cli.md#zaumzeug-serve)
+- [Production auth](production-auth.md) — Traefik in front of `POST /{id}/run` (same proxy-only pattern as REST)
 - [Haystack Pipelines](https://docs.haystack.deepset.ai/docs/pipelines)

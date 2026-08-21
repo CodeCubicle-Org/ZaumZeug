@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/62-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-08-21 |
 | **Story ID** | E8-S05 |
 | **Epic** | [E8 — RAG and Production Hardening](../08-epic.md) |
 | **Phase** | 4 |
@@ -23,7 +23,7 @@
 | **Feature** | E8.5 |
 | **Persona** | Ops / platform |
 | **Priority** | P2 |
-| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) ✅ · [E5-S08](48-story.md#e5-s08-deploy-platform-policy) ✅ (2026-07-29) |
+| **Prerequisites** | [E5-S01](41-story.md#e5-s01-zaumzeug-deploy-command) ✅ · [E5-S08](48-story.md#e5-s08-deploy-platform-policy) ✅ (2026-07-29) · [E8-S02](59-story.md#e8-s02-production-auth) ✅ (2026-08-21) |
 
 ### User story
 
@@ -42,7 +42,7 @@ As **ops**, I want an optional generated Dockerfile in the deploy bundle, so tha
 
 - [Dockerfile reference](https://docs.docker.com/reference/dockerfile/)
 - [Architecture §10.6 — container targets](../../architecture/07-deploy-packaging.md#106-deploy-platform-targets)
-- [E8-S02 Traefik auth](59-story.md) for production compose examples
+- [E8-S02 Traefik auth](59-story.md) ✅ (2026-08-21) for production compose examples
 
 ### Acceptance criteria
 

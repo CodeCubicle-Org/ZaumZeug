@@ -1,0 +1,86 @@
+# Traefik v3 dynamic config snippet (E8-S02).
+# Copy to the Traefik host (e.g. /etc/traefik/dynamic/harness.yml).
+# Auth credentials belong in Traefik/host env (ForwardAuth sidecar, oauth2-proxy,
+# systemd EnvironmentFile) — never in this YAML, harness.yaml, or git.
+
+http:
+  middlewares:
+    harness-secure-headers:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        forceSTSHeader: true
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+
+    harness-forwardauth:
+      forwardAuth:
+        # Host-local verifier. It reads HARNESS_API_KEY (or OIDC secrets)
+        # from the Traefik host environment — not from this file.
+        address: "http://127.0.0.1:4181"
+        trustForwardHeader: true
+        authRequestHeaders:
+          - "Authorization"
+          - "X-Api-Key"
+
+  routers:
+    harness-rest:
+      rule: >-
+        Host(`harness.example.com`) && PathPrefix(`/v1`)
+        && HeadersRegexp(`Authorization`, `^Bearer .+`)
+      entryPoints:
+        - websecure
+      middlewares:
+        - harness-secure-headers
+        - harness-forwardauth
+      service: hayhooks-rest
+      tls:
+        certResolver: le
+
+    harness-docs:
+      rule: "Host(`harness.example.com`) && PathPrefix(`/docs`)"
+      entryPoints:
+        - websecure
+      middlewares:
+        - harness-secure-headers
+        - harness-forwardauth
+      service: hayhooks-rest
+      tls:
+        certResolver: le
+
+    harness-chat:
+      rule: "Host(`harness.example.com`) && PathPrefix(`/chat`)"
+      entryPoints:
+        - websecure
+      middlewares:
+        - harness-secure-headers
+        - harness-forwardauth
+      service: hayhooks-rest
+      tls:
+        certResolver: le
+
+    harness-mcp:
+      rule: "Host(`harness.example.com`) && PathPrefix(`/mcp`)"
+      entryPoints:
+        - websecure
+      middlewares:
+        - harness-secure-headers
+        - harness-forwardauth
+      service: hayhooks-mcp
+      tls:
+        certResolver: le
+
+  services:
+    hayhooks-rest:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:1416"
+    hayhooks-mcp:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:1417"

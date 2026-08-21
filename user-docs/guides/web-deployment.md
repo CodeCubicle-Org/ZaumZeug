@@ -129,7 +129,7 @@ The Chainlit app talks to those OpenAI endpoints. OpenAI `model` is the harness 
 
 ### Production notes
 
-- **Auth:** the embedded UI is public on the bind address. Put Traefik (or Nginx/Caddy) in front for production — same stance as REST (Phase 4 [E8-S02](../../docs/stories/epic-stories/59-story.md)).
+- **Auth:** the embedded UI is public on the bind address. Put Traefik (or Nginx/Caddy) in front for production — same stance as REST ([Production auth](production-auth.md)).
 - **Persistence / multi-user:** in-memory Chainlit sessions; for conversation history or a richer product UI, use [Open WebUI](#open-webui--hayhooks-two-containers) or a custom frontend against `/v1`.
 - **Workers:** keep a single uvicorn worker (Hayhooks default) unless the load balancer has sticky sessions.
 
@@ -314,7 +314,7 @@ curl -s http://127.0.0.1:1416/docs | head
 curl -s http://127.0.0.1/api/v1/models
 ```
 
-Put TLS and auth on Nginx (or Traefik) in production — Hayhooks stays unauthenticated behind the proxy.
+Put TLS and auth on Nginx (or Traefik) in production — Hayhooks stays unauthenticated behind the proxy. Reference pattern: [Production auth](production-auth.md).
 
 ---
 
@@ -390,7 +390,7 @@ curl -s http://127.0.0.1:1416/v1/models
 curl -s http://127.0.0.1:1416/docs | head
 ```
 
-Production: same host or sidecar; `zaumzeug serve --deploy` / `HARNESS_ROOT=deploy`. Put Traefik in front of Next.js (and optionally Hayhooks) for TLS/auth — [E8-S02](../../docs/stories/epic-stories/59-story.md).
+Production: same host or sidecar; `zaumzeug serve --deploy` / `HARNESS_ROOT=deploy`. Put Traefik in front of Next.js (and optionally Hayhooks) for TLS/auth — [Production auth](production-auth.md).
 
 ---
 
@@ -400,4 +400,5 @@ Production: same host or sidecar; `zaumzeug serve --deploy` / `HARNESS_ROOT=depl
 - [CLI — mcp](../reference/cli.md#zaumzeug-mcp) — Cursor / Claude Desktop
 - [ACP (Zed / JetBrains)](acp.md) — `zaumzeug acp` stdio JSON-RPC; not IBM ACP/A2A; Cursor uses MCP
 - [Deploy and ship](deploy.md) — production `--deploy` / `HARNESS_ROOT=deploy`
+- [Production auth](production-auth.md) — Traefik proxy-only TLS + bearer/ForwardAuth (Hayhooks has no built-in auth in v1)
 - [Architecture §9.4](../../docs/architecture/06-runtime-and-protocols.md#94-web-deployment-layouts)

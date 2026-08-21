@@ -46,6 +46,7 @@ Requirements: [PRD E5.2](../prd.md#epic-e5--deploy-packaging-phase-2). **Done** 
 4. Pin per-agent artifacts; copy `agents/*/agents-models.yaml`, tools, pipelines, hooks, `docs/workflow-diagram.md`.
 5. Merge harness `models.yaml`; write `manifest.json` (per-agent `artifact_run_id` map), `README.deploy.md`.
 6. Copy `target_install.py`, `target-install.sh`, `target-install.ps1` into `deploy/<name>/` (from `install/templates/` or SDK `install/`).
+7. Copy optional secret-free `traefik/` snippets (static + dynamic YAML) from `install/templates/deploy/traefik/` (**E8-S02**).
 
 Idempotent — overwrites `deploy/<name>/`. Future: `zaumzeug export` tarball of bundle.
 
@@ -57,7 +58,7 @@ Idempotent — overwrites `deploy/<name>/`. Future: `zaumzeug export` tarball of
 
 **Implementation (E8-S01, 2026-08-21):** Packager copy of `serve.expose` pipelines (string ids or `{id, path}`) remains the E5-S02 path; serve now **registers** those YAML files as Hayhooks `POST /{id}/run`. Tests: `tests/unit/deploy/test_copy_rules.py::test_e8_s01_ac3_exposed_pipelines_in_deploy`, `tests/integration/pipelines/test_serve_expose.py`.
 
-**Implementation (E5-S01, 2026-07-28):** Steps 1 and 3–6 are live: doctor preflight → `write_deploy_bundle` (stripped yaml, pin/copy, merged harness `models.yaml`, `manifest.json`, `README.deploy.md` from `install/templates/deploy/`, target install scripts from `install/`). Tests: `tests/integration/deploy/test_deploy.py` (`e5_s01`). Target install **Done** ([E5-S09a](../stories/epic-stories/49.1-story.md)–[E5-S09c](../stories/epic-stories/49.3-story.md), 2026-07-29) — core, wrappers, `--verify`.
+**Implementation (E5-S01, 2026-07-28):** Steps 1 and 3–6 are live: doctor preflight → `write_deploy_bundle` (stripped yaml, pin/copy, merged harness `models.yaml`, `manifest.json`, `README.deploy.md` from `install/templates/deploy/`, target install scripts from `install/`). Tests: `tests/integration/deploy/test_deploy.py` (`e5_s01`). Target install **Done** ([E5-S09a](../stories/epic-stories/49.1-story.md)–[E5-S09c](../stories/epic-stories/49.3-story.md), 2026-07-29) — core, wrappers, `--verify`. Step 7 (Traefik snippets) **Done** ([E8-S02](../stories/epic-stories/59-story.md), 2026-08-21).
 
 **Implementation (E6-S04, 2026-07-28):** `deploy/copy_rules.py` exports `is_excluded_from_deploy()` so `eval/` (and other §10.1 dev-only paths) are marked excluded. Strip helpers (`strip_harness_yaml` / `strip_agent_yaml`) landed with E5-S01. Shared test: `tests/unit/deploy/test_copy_rules.py::test_e5_s02_excludes_eval`.
 
@@ -122,6 +123,8 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 **Implementation (E7-S05, 2026-08-21):** `zaumzeug acp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same production root as serve. Ops snippets: `README.deploy.md`, [acp.md](../../user-docs/guides/acp.md).
 
 **Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same production root as serve; MCP surface matches dev. Ops snippets: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`.
+
+**Implementation (E8-S02, 2026-08-21):** Production auth is **proxy-only** (Traefik reference). Bundle `README.deploy.md` notes Hayhooks has no built-in auth; packager copies secret-free `traefik/` snippets. Docs: [production-auth.md](../../user-docs/guides/production-auth.md). Tests: `tests/unit/docs/test_production_auth.py`, `test_deploy.py::test_e8_s02_ac6_no_secrets_in_bundle`.
 
 ### 10.6 Deploy platform targets
 

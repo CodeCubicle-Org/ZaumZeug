@@ -57,6 +57,7 @@ __all__ = [
     "EvalGateResult",
     "PackageResult",
     "TARGET_INSTALL_FILES",
+    "TRAEFIK_SNIPPET_DIR",
     "apply_eval_gate",
     "discover_install_dir",
     "format_eval_gate_result",
@@ -72,6 +73,10 @@ TARGET_INSTALL_FILES: tuple[str, ...] = (
     "target-install.sh",
     "target-install.ps1",
 )
+
+# Optional Traefik snippets copied into every bundle (E8-S02). Secret-free YAML
+# only — credentials stay on the Traefik host env, never in these files.
+TRAEFIK_SNIPPET_DIR = "traefik"
 
 EvalRunner = Callable[..., EvalResult]
 BundleWriter = Callable[..., Path]
@@ -543,6 +548,20 @@ def _render_readme_deploy(
     )
 
 
+def _copy_traefik_snippets(dest_dir: Path) -> None:
+    """Copy optional ``traefik/`` YAML snippets from the deploy template dir.
+
+    Missing snippets are skipped (the README still documents the proxy-only
+    pattern). Present files must stay secret-free — ops fills host env on target.
+    """
+    template_dir = discover_deploy_template_dir()
+    src = template_dir / TRAEFIK_SNIPPET_DIR
+    if not src.is_dir():
+        return
+    dest = dest_dir / TRAEFIK_SNIPPET_DIR
+    shutil.copytree(src, dest, dirs_exist_ok=True)
+
+
 def _copy_target_install_scripts(dest_dir: Path) -> None:
     install_dir = discover_install_dir()
     missing = [
@@ -750,6 +769,7 @@ def write_deploy_bundle(
     )
     (dest / "README.deploy.md").write_text(readme, encoding="utf-8")
     _copy_target_install_scripts(dest)
+    _copy_traefik_snippets(dest)
     return dest
 
 

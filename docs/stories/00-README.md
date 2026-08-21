@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-21 (E8-S01 Done) |
+| **Last modified** | 2026-08-21 (E8-S02 Done) |
 | **Status** | Active |
 
 ---
@@ -100,8 +100,9 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E7-S07](epic-stories/56-story.md) — Extended builtin tools catalog | Done | 2026-08-21 |
 | [E7-S08](epic-stories/57-story.md) — Web client deployment layouts | Done | 2026-08-21 |
 | [E8-S01](epic-stories/58-story.md) — Pipeline exposure via `serve.expose` | Done | 2026-08-21 |
+| [E8-S02](epic-stories/59-story.md) — Production auth | Done | 2026-08-21 |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done. [E1-S08](epic-stories/25-story.md) (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved 2026-07-22). Phase 2: [E4-S01](epic-stories/26-story.md)–[E4-S08](epic-stories/33-story.md) done; [E6-S01](epic-stories/34-story.md)–[E6-S07](epic-stories/40-story.md) done ([E5-S06](epic-stories/46-story.md) shipped early with E6-S03); [E5-S01](epic-stories/41-story.md)–[E5-S05](epic-stories/45-story.md), [E5-S07](epic-stories/47-story.md)–[E5-S09c](epic-stories/49.3-story.md) done (2026-07-28 / 2026-07-29) — epic **E5 complete**. [E8-S07](epic-stories/64-story.md) (workflow reliability) **Done** (2026-08-01). [E7-S01](epic-stories/50-story.md) (MCP tool configuration) **Done** (2026-08-14). [E7-S02](epic-stories/51-story.md) (custom tool loader) **Done** (2026-08-14). [E7-S03](epic-stories/52-story.md) (Cursor MCP setup) **Done** (2026-08-21). [E7-S04](epic-stories/53-story.md) (Chainlit embedded UI) **Done** (2026-08-21). [E7-S05](epic-stories/54-story.md) (ACP adapter) **Done** (2026-08-21). [E7-S06](epic-stories/55-story.md) (MCP from deploy) **Done** (2026-08-21). [E7-S07](epic-stories/56-story.md) (extended builtin tools) **Done** (2026-08-21). [E7-S08](epic-stories/57-story.md) (web client deployment layouts) **Done** (2026-08-21). [E8-S01](epic-stories/58-story.md) (pipeline exposure / RAG) **Done** (2026-08-21). Next build: [E8-S03](epic-stories/60-story.md) (trace → dataset ratchet).
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done. [E1-S08](epic-stories/25-story.md) (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved 2026-07-22). Phase 2: [E4-S01](epic-stories/26-story.md)–[E4-S08](epic-stories/33-story.md) done; [E6-S01](epic-stories/34-story.md)–[E6-S07](epic-stories/40-story.md) done ([E5-S06](epic-stories/46-story.md) shipped early with E6-S03); [E5-S01](epic-stories/41-story.md)–[E5-S05](epic-stories/45-story.md), [E5-S07](epic-stories/47-story.md)–[E5-S09c](epic-stories/49.3-story.md) done (2026-07-28 / 2026-07-29) — epic **E5 complete**. [E8-S07](epic-stories/64-story.md) (workflow reliability) **Done** (2026-08-01). [E7-S01](epic-stories/50-story.md) (MCP tool configuration) **Done** (2026-08-14). [E7-S02](epic-stories/51-story.md) (custom tool loader) **Done** (2026-08-14). [E7-S03](epic-stories/52-story.md) (Cursor MCP setup) **Done** (2026-08-21). [E7-S04](epic-stories/53-story.md) (Chainlit embedded UI) **Done** (2026-08-21). [E7-S05](epic-stories/54-story.md) (ACP adapter) **Done** (2026-08-21). [E7-S06](epic-stories/55-story.md) (MCP from deploy) **Done** (2026-08-21). [E7-S07](epic-stories/56-story.md) (extended builtin tools) **Done** (2026-08-21). [E7-S08](epic-stories/57-story.md) (web client deployment layouts) **Done** (2026-08-21). [E8-S01](epic-stories/58-story.md) (pipeline exposure / RAG) **Done** (2026-08-21). [E8-S02](epic-stories/59-story.md) (production auth) **Done** (2026-08-21). Next build: [E8-S03](epic-stories/60-story.md) (trace → dataset ratchet).
 
 ---
 
@@ -209,6 +210,9 @@ E7-S08  Web client deployment layouts ✅ (2026-08-21)
    ↓
 E8-S01  Pipeline exposure via serve.expose ✅ (2026-08-21)
         — serve.expose → POST /{id}/run; search_docs; RAG docs
+   ↓
+E8-S02  Production auth ✅ (2026-08-21)
+        — Traefik proxy-only TLS + ForwardAuth; no serve.auth
 ```
 
 ## Validation summary (2026-07-05, re-checked)
@@ -253,7 +257,7 @@ Cross-checked against [PRD §8](../prd.md#8-functional-requirements-epics) and [
 | `zaumzeug install-project` + PyPI publish | [E1-S08](epic-stories/25-story.md) | Open #3 **resolved** (2026-07-22): dual path; implement with package publish |
 | A2A defer | E8-S04 | PRD open #5 |
 
-**Resolved:** **`install/` vs `install-project` (open #3)** — both coexist; clone+`install/` for Phase 1–4 v1; CLI deferred until PyPI publish — [E1-S08](epic-stories/25-story.md). **Production auth (Phase 4)** — Traefik proxy-only; no in-process SDK auth in v1 — [E8-S02](08-epic.md#e8-s02-production-auth). Product name **ZaumZeug** (PyPI `zaumzeug`, CLI `zaumzeug`) — [Architecture §3.2](../architecture/02-repository-and-layout.md#32-package-naming). **GEPA Phase 2 = Pattern A** (`dspy.GEPA` default CLI); **optional input rewrite/clarify templates** at compile time (E4-S03); **post-compile serve prefers artifact** ([E4-S05](epic-stories/30-story.md), 2026-07-28); **`optimize_anything` / Pattern B** shipped early as adapter + schema ([E4-S04](epic-stories/29-story.md), 2026-07-28) — CLI remains Pattern A. **Hayhooks self-hosted** — `zaumzeug serve|mcp` on target host (Docker via E8-S05); Haystack Enterprise Platform not in v1 scope — [Architecture §8.2](../architecture/06-runtime-and-protocols.md#82-harness-vs-raw-hayhooks).
+**Resolved:** **`install/` vs `install-project` (open #3)** — both coexist; clone+`install/` for Phase 1–4 v1; CLI deferred until PyPI publish — [E1-S08](epic-stories/25-story.md). **Production auth (Phase 4, Done E8-S02, 2026-08-21)** — Traefik proxy-only; no in-process SDK auth in v1 — [E8-S02](08-epic.md#e8-s02-production-auth). Product name **ZaumZeug** (PyPI `zaumzeug`, CLI `zaumzeug`) — [Architecture §3.2](../architecture/02-repository-and-layout.md#32-package-naming). **GEPA Phase 2 = Pattern A** (`dspy.GEPA` default CLI); **optional input rewrite/clarify templates** at compile time (E4-S03); **post-compile serve prefers artifact** ([E4-S05](epic-stories/30-story.md), 2026-07-28); **`optimize_anything` / Pattern B** shipped early as adapter + schema ([E4-S04](epic-stories/29-story.md), 2026-07-28) — CLI remains Pattern A. **Hayhooks self-hosted** — `zaumzeug serve|mcp` on target host (Docker via E8-S05); Haystack Enterprise Platform not in v1 scope — [Architecture §8.2](../architecture/06-runtime-and-protocols.md#82-harness-vs-raw-hayhooks).
 
 ---
 
@@ -296,7 +300,7 @@ Every story follows **build first, verify second**. A story is **not done** unti
 
 ### Manual-only exceptions (allowed when documented)
 
-- **Pure documentation** stories (e.g. E1-S06, E7-S08, E8-S02): Verification uses a **manual** checklist mapped to ACs; no pytest required unless link/content assertions are added later. (E1-S05 added path/content tests in `tests/unit/docs/`.)
+- **Pure documentation** stories (e.g. E1-S06, E7-S08, E8-S02): Verification uses a **manual** checklist mapped to ACs; no pytest required unless link/content assertions are added later. (E1-S05 added path/content tests in `tests/unit/docs/`; E8-S02 added `test_production_auth.py` plus AC-6 bundle scan.)
 - **CI orchestration** (E1-S07): Verification is the workflow itself; individual ACs trace to workflow steps/jobs.
 - **Deferred** stories (E1-S08 until PyPI publish, E8-S04): Verification section omitted until implementation starts; template still applies when implemented.
 

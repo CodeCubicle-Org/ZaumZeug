@@ -189,6 +189,8 @@ production failure → trace → dataset row → zaumzeug eval (optional) → GE
 
 **Implementation (E5-S05, 2026-07-28):** Target ship workflow documented — copy `deploy/<name>/` → `target_install` → create `.env` → `zaumzeug serve --deploy`. Runtime-only install (no DSPy/GEPA/DeepEval); `.env` never in bundle. Docs: [user-docs/guides/deploy.md](../user-docs/guides/deploy.md), bundle `README.deploy.md`. Tests: `tests/integration/deploy/test_target_install.py`, `test_deploy.py::test_e5_s05_ac5_no_env_in_bundle`.
 
+**Implementation (E8-S02, 2026-08-21):** Production HTTP stays unauthenticated in Hayhooks; Traefik (or Nginx/Caddy) terminates TLS and checks credentials in front of serve/MCP. Docs: [production-auth.md](../../user-docs/guides/production-auth.md). Tests: `tests/unit/docs/test_production_auth.py`, `test_deploy.py::test_e8_s02_ac6_no_secrets_in_bundle`.
+
 **Implementation (E5-S07, 2026-07-28):** Deploy git policy — default `.gitignore` includes `/deploy/` and `usr-harnesses/*/artifacts/`; documented release force-add and CI `upload-artifact` options. See [§10.4](07-deploy-packaging.md#104-git-and-gitignore).
 
 **Implementation (E5-S08, 2026-07-29):** Deploy platform policy — Linux-first production matrix; OS-neutral bundle assertions; Linux CI `zaumzeug deploy` → `serve --deploy` smoke. See [§10.6](07-deploy-packaging.md#106-deploy-platform-targets).

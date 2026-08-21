@@ -57,7 +57,7 @@ Requirements: [PRD E2.2](../prd.md#epic-e2--configuration-and-validation-phase-1
 | `compile` | `agent.yaml` | 2 | DSPy + GEPA → agent `artifacts/` | E4 |
 | `eval` | `harness.yaml` | 2 | Optional eval (`builtin` or `deepeval`) | E6 |
 | `deploy` | `harness.yaml` | 2 | Eval gate on `zaumzeug deploy` ✅ (E6-S03 / E5-S06) | E5 |
-| `serve` | `harness.yaml` | 1+ | Hayhooks ports, Chainlit `/chat` ✅ (E7-S04), MCP, ACP stdio ✅ (E7-S05), `serve.expose` pipelines ✅ (E8-S01), A2A | E3, E7, E8 |
+| `serve` | `harness.yaml` | 1+ | Hayhooks ports, Chainlit `/chat` ✅ (E7-S04), MCP, ACP stdio ✅ (E7-S05), `serve.expose` pipelines ✅ (E8-S01); **no `serve.auth`** (extra-forbid; proxy-only ✅ E8-S02), A2A | E3, E7, E8 |
 
 Full schema examples: Phase 1 canonical examples in [§6.6](05-configuration.md#66-phase-1-config-schema); full multi-phase reference in [ideation-stage.md](../ideation-stage.md) until `user-docs/reference/harness-yaml.md` exists.
 
@@ -256,6 +256,8 @@ compile:
 **Implementation (E7-S07, 2026-08-21):** `tools.builtin` Phase 3 catalog — `calculator` and `read_file`. `CURRENT_SDK_PHASE` stays **1**. Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`, `tests/unit/config/test_schemas.py::test_e7_s07_ac3_unknown_builtin_phase3_list`.
 
 **Implementation (E8-S01, 2026-08-21):** `ServeExposeEntry` on `ServeConfig.expose` (string ids or `{id, path}`); removed from `PHASE_GATED_FIELDS`. Serve registers YAML as `POST /{id}/run`; `search_docs` catalog phase **4**. Docs: [pipelines.md](../../user-docs/guides/pipelines.md). Tests: `tests/integration/pipelines/test_serve_expose.py`. `CURRENT_SDK_PHASE` stays **1**.
+
+**Implementation (E8-S02, 2026-08-21):** No `serve.auth` field — `ServeConfig` extra-forbid rejects it. Production auth is Traefik proxy-only. Docs: [production-auth.md](../../user-docs/guides/production-auth.md). Tests: `tests/unit/config/test_schemas.py::test_e8_s02_no_serve_auth_in_schema`.
 
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract — `AgentPipelineWrapper.run_chat_completion` reads optional request `model_id` and swaps the agent `chat_generator` via stage-scoped `ModelRouter`. Ephemeral-port fixture `tests/integration/conftest.py::ephemeral_serve_url`; tests `tests/integration/test_openai_contract.py` (`-k e3_s07`); `web_fetch` stubbed with `respx` for offline CI. Cross-OS green closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
 

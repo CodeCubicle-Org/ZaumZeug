@@ -378,3 +378,20 @@ def test_e7_s02_custom_schema_allows_module_paths(tmp_path: Path) -> None:
     with pytest.raises(ConfigValidationError) as exc_info:
         load_agent_config(blank)
     assert "custom" in str(exc_info.value).lower()
+
+
+def test_e8_s02_no_serve_auth_in_schema(tmp_path: Path) -> None:
+    """E8-S02: ``serve.auth`` is not a v1 field — proxy-only auth, extra keys forbidden."""
+    data = dict(PHASE1_MINIMAL)
+    data["serve"] = {
+        "hayhooks": {"port": 1416},
+        "auth": {"bearer": True},
+    }
+    path = _write_yaml(tmp_path / "harness.yaml", data)
+
+    with pytest.raises(ConfigValidationError) as exc_info:
+        load_harness(path)
+
+    message = str(exc_info.value).lower()
+    assert "auth" in message
+    assert "extra" in message or "forbidden" in message or "not permitted" in message

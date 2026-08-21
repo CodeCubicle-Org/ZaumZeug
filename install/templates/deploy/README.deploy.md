@@ -121,6 +121,26 @@ zaumzeug acp {{harness_name}} --deploy
 
 Web clients (Open WebUI, SPA + Nginx, Next.js) set OpenAI `baseURL` to this server's `/v1` (for example `http://127.0.0.1:1416/v1`, or `http://hayhooks:1416/v1` on a Docker network) — **not** `https://api.openai.com/v1`. Layout recipes live in the project's `user-docs/guides/web-deployment.md`.
 
+---
+
+## Production auth (proxy-only)
+
+**Hayhooks has no built-in auth in v1.** There is no `serve.auth`. Do not publish this process on the public internet.
+
+Put **Traefik** (reference) in front: TLS termination + Headers middleware (HSTS) + ForwardAuth or bearer check at the edge. The harness stays unauthenticated on `127.0.0.1` (or a Docker internal network). Nginx/Caddy work the same way.
+
+Optional Traefik static/dynamic YAML ships in this bundle under `traefik/` — **secret-free**. Set `HARNESS_API_KEY` / OIDC client secrets / ACME email on the **Traefik host** only (systemd `EnvironmentFile`, Docker secret). Never put credentials in `harness.yaml`, `traefik/*.yml`, or git.
+
+Public path map (Traefik → localhost):
+
+| Path | Backend |
+|---|---|
+| `/v1/chat/completions` (REST) | `127.0.0.1:1416` |
+| `/chat` (Chainlit, if enabled) | `127.0.0.1:1416` |
+| `/mcp` (MCP) | `127.0.0.1:1417` |
+
+Full guide: the project's `user-docs/guides/production-auth.md`.
+
 Validate without binding a port:
 
 ```bash
@@ -163,6 +183,7 @@ Override the port with `--port N` or `serve.hayhooks.mcp_port` in the shipped `h
 | `agents/<name>/` | Runtime agent files + pinned artifacts |
 | `target_install.py` (+ wrappers) | Target host bootstrap |
 | `README.deploy.md` | This ops guide |
+| `traefik/` | Optional Traefik static/dynamic snippets (no secrets; fill host env on target) |
 
 **Never included:** `.env`, `modules/`, `skills/`, `data/`, `eval/`, DSPy/GEPA sources.
 

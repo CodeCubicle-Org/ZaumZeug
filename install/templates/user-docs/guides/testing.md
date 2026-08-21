@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers · SDK contributors |
-| **Last updated** | 2026-08-21 (E8-S01 pipeline exposure tests) |
+| **Last updated** | 2026-08-21 (E8-S02 production auth docs tests) |
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
@@ -174,11 +174,11 @@ Contract suite (E3-S07): `pytest tests/integration/test_openai_contract.py -v` �
 
 ## Phase 1 security notes
 
-Local `zaumzeug serve` is unauthenticated in Phase 1. Keep exposure narrow:
+Local `zaumzeug serve` is unauthenticated. Keep exposure narrow:
 
 - Bind is **`127.0.0.1` only** — wide-open `0.0.0.0` is rejected.
 - Put secrets in `.env` only (never YAML or deploy bundles).
-- Production auth is proxy-only (Traefik ForwardAuth / bearer) in Phase 4 — see CLI security notes.
+- Production auth is **proxy-only** (**Done** E8-S02): Traefik TLS + Headers / ForwardAuth in front of Hayhooks — [Production auth](production-auth.md). Auth credentials stay in Traefik/host env, never in the deploy bundle.
 
 ---
 
@@ -517,7 +517,8 @@ zaumzeug compile example --dry-run
 - [Cursor MCP setup](cursor-mcp.md) — `.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`; `--cursor-mcp`; `uv` for stdio `tools.mcp`
 - [ACP (Zed / JetBrains)](acp.md) — `zaumzeug acp` stdio JSON-RPC; Agent Client Protocol ≠ A2A
 - [Web deployment](web-deployment.md) — Chainlit `/chat`, Open WebUI, SPA + Nginx, Next.js; OpenAI `baseURL` at the harness (E7-S08)
+- [Production auth](production-auth.md) — Traefik proxy-only TLS + ForwardAuth; no `serve.auth`; no secrets in the deploy bundle (E8-S02)
 - [Pipelines and RAG](pipelines.md) — `serve.expose` → `POST /{id}/run`; `search_docs`; RAG retriever → prompt → generator (E8-S01)
 - [Multi-agent workflow](multi-agent-workflow.md) — `workflow.yaml` and stage routing under test
-- [Deploy and ship](deploy.md) — copy → `target_install` → `.env` → `serve --deploy` (E5-S05); git policy for bundles (E5-S07); platforms / Linux CI smoke (E5-S08); target install + `--verify` (E5-S09a/b/c)
+- [Deploy and ship](deploy.md) — copy → `target_install` → `.env` → `serve --deploy` (E5-S05); git policy for bundles (E5-S07); platforms / Linux CI smoke (E5-S08); target install + `--verify` (E5-S09a/b/c); optional `traefik/` snippets (E8-S02)
 - [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_ROOT=deploy` (E5-S04), `HARNESS_LIVE_LLM`, debugpy, serve/compile `--dry-run`, serve `--deploy` (E5-S03), `doctor`, `eval` / `--trace` / `--base-url`, GEPA ↔ DeepEval bridge, Phase 1 security notes

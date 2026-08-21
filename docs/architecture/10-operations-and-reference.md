@@ -78,6 +78,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E8-S01, 2026-08-21):** Pipeline exposure — `ServeExposeEntry` on `serve.expose` (string ids or `{id, path}`); Hayhooks `deploy_pipeline_yaml` registers `POST /{id}/run`; `search_docs` catalog phase **4**; `zaumzeug run` pipeline stages invoke the same YAML. Docs: [pipelines.md](../../user-docs/guides/pipelines.md). Tests: `tests/integration/pipelines/test_serve_expose.py`. `CURRENT_SDK_PHASE` stays **1**. Full suite 2026-08-21: 351 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate).
 
+**Implementation (E8-S02, 2026-08-21):** Production auth is **proxy-only** — Traefik reference (TLS + Headers middleware + ForwardAuth); Hayhooks has no built-in auth; no `serve.auth`. Docs: [production-auth.md](../../user-docs/guides/production-auth.md), bundle `README.deploy.md` + `traefik/` snippets. Tests: `tests/unit/docs/test_production_auth.py`, `test_e8_s02_ac6_no_secrets_in_bundle`. Full suite 2026-08-21: 360 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate).
+
 **Implementation (E2-S07, 2026-07-08):** `workflow.yaml` schema validation via `load_workflow()` — `workflow_config` check in doctor; `validate_serve()` fails fast on invalid workflow before entry resolution. Tests: `tests/unit/config/test_workflow_schema.py`.
 
 **Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` (`src/zaumzeug/integrations/mock.py`) returns fixture text from `tests/fixtures/responses/`; `ModelRouter` (`src/zaumzeug/runtime/model_router.py`) dispatches `provider: mock` without live API keys or provider integration packages. Shipped `install/templates/config/models.example.yaml`. Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`).
@@ -92,7 +94,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 | `zaumzeug eval` | **Done** (E6-S02 / E6-S05 / E6-S06 / E6-S07) — optional regression; `--trace <file>` scores a captured turn; `--base-url` Mode C HTTP against running serve (staging/debug); GEPA bridge helpers for failed→train |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
-| `zaumzeug serve` (dev) | **Done** (E3-S02, 2026-07-20; optional `/chat` **E7-S04**, 2026-08-21; web layout recipes **E7-S08**, 2026-08-21) — Hayhooks runner, OpenAI REST, localhost bind; `serve.hayhooks.chainlit: true` needs `hayhooks[chainlit]`; Open WebUI / SPA / Next.js use harness `baseURL` |
+| `zaumzeug serve` (dev) | **Done** (E3-S02, 2026-07-20; optional `/chat` **E7-S04**, 2026-08-21; web layout recipes **E7-S08**, 2026-08-21; Traefik proxy-only **E8-S02**, 2026-08-21) — Hayhooks runner, OpenAI REST, localhost bind; `serve.hayhooks.chainlit: true` needs `hayhooks[chainlit]`; Open WebUI / SPA / Next.js use harness `baseURL`; production TLS/auth at Traefik |
 | `zaumzeug mcp` | **Done** (E7-S01, 2026-08-14; **E7-S06**, 2026-08-21) — Hayhooks MCP Streamable HTTP at `{mcp_port}/mcp`; `--deploy` / `HARNESS_ROOT=deploy` same root as serve |
 | `zaumzeug acp` | **Done** (E7-S05, 2026-08-21) — Agent Client Protocol stdio JSON-RPC (`serve/acp.py`); Zed/JetBrains snippets in [acp.md](../../user-docs/guides/acp.md); Cursor uses MCP |
 | `--dry-run` on compile | **Done** (E4-S06, 2026-07-28) — validate without GEPA/LLM |
@@ -265,7 +267,7 @@ Requirements: [PRD E8.2](../prd.md#epic-e8--rag-and-production-hardening-phase-4
 - **Local dev:** bind `localhost`; no auth on Hayhooks.
 - **Secrets:** `.env` only — never in yaml, artifacts, or deploy bundle.
 - **Sandbox / tool isolation:** not Phase 1 ([PRD NG4](../prd.md#4-non-goals-v1)); future: E2B, Docker Sandboxes (see [§16](10-operations-and-reference.md#16-supporting-ecosystem-reference)).
-- **Production auth (Phase 4, resolved):** **Traefik proxy-only** — TLS termination and auth middleware (bearer/API-key headers, ForwardAuth, or OAuth provider) in front of `zaumzeug serve`; Hayhooks stays unauthenticated behind the proxy; **no in-process auth in SDK v1**. Document in `README.deploy.md` and `user-docs/guides/production-auth.md`. Nginx/Caddy acceptable as documented alternatives; Traefik is the reference implementation.
+- **Production auth (Phase 4, resolved):** **Traefik proxy-only** — TLS termination and auth middleware (bearer/API-key headers, ForwardAuth, or OAuth provider) in front of `zaumzeug serve`; Hayhooks stays unauthenticated behind the proxy; **no in-process auth in SDK v1**. **Done** (E8-S02, 2026-08-21): [production-auth.md](../../user-docs/guides/production-auth.md), bundle `README.deploy.md` + optional `traefik/` snippets. Nginx/Caddy acceptable as documented alternatives; Traefik is the reference implementation. Tests: `tests/unit/docs/test_production_auth.py`, `test_e8_s02_ac6_no_secrets_in_bundle`.
 
 ---
 
