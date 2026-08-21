@@ -1,5 +1,12 @@
 """Hayhooks wrapper and MCP/REST/ACP boot."""
 
+from zaumzeug.serve.chainlit import (
+    CHAINLIT_INSTALL_HINT,
+    CHAINLIT_MISSING_MESSAGE,
+    ChainlitMissingError,
+    is_chainlit_available,
+    require_chainlit,
+)
 from zaumzeug.serve.dry_run import dry_run_to_dict, dry_run_to_json, format_dry_run
 from zaumzeug.serve.mcp import (
     DEFAULT_MCP_PORT,
@@ -17,8 +24,11 @@ from zaumzeug.serve.runner import (
 from zaumzeug.serve.validate import ServeValidationResult, validate_serve
 
 __all__ = [
+    "CHAINLIT_INSTALL_HINT",
+    "CHAINLIT_MISSING_MESSAGE",
     "DEFAULT_BIND_HOST",
     "DEFAULT_MCP_PORT",
+    "ChainlitMissingError",
     "McpPrepared",
     "ServePrepareError",
     "ServePrepared",
@@ -26,8 +36,10 @@ __all__ = [
     "dry_run_to_dict",
     "dry_run_to_json",
     "format_dry_run",
+    "is_chainlit_available",
     "prepare_mcp",
     "prepare_serve",
+    "require_chainlit",
     "run_mcp",
     "run_serve",
     "validate_serve",

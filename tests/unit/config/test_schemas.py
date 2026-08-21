@@ -263,6 +263,30 @@ def test_e7_s01_mcp_schema_and_mcp_port(tmp_path: Path) -> None:
     assert "command" in str(exc_info.value).lower() or "url" in str(exc_info.value).lower()
 
 
+def test_e7_s04_chainlit_flag_validates(tmp_path: Path) -> None:
+    """serve.hayhooks.chainlit is unblocked (E7-S04); default is false."""
+    default_path = _write_yaml(
+        tmp_path / "harness.yaml",
+        {"name": "example", "serve": {"hayhooks": {"port": 1416}}},
+    )
+    default = load_harness(default_path)
+    assert default.serve is not None
+    assert default.serve.hayhooks is not None
+    assert default.serve.hayhooks.chainlit is False
+
+    enabled_path = _write_yaml(
+        tmp_path / "harness-chat.yaml",
+        {
+            "name": "example",
+            "serve": {"hayhooks": {"port": 1416, "chainlit": True}},
+        },
+    )
+    enabled = load_harness(enabled_path)
+    assert enabled.serve is not None
+    assert enabled.serve.hayhooks is not None
+    assert enabled.serve.hayhooks.chainlit is True
+
+
 def test_e7_s02_custom_schema_allows_module_paths(tmp_path: Path) -> None:
     """tools.custom module paths validate (E7-S02); empty entries are rejected."""
     path = _write_yaml(

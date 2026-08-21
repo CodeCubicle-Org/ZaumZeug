@@ -16,7 +16,7 @@
 | [GEPA](https://github.com/gepa-ai/gepa) | Optimization | `gepa` | `dspy.GEPA`, `optimize_anything` — offline |
 | [DeepEval](https://github.com/confident-ai/deepeval) | Dev eval (optional) | `deepeval` via `[eval]` extra ✅ (E6-S01); `zaumzeug eval` ✅ (E6-S02); deploy gate ✅ (E6-S03 / E5-S06); `eval/` pytest scaffold ✅ (E6-S04); trace → test case ✅ (E6-S05); Mode C HTTP `--base-url` ✅ (E6-S06); GEPA ↔ DeepEval bridge ✅ (E6-S07) | Regression tests; not required for production serve |
 
-Optional: Hayhooks `[chainlit]` extra for embedded GUI — **primary MCP serving** is via Hayhooks (`zaumzeug mcp`). `mcp-haystack` is a **runtime** dependency for `MCPToolset` (E7-S01).
+Optional: Hayhooks `[chainlit]` extra for embedded GUI at `/chat` ✅ (E7-S04, 2026-08-21) — **primary MCP serving** is via Hayhooks (`zaumzeug mcp`). `mcp-haystack` is a **runtime** dependency for `MCPToolset` (E7-S01).
 
 ### 4.2 Library boundaries (when to use what)
 
@@ -55,7 +55,7 @@ pip install -e ".[dev]"              # repo clone — full dev stack (see §4.4)
 pip install zaumzeug              # runtime only (production / PyPI)
 pip install "zaumzeug[eval]"      # optional DeepEval
 pip install openai-haystack anthropic-haystack openrouter-haystack  # per configured provider
-# Chainlit (Phase 3): pip install "hayhooks[chainlit]"
+# Chainlit (Phase 3 / E7-S04): pip install "hayhooks[chainlit]"
 ```
 
 Model choice lives in **`models.yaml`**, not source code. Users do **not** pin Haystack/DSPy/GEPA/LiteLLM individually on the default path — versions come from `zaumzeug` extras ([PRD §7.4](../prd.md#74-user-installation-guide-content-for-readme--phase-1)).
@@ -66,11 +66,13 @@ Canonical package layout. Root `pyproject.toml` exists as of E2-S00 (2026-07-08)
 
 | Group | Install command | Includes | Excludes |
 |---|---|---|---|
-| **Runtime** (core) | `pip install zaumzeug` | `haystack-ai`, `hayhooks`, `mcp>=1.8.0,<2`, `mcp-haystack`, `httpx`, `litellm`, `pydantic`, `pyyaml`, CLI entry `zaumzeug` | `dspy-ai`, `gepa`, `deepeval` |
+| **Runtime** (core) | `pip install zaumzeug` | `haystack-ai`, `hayhooks`, `mcp>=1.8.0,<2`, `mcp-haystack`, `httpx`, `litellm`, `pydantic`, `pyyaml`, CLI entry `zaumzeug` | `dspy-ai`, `gepa`, `deepeval`, Chainlit (`hayhooks[chainlit]`) |
 | **`[dev]`** extra | `pip install -e ".[dev]"` | Runtime + **`dspy-ai`**, **`gepa`**, test stack ([§4.5](#45-test-dependencies)), `debugpy`, editable SDK | Provider Haystack integrations (user-installed) |
 | **`[eval]`** extra | `pip install "zaumzeug[eval]"` | `deepeval` (requires runtime core) | — |
 
 **Implementation (E6-S01, 2026-07-28):** `eval = ["deepeval"]` in root `pyproject.toml`; core install excludes `deepeval`. `zaumzeug.eval.require_deepeval()` raises the §6.3 install hint when missing. Doctor does not import `deepeval`. Docs: [user-docs/getting-started/installation.md](../user-docs/getting-started/installation.md#optional-extras).
+
+**Implementation (E7-S04, 2026-08-21):** Optional Chainlit GUI is **not** a `zaumzeug` extra — install `pip install "hayhooks[chainlit]"` then set `serve.hayhooks.chainlit: true`. `zaumzeug.serve.chainlit.require_chainlit()` fails serve with that hint when missing. Docs: [web-deployment.md](../user-docs/guides/web-deployment.md).
 
 **Implementation (E6-S02, 2026-07-28):** `zaumzeug eval` CLI via `eval/runner.py` — `EvalConfig` on `HarnessConfig`; `framework: builtin` (JSONL exact/substring, no DeepEval) or `deepeval` (default when omitted); CLI `--framework` override. Tests: `tests/unit/eval/test_runner.py`.
 

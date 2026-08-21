@@ -53,6 +53,8 @@ From the project root (after install / editable SDK setup):
 ```bash
 zaumzeug doctor example
 zaumzeug serve example
+# Optional GUI on the same port (pip install "hayhooks[chainlit]"):
+#   serve.hayhooks.chainlit: true  →  http://127.0.0.1:1416/chat
 # MCP for Cursor / Claude Desktop (default port 1417):
 # zaumzeug mcp example
 # Point Cursor at http://localhost:1417/mcp — see Cursor MCP setup
@@ -60,7 +62,7 @@ zaumzeug serve example
 # HARNESS_LOG_LEVEL=INFO zaumzeug run example --input "Summarize this topic"
 ```
 
-Then open an OpenAI-compatible client against `http://127.0.0.1:1416` (port from `serve.hayhooks.port`). The chat model id is the harness name: `example`.
+Then open an OpenAI-compatible client against `http://127.0.0.1:1416` (port from `serve.hayhooks.port`). The chat model id is the harness name: `example`. Optional Chainlit UI: [Web deployment](../guides/web-deployment.md).
 
 `zaumzeug serve example` works **without** a `.env` file while the entry agent stays on the mock profile. For flaky local models later, see [Run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run) (`runtime.retry`, optional `output.format: json`).
 

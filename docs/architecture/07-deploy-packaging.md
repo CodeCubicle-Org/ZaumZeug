@@ -113,6 +113,8 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 
 **Implementation (E5-S05, 2026-07-28):** Target ship workflow documented — copy `deploy/<name>/` → `target_install` → create `.env` → `zaumzeug serve --deploy`. Runtime-only `pip install zaumzeug` (no DSPy/GEPA/DeepEval); Python 3.11+ prerequisite; `.env` never in bundle. Docs: `install/templates/deploy/README.deploy.md`, [user-docs/guides/deploy.md](../user-docs/guides/deploy.md), root README production note. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s05`) + `test_deploy.py::test_e5_s05_ac5_no_env_in_bundle`.
 
+**Implementation (E7-S04, 2026-08-21):** Bundle `README.deploy.md` and [deploy.md](../../user-docs/guides/deploy.md) list optional `GET /chat` when the shipped harness has `serve.hayhooks.chainlit: true` and the target has `pip install "hayhooks[chainlit]"`.
+
 ### 10.6 Deploy platform targets
 
 Requirements: **[PRD E5.8](../prd.md#epic-e5--deploy-packaging-phase-2)**.

@@ -63,6 +63,8 @@ At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug run` (workflow
 
 **Implementation (E3-S02, 2026-07-20):** `zaumzeug serve <harness>` calls the same `validate_serve()` then `runtime/factory.build_agent()` and starts Hayhooks via `serve/runner.py` — OpenAI `/v1/chat/completions` + `GET /v1/models`, bind `127.0.0.1`, port from `serve.hayhooks.port`. Escape hatch documented in `user-docs/reference/cli.md`.
 
+**Implementation (E7-S04, 2026-08-21):** Optional `serve.hayhooks.chainlit: true` mounts `/chat` on that same process/port (`pip install "hayhooks[chainlit]"`). REST stays available. Docs: [web-deployment.md](../../user-docs/guides/web-deployment.md).
+
 **Implementation (E3-S08, 2026-07-21):** `zaumzeug run <harness>` executes the full (or `--from`-partial) stage graph via `runtime/workflow.run_workflow()` — stage-scoped ModelRouter + factory per agent stage; prior output forwarded as prepended user context. Pipeline stages stubbed until Phase 4.
 
 **Implementation (E8-S07, 2026-08-01):** Same `run_workflow` path adds typed live errors, optional `runtime.retry`, JSON `output.format`, and INFO stage logs with structured `stage`. Serve/HTTP path is a follow-up.

@@ -66,6 +66,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E7-S03, 2026-08-21):** Cursor MCP setup — documented `http://localhost:{mcp_port}/mcp` (default 1417); install `--cursor-mcp` writes live `.cursor/mcp.json` (copy-if-missing). Guide: [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md). Tests: `tests/unit/install/test_scaffolding.py::test_e7_s03_ac2_mcp_json_example_scaffolded`, `tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json`. Full suite 2026-08-21: 322 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate).
 
+**Implementation (E7-S04, 2026-08-21):** Optional Chainlit at `/chat` — `HayhooksConfig.chainlit` (unblocked from `PHASE_GATED_FIELDS`); `serve/runner.py` sets Hayhooks `chainlit_enabled` before `create_app()`. Extra `pip install "hayhooks[chainlit]"`; missing extra raises `ChainlitMissingError`. REST `/v1/chat/completions` stays on the same app. Docs: [web-deployment.md](../../user-docs/guides/web-deployment.md). Tests: `tests/integration/serve/test_chainlit.py`. PRD open #2 remains open. Full suite 2026-08-21: 327 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate).
+
 **Implementation (E2-S07, 2026-07-08):** `workflow.yaml` schema validation via `load_workflow()` — `workflow_config` check in doctor; `validate_serve()` fails fast on invalid workflow before entry resolution. Tests: `tests/unit/config/test_workflow_schema.py`.
 
 **Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` (`src/zaumzeug/integrations/mock.py`) returns fixture text from `tests/fixtures/responses/`; `ModelRouter` (`src/zaumzeug/runtime/model_router.py`) dispatches `provider: mock` without live API keys or provider integration packages. Shipped `install/templates/config/models.example.yaml`. Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`).
@@ -80,7 +82,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 | `zaumzeug eval` | **Done** (E6-S02 / E6-S05 / E6-S06 / E6-S07) — optional regression; `--trace <file>` scores a captured turn; `--base-url` Mode C HTTP against running serve (staging/debug); GEPA bridge helpers for failed→train |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
-| `zaumzeug serve` (dev) | **Done** (E3-S02, 2026-07-20) — Hayhooks runner, OpenAI REST, localhost bind |
+| `zaumzeug serve` (dev) | **Done** (E3-S02, 2026-07-20; optional `/chat` **E7-S04**, 2026-08-21) — Hayhooks runner, OpenAI REST, localhost bind; `serve.hayhooks.chainlit: true` needs `hayhooks[chainlit]` |
 | `--dry-run` on compile | **Done** (E4-S06, 2026-07-28) — validate without GEPA/LLM |
 | `--verbose` on serve/compile/run | **Done** (E2-S06; run stage INFO also via E8-S07) — SDK + Haystack structured debug logging |
 | `HARNESS_LOG_LEVEL=DEBUG` | **Done** (E2-S06) — equivalent to `--verbose`; SDK + Haystack request logging |
@@ -156,7 +158,7 @@ Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace da
 |---|---|
 | 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06), OpenAI REST contract ✅ (E3-S07) |
 | 2 | compile `--dry-run` (**E4-S06 Done** — `tests/integration/compile/test_compile_dry_run.py`), export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), `zaumzeug eval` (**E6-S02 Done** — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**E6-S04 Done** — `tests/integration/eval/test_deepeval_scaffold.py`), trace → `LLMTestCase` (**E6-S05 Done** — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**E6-S06 Done** — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**E6-S07 Done** — `tests/unit/eval/test_gepa_bridge.py`) |
-| 3 | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`, Starlette `TestClient`); custom tool loader ✅ (**E7-S02** — `tests/unit/runtime/tools/test_custom_loader.py`, doctor `custom_tools`); tool correctness eval when DeepEval present |
+| 3 | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`, Starlette `TestClient`); custom tool loader ✅ (**E7-S02** — `tests/unit/runtime/tools/test_custom_loader.py`, doctor `custom_tools`); Cursor MCP setup ✅ (**E7-S03**); Chainlit `/chat` ✅ (**E7-S04** — `tests/integration/serve/test_chainlit.py`); tool correctness eval when DeepEval present |
 | 4 | Run reliability ✅ (**E8-S07** — retry / JSON / stage logs / `phase_gated_tools`; serve path follow-up); `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
 
 Also compatible: Promptfoo, Ragas, custom pytest — no DeepEval lock-in.
@@ -215,6 +217,7 @@ pytest tests/unit tests/integration tests/usr-harnesses -v
 # Single story / module while developing
 pytest tests/unit/config/test_schemas.py -v -k e2_s01
 pytest tests/unit/deploy/ tests/integration/deploy/test_deploy_golden.py -v -k e5_s02
+pytest tests/integration/serve/test_chainlit.py -v   # E7-S04; stubs Chainlit mount (no hayhooks[chainlit] needed)
 
 # Optional harness regression (requires [eval])
 pip install -e ".[dev,eval]"

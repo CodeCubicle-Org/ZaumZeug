@@ -111,6 +111,7 @@ HARNESS_ROOT=deploy zaumzeug serve {{harness_name}}
 | `POST /v1/chat/completions` | Chat — `"model": "{{harness_name}}"` |
 | `GET /v1/models` | Lists the served harness |
 | `POST /{{harness_name}}/run` | Direct Hayhooks run API |
+| `GET /chat` | Optional Chainlit GUI — only if `serve.hayhooks.chainlit: true` and `pip install "hayhooks[chainlit]"` on the target |
 
 Validate without binding a port:
 

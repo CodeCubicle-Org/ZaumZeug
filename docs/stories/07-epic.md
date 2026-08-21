@@ -5,8 +5,8 @@
 | **Document** | Epic E7 user stories |
 | **File** | `docs/stories/07-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-21 (E7-S03 Done) |
-| **Status** | In progress (E7-S03 Done 2026-08-21) |
+| **Last modified** | 2026-08-21 (E7-S04 Done) |
+| **Status** | In progress (E7-S04 Done 2026-08-21) |
 | **Build order** | **7 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -30,7 +30,7 @@
 4. **E7-S03** — Cursor setup ✅
 5. **E7-S05** — ACP adapter
 6. **E7-S06** — MCP from deploy
-7. **E7-S04** → **E7-S08** — Chainlit + web layout docs
+7. **E7-S04** → **E7-S08** — Chainlit ✅; remaining Open WebUI / SPA / Next.js recipes
 
 ---
 
@@ -225,14 +225,14 @@ As a **web integrator**, I want optional Chainlit at `/chat`, so that I get a qu
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `serve.hayhooks.chainlit: true` serves `/chat` on same port as REST
-- [ ] **AC-2** Document `pip install "hayhooks[chainlit]"` as optional extra
-- [ ] **AC-3** OpenAI REST remains available alongside Chainlit
+- [x] **AC-1** `serve.hayhooks.chainlit: true` serves `/chat` on same port as REST
+- [x] **AC-2** Document `pip install "hayhooks[chainlit]"` as optional extra
+- [x] **AC-3** OpenAI REST remains available alongside Chainlit
 
 ### Implementation tasks (build)
 
-- [ ] Wire Chainlit flag in serve runner
-- [ ] Document in web deployment guide (E7-S08)
+- [x] Wire Chainlit flag in serve runner
+- [x] Document in web deployment guide (E7-S08)
 
 ### Verification (after build)
 
@@ -241,16 +241,20 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC | Test |
 |---|---|
 | AC-1 | `tests/integration/serve/test_chainlit.py::test_e7_s04_ac1_chat_route_loads` |
-| AC-2 | **manual:** user-docs lists hayhooks chainlit extra |
+| AC-2 | **manual + automated:** user-docs list hayhooks chainlit extra — [web-deployment.md](../user-docs/guides/web-deployment.md) |
 | AC-3 | `tests/integration/serve/test_chainlit.py::test_e7_s04_ac3_openai_rest_still_available` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/serve/test_chainlit.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/serve/test_chainlit.py -v` passes
 
 ### Definition of done
 
-- [ ] Align docs with open #2 primary web UI decision when resolved
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Align docs with open #2 primary web UI decision when resolved — **open #2 remains open**; Chainlit is an optional layout, not a product default
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-21)
+
+Canonical detail: [53-story.md](epic-stories/53-story.md). `serve.hayhooks.chainlit: true` mounts `/chat` on the REST port; extra `pip install "hayhooks[chainlit]"`; OpenAI REST stays available.
 
 ---
 
@@ -424,7 +428,7 @@ As a **web integrator**, I want documented deployment layouts, so that I can cho
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Document Chainlit embedded co-location
+- [x] **AC-1** Document Chainlit embedded co-location — **shipped in E7-S04** ([web-deployment.md](../../user-docs/guides/web-deployment.md))
 - [ ] **AC-2** Document Open WebUI + Hayhooks two-container pattern
 - [ ] **AC-3** Document custom SPA + Nginx proxy pattern
 - [ ] **AC-4** Document Next.js co-located pattern
@@ -432,9 +436,10 @@ As a **web integrator**, I want documented deployment layouts, so that I can cho
 
 ### Implementation tasks (build)
 
-- [ ] Author `user-docs/guides/web-deployment.md`
-- [ ] Include example `baseURL` and env vars
-- [ ] Cross-link Hayhooks `/v1/models`, `/docs` endpoints
+- [x] Author `user-docs/guides/web-deployment.md` — **file exists** (E7-S04 Chainlit recipe + preview of other layouts)
+- [ ] Expand Open WebUI / SPA / Next.js recipes (preview only today)
+- [ ] Include example `baseURL` and env vars for remaining layouts
+- [ ] Cross-link Hayhooks `/v1/models`, `/docs` endpoints for remaining layouts
 
 ### Verification (after build)
 
@@ -442,7 +447,7 @@ Per [Story verification](00-README.md#story-verification-required). **Docs-only*
 
 | AC | Verification |
 |---|---|
-| AC-1 | **manual:** web-deployment.md Chainlit section |
+| AC-1 | **manual:** web-deployment.md Chainlit section — **done** (E7-S04, 2026-08-21) |
 | AC-2 | **manual:** Open WebUI two-container section |
 | AC-3 | **manual:** SPA + Nginx section |
 | AC-4 | **manual:** Next.js co-located section |
@@ -452,5 +457,9 @@ Per [Story verification](00-README.md#story-verification-required). **Docs-only*
 
 ### Definition of done
 
-- [ ] No implementation required beyond docs unless Chainlit flag (E7-S04)
+- [ ] No implementation required beyond docs unless Chainlit flag (E7-S04) — **flag shipped 2026-08-21**; this story remains docs for the other layouts
 - [ ] Verification checklist complete
+
+### Implementation notes (2026-08-21)
+
+E7-S04 shipped the Chainlit recipe and created `user-docs/guides/web-deployment.md`. Remaining layouts stay on this story.

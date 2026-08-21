@@ -24,7 +24,6 @@ PHASE_GATED_FIELDS: dict[tuple[str, ...], int] = {
     ("serve", "acp"): 3,
     ("serve", "a2a"): 4,
     ("serve", "expose"): 4,
-    ("serve", "hayhooks", "chainlit"): 3,
 }
 
 
@@ -61,12 +60,16 @@ def _reject_phase_gated_keys(
 
 
 class HayhooksConfig(BaseModel):
-    """Hayhooks bind settings under ``serve.hayhooks`` (Phase 1+)."""
+    """Hayhooks bind settings under ``serve.hayhooks`` (Phase 1+).
+
+    ``chainlit`` (E7-S04) mounts the optional GUI at ``/chat`` on the REST port.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
     port: int = 1416
     mcp_port: int = 1417
+    chainlit: bool = False
 
     @model_validator(mode="before")
     @classmethod

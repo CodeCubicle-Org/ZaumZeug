@@ -17,10 +17,12 @@ from hayhooks.server.utils.deploy_utils import add_pipeline_api_route
 from hayhooks.settings import settings as hayhooks_settings
 
 from zaumzeug.config.harness_root import harness_root_segment, is_deploy_mode
+from zaumzeug.config.schemas import HarnessConfig
 from zaumzeug.doctor.project import find_project_root
 from zaumzeug.runtime.factory import build_agent_bundle
 from zaumzeug.runtime.model_router import ModelRouter
 from zaumzeug.runtime.preprocess import preprocess_openai_messages, preprocess_user_text
+from zaumzeug.serve.chainlit import ChainlitMissingError, require_chainlit
 from zaumzeug.serve.dry_run import format_dry_run
 from zaumzeug.serve.validate import ServeValidationResult, validate_serve
 
@@ -118,6 +120,7 @@ class ServePrepared:
     agent: Agent
     router: ModelRouter
     validation: ServeValidationResult
+    chainlit: bool = False
 
 
 def _assistant_text(result: dict[str, Any]) -> str:
@@ -128,11 +131,31 @@ def _assistant_text(result: dict[str, Any]) -> str:
     return ""
 
 
-def _configure_hayhooks(*, host: str, port: int, pipelines_dir: Path) -> None:
+def _chainlit_requested(harness_config: HarnessConfig | None) -> bool:
+    """Return True when ``serve.hayhooks.chainlit`` is enabled."""
+    if harness_config is None or harness_config.serve is None:
+        return False
+    hayhooks = harness_config.serve.hayhooks
+    return bool(hayhooks is not None and hayhooks.chainlit)
+
+
+def _configure_hayhooks(
+    *,
+    host: str,
+    port: int,
+    pipelines_dir: Path,
+    chainlit: bool = False,
+    chainlit_default_model: str = "",
+) -> None:
     """Point Hayhooks at an empty pipelines dir and Phase-1 bind defaults."""
     hayhooks_settings.host = host
     hayhooks_settings.port = port
     hayhooks_settings.pipelines_dir = str(pipelines_dir)
+    hayhooks_settings.chainlit_enabled = chainlit
+    hayhooks_settings.chainlit_path = "/chat"
+    hayhooks_settings.chainlit_default_model = (
+        chainlit_default_model if chainlit else ""
+    )
 
 
 def _register_agent_pipeline(
@@ -210,11 +233,17 @@ def prepare_serve(
         router=router,
     )
 
+    chainlit = _chainlit_requested(validation.harness_config)
+    if chainlit:
+        require_chainlit()
+
     pipelines_dir = Path(tempfile.mkdtemp(prefix="zaumzeug-hayhooks-pipelines-"))
     _configure_hayhooks(
         host=bind_host,
         port=validation.port,
         pipelines_dir=pipelines_dir,
+        chainlit=chainlit,
+        chainlit_default_model=validation.harness_name,
     )
     app = create_app()
     _register_agent_pipeline(
@@ -235,6 +264,7 @@ def prepare_serve(
         agent=built.agent,
         router=router,
         validation=validation,
+        chainlit=chainlit,
     )
 
 
@@ -266,6 +296,9 @@ def run_serve(
     except ServePrepareError as exc:
         print(format_dry_run(exc.validation), file=sys.stderr)
         return exc.validation.exit_code
+    except ChainlitMissingError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
     base = f"http://{prepared.host}:{prepared.port}"
     root_label = harness_root_segment(deploy=is_deploy_mode(deploy_flag=deploy))
@@ -275,5 +308,7 @@ def run_serve(
     )
     print(f"  POST {base}/v1/chat/completions")
     print(f"  GET  {base}/v1/models")
+    if prepared.chainlit:
+        print(f"  GET  {base}/chat  (Chainlit UI)")
     run_app(prepared.app, host=prepared.host, port=prepared.port)
     return 0

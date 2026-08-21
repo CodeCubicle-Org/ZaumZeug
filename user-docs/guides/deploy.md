@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Ops / platform · Harness developers |
-| **Last updated** | 2026-08-14 (E7-S02 custom tools in copy matrix) |
+| **Last updated** | 2026-08-21 (E7-S04 optional `/chat`) |
 
 Ship a production harness to a clean server **without** DSPy, GEPA, or DeepEval on the target. Compile and eval stay on the developer machine (or CI); the target only runs Haystack via `zaumzeug`.
 
@@ -116,7 +116,7 @@ $env:HARNESS_ROOT = "deploy"
 zaumzeug serve <name>
 ```
 
-Same OpenAI REST surface as local serve (`POST /v1/chat/completions`, `GET /v1/models`). Validate without binding:
+Same OpenAI REST surface as local serve (`POST /v1/chat/completions`, `GET /v1/models`). Optional **`GET /chat`** when the shipped `harness.yaml` has `serve.hayhooks.chainlit: true` and the target has `pip install "hayhooks[chainlit]"` — see [Web deployment](web-deployment.md). Validate without binding:
 
 ```bash
 zaumzeug serve <name> --deploy --dry-run

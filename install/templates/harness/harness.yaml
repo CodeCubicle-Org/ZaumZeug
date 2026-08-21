@@ -6,3 +6,4 @@ models: models.yaml    # optional harness-wide aliases
 serve:
   hayhooks:
     port: 1416
+    # chainlit: true   # optional GUI at /chat — pip install "hayhooks[chainlit]"

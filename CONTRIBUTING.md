@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | New contributors · harness developers |
-| **Last updated** | 2026-08-21 (E7-S03 Cursor MCP setup) |
+| **Last updated** | 2026-08-21 (E7-S04 Chainlit embedded UI) |
 | **Related** | [Root README](README.md) · [Installation (full)](user-docs/getting-started/installation.md) |
 
 Short entry point for vision, install, and first commands — without reading the full PRD. Depth lives in [user-docs/getting-started/installation.md](user-docs/getting-started/installation.md).
@@ -80,7 +80,7 @@ Not required for mock serve:
 - **Deploy packaging** — `zaumzeug deploy` (**Done** E5-S01 / E5-S02) writes `deploy/<name>/`; ops ships with copy → `target_install` → `.env` → `zaumzeug serve <name> --deploy` (**Done** E5-S03) or `HARNESS_ROOT=deploy` (**Done** E5-S04). Ship workflow docs **Done** E5-S05 — see [Deploy and ship](user-docs/guides/deploy.md), [CLI — serve](user-docs/reference/cli.md#zaumzeug-serve) / [Global environment](user-docs/reference/cli.md#global-environment), and bundle `README.deploy.md`. Deploy git policy **Done** E5-S07 — default ignore `deploy/` + `usr-harnesses/*/artifacts/`; optional release commit or CI artifact upload ([Git policy](user-docs/guides/deploy.md#git-policy-for-deploy-bundles)). Platform policy **Done** E5-S08 — Linux-first production; OS-neutral bundle; Win/macOS best-effort not CI-gated; Linux CI `deploy` → `serve --deploy` smoke ([Platforms](user-docs/guides/deploy.md#platforms)). Target install **Done** E5-S09a/b/c — optional `.venv`, `pip install zaumzeug` (runtime only), `.env` seed, wrappers, `--verify` (doctor `--deploy` + serve `--deploy --dry-run`) ([Deploy and ship — Target install](user-docs/guides/deploy.md#target-install--win--macos--linux)).
 - **Provider plugins** — e.g. `openai-haystack`, `anthropic-haystack` (live models only)
 - **MCP in Cursor** — install `--cursor-mcp` writes live `.cursor/mcp.json`; `uv` only if the harness uses stdio `tools.mcp`. See [Cursor MCP setup](user-docs/guides/cursor-mcp.md).
-- **Chainlit UI** — `hayhooks[chainlit]` (Phase 3)
+- **Chainlit UI** — `pip install "hayhooks[chainlit]"` then `serve.hayhooks.chainlit: true` (embedded `/chat` on the serve port; optional, not a primary-UI decision). See [Web deployment](user-docs/guides/web-deployment.md).
 
 ---
 

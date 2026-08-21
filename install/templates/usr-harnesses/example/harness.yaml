@@ -6,6 +6,7 @@ models: models.yaml    # optional harness-wide aliases
 serve:
   hayhooks:
     port: 1416
+    # chainlit: true   # optional GUI at /chat — pip install "hayhooks[chainlit]"
 
 # Optional Phase 2 deploy gate (Architecture §6.4 / E5-S06 / E6-S03).
 # Uncomment to run `zaumzeug eval` before `zaumzeug deploy`:

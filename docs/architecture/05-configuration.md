@@ -57,7 +57,7 @@ Requirements: [PRD E2.2](../prd.md#epic-e2--configuration-and-validation-phase-1
 | `compile` | `agent.yaml` | 2 | DSPy + GEPA → agent `artifacts/` | E4 |
 | `eval` | `harness.yaml` | 2 | Optional eval (`builtin` or `deepeval`) | E6 |
 | `deploy` | `harness.yaml` | 2 | Eval gate on `zaumzeug deploy` ✅ (E6-S03 / E5-S06) | E5 |
-| `serve` | `harness.yaml` | 1+ | Hayhooks ports, Chainlit, MCP, ACP, A2A | E3, E7, E8 |
+| `serve` | `harness.yaml` | 1+ | Hayhooks ports, Chainlit `/chat` ✅ (E7-S04), MCP, ACP, A2A | E3, E7, E8 |
 
 Full schema examples: Phase 1 canonical examples in [§6.6](05-configuration.md#66-phase-1-config-schema); full multi-phase reference in [ideation-stage.md](../ideation-stage.md) until `user-docs/reference/harness-yaml.md` exists.
 
@@ -243,6 +243,8 @@ compile:
 
 **Implementation (E3-S02, 2026-07-20):** `zaumzeug serve <harness>` via `serve/runner.py` — same `validate_serve()`, then `build_agent()`, Hayhooks on `127.0.0.1` / `serve.hayhooks.port`. Tests: `tests/integration/test_serve.py`, `tests/integration/test_openai_contract.py` (AC-4).
 
+**Implementation (E7-S04, 2026-08-21):** `HayhooksConfig.chainlit` (default `false`) unblocked from `PHASE_GATED_FIELDS`. When true, runner sets Hayhooks `chainlit_enabled` before `create_app()` so `/chat` shares the REST port; missing `hayhooks[chainlit]` raises `ChainlitMissingError`. Tests: `tests/integration/serve/test_chainlit.py`.
+
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract — `AgentPipelineWrapper.run_chat_completion` reads optional request `model_id` and swaps the agent `chat_generator` via stage-scoped `ModelRouter`. Ephemeral-port fixture `tests/integration/conftest.py::ephemeral_serve_url`; tests `tests/integration/test_openai_contract.py` (`-k e3_s07`); `web_fetch` stubbed with `respx` for offline CI. Cross-OS green closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
 
 **Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` in `src/zaumzeug/integrations/mock.py` returns canned text from `tests/fixtures/responses/{model}.txt` (or `.json` with a `content` field); bundled copy under `src/zaumzeug/fixtures/responses/` for pip installs. `ModelRouter` in `src/zaumzeug/runtime/model_router.py` dispatches `provider: mock` without `haystack_integrations` packages. Shipped default: `install/templates/config/models.example.yaml` (`default_model_id: mock`, `model: harness-fixture`). Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`).
@@ -262,6 +264,7 @@ models: models.yaml    # optional harness-wide aliases
 serve:
   hayhooks:
     port: 1416
+    # chainlit: true   # optional GUI at /chat — pip install "hayhooks[chainlit]" (E7-S04)
 
 # Optional — zaumzeug run only (E8-S07). Omit or max_attempts: 1 = one-shot.
 # runtime:

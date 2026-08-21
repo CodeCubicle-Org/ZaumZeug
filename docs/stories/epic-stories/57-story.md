@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/57-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-08-21 |
 | **Story ID** | E7-S08 |
 | **Epic** | [E7 — Tools, MCP, and ACP](../07-epic.md) |
 | **Phase** | 3 |
@@ -45,7 +45,7 @@ As a **web integrator**, I want documented deployment layouts, so that I can cho
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Document Chainlit embedded co-location
+- [x] **AC-1** Document Chainlit embedded co-location — **shipped in E7-S04** ([web-deployment.md](../../../user-docs/guides/web-deployment.md))
 - [ ] **AC-2** Document Open WebUI + Hayhooks two-container pattern
 - [ ] **AC-3** Document custom SPA + Nginx proxy pattern
 - [ ] **AC-4** Document Next.js co-located pattern
@@ -53,9 +53,10 @@ As a **web integrator**, I want documented deployment layouts, so that I can cho
 
 ### Implementation tasks (build)
 
-- [ ] Author `user-docs/guides/web-deployment.md`
-- [ ] Include example `baseURL` and env vars
-- [ ] Cross-link Hayhooks `/v1/models`, `/docs` endpoints
+- [x] Author `user-docs/guides/web-deployment.md` — **file exists** (E7-S04 Chainlit recipe + preview of other layouts)
+- [ ] Expand Open WebUI / SPA / Next.js recipes (preview only today)
+- [ ] Include example `baseURL` and env vars for remaining layouts
+- [ ] Cross-link Hayhooks `/v1/models`, `/docs` endpoints for remaining layouts
 
 ### Verification (after build)
 
@@ -63,7 +64,7 @@ Per [Story verification](../00-README.md#story-verification-required). **Docs-on
 
 | AC | Verification |
 |---|---|
-| AC-1 | **manual:** web-deployment.md Chainlit section |
+| AC-1 | **manual:** web-deployment.md Chainlit section — **done** (E7-S04, 2026-08-21) |
 | AC-2 | **manual:** Open WebUI two-container section |
 | AC-3 | **manual:** SPA + Nginx section |
 | AC-4 | **manual:** Next.js co-located section |
@@ -73,5 +74,9 @@ Per [Story verification](../00-README.md#story-verification-required). **Docs-on
 
 ### Definition of done
 
-- [ ] No implementation required beyond docs unless Chainlit flag (E7-S04)
+- [ ] No implementation required beyond docs unless Chainlit flag (E7-S04) — **flag shipped 2026-08-21**; this story remains docs for the other layouts
 - [ ] Verification checklist complete
+
+### Implementation notes (2026-08-21)
+
+E7-S04 shipped the Chainlit co-location recipe and created `user-docs/guides/web-deployment.md` (mirrored in `install/templates/user-docs/guides/`). Open #2 stays open. Remaining work: Open WebUI two-container, SPA + Nginx, Next.js, and `baseURL` examples for those layouts.
