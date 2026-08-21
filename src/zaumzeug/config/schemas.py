@@ -21,7 +21,6 @@ PHASE_GATED_FIELDS: dict[tuple[str, ...], int] = {
     # ``eval`` unblocked by E6-S02 (``zaumzeug eval``); still Phase 2 in the PRD.
     # ``deploy`` unblocked by E6-S03 / E5-S06 (``deploy.eval_gate``); still Phase 2 in the PRD.
     ("parallelism",): 2,
-    ("serve", "acp"): 3,
     ("serve", "a2a"): 4,
     ("serve", "expose"): 4,
 }
@@ -81,12 +80,25 @@ class HayhooksConfig(BaseModel):
         )
 
 
+class AcpConfig(BaseModel):
+    """Optional ``serve.acp`` block (E7-S05).
+
+    ``zaumzeug acp <name>`` always starts the stdio adapter; this section
+    documents that ACP is enabled for the harness.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = True
+
+
 class ServeConfig(BaseModel):
     """Serve section of ``harness.yaml`` (Phase 1+)."""
 
     model_config = ConfigDict(extra="forbid")
 
     hayhooks: HayhooksConfig | None = None
+    acp: AcpConfig | None = None
 
     @model_validator(mode="before")
     @classmethod

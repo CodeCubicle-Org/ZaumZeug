@@ -57,7 +57,7 @@ Requirements: [PRD E2.2](../prd.md#epic-e2--configuration-and-validation-phase-1
 | `compile` | `agent.yaml` | 2 | DSPy + GEPA → agent `artifacts/` | E4 |
 | `eval` | `harness.yaml` | 2 | Optional eval (`builtin` or `deepeval`) | E6 |
 | `deploy` | `harness.yaml` | 2 | Eval gate on `zaumzeug deploy` ✅ (E6-S03 / E5-S06) | E5 |
-| `serve` | `harness.yaml` | 1+ | Hayhooks ports, Chainlit `/chat` ✅ (E7-S04), MCP, ACP, A2A | E3, E7, E8 |
+| `serve` | `harness.yaml` | 1+ | Hayhooks ports, Chainlit `/chat` ✅ (E7-S04), MCP, ACP stdio ✅ (E7-S05), A2A | E3, E7, E8 |
 
 Full schema examples: Phase 1 canonical examples in [§6.6](05-configuration.md#66-phase-1-config-schema); full multi-phase reference in [ideation-stage.md](../ideation-stage.md) until `user-docs/reference/harness-yaml.md` exists.
 
@@ -175,7 +175,7 @@ Custom tools use `tools.custom` (user Python), not this catalog — [PRD E7.2](.
 
 Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validation-phase-1), [E3.4](../prd.md#epic-e3--runtime-and-local-serve-phase-1), [E3.5](../prd.md#epic-e3--runtime-and-local-serve-phase-1).
 
-**Implementation (E2-S01, 2026-07-08):** Phase 1 `harness.yaml` root fields are validated by `zaumzeug.config.load_harness()` → `HarnessConfig` (`src/zaumzeug/config/schemas.py`, `loader.py`). Phase-gated keys (`compile`, `serve.acp`, …) fail with a phase hint. **`eval` unblocked by E6-S02** (validated as `EvalConfig` when present). **`deploy` unblocked by E6-S03 / E5-S06** (validated as `DeployConfig` with `eval_gate`).
+**Implementation (E2-S01, 2026-07-08):** Phase 1 `harness.yaml` root fields are validated by `zaumzeug.config.load_harness()` → `HarnessConfig` (`src/zaumzeug/config/schemas.py`, `loader.py`). Phase-gated keys (`compile`, `serve.a2a`, …) fail with a phase hint. **`eval` unblocked by E6-S02** (validated as `EvalConfig` when present). **`deploy` unblocked by E6-S03 / E5-S06** (validated as `DeployConfig` with `eval_gate`). **`serve.acp` unblocked by E7-S05**.
 
 **Implementation (E8-S07, 2026-08-01):** Optional `runtime` on `HarnessConfig` (`HarnessRuntimeConfig` / `RuntimeRetryConfig`) and optional `output` on `AgentConfig` (`AgentOutputConfig`, `format: json` only). Consumed by `run_workflow` / `zaumzeug run` — stage build once, retry `Agent.run` + JSON parse with backoff; INFO stage lifecycle via `log_request(..., stage=...)`. **Serve/HTTP does not yet share this reliability layer** (follow-up). **`tools.mcp` unblocked by E7-S01** (2026-08-14). **`tools.custom` unblocked by E7-S02** (2026-08-14); doctor `custom_tools` fails on import errors with the module path. Tests: `tests/unit/runtime/test_workflow_reliability.py`, `tests/integration/test_workflow_reliability.py`, `tests/unit/cli/test_doctor.py` (`-k e8_s07`).
 
@@ -244,6 +244,8 @@ compile:
 **Implementation (E3-S02, 2026-07-20):** `zaumzeug serve <harness>` via `serve/runner.py` — same `validate_serve()`, then `build_agent()`, Hayhooks on `127.0.0.1` / `serve.hayhooks.port`. Tests: `tests/integration/test_serve.py`, `tests/integration/test_openai_contract.py` (AC-4).
 
 **Implementation (E7-S04, 2026-08-21):** `HayhooksConfig.chainlit` (default `false`) unblocked from `PHASE_GATED_FIELDS`. When true, runner sets Hayhooks `chainlit_enabled` before `create_app()` so `/chat` shares the REST port; missing `hayhooks[chainlit]` raises `ChainlitMissingError`. Tests: `tests/integration/serve/test_chainlit.py`.
+
+**Implementation (E7-S05, 2026-08-21):** `AcpConfig` on `ServeConfig` (`serve.acp.enabled`, default true when the section is present) unblocked from `PHASE_GATED_FIELDS`. `zaumzeug acp <name>` builds the entry agent via the factory (including `tools.mcp`) and serves Agent Client Protocol JSON-RPC on stdio (`initialize` / `session/new` / `session/prompt`). Docs: [acp.md](../../user-docs/guides/acp.md). Tests: `tests/integration/acp/test_acp_stdio.py`. `CURRENT_SDK_PHASE` stays **1**.
 
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract — `AgentPipelineWrapper.run_chat_completion` reads optional request `model_id` and swaps the agent `chat_generator` via stage-scoped `ModelRouter`. Ephemeral-port fixture `tests/integration/conftest.py::ephemeral_serve_url`; tests `tests/integration/test_openai_contract.py` (`-k e3_s07`); `web_fetch` stubbed with `respx` for offline CI. Cross-OS green closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
 

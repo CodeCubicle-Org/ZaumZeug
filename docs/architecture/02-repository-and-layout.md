@@ -16,7 +16,7 @@ HarnessDevelopment/
 │   ├── compile/              # DSPy loader; CLI + GEPA + --dry-run; export; workflow diagram; immutable runs (E4-S01–S08)
 │   ├── deploy/               # Packager ✅ E5-S01; copy matrix ✅ E5-S02 (`resolve_deploy_copy_plan`); gate ✅ E6-S03/E5-S06; exclude/strip ✅ E6-S04 / E5-S01
 │   ├── eval/                 # Optional DeepEval bridge — [eval] extra + require_deepeval() (E6-S01); zaumzeug eval runner (E6-S02); invoked by deploy gate (E6-S03); harness eval/ pytest scaffold (E6-S04); trace export + --trace (E6-S05); Mode C --base-url (E6-S06); GEPA bridge append_failed_eval_to_train + deepeval_gepa_metric (E6-S07)
-│   ├── serve/                # validate_serve + dry-run (E2-S05); Hayhooks runner (E3-S02; input_rewrite on request path E4-S03b); optional Chainlit /chat (E7-S04)
+│   ├── serve/                # validate_serve + dry-run (E2-S05); Hayhooks runner (E3-S02; input_rewrite on request path E4-S03b); optional Chainlit /chat (E7-S04); ACP stdio (E7-S05)
 │   ├── integrations/         # mock (E3-S05), haystack provider map (E3-S01); DSPy, GEPA, LiteLLM adapters
 │   └── fixtures/responses/   # bundled mock LLM fixtures (pip install; mirrors tests/fixtures/responses/)
 ├── usr-harnesses/<name>/         # USER dev workspace (author, compile, experiment)
@@ -188,11 +188,12 @@ user-docs/
 │   ├── custom-tools.md           # tools.custom → ComponentTool / Tool (E7-S02)
 │   ├── cursor-mcp.md             # Cursor mcp.json → localhost:{mcp_port}/mcp (E7-S03)
 │   ├── web-deployment.md         # Chainlit /chat co-located with REST (E7-S04)
+│   ├── acp.md                    # zaumzeug acp stdio JSON-RPC for Zed / JetBrains (E7-S05)
 │   └── testing.md                # unit, integration, eval; mock profile; CI tiers
 └── reference/cli.md
 ```
 
-Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [project-setup.md](../../user-docs/getting-started/project-setup.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [compile.md](../../user-docs/guides/compile.md), [deploy.md](../../user-docs/guides/deploy.md), [custom-tools.md](../../user-docs/guides/custom-tools.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md), [web-deployment.md](../../user-docs/guides/web-deployment.md), [testing.md](../../user-docs/guides/testing.md).
+Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [project-setup.md](../../user-docs/getting-started/project-setup.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [compile.md](../../user-docs/guides/compile.md), [deploy.md](../../user-docs/guides/deploy.md), [custom-tools.md](../../user-docs/guides/custom-tools.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md), [web-deployment.md](../../user-docs/guides/web-deployment.md), [acp.md](../../user-docs/guides/acp.md), [testing.md](../../user-docs/guides/testing.md).
 
 **Implementation (E1-S03, 2026-07-22):** Install copies `install/templates/user-docs/` into project `user-docs/` (copy-if-missing). Content completeness (installation prerequisites / troubleshooting) → [E1-S05](../stories/epic-stories/22-story.md).
 
@@ -205,6 +206,8 @@ Install copies this tree from `install/templates/user-docs/` ([§3.4](02-reposit
 **Implementation (E7-S03, 2026-08-21):** [user-docs/guides/cursor-mcp.md](../../user-docs/guides/cursor-mcp.md) — Cursor `mcp.json` → `http://localhost:{mcp_port}/mcp` (default 1417); install `--cursor-mcp` writes live `.cursor/mcp.json`; `uv` only for stdio `tools.mcp`. Tests: `tests/unit/install/test_scaffolding.py::test_e7_s03_ac2_mcp_json_example_scaffolded`, `tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json`.
 
 **Implementation (E7-S04, 2026-08-21):** [user-docs/guides/web-deployment.md](../../user-docs/guides/web-deployment.md) — optional Chainlit at `/chat` (`serve.hayhooks.chainlit: true` + `pip install "hayhooks[chainlit]"`). Open #2 (primary web UI) remains open.
+
+**Implementation (E7-S05, 2026-08-21):** [user-docs/guides/acp.md](../../user-docs/guides/acp.md) — `zaumzeug acp` Agent Client Protocol stdio JSON-RPC; Zed `agent_servers` and JetBrains `~/.jetbrains/acp.json` snippets; ACP ≠ IBM A2A; Cursor uses MCP. Tests: `tests/integration/acp/test_acp_stdio.py`.
 
 **Implementation (E1-S06, 2026-07-22):** Short new-contributor onboarding guide at root [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (product `README.md` unchanged) — vision, install table, `< 15 min` / `~1–2.5 GB` planning ranges, mock-first serve, optional extras, updating dependencies, abbreviated layout; links to [installation.md](../../user-docs/getting-started/installation.md) for depth. Tests: `tests/unit/docs/test_contributing_guide.py`.
 

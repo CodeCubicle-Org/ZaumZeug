@@ -5,8 +5,8 @@
 | **Document** | Epic E7 user stories |
 | **File** | `docs/stories/07-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-21 (E7-S04 Done) |
-| **Status** | In progress (E7-S04 Done 2026-08-21) |
+| **Last modified** | 2026-08-21 (E7-S05 Done) |
+| **Status** | In progress (E7-S05 Done 2026-08-21) |
 | **Build order** | **7 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -19,7 +19,7 @@
 | **Depends on** | [E5](06-epic.md) deploy serve path · Phase 1–2 complete |
 | **Blocks** | — |
 | **PRD** | [Epic E7](../prd.md#epic-e7--tools-mcp-and-acp-phase-3) |
-| **Architecture** | [§9 Client access](../architecture/06-runtime-and-protocols.md#9-client-access-and-protocols) · [§11 #5, #11](../architecture/09-sdk-module-map.md#11-sdk-modules-to-build) |
+| **Architecture** | [§9 Client access](../architecture/06-runtime-and-protocols.md#9-client-access-and-protocols) · [§11 #5, #11, #13](../architecture/09-sdk-module-map.md#11-sdk-modules-to-build) |
 | **Open decisions** | [#2 Web UI](../prd.md#12-open-decisions-blockers-for-some-stories) · [#5 MCP granularity](../prd.md#12-open-decisions-blockers-for-some-stories) |
 
 ### Story implementation order (within this epic)
@@ -28,7 +28,7 @@
 2. **E7-S07** — Extended builtins
 3. **E7-S01** — MCP config + `zaumzeug mcp` ✅
 4. **E7-S03** — Cursor setup ✅
-5. **E7-S05** — ACP adapter
+5. **E7-S05** — ACP adapter ✅
 6. **E7-S06** — MCP from deploy
 7. **E7-S04** → **E7-S08** — Chainlit ✅; remaining Open WebUI / SPA / Next.js recipes
 
@@ -278,15 +278,15 @@ As a **Zed/JetBrains user**, I want `zaumzeug acp`, so that my IDE can drive the
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `zaumzeug acp <name>` starts stdio JSON-RPC process
-- [ ] **AC-2** Zed/JetBrains can register command in agent settings
-- [ ] **AC-3** ACP naming clarified: Agent Client Protocol ≠ IBM ACP/A2A
-- [ ] **AC-4** Harness may still use MCP internally for its own tools
+- [x] **AC-1** `zaumzeug acp <name>` starts stdio JSON-RPC process
+- [x] **AC-2** Zed/JetBrains can register command in agent settings
+- [x] **AC-3** ACP naming clarified: Agent Client Protocol ≠ IBM ACP/A2A
+- [x] **AC-4** Harness may still use MCP internally for its own tools
 
 ### Implementation tasks (build)
 
-- [ ] Implement ACP adapter in `src/zaumzeug/serve/acp.py`
-- [ ] Document registration snippets for Zed and JetBrains
+- [x] Implement ACP adapter in `src/zaumzeug/serve/acp.py`
+- [x] Document registration snippets for Zed and JetBrains
 
 ### Verification (after build)
 
@@ -295,17 +295,21 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC | Test |
 |---|---|
 | AC-1 | `tests/integration/acp/test_acp_stdio.py::test_e7_s05_ac1_starts_stdio_jsonrpc` |
-| AC-2 | **manual:** docs include Zed/JetBrains registration snippets |
-| AC-3 | **manual:** docs disambiguate ACP vs A2A |
+| AC-2 | **manual + automated:** docs include Zed/JetBrains registration snippets |
+| AC-3 | **manual + automated:** docs disambiguate ACP vs A2A |
 | AC-4 | `tests/integration/acp/test_acp_stdio.py::test_e7_s05_ac4_internal_mcp_still_works` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/acp/test_acp_stdio.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/acp/test_acp_stdio.py -v` passes
 
 ### Definition of done
 
-- [ ] Document Cursor limitation (MCP primary, not generic ACP client)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Document Cursor limitation (MCP primary, not generic ACP client)
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-21)
+
+Canonical detail: [54-story.md](epic-stories/54-story.md). `zaumzeug acp <name>` serves Agent Client Protocol JSON-RPC on stdio; Zed/JetBrains snippets in [acp.md](../../user-docs/guides/acp.md); Cursor uses MCP.
 
 ---
 

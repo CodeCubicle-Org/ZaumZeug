@@ -58,6 +58,8 @@ zaumzeug serve example
 # MCP for Cursor / Claude Desktop (default port 1417):
 # zaumzeug mcp example
 # Point Cursor at http://localhost:1417/mcp — see Cursor MCP setup
+# ACP for Zed / JetBrains (stdio JSON-RPC; not IBM A2A):
+# zaumzeug acp example
 # or batch all workflow stages (mock):
 # HARNESS_LOG_LEVEL=INFO zaumzeug run example --input "Summarize this topic"
 ```
@@ -94,5 +96,6 @@ Global defaults can live in `config/models.yaml`; harness and agent files deep-m
 - Add stages or agents — see [Multi-agent workflow](../guides/multi-agent-workflow.md).
 - Add Python tools under `agents/<name>/tools/` — see [Custom tools](../guides/custom-tools.md).
 - Connect Cursor over MCP — see [Cursor MCP setup](../guides/cursor-mcp.md).
+- Connect Zed or JetBrains over ACP — see [ACP (Zed / JetBrains)](../guides/acp.md).
 - Testing and the mock profile — see [Testing](../guides/testing.md).
-- CLI flags — see [CLI reference](../reference/cli.md) (`compile`, `serve`, `run`, …).
+- CLI flags — see [CLI reference](../reference/cli.md) (`compile`, `serve`, `mcp`, `acp`, `run`, …).

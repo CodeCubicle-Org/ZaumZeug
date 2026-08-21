@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-08-21 (E7-S04 Chainlit embedded UI)
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01 **Done** (2026-08-14); E7-S02 **Done** (2026-08-14); E7-S03 **Done** (2026-08-21); E7-S04 **Done** (2026-08-21); next E7-S05
+**Last updated:** 2026-08-21 (E7-S05 ACP adapter)
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S05 **Done** (2026-08-21); next E7-S06
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -372,12 +372,12 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E7.2 | Custom tool loader | **Done** (E7-S02, 2026-08-14). `tools.custom` imports from `agents/<name>/tools/`; registered as Haystack `ComponentTool` / `Tool`; import errors fail doctor/serve with module path; deploy copies listed `tools/*.py` only. Guide: [custom-tools.md](user-docs/guides/custom-tools.md). |
 | E7.3 | Cursor MCP setup | **Done** (E7-S03, 2026-08-21). Documented `mcp.json` → `http://localhost:{mcp_port}/mcp` (default **1417**); install scaffolds `.cursor/mcp.json.example`; `--cursor-mcp` writes live `.cursor/mcp.json` (copy-if-missing). `uv` required only for stdio `tools.mcp`. Guide: [cursor-mcp.md](user-docs/guides/cursor-mcp.md). |
 | E7.4 | Chainlit | **Done** (E7-S04, 2026-08-21). `serve.hayhooks.chainlit: true` serves `/chat` on the same port as OpenAI REST; extra `pip install "hayhooks[chainlit]"` (fail-fast if missing). Guide: [web-deployment.md](user-docs/guides/web-deployment.md). |
-| E7.5 | ACP adapter | **AC:** `zaumzeug acp <name>` stdio process; Zed/JetBrains can register command. |
+| E7.5 | ACP adapter | **Done** (E7-S05, 2026-08-21). `zaumzeug acp <name>` stdio JSON-RPC (Agent Client Protocol; not IBM ACP/A2A). Zed/JetBrains registration snippets in [acp.md](user-docs/guides/acp.md). Cursor uses MCP, not ACP. Internal `tools.mcp` still wired. |
 | E7.6 | MCP + deploy | **AC:** `zaumzeug mcp <name> --deploy` works from production bundle. |
 | E7.7 | Extended builtin catalog | **AC:** Phase 3 builtins beyond `web_fetch` per [Architecture §6.5](architecture/05-configuration.md#65-builtin-tools-catalog). |
 | E7.8 | Web client layouts | **Partial.** Chainlit embedded co-location **Done** (E7-S04, 2026-08-21) — [web-deployment.md](user-docs/guides/web-deployment.md). Remaining (E7-S08): Open WebUI two-container, SPA + Nginx, Next.js. Open #2 (primary UI) stays open. |
 
-**Story seeds:** MCP **Done** (E7-S01). Custom tools **Done** (E7-S02). Cursor MCP setup **Done** (E7-S03 — `user-docs/guides/cursor-mcp.md`, `--cursor-mcp` live write). Chainlit embedded UI **Done** (E7-S04 — `serve.hayhooks.chainlit` → `/chat`; `user-docs/guides/web-deployment.md`). Remaining: ACP, MCP from deploy, extended builtins, full web-layout recipes (E7-S08), tool correctness eval when DeepEval present.
+**Story seeds:** MCP **Done** (E7-S01). Custom tools **Done** (E7-S02). Cursor MCP setup **Done** (E7-S03 — `user-docs/guides/cursor-mcp.md`, `--cursor-mcp` live write). Chainlit embedded UI **Done** (E7-S04 — `serve.hayhooks.chainlit` → `/chat`; `user-docs/guides/web-deployment.md`). ACP adapter **Done** (E7-S05 — `zaumzeug acp` stdio JSON-RPC; [acp.md](user-docs/guides/acp.md)). Remaining: MCP from deploy, extended builtins, full web-layout recipes (E7-S08), tool correctness eval when DeepEval present.
 
 ---
 
@@ -411,7 +411,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 | `zaumzeug deploy` | 2 | E5 |
 | `zaumzeug eval` | 2 | E6 (optional) |
 | `zaumzeug mcp` | 3 | E7 **Done** E7-S01 (2026-08-14); `HARNESS_ROOT=deploy` / `--deploy` honour E5-S04; full deploy-bundle story E7-S06 |
-| `zaumzeug acp` | 3 | E7 (`HARNESS_ROOT=deploy` stub wiring **Done** E5-S04; full protocol → E7-S05) |
+| `zaumzeug acp` | 3 | E7 **Done** E7-S05 (2026-08-21); `HARNESS_ROOT=deploy` / `--deploy` honour E5-S04 |
 
 **Future commands (not Phase 1–4 v1):** `zaumzeug export <name>` (tarball of `deploy/`); `zaumzeug replay <name> --trace` (trace replay); `zaumzeug install-project` (PyPI consumer scaffold — [E1-S08](stories/epic-stories/25-story.md); deferred until package publish).
 

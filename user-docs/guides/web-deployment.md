@@ -82,3 +82,12 @@ These share the same OpenAI `baseURL` (`http://127.0.0.1:1416/v1`, not `api.open
 | **Next.js co-located** | App on `:3000` calls `localhost:1416` |
 
 Also exposed for probes: `GET /v1/models`, `POST /<harness>/run`, optional `/docs` (Swagger).
+
+---
+
+## Related
+
+- [CLI — serve](../reference/cli.md#zaumzeug-serve) — OpenAI REST (and optional `/chat`)
+- [CLI — mcp](../reference/cli.md#zaumzeug-mcp) — Cursor / Claude Desktop
+- [ACP (Zed / JetBrains)](acp.md) — `zaumzeug acp` stdio JSON-RPC; not IBM ACP/A2A; Cursor uses MCP
+- [Deploy and ship](deploy.md) — production `--deploy` / `HARNESS_ROOT=deploy`

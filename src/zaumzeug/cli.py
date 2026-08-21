@@ -10,7 +10,7 @@ from zaumzeug.doctor import run_doctor
 from zaumzeug.logging import configure_logging
 from zaumzeug.runtime.workflow import WorkflowError, run_workflow
 from zaumzeug.scaffold import ScaffoldError, init_harness
-from zaumzeug.serve import format_dry_run, run_mcp, run_serve, validate_serve
+from zaumzeug.serve import format_dry_run, run_acp, run_mcp, run_serve, validate_serve
 from zaumzeug.serve.dry_run import dry_run_to_json
 
 
@@ -43,41 +43,10 @@ def _mcp_command(args: argparse.Namespace) -> int:
     return run_mcp(args.harness_name, deploy=args.deploy, port=port)
 
 
-def _protocol_root_stub(name: str) -> Callable[[argparse.Namespace], int]:
-    """Stub for serve-adjacent protocol CLIs that honour ``HARNESS_ROOT`` (E5-S04)."""
-
-    def _run(args: argparse.Namespace) -> int:
-        from zaumzeug.config.harness_root import (
-            harness_root_segment,
-            is_deploy_mode,
-            resolve_harness_path,
-        )
-        from zaumzeug.doctor.project import find_project_root
-
-        deploy = bool(getattr(args, "deploy", False))
-        deploy_mode = is_deploy_mode(deploy_flag=deploy)
-        segment = harness_root_segment(deploy=deploy_mode)
-        harness_name = getattr(args, "harness_name", None)
-        if harness_name:
-            path = resolve_harness_path(
-                find_project_root(),
-                harness_name,
-                deploy_flag=deploy,
-            )
-            print(
-                f"zaumzeug {name}: would load from {path} "
-                f"({segment}/; not implemented yet)",
-                file=sys.stderr,
-            )
-        else:
-            print(
-                f"zaumzeug {name}: default root {segment}/ "
-                f"(not implemented yet)",
-                file=sys.stderr,
-            )
-        return 0
-
-    return _run
+def _acp_command(args: argparse.Namespace) -> int:
+    """Serve the harness as an ACP stdio JSON-RPC agent (E7-S05)."""
+    configure_logging(verbose=args.verbose)
+    return run_acp(args.harness_name, deploy=args.deploy)
 
 
 def _init_command(args: argparse.Namespace) -> int:
@@ -390,12 +359,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     acp_cmd = sub.add_parser(
         "acp",
-        help="acp command (stub; respects HARNESS_ROOT / --deploy)",
+        help="serve harness as ACP stdio JSON-RPC agent (Zed / JetBrains)",
     )
     acp_cmd.add_argument(
         "harness_name",
-        nargs="?",
-        default=None,
         help="harness name under usr-harnesses/ (or deploy/ with --deploy)",
     )
     acp_cmd.add_argument(
@@ -403,7 +370,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="load harness from deploy/<name>/ (or HARNESS_ROOT=deploy)",
     )
-    acp_cmd.set_defaults(_handler=_protocol_root_stub("acp"))
+    acp_cmd.add_argument(
+        "--verbose",
+        action="store_true",
+        help="enable SDK and Haystack debug logging (stderr only)",
+    )
+    acp_cmd.set_defaults(_handler=_acp_command)
 
     deploy_cmd = sub.add_parser(
         "deploy",

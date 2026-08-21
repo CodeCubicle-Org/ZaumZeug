@@ -46,6 +46,7 @@ from zaumzeug.config.resolver import (
 from zaumzeug.config.schemas import (
     CURRENT_SDK_PHASE,
     PHASE_GATED_FIELDS,
+    AcpConfig,
     AgentConfig,
     AgentOutputConfig,
     AgentSectionConfig,
@@ -76,6 +77,7 @@ __all__ = [
     "HARNESS_ROOT_ENV",
     "PHASE_GATED_FIELDS",
     "PROTOCOL_ROOT_COMMANDS",
+    "AcpConfig",
     "AgentConfig",
     "AgentModelsConfig",
     "AgentOutputConfig",

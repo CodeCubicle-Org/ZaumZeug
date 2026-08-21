@@ -102,6 +102,9 @@ From the **project root** that contains `deploy/{{harness_name}}/` (not from ins
 zaumzeug serve {{harness_name}} --deploy
 # equivalent env override (containers / systemd):
 HARNESS_ROOT=deploy zaumzeug serve {{harness_name}}
+# MCP (Cursor / Claude Desktop) and ACP (Zed / JetBrains) honour the same root:
+# zaumzeug mcp {{harness_name}} --deploy
+# zaumzeug acp {{harness_name}} --deploy
 ```
 
 `--deploy` or `HARNESS_ROOT=deploy` loads **only** this production tree — no `usr-harnesses/` required. The OpenAI-compatible API matches dev serve:

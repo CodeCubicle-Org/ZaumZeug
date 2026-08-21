@@ -89,4 +89,5 @@ Walk this once after install (mock model is enough):
 
 - [CLI — mcp](../reference/cli.md#zaumzeug-mcp)
 - [Installation](../getting-started/installation.md) — `--cursor-mcp` flag
+- [ACP (Zed / JetBrains)](acp.md) — Agent Client Protocol for IDEs that drive the harness (Cursor uses MCP, not ACP)
 - [Cursor MCP docs](https://cursor.com/docs/mcp)

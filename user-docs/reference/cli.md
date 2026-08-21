@@ -176,6 +176,56 @@ Cursor setup (`.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`): [Cursor
 
 ---
 
+## `zaumzeug acp`
+
+Serve the harness as an **Agent Client Protocol** (ACP) agent on **stdio JSON-RPC** so Zed, JetBrains, or Neovim can drive it as the primary agent. This is **not** IBM Agent Communication Protocol / **A2A**.
+
+```bash
+zaumzeug acp <harness> [--deploy] [--verbose]
+```
+
+| Flag | Description |
+|---|---|
+| `--deploy` | Load harness **only** from `deploy/<name>/` (or `HARNESS_ROOT=deploy`); requires a valid `manifest.json` |
+| `--verbose` | Enable SDK and Haystack debug logging (**stderr only** — stdout is the protocol) |
+
+**Transport:** newline-delimited JSON-RPC 2.0 on stdin/stdout (`initialize`, `session/new`, `session/prompt`). Status banners go to stderr. Optional `serve.acp.enabled` in `harness.yaml` documents intent; the CLI always starts the adapter.
+
+The factory still wires `tools.mcp` on the entry agent (internal MCP client). Cursor is **not** a generic ACP client — use `zaumzeug mcp` instead ([Cursor MCP setup](../guides/cursor-mcp.md)).
+
+**Zed** — Agent Settings → External Agents → Add Custom Agent (`agent_servers` in `settings.json`):
+
+```json
+{
+  "agent_servers": {
+    "zaumzeug": {
+      "type": "custom",
+      "command": "zaumzeug",
+      "args": ["acp", "example"],
+      "env": {}
+    }
+  }
+}
+```
+
+**JetBrains** — AI Chat → Add Custom Agent writes `~/.jetbrains/acp.json`:
+
+```json
+{
+  "agent_servers": {
+    "ZaumZeug": {
+      "command": "zaumzeug",
+      "args": ["acp", "example"],
+      "env": {}
+    }
+  }
+}
+```
+
+Full registration notes: [ACP (Zed / JetBrains)](../guides/acp.md).
+
+---
+
 ## `zaumzeug run`
 
 Execute `workflow.yaml` stages serially (multi-agent orchestration). Each agent stage loads that agent's config and merged `agents-models.yaml`, builds a Haystack Agent via the runtime factory, and forwards prior stage output as context to the next stage.
@@ -353,4 +403,5 @@ Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack
 - [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, `--trace` / Journey C, Mode C `--base-url`, GEPA ↔ DeepEval bridge, deploy eval gates
 - [Custom tools](../guides/custom-tools.md) — `tools.custom` Python modules, `ComponentTool` / `Tool`, doctor import errors
 - [Cursor MCP setup](../guides/cursor-mcp.md) — `.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`; `--cursor-mcp`; `uv` for stdio `tools.mcp`
+- [ACP (Zed / JetBrains)](../guides/acp.md) — `zaumzeug acp` stdio JSON-RPC; Agent Client Protocol ≠ A2A; Cursor uses MCP
 - [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml`, agent routing, [run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run) (`runtime.retry`, `output.format: json`, stage logs)

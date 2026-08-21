@@ -43,7 +43,7 @@ def test_e5_s04_ac1_env_forces_deploy_root(
     assert DEPLOY_HARNESS_ROOT in validation.harness_dir.parts
     assert DEV_HARNESS_ROOT not in validation.harness_dir.parts
 
-    # mcp / acp stubs share the same resolver + honour env without --deploy
+    # mcp / acp honour the same resolver + env without --deploy
     parser = build_parser()
     for command in ("mcp", "acp"):
         assert command in PROTOCOL_ROOT_COMMANDS

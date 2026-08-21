@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 complete for **E4** / **E6** / **E5** (2026-07-28 / 2026-07-29). Phase 4 pull-forward: **[E8-S07](docs/stories/epic-stories/64-story.md)** (workflow run reliability — `runtime.retry`, stage INFO logs, `output.format: json`) **done** (2026-08-01). Phase 3: **[E7-S01](docs/stories/epic-stories/50-story.md)** (MCP), **[E7-S02](docs/stories/epic-stories/51-story.md)** (custom tool loader), **[E7-S03](docs/stories/epic-stories/52-story.md)** (Cursor MCP setup), and **[E7-S04](docs/stories/epic-stories/53-story.md)** (Chainlit embedded UI) **done** (2026-08-21). Next: [E7-S05](docs/stories/epic-stories/54-story.md) (ACP adapter). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 complete for **E4** / **E6** / **E5** (2026-07-28 / 2026-07-29). Phase 4 pull-forward: **[E8-S07](docs/stories/epic-stories/64-story.md)** (workflow run reliability — `runtime.retry`, stage INFO logs, `output.format: json`) **done** (2026-08-01). Phase 3: **[E7-S01](docs/stories/epic-stories/50-story.md)** (MCP) through **[E7-S05](docs/stories/epic-stories/54-story.md)** (ACP adapter) **done** (2026-08-21). Next: [E7-S06](docs/stories/epic-stories/55-story.md) (MCP from deploy). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -157,12 +157,7 @@ zaumzeug deploy <harness> --eval-gate block  # Override deploy.eval_gate for one
 zaumzeug init <name> --with-eval      # Scaffold harness + optional eval/ DeepEval tests (E6-S04)
 zaumzeug mcp <harness>                # Serve MCP at http://127.0.0.1:{mcp_port}/mcp (E7-S01; default 1417)
 # Cursor: .cursor/mcp.json → that URL (install --cursor-mcp or copy the example; E7-S03)
-```
-
-**Planned:**
-
-```bash
-zaumzeug acp <harness>        # Agent Client Protocol adapter (E7-S05)
+zaumzeug acp <harness>                # Agent Client Protocol stdio JSON-RPC (E7-S05; Zed / JetBrains)
 ```
 
 ---
@@ -188,7 +183,7 @@ zaumzeug acp <harness>        # Agent Client Protocol adapter (E7-S05)
 | [Product Requirements (PRD)](docs/prd.md) | Goals, personas, epics, acceptance criteria, phases |
 | [Architecture](docs/architecture.md) | Technical design — stack, data flows, config, deploy |
 | [Epic stories](docs/stories/00-README.md) | Implementation backlog broken into epics and stories |
-| [User guides](user-docs/README.md) | How to build and run harnesses — install, workflow, compile, [deploy/ship](user-docs/guides/deploy.md), testing |
+| [User guides](user-docs/README.md) | How to build and run harnesses — install, workflow, compile, [deploy/ship](user-docs/guides/deploy.md), [ACP](user-docs/guides/acp.md), testing |
 | [Dependencies](dependencies.md) | External tools, libraries, and protocols |
 | [Competitive landscape](docs/competitive-landscape.md) | How ZaumZeug compares to other harness SDKs |
 

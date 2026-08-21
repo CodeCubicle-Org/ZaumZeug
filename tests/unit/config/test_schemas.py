@@ -84,17 +84,17 @@ def test_e2_s01_ac3_unknown_key_phase_hint(tmp_path: Path) -> None:
     assert "compile" in message
     assert "Phase 2" in message
 
-    # Nested Phase 3 key under serve also gets a phase hint.
+    # Nested Phase 4 key under serve also gets a phase hint.
     nested = dict(PHASE1_MINIMAL)
-    nested["serve"] = {"hayhooks": {"port": 1416}, "acp": {"enabled": True}}
-    nested_path = _write_yaml(tmp_path / "harness-acp.yaml", nested)
+    nested["serve"] = {"hayhooks": {"port": 1416}, "a2a": {"enabled": True}}
+    nested_path = _write_yaml(tmp_path / "harness-a2a.yaml", nested)
 
     with pytest.raises(ConfigValidationError) as nested_info:
         load_harness(nested_path)
 
     nested_msg = str(nested_info.value)
-    assert "acp" in nested_msg
-    assert "Phase 3" in nested_msg
+    assert "a2a" in nested_msg
+    assert "Phase 4" in nested_msg
 
 
 def test_e2_s01_ac4_error_includes_path_and_field(tmp_path: Path) -> None:
@@ -285,6 +285,35 @@ def test_e7_s04_chainlit_flag_validates(tmp_path: Path) -> None:
     assert enabled.serve is not None
     assert enabled.serve.hayhooks is not None
     assert enabled.serve.hayhooks.chainlit is True
+
+
+def test_e7_s05_acp_schema_unblocked(tmp_path: Path) -> None:
+    """serve.acp is unblocked (E7-S05); omitted section stays None."""
+    from zaumzeug.config.schemas import AcpConfig
+
+    default_path = _write_yaml(
+        tmp_path / "harness.yaml",
+        {"name": "example", "serve": {"hayhooks": {"port": 1416}}},
+    )
+    default = load_harness(default_path)
+    assert default.serve is not None
+    assert default.serve.acp is None
+
+    enabled_path = _write_yaml(
+        tmp_path / "harness-acp.yaml",
+        {
+            "name": "example",
+            "serve": {
+                "hayhooks": {"port": 1416},
+                "acp": {"enabled": True},
+            },
+        },
+    )
+    enabled = load_harness(enabled_path)
+    assert enabled.serve is not None
+    assert enabled.serve.acp is not None
+    assert isinstance(enabled.serve.acp, AcpConfig)
+    assert enabled.serve.acp.enabled is True
 
 
 def test_e7_s02_custom_schema_allows_module_paths(tmp_path: Path) -> None:

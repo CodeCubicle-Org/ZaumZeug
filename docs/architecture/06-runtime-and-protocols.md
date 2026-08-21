@@ -54,6 +54,7 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 | `zaumzeug init <name>` | Scaffold `usr-harnesses/<name>/` from template ([E1-S04](../stories/epic-stories/21-story.md)); `--force` overwrites |
 | `zaumzeug install-project` | **Deferred** — PyPI consumer scaffold (no editable install); after package publish ([E1-S08](../stories/epic-stories/25-story.md)) |
 | `zaumzeug mcp <harness>` | Hayhooks MCP Streamable HTTP on `serve.hayhooks.mcp_port` (default **1417**) — `{host}:{mcp_port}/mcp` ✅ (E7-S01) |
+| `zaumzeug acp <harness>` | Agent Client Protocol newline-delimited JSON-RPC on **stdio** (`serve/acp.py`); logs on stderr; `--deploy` / `HARNESS_ROOT=deploy` same as serve ✅ (E7-S05) |
 | `zaumzeug serve <harness> --deploy` | Same OpenAI REST as dev serve, loads **only** `deploy/<name>/` (manifest required; no `usr-harnesses/`) ([E5-S03](../stories/epic-stories/43-story.md)) |
 | `HARNESS_ROOT=deploy` | Env equivalent of `--deploy` for serve / mcp / acp (and doctor / run); preferred in containers / systemd ([E5-S04](../stories/epic-stories/44-story.md)) |
 | `zaumzeug serve <harness> --dry-run` | Validate `harness.yaml`, `workflow.yaml`, and resolved paths; print summary — no Hayhooks bind, no LLM ([E2-S05](../stories/epic-stories/06-story.md), [E2-S07](../stories/epic-stories/08-story.md)); combine with `--deploy` for production bundles |
@@ -114,6 +115,8 @@ Use when harness is a **capability** invoked by Cursor's (or another host's) age
 
 Use when harness **is** the primary agent in Zed/JetBrains/Neovim. Harness may still use MCP internally for its own tools. Limitations: Cursor does not generically adopt third-party ACP agents; more implementation work than MCP expose.
 
+**Implementation (E7-S05, 2026-08-21):** `zaumzeug acp <name>` — Agent Client Protocol stdio JSON-RPC (`serve/acp.py`). Guide: [acp.md](../../user-docs/guides/acp.md) (Zed `agent_servers`, JetBrains `~/.jetbrains/acp.json`, ACP ≠ A2A, Cursor MCP-only). Tests: `tests/integration/acp/test_acp_stdio.py`.
+
 ### 9.4 Web deployment layouts
 
 **OpenAI-compatible** means Hayhooks exposes `/v1/chat/completions` with OpenAI JSON shape — clients use `baseURL` pointing at your server (not OpenAI).
@@ -134,6 +137,8 @@ Clients use OpenAI-shaped requests against your `baseURL` (e.g. `http://127.0.0.
 **Implementation (E3-S07, 2026-07-21):** Contract tests assert response shape (`choices` / `message` / `role` / `content`), HTTP `model_id` override, and offline CI (mock + `respx`-stubbed `web_fetch`). Fixture: `tests/integration/conftest.py::ephemeral_serve_url`. Tests: `tests/integration/test_openai_contract.py` (`-k e3_s07`). Cross-OS CI green — closed by [E1-S07](../stories/epic-stories/24-story.md#e1-s07-cross-platform-ci-matrix) (2026-07-22).
 
 **Implementation (E7-S04, 2026-08-21):** Optional Chainlit GUI — `serve.hayhooks.chainlit: true` sets Hayhooks `chainlit_enabled` before `create_app()` so `/chat` shares the REST port. Requires `pip install "hayhooks[chainlit]"` (fail-fast install hint if missing). OpenAI `/v1/chat/completions` stays mounted. Docs: [web-deployment.md](../../user-docs/guides/web-deployment.md). Tests: `tests/integration/serve/test_chainlit.py`. PRD open #2 (primary web UI) remains open — Chainlit is one layout, not a product default.
+
+**Implementation (E7-S05, 2026-08-21):** `src/zaumzeug/serve/acp.py` — `zaumzeug acp <name>` validates like serve, builds the entry agent (including `tools.mcp`), and serves Agent Client Protocol JSON-RPC on stdio (`initialize`, `session/new`, `session/prompt`; logs on stderr). Zed/JetBrains registration: [acp.md](../../user-docs/guides/acp.md). Cursor remains MCP-primary. Tests: `tests/integration/acp/test_acp_stdio.py`.
 
 ### 9.5 What does NOT call the harness directly
 

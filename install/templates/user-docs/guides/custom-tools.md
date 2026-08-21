@@ -98,3 +98,4 @@ Keep modules inside `agents/<name>/tools/` — traversal (`../`) and absolute pa
 - Builtin catalog (`web_fetch`) is separate: `tools.builtin` in `agent.yaml`
 - External MCP servers: `tools.mcp` — see [CLI — mcp](../reference/cli.md#zaumzeug-mcp)
 - Cursor as MCP host: [Cursor MCP setup](cursor-mcp.md)
+- ACP (harness as the IDE agent): [ACP (Zed / JetBrains)](acp.md) — `zaumzeug acp` may still use `tools.mcp` internally

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Ops / platform · Harness developers |
-| **Last updated** | 2026-08-21 (E7-S04 optional `/chat`) |
+| **Last updated** | 2026-08-21 (E7-S05 ACP `--deploy` / `HARNESS_ROOT`) |
 
 Ship a production harness to a clean server **without** DSPy, GEPA, or DeepEval on the target. Compile and eval stay on the developer machine (or CI); the target only runs Haystack via `zaumzeug`.
 
@@ -181,6 +181,7 @@ Remove or restore the ignore later with `git rm -r --cached deploy/<name>/` if y
 - Bundle ops sheet: `deploy/<name>/README.deploy.md`
 - [Platforms](#platforms) (E5-S08) — Linux-first production; OS-neutral bundle; Win/macOS best-effort
 - [Git policy for deploy bundles](#git-policy-for-deploy-bundles) (E5-S07)
-- [CLI — deploy](../reference/cli.md#zaumzeug-deploy) · [CLI — serve](../reference/cli.md#zaumzeug-serve)
+- [CLI — deploy](../reference/cli.md#zaumzeug-deploy) · [CLI — serve](../reference/cli.md#zaumzeug-serve) · [CLI — mcp](../reference/cli.md#zaumzeug-mcp) · [CLI — acp](../reference/cli.md#zaumzeug-acp)
+- [ACP (Zed / JetBrains)](acp.md) — `zaumzeug acp <name> --deploy` (same production root as serve)
 - [Testing — deploy gates](testing.md#deploy-eval-gate)
 - [Installation — production disk](../getting-started/installation.md#disk-space-planning-estimates)

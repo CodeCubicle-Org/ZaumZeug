@@ -138,6 +138,7 @@ Not required to start a harness with the mock profile.
 | **DeepEval** | `pip install "zaumzeug[eval]"` | Optional DeepEval for harness regression — **Done** (E6-S01, 2026-07-28): not in core install; missing import shows install hint. `zaumzeug eval` CLI **Done** (E6-S02, 2026-07-28). Deploy eval gate **Done** (E6-S03 / E5-S06, 2026-07-28): `deploy.eval_gate` / `zaumzeug deploy --eval-gate`. Harness `eval/` pytest scaffold **Done** (E6-S04, 2026-07-28): `zaumzeug init --with-eval` / `deepeval test run`. Trace → test case **Done** (E6-S05, 2026-07-28): `data/traces/` + `zaumzeug eval --trace`. Mode C HTTP black-box **Done** (E6-S06, 2026-07-28): `zaumzeug eval --base-url` (staging/debug). GEPA ↔ DeepEval bridge **Done** (E6-S07, 2026-07-28): `append_failed_eval_to_train`, shared val aliases, optional `modules/metrics.py`. See [Testing](../guides/testing.md) and [CLI — deploy](../reference/cli.md#zaumzeug-deploy). |
 | **Provider plugins** | e.g. `openai-haystack`, `anthropic-haystack` | Only for configured live providers |
 | **MCP serve** | included (`mcp`, `mcp-haystack`) | `zaumzeug mcp` serves `{host}:{mcp_port}/mcp` (default **1417**). `uv` is needed only for stdio `tools.mcp` servers (`zaumzeug doctor` warns if missing). Cursor live `mcp.json` write is opt-in (`--cursor-mcp`). See [Cursor MCP setup](../guides/cursor-mcp.md) and [CLI — mcp](../reference/cli.md#zaumzeug-mcp). |
+| **ACP adapter** | included | `zaumzeug acp` speaks Agent Client Protocol JSON-RPC on stdio for Zed / JetBrains. Not IBM ACP/A2A. Cursor uses MCP. See [ACP (Zed / JetBrains)](../guides/acp.md) and [CLI — acp](../reference/cli.md#zaumzeug-acp). |
 | **Chainlit UI** | `pip install "hayhooks[chainlit]"` | Optional embedded GUI at `/chat` on the same port as REST. Set `serve.hayhooks.chainlit: true` then `zaumzeug serve`. Missing extra fails serve with this install hint. **Not** the resolved primary web UI (Open WebUI / SPA / Next.js remain valid). See [Web deployment](../guides/web-deployment.md). |
 
 ---
@@ -206,5 +207,6 @@ Still stuck? Run `zaumzeug doctor` / `zaumzeug serve example --dry-run` and chec
 
 - Run the shipped example — [Your first harness](first-harness.md)
 - Add another harness — [Project setup](project-setup.md) (`zaumzeug init <name>`)
+- Connect Zed or JetBrains — [ACP (Zed / JetBrains)](../guides/acp.md)
 - Testing with the mock profile — [Testing](../guides/testing.md)
 - CLI reference — [cli.md](../reference/cli.md)

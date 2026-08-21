@@ -115,6 +115,8 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 
 **Implementation (E7-S04, 2026-08-21):** Bundle `README.deploy.md` and [deploy.md](../../user-docs/guides/deploy.md) list optional `GET /chat` when the shipped harness has `serve.hayhooks.chainlit: true` and the target has `pip install "hayhooks[chainlit]"`.
 
+**Implementation (E7-S05, 2026-08-21):** `zaumzeug acp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same production root as serve. Ops snippets: `README.deploy.md`, [acp.md](../../user-docs/guides/acp.md). MCP-from-deploy packaging remains [E7-S06](../stories/epic-stories/55-story.md).
+
 ### 10.6 Deploy platform targets
 
 Requirements: **[PRD E5.8](../prd.md#epic-e5--deploy-packaging-phase-2)**.

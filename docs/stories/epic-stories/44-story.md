@@ -86,5 +86,6 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 - Canonical API: `resolve_harness_path()` combines `--deploy` + `HARNESS_ROOT=deploy`; serve/doctor/run use it; mcp/acp stubs resolve the same root.
 - Serve banner uses `harness_root_segment()` (no literal `"usr-harnesses"`).
 - Docs: `install/templates/deploy/README.deploy.md`, `user-docs/reference/cli.md` (+ install template mirror).
+- Later: [E7-S05](54-story.md) replaced the `zaumzeug acp` stub with Agent Client Protocol stdio JSON-RPC (`serve/acp.py`, 2026-08-21). Root resolution is unchanged.
 
 ---
