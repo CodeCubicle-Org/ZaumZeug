@@ -177,7 +177,6 @@ def test_e5_s02_golden_example_bundle(tmp_path: Path) -> None:
     """AC-1–5 golden: example deploy contents match Architecture §10.1 matrix."""
     run_id = "20260728T120000Z"
     harness_dir = _seed_golden_example(tmp_path, run_id=run_id)
-    # Packager re-reads raw yaml; avoid load_harness because serve.expose is Phase 4.
     config = HarnessConfig(name="example", models="models.yaml")
     bundle = write_deploy_bundle(
         "example",

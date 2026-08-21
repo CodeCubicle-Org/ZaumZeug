@@ -5,8 +5,8 @@
 | **Document** | Epic E8 user stories |
 | **File** | `docs/stories/08-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-14 (E8-S07 AC-5 follow-up: `tools.custom` unblocked by E7-S02) |
-| **Status** | Backlog |
+| **Last modified** | 2026-08-21 (E8-S01 pipeline exposure) |
+| **Status** | Active (E8-S07 / E8-S01 Done) |
 | **Build order** | **8 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -26,7 +26,7 @@
 ### Story implementation order (within this epic)
 
 1. **E8-S07** — Workflow run reliability and stage transparency ✅ *(2026-08-01; P0 pull-forward)*
-2. **E8-S01** — Pipeline exposure / RAG
+2. **E8-S01** — Pipeline exposure / RAG ✅ *(2026-08-21)*
 3. **E8-S03** — Trace → dataset ratchet
 4. **E8-S02** — Production auth *(Traefik proxy-only — resolved)*
 5. **E8-S05** — Dockerfile template
@@ -45,6 +45,8 @@
 | **Feature** | E8.1 |
 | **Persona** | Harness developer |
 | **Priority** | P0 |
+| **Prerequisites** | [E5-S02](epic-stories/42-story.md#e5-s02-dev-vs-deploy-copy-rules) · [E3-S02](epic-stories/13-story.md#e3-s02-zaumzeug-serve-dev-mode) |
+| **Status** | Done (2026-08-21) |
 
 ### User story
 
@@ -59,16 +61,16 @@ As a **harness developer**, I want user pipelines exposed via config, so that I 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** User `pipelines/` exposed via `serve.expose` in yaml
-- [ ] **AC-2** RAG path documented with retriever → prompt → generator pattern
-- [ ] **AC-3** Pipelines listed in `serve.expose` copied to deploy bundle *(packager row **Done** early with [E5-S02](epic-stories/42-story.md), 2026-07-28; Phase 4 serve remains this story)*
-- [ ] **AC-4** `POST /{pipeline}/run` available per Architecture §9.1
+- [x] **AC-1** User `pipelines/` exposed via `serve.expose` in yaml
+- [x] **AC-2** RAG path documented with retriever → prompt → generator pattern
+- [x] **AC-3** Pipelines listed in `serve.expose` copied to deploy bundle *(packager row **Done** early with [E5-S02](epic-stories/42-story.md), 2026-07-28; serve registration **Done** this story)*
+- [x] **AC-4** `POST /{pipeline}/run` available per Architecture §9.1
 
 ### Implementation tasks (build)
 
-- [ ] Extend serve runner to register exposed pipelines
-- [ ] Add Phase 4 config schema for `serve.expose`
-- [ ] Example RAG harness in user-docs (optional)
+- [x] Extend serve runner to register exposed pipelines
+- [x] Add Phase 4 config schema for `serve.expose`
+- [x] Example RAG harness in user-docs (optional)
 
 ### Verification (after build)
 
@@ -77,17 +79,26 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC | Test |
 |---|---|
 | AC-1 | `tests/integration/pipelines/test_serve_expose.py::test_e8_s01_ac1_pipelines_registered_from_yaml` |
-| AC-2 | **manual:** user-docs RAG pattern documented |
+| AC-2 | **manual:** user-docs RAG pattern documented — [pipelines.md](../../user-docs/guides/pipelines.md); content test `test_e8_s01_ac2_rag_pattern_documented` |
 | AC-3 | **shared early:** `tests/unit/deploy/test_copy_rules.py::test_e8_s01_ac3_exposed_pipelines_in_deploy` *(packager copy landed with [E5-S02](epic-stories/42-story.md), 2026-07-28)* |
 | AC-4 | `tests/integration/pipelines/test_serve_expose.py::test_e8_s01_ac4_post_pipeline_run_endpoint` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/pipelines/test_serve_expose.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/pipelines/test_serve_expose.py -v` passes
 
 ### Definition of done
 
-- [ ] `search_docs` builtin can attach when RAG pipeline present (§6.5 Phase 4)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] `search_docs` builtin can attach when RAG pipeline present (§6.5 Phase 4)
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-21)
+
+- `ServeExposeEntry` on `ServeConfig.expose` accepts string ids (`summarize` → `pipelines/summarize.yaml`) or `{id, path}` maps. Removed from `PHASE_GATED_FIELDS`; `CURRENT_SDK_PHASE` stays **1**.
+- `serve/runner.py` registers each YAML via Hayhooks `deploy_pipeline_yaml` as `POST /{id}/run`.
+- `search_docs` (`runtime/tools/search_docs.py`) is catalog phase **4**; factory loads the RAG-named (or first) `serve.expose` pipeline.
+- `zaumzeug run` pipeline stages invoke the same YAML (no longer a Phase 1 stub).
+- Guide: [pipelines.md](../../user-docs/guides/pipelines.md) (mirrored in `install/templates/user-docs/guides/`).
+- Tests: `tests/integration/pipelines/test_serve_expose.py`; shared AC-3 `test_e8_s01_ac3_exposed_pipelines_in_deploy`. Full suite 2026-08-21: **351 passed, 1 skipped**.
 
 ---
 

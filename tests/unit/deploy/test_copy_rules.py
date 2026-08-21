@@ -430,8 +430,7 @@ def test_e7_s02_ac4_custom_tools_in_deploy(tmp_path: Path) -> None:
 def test_e8_s01_ac3_exposed_pipelines_in_deploy(tmp_path: Path) -> None:
     """Shared E8-S01 AC-3: pipelines listed in serve.expose are copied.
 
-    ``serve.expose`` is Phase 4 in the schema; the packager reads raw yaml so
-    this row proves the copy matrix without requiring Phase 4 SDK mode.
+    Packager accepts string ids and ``{id, path}`` maps (schema unblocked E8-S01).
     """
     harness_dir = _seed_matrix_harness(
         tmp_path,

@@ -51,13 +51,13 @@ Requirements: [PRD E2.2](../prd.md#epic-e2--configuration-and-validation-phase-1
 | `agent` | `agents/<name>/agent.yaml` | 1+ | Per-role Haystack agent, tools, compile, hooks | E2, E3, E4, E7 |
 | `output` | `agent.yaml` | 1+ | Optional stage output check (`format: json`) for `zaumzeug run` ✅ (E8-S07) | E8 |
 | `agents-models` | `agents/<name>/agents-models.yaml` | 1+ | Per-agent LLM registry; stage-scoped `ModelRouter` | E2, E3 |
-| `tools.builtin` | `agent.yaml` | 1+ | SDK catalog (`web_fetch`; Phase 3 `calculator`, `read_file`) | E3, E7 |
+| `tools.builtin` | `agent.yaml` | 1+ | SDK catalog (`web_fetch`; Phase 3 `calculator`, `read_file`; Phase 4 `search_docs` ✅ E8-S01) | E3, E7, E8 |
 | `tools.mcp` | `agent.yaml` | 3 | `MCPToolset` ✅ (E7-S01) | E7 |
 | `tools.custom` | `agent.yaml` | 3 | `agents/<name>/tools/*.py` ✅ (E7-S02) | E7 |
 | `compile` | `agent.yaml` | 2 | DSPy + GEPA → agent `artifacts/` | E4 |
 | `eval` | `harness.yaml` | 2 | Optional eval (`builtin` or `deepeval`) | E6 |
 | `deploy` | `harness.yaml` | 2 | Eval gate on `zaumzeug deploy` ✅ (E6-S03 / E5-S06) | E5 |
-| `serve` | `harness.yaml` | 1+ | Hayhooks ports, Chainlit `/chat` ✅ (E7-S04), MCP, ACP stdio ✅ (E7-S05), A2A | E3, E7, E8 |
+| `serve` | `harness.yaml` | 1+ | Hayhooks ports, Chainlit `/chat` ✅ (E7-S04), MCP, ACP stdio ✅ (E7-S05), `serve.expose` pipelines ✅ (E8-S01), A2A | E3, E7, E8 |
 
 Full schema examples: Phase 1 canonical examples in [§6.6](05-configuration.md#66-phase-1-config-schema); full multi-phase reference in [ideation-stage.md](../ideation-stage.md) until `user-docs/reference/harness-yaml.md` exists.
 
@@ -163,13 +163,15 @@ SDK-provided tools referenced by `tools.builtin` in `harness.yaml`:
 | `web_fetch` | **1** | Fetch URL content (HTTP GET); returns text for agent context. **v1 limits:** HTTPS only; 30s timeout; 1 MB response cap; blocks private/link-local IPs (SSRF guard). CI may stub HTTP. |
 | `calculator` | **3** | Safe arithmetic expression evaluation (restricted AST; `+ - * / // % **` and parentheses). ✅ (E7-S07) |
 | `read_file` | **3** | Read text file under harness folder (path sandboxed to workspace). ✅ (E7-S07) |
-| `search_docs` | 4 | Search indexed documents when RAG pipeline attached |
+| `search_docs` | **4** | Search indexed documents when RAG pipeline attached (`serve.expose`) ✅ (E8-S01) |
 
-Phase 1 **minimum ship:** `web_fetch` only. Phase 3 ships `calculator` and `read_file`. `search_docs` remains Phase 4 (E8). Unknown builtin ID → config validation error with list of available IDs for the catalog phase (`BUILTIN_CATALOG_PHASE`).
+Phase 1 **minimum ship:** `web_fetch` only. Phase 3 ships `calculator` and `read_file`. Phase 4 ships `search_docs` when a RAG pipeline is listed in `serve.expose`. Unknown builtin ID → config validation error with list of available IDs for the catalog phase (`BUILTIN_CATALOG_PHASE`).
 
 **Implementation (E3-S03, 2026-07-08; E3-S00, 2026-07-20):** Builtin `web_fetch` in `src/zaumzeug/runtime/tools/web_fetch.py` — Haystack `@component` + `ComponentTool`, outbound fetch via **httpx** (HTTPS only, 30s timeout, 1 MB cap, SSRF guard on host resolution and redirect chain). Phase-aware catalog in `src/zaumzeug/runtime/tools/catalog.py` and `src/zaumzeug/config/builtins.py`. `AgentConfig` / `load_agent_config()` validate `tools.builtin` ids; workflow cross-checks agent yaml via `load_workflow()`. `build_agent()` in `src/zaumzeug/runtime/factory.py` builds a single Haystack `Agent` from resolved harness config (ModelRouter chat generator, `resolve_agent_serve()` prompt path, builtins). Tests: `tests/unit/runtime/tools/test_web_fetch.py`, `tests/integration/test_runtime_factory.py`, `tests/unit/runtime/test_factory_imports.py`, `tests/unit/config/test_schemas.py` (`test_e3_s03_ac5_*`). Stub outbound HTTP in CI with **respx** ([§4.5](03-technology-stack.md#45-test-dependencies)).
 
-**Implementation (E7-S07, 2026-08-21):** Phase 3 builtins `calculator` (`runtime/tools/calculator.py`, restricted AST) and `read_file` (`runtime/tools/read_file.py`, harness-folder sandbox via `resolve()` + `relative_to`). Catalog factories in `runtime/tools/catalog.py`. `BUILTIN_CATALOG_PHASE = 3` is the default for `tools.builtin` validation; `CURRENT_SDK_PHASE` stays **1**. `search_docs` stays Phase 4. Factory `build_agent_tools(..., workspace=harness_dir)` so `read_file` cannot leave the harness folder. Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`, `tests/unit/config/test_schemas.py::test_e7_s07_ac3_unknown_builtin_phase3_list`.
+**Implementation (E7-S07, 2026-08-21):** Phase 3 builtins `calculator` (`runtime/tools/calculator.py`, restricted AST) and `read_file` (`runtime/tools/read_file.py`, harness-folder sandbox via `resolve()` + `relative_to`). Catalog factories in `runtime/tools/catalog.py`. `CURRENT_SDK_PHASE` stays **1**. Factory `build_agent_tools(..., workspace=harness_dir)` so `read_file` cannot leave the harness folder. Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`, `tests/unit/config/test_schemas.py::test_e7_s07_ac3_unknown_builtin_phase3_list`.
+
+**Implementation (E8-S01, 2026-08-21):** `search_docs` (`runtime/tools/search_docs.py`) — Haystack `@component` + `ComponentTool` bound to the RAG pipeline in `serve.expose`. `BUILTIN_CATALOG_PHASE = 4`. Missing `serve.expose` fails at agent build. Tests: `tests/integration/pipelines/test_serve_expose.py`.
 
 Custom tools use `tools.custom` (user Python), not this catalog — [PRD E7.2](../prd.md#epic-e7--tools-mcp-and-acp-phase-3) ✅ (E7-S02, 2026-08-14). Loader: `src/zaumzeug/runtime/tools/custom.py`. Guide: [custom-tools.md](../user-docs/guides/custom-tools.md).
 
@@ -251,7 +253,9 @@ compile:
 
 **Implementation (E7-S06, 2026-08-21):** No new schema. `zaumzeug mcp --deploy` / `HARNESS_ROOT=deploy` reuse `validate_serve` + existing `serve.hayhooks.mcp_port`. Tests: `tests/integration/mcp/test_mcp_deploy.py`.
 
-**Implementation (E7-S07, 2026-08-21):** `tools.builtin` Phase 3 catalog — `calculator` and `read_file`; `search_docs` stays Phase 4. `BUILTIN_CATALOG_PHASE = 3`; `CURRENT_SDK_PHASE` stays **1**. Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`, `tests/unit/config/test_schemas.py::test_e7_s07_ac3_unknown_builtin_phase3_list`.
+**Implementation (E7-S07, 2026-08-21):** `tools.builtin` Phase 3 catalog — `calculator` and `read_file`. `CURRENT_SDK_PHASE` stays **1**. Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`, `tests/unit/config/test_schemas.py::test_e7_s07_ac3_unknown_builtin_phase3_list`.
+
+**Implementation (E8-S01, 2026-08-21):** `ServeExposeEntry` on `ServeConfig.expose` (string ids or `{id, path}`); removed from `PHASE_GATED_FIELDS`. Serve registers YAML as `POST /{id}/run`; `search_docs` catalog phase **4**. Docs: [pipelines.md](../../user-docs/guides/pipelines.md). Tests: `tests/integration/pipelines/test_serve_expose.py`. `CURRENT_SDK_PHASE` stays **1**.
 
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract — `AgentPipelineWrapper.run_chat_completion` reads optional request `model_id` and swaps the agent `chat_generator` via stage-scoped `ModelRouter`. Ephemeral-port fixture `tests/integration/conftest.py::ephemeral_serve_url`; tests `tests/integration/test_openai_contract.py` (`-k e3_s07`); `web_fetch` stubbed with `respx` for offline CI. Cross-OS green closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
 

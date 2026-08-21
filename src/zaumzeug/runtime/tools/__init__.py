@@ -32,6 +32,7 @@ from zaumzeug.runtime.tools.read_file import (
     read_text_file,
     resolve_workspace_file,
 )
+from zaumzeug.runtime.tools.search_docs import SearchDocs, SearchDocsError
 from zaumzeug.runtime.tools.web_fetch import (
     FETCH_TIMEOUT_S,
     MAX_RESPONSE_BYTES,
@@ -54,6 +55,8 @@ __all__ = [
     "McpBoundaryError",
     "ReadFile",
     "ReadFileError",
+    "SearchDocs",
+    "SearchDocsError",
     "WebFetch",
     "WebFetchError",
     "available_builtin_tool_ids",

@@ -22,7 +22,7 @@ PHASE_GATED_FIELDS: dict[tuple[str, ...], int] = {
     # ``deploy`` unblocked by E6-S03 / E5-S06 (``deploy.eval_gate``); still Phase 2 in the PRD.
     ("parallelism",): 2,
     ("serve", "a2a"): 4,
-    ("serve", "expose"): 4,
+    # ``serve.expose`` unblocked by E8-S01 (pipeline YAML → POST /{id}/run).
 }
 
 
@@ -92,6 +92,47 @@ class AcpConfig(BaseModel):
     enabled: bool = True
 
 
+class ServeExposeEntry(BaseModel):
+    """One ``serve.expose`` row — a Haystack YAML pipeline under ``pipelines/``.
+
+    String shorthand ``expose: [summarize]`` is coerced to ``id: summarize``
+    (file ``pipelines/summarize.yaml``). Object form matches the E8-S01 sketch:
+
+    ```yaml
+    serve:
+      expose:
+        - id: rag_pipeline
+          path: pipelines/rag.yaml
+    ```
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    path: str | None = None
+
+    @field_validator("id")
+    @classmethod
+    def _id_non_empty(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("`id` must be a non-empty pipeline id")
+        return value.strip()
+
+    @field_validator("path")
+    @classmethod
+    def _path_strip(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        stripped = value.strip().replace("\\", "/")
+        return stripped or None
+
+    def relative_path(self) -> str:
+        """Harness-relative YAML path (``pipelines/<id>.yaml`` when omitted)."""
+        if self.path:
+            return self.path.lstrip("./")
+        return f"pipelines/{self.id}.yaml"
+
+
 class ServeConfig(BaseModel):
     """Serve section of ``harness.yaml`` (Phase 1+)."""
 
@@ -99,6 +140,7 @@ class ServeConfig(BaseModel):
 
     hayhooks: HayhooksConfig | None = None
     acp: AcpConfig | None = None
+    expose: list[ServeExposeEntry] = Field(default_factory=list)
 
     @model_validator(mode="before")
     @classmethod
@@ -108,6 +150,21 @@ class ServeConfig(BaseModel):
             path_prefix=("serve",),
             model_name=cls.__name__,
         )
+
+    @field_validator("expose", mode="before")
+    @classmethod
+    def _coerce_expose(cls, value: Any) -> Any:
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise ValueError("`serve.expose` must be a list of pipeline ids or `{id, path}` maps")
+        coerced: list[Any] = []
+        for item in value:
+            if isinstance(item, str):
+                coerced.append({"id": item})
+            else:
+                coerced.append(item)
+        return coerced
 
 
 class WorkflowStage(BaseModel):

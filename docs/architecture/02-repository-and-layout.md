@@ -76,7 +76,7 @@ usr-harnesses/<harness-name>/
 │       ├── agent.yaml
 │       ├── agents-models.yaml
 │       └── ...
-├── pipelines/                # Haystack YAML — deterministic steps, orchestration (Phase 4+)
+├── pipelines/                # Haystack YAML — deterministic steps, orchestration (✅ E8-S01 via serve.expose)
 ├── data/                     # shared queue, context, train/val JSONL (dev); traces/ from E6-S05
 ├── docs/                     # generated harness docs (workflow-diagram.md at compile)
 └── eval/                     # harness-level optional DeepEval pytest (dev only; E6-S04 scaffold)
@@ -185,7 +185,8 @@ user-docs/
 │   ├── multi-agent-workflow.md   # workflow.yaml, agents vs pipelines, control flow
 │   ├── compile.md                # GEPA compile / export / rollback
 │   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05); git policy (E5-S07); platforms (E5-S08); target install + --verify (E5-S09a/b/c); mcp --deploy (E7-S06)
-│   ├── custom-tools.md           # tools.custom → ComponentTool / Tool (E7-S02); builtin catalog calculator/read_file (E7-S07)
+│   ├── custom-tools.md           # tools.custom → ComponentTool / Tool (E7-S02); builtin catalog calculator/read_file (E7-S07); search_docs (E8-S01)
+│   ├── pipelines.md              # serve.expose → POST /{id}/run; RAG retriever → prompt → generator (E8-S01)
 │   ├── cursor-mcp.md             # Cursor mcp.json → localhost:{mcp_port}/mcp (E7-S03); --deploy (E7-S06)
 │   ├── web-deployment.md         # Chainlit /chat (E7-S04); Open WebUI / SPA / Next.js + baseURL (E7-S08)
 │   ├── acp.md                    # zaumzeug acp stdio JSON-RPC for Zed / JetBrains (E7-S05); MCP --deploy pointer (E7-S06)
@@ -193,7 +194,7 @@ user-docs/
 └── reference/cli.md
 ```
 
-Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [project-setup.md](../../user-docs/getting-started/project-setup.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [compile.md](../../user-docs/guides/compile.md), [deploy.md](../../user-docs/guides/deploy.md), [custom-tools.md](../../user-docs/guides/custom-tools.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md), [web-deployment.md](../../user-docs/guides/web-deployment.md), [acp.md](../../user-docs/guides/acp.md), [testing.md](../../user-docs/guides/testing.md).
+Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [project-setup.md](../../user-docs/getting-started/project-setup.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [compile.md](../../user-docs/guides/compile.md), [deploy.md](../../user-docs/guides/deploy.md), [custom-tools.md](../../user-docs/guides/custom-tools.md), [pipelines.md](../../user-docs/guides/pipelines.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md), [web-deployment.md](../../user-docs/guides/web-deployment.md), [acp.md](../../user-docs/guides/acp.md), [testing.md](../../user-docs/guides/testing.md).
 
 **Implementation (E1-S03, 2026-07-22):** Install copies `install/templates/user-docs/` into project `user-docs/` (copy-if-missing). Content completeness (installation prerequisites / troubleshooting) → [E1-S05](../stories/epic-stories/22-story.md).
 
@@ -211,7 +212,9 @@ Install copies this tree from `install/templates/user-docs/` ([§3.4](02-reposit
 
 **Implementation (E7-S05, 2026-08-21):** [user-docs/guides/acp.md](../../user-docs/guides/acp.md) — `zaumzeug acp` Agent Client Protocol stdio JSON-RPC; Zed `agent_servers` and JetBrains `~/.jetbrains/acp.json` snippets; ACP ≠ IBM A2A; Cursor uses MCP. Tests: `tests/integration/acp/test_acp_stdio.py`.
 
-**Implementation (E7-S07, 2026-08-21):** Phase 3 builtin catalog — `calculator` and `read_file` (`runtime/tools/`); `search_docs` stays Phase 4. User guide: [custom-tools.md](../../user-docs/guides/custom-tools.md#builtin-catalog). Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`.
+**Implementation (E7-S07, 2026-08-21):** Phase 3 builtin catalog — `calculator` and `read_file` (`runtime/tools/`); `search_docs` shipped in [E8-S01](../stories/epic-stories/58-story.md). User guide: [custom-tools.md](../../user-docs/guides/custom-tools.md#builtin-catalog). Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`.
+
+**Implementation (E8-S01, 2026-08-21):** [user-docs/guides/pipelines.md](../../user-docs/guides/pipelines.md) — `serve.expose` registers `pipelines/` YAML as `POST /{id}/run`; RAG retriever → prompt → generator; `search_docs` attaches when a RAG pipeline is listed. Tests: `tests/integration/pipelines/test_serve_expose.py`.
 
 **Implementation (E1-S06, 2026-07-22):** Short new-contributor onboarding guide at root [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (product `README.md` unchanged) — vision, install table, `< 15 min` / `~1–2.5 GB` planning ranges, mock-first serve, optional extras, updating dependencies, abbreviated layout; links to [installation.md](../../user-docs/getting-started/installation.md) for depth. Tests: `tests/unit/docs/test_contributing_guide.py`.
 

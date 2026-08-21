@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Ops / platform · Harness developers |
-| **Last updated** | 2026-08-21 (E7-S08 web layouts) |
+| **Last updated** | 2026-08-21 (E8-S01 `serve.expose` pipeline copy) |
 
 Ship a production harness to a clean server **without** DSPy, GEPA, or DeepEval on the target. Compile and eval stay on the developer machine (or CI); the target only runs Haystack via `zaumzeug`.
 
@@ -31,6 +31,8 @@ target:  copy folder  →  target_install  →  create .env  →  zaumzeug serve
 | 5. Serve / MCP | Target | `zaumzeug serve <name> --deploy` or `zaumzeug mcp <name> --deploy` (or `HARNESS_ROOT=deploy`) |
 
 Python files listed in an agent's `tools.custom` are copied into the bundle (`tools/search_docs.py`, dotted `tools.search_docs`, or `tools.search_docs:attr` all resolve to `tools/search_docs.py`). Extra `.py` files under `tools/` stay in the dev tree. See [Custom tools](custom-tools.md).
+
+Haystack YAML listed in **`serve.expose`** is copied into `deploy/<name>/pipelines/` (string ids or `{id, path}` maps). Unlisted files under `pipelines/` stay in the dev tree. Serve those ids as **`POST /{id}/run`** — see [Pipelines and RAG](pipelines.md).
 
 ---
 

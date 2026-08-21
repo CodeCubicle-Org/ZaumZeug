@@ -199,6 +199,14 @@ def _exposed_pipeline_ids(harness_raw: Mapping[str, Any]) -> list[str]:
     for item in expose:
         if isinstance(item, str) and item.strip():
             ids.append(item.strip())
+            continue
+        if isinstance(item, Mapping):
+            path = item.get("path")
+            pipeline_id = item.get("id")
+            if isinstance(path, str) and path.strip():
+                ids.append(path.strip())
+            elif isinstance(pipeline_id, str) and pipeline_id.strip():
+                ids.append(pipeline_id.strip())
     return list(dict.fromkeys(ids))
 
 

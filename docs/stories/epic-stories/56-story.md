@@ -80,7 +80,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 - `calculator` (`runtime/tools/calculator.py`) evaluates arithmetic with a restricted AST (`+ - * / // % **` and parentheses; no names or calls). Haystack `@component` + `ComponentTool`.
 - `read_file` (`runtime/tools/read_file.py`) reads UTF-8 text under the harness folder. Paths `resolve()` then `relative_to(workspace)`; traversal and absolute paths outside the workspace are blocked. Factory passes `workspace=harness_dir`.
-- Catalog factories in `runtime/tools/catalog.py`. `BUILTIN_CATALOG_PHASE = 3` (`config/constants.py`) is the default for `tools.builtin` validation so Phase 3 ids ship without bumping `CURRENT_SDK_PHASE` (stays **1**). `search_docs` stays Phase 4.
+- Catalog factories in `runtime/tools/catalog.py`. `BUILTIN_CATALOG_PHASE` was **3** at E7-S07 ship so Phase 3 ids landed without bumping `CURRENT_SDK_PHASE` (stays **1**). Follow-up: [E8-S01](58-story.md) shipped `search_docs` and raised the catalog phase to **4**.
 - Unknown builtin ids fail with `available for Phase 3: ['calculator', 'read_file', 'web_fetch']`.
 - Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`, `tests/unit/config/test_schemas.py::test_e7_s07_ac3_unknown_builtin_phase3_list`.
 

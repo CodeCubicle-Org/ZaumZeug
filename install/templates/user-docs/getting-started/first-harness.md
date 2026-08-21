@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | **Audience** | New developers |
-| **Last updated** | 2026-08-21 (E7-S08 web layouts) |
+| **Last updated** | 2026-08-21 (E8-S01 pipelines / RAG pointer) |
 
 This walkthrough uses the shipped **`example`** harness — a general research agent with one workflow stage and the mock model profile. You can chat locally without API keys. Phase 2 also ships a compile seed (`compile.module` + train/val data) so `zaumzeug compile example` works offline via stub GEPA.
 
-For how `workflow.yaml`, agent stages, and pipelines fit together, see [Multi-agent workflow](../guides/multi-agent-workflow.md).
+For how `workflow.yaml`, agent stages, and pipelines fit together, see [Multi-agent workflow](../guides/multi-agent-workflow.md). To expose Haystack YAML as `POST /{id}/run` (and attach `search_docs`), see [Pipelines and RAG](../guides/pipelines.md). The shipped `example` harness uses **agent stages only**.
 
 ---
 

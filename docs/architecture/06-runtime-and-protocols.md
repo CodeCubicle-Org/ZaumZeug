@@ -31,17 +31,19 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 **Implementation (E2-S06, 2026-07-08):** `src/zaumzeug/logging.py` — `configure_logging()` wired from `zaumzeug serve` and `zaumzeug compile` when `--verbose` or `HARNESS_LOG_LEVEL=DEBUG`. Structured request context via `log_request()`; API keys redacted in log output.
 
-**Implementation (E3-S02, 2026-07-20):** `src/zaumzeug/serve/runner.py` — `validate_serve()` → `build_agent()` → Hayhooks `create_app` / `run_app` on `127.0.0.1` and `serve.hayhooks.port`. OpenAI routes via Hayhooks registry (`/v1/chat/completions`, `GET /v1/models`). Production `--deploy` path closed by [E5-S03](../stories/epic-stories/43-story.md) (2026-07-28). Optional `/chat` (E7-S04) uses the same runner when `serve.hayhooks.chainlit: true`.
+**Implementation (E3-S02, 2026-07-20):** `src/zaumzeug/serve/runner.py` — `validate_serve()` → `build_agent()` → Hayhooks `create_app` / `run_app` on `127.0.0.1` and `serve.hayhooks.port`. OpenAI routes via Hayhooks registry (`/v1/chat/completions`, `GET /v1/models`). Production `--deploy` path closed by [E5-S03](../stories/epic-stories/43-story.md) (2026-07-28). Optional `/chat` (E7-S04) uses the same runner when `serve.hayhooks.chainlit: true`. **`serve.expose`** YAML pipelines (E8-S01, 2026-08-21) register as `POST /{id}/run`.
 
 **Implementation (E7-S01, 2026-08-14):** `src/zaumzeug/serve/mcp.py` — `zaumzeug mcp <name>` validates like serve, builds the entry agent, registers it with `skip_mcp=False`, and starts Hayhooks MCP (`create_mcp_server` / `create_starlette_app`) on `127.0.0.1`:`serve.hayhooks.mcp_port` (default 1417). Endpoints: `POST /mcp`, `GET /status`. Malformed `POST /mcp` returns JSON-RPC 2.0 `{jsonrpc, error: {code, message, data}}` with `data.ok: false`. `zaumzeug serve` keeps `skip_mcp=True`. `tools.mcp` → Haystack `MCPToolset` in `runtime/tools/mcp.py`. Tests: `tests/integration/mcp/` (`-k e7_s01`). Production `--deploy` / `HARNESS_ROOT=deploy` closed by [E7-S06](../stories/epic-stories/55-story.md) (2026-08-21).
 
 **Implementation (E7-S02, 2026-08-14):** `src/zaumzeug/runtime/tools/custom.py` — `load_custom_tools()` imports `tools.custom` from `agents/<name>/` (path, dotted module, or `module:attr`; no traversal; stale `sys.modules` dropped). Registers Haystack `Tool` / `ComponentTool` / `@component` / typed functions. Factory `build_agent_tools(..., agent_dir=)` appends custom tools after builtins and MCP; import errors raise `RuntimeFactoryError` with the module path. Tests: `tests/unit/runtime/tools/test_custom_loader.py`.
 
-**Implementation (E7-S07, 2026-08-21):** `src/zaumzeug/runtime/tools/calculator.py` and `read_file.py` — Haystack `@component` + `ComponentTool`. Factory `build_agent_tools(..., workspace=)` sandboxes `read_file` to the harness folder. Catalog phase is `BUILTIN_CATALOG_PHASE = 3` (`CURRENT_SDK_PHASE` stays **1**). Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`.
+**Implementation (E7-S07, 2026-08-21):** `src/zaumzeug/runtime/tools/calculator.py` and `read_file.py` — Haystack `@component` + `ComponentTool`. Factory `build_agent_tools(..., workspace=)` sandboxes `read_file` to the harness folder. Catalog phase is `BUILTIN_CATALOG_PHASE` (`CURRENT_SDK_PHASE` stays **1**). Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`.
+
+**Implementation (E8-S01, 2026-08-21):** `serve.expose` unblocked from `PHASE_GATED_FIELDS`. Serve registers listed `pipelines/*.yaml` via Hayhooks `deploy_pipeline_yaml` as `POST /{id}/run`. `search_docs` builtin (catalog phase **4**) attaches to a RAG-named expose row. Workflow `pipeline:` stages invoke the same YAML. Docs: [pipelines.md](../../user-docs/guides/pipelines.md). Tests: `tests/integration/pipelines/test_serve_expose.py`.
 
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract tests on ephemeral localhost port; optional request `model_id` overrides the entry agent's ModelRouter registry (`AgentPipelineWrapper`). Tests: `tests/integration/test_openai_contract.py` (`-k e3_s07`).
 
-**Implementation (E3-S08, 2026-07-21):** `src/zaumzeug/runtime/workflow.py` — `run_workflow()` executes `workflow.yaml` stages serially; per-stage `ModelRouter` + `build_agent()`; prior stage output prepended as a user message; `--from <stage>` partial runs; pipeline stages raise a Phase-1 stub error (full invoke Phase 4). CLI: `zaumzeug run <harness> [--from STAGE] [--input TEXT]`. Tests: `tests/integration/test_workflow_run.py` (`-k e3_s08`).
+**Implementation (E3-S08, 2026-07-21):** `src/zaumzeug/runtime/workflow.py` — `run_workflow()` executes `workflow.yaml` stages serially; per-stage `ModelRouter` + `build_agent()`; prior stage output prepended as a user message; `--from <stage>` partial runs; pipeline stages invoke YAML listed in `serve.expose` (**Done** E8-S01). CLI: `zaumzeug run <harness> [--from STAGE] [--input TEXT]`. Tests: `tests/integration/test_workflow_run.py` (`-k e3_s08`).
 
 **Implementation (E8-S07, 2026-08-01):** Run-path reliability on the same `run_workflow()` — typed live-generation `WorkflowError` (harness/agent/stage); optional `runtime.retry` (build once, retry `Agent.run` + JSON check); INFO stage lifecycle via `log_request(..., stage=...)`; optional agent `output.format: json` (fence strip). **Serve/HTTP does not share this layer yet.** Docs: [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md#run-reliability-zaumzeug-run). Tests: `tests/unit/runtime/test_workflow_reliability.py`, `tests/integration/test_workflow_reliability.py` (`-k e8_s07`).
 
@@ -62,7 +64,7 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 | `zaumzeug serve <harness> --dry-run` | Validate `harness.yaml`, `workflow.yaml`, and resolved paths; print summary — no Hayhooks bind, no LLM ([E2-S05](../stories/epic-stories/06-story.md), [E2-S07](../stories/epic-stories/08-story.md)); combine with `--deploy` for production bundles |
 | `zaumzeug serve <harness> --verbose` | Enable SDK + Haystack debug logging ([E2-S06](../stories/epic-stories/07-story.md)); equivalent to `HARNESS_LOG_LEVEL=DEBUG` |
 | `zaumzeug compile <harness> --verbose` | Same structured logging for compile path ([E2-S06](../stories/epic-stories/07-story.md)) |
-| `zaumzeug run <harness>` | **Serial workflow:** executes `workflow.yaml` stages in order; stage-scoped `ModelRouter` per agent ([PRD E3.6](../prd.md#epic-e3--runtime-and-local-serve-phase-1)); optional retry / JSON / stage logs ([PRD E8.7](../prd.md#epic-e8--rag-and-production-hardening-phase-4) / E8-S07) |
+| `zaumzeug run <harness>` | **Serial workflow:** executes `workflow.yaml` stages in order; stage-scoped `ModelRouter` per agent ([PRD E3.6](../prd.md#epic-e3--runtime-and-local-serve-phase-1)); **`pipeline:`** stages invoke YAML in `serve.expose` ([PRD E8.1](../prd.md#epic-e8--rag-and-production-hardening-phase-4) / E8-S01); optional retry / JSON / stage logs ([PRD E8.7](../prd.md#epic-e8--rag-and-production-hardening-phase-4) / E8-S07) |
 | `zaumzeug run <harness> --from <stage>` | Partial run from a workflow stage (debug) |
 | `HARNESS_LOG_LEVEL=INFO zaumzeug run …` | Reconstruct stage start/success/retry/failure (default WARNING hides INFO stage logs; `--verbose` also works) |
 
@@ -132,7 +134,7 @@ Use when harness **is** the primary agent in Zed/JetBrains/Neovim. Harness may s
 | **Custom SPA + proxy** | Nginx serves static UI; `/api/v1/*` → `127.0.0.1:1416` |
 | **Next.js co-located** | App on `:3000` calls `localhost:1416` |
 
-Also exposed: `GET /v1/models`, `POST /{pipeline}/run`, optional `/docs` (Swagger) for manual probes.
+Also exposed: `GET /v1/models`, `POST /{pipeline}/run` (entry agent plus each `serve.expose` id — **Done** E8-S01), optional `/docs` (Swagger) for manual probes.
 
 Clients use OpenAI-shaped requests against your `baseURL` (e.g. `http://127.0.0.1:1416/v1`) — not the OpenAI API. Any HTTP client or OpenAI SDK with custom `baseURL` works.
 

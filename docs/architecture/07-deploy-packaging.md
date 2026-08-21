@@ -20,7 +20,7 @@ Requirements: **[PRD E5](../prd.md#epic-e5--deploy-packaging-phase-2)**.
 | `agents/<agent-name>/artifacts/` | Working / `current` | **Pinned copy** per agent |
 | `agents/<agent-name>/agents-models.yaml` | Dev | **Included** — merged at packager |
 | `data/`, `eval/` | Present | **Excluded** |
-| `pipelines/` | Haystack YAML | **Included** — ids in `serve.expose` only (Phase 4+) |
+| `pipelines/` | Haystack YAML | **Included** — ids in `serve.expose` only ✅ (E8-S01) |
 
 **Runtime-reference rules (packager v1):**
 
@@ -54,6 +54,8 @@ Idempotent — overwrites `deploy/<name>/`. Future: `zaumzeug export` tarball of
 **Implementation (E5-S02, 2026-07-28):** `resolve_deploy_copy_plan` / `assert_required_paths` encode the §10.1 include matrix; packager validates before writing `deploy/<name>/`. Tests: `tests/unit/deploy/test_copy_rules.py` (`e5_s02`), golden `tests/integration/deploy/test_deploy_golden.py`.
 
 **Implementation (E7-S02, 2026-08-14):** `custom_tool_source_rel` in `deploy/copy_rules.py` maps dotted `tools.search_docs` and `tools.search_docs:attr` entries to `tools/search_docs.py`, so deploy still copies **listed** custom-tool files only. Tests: `tests/unit/deploy/test_copy_rules.py::test_e7_s02_ac4_custom_tools_in_deploy`.
+
+**Implementation (E8-S01, 2026-08-21):** Packager copy of `serve.expose` pipelines (string ids or `{id, path}`) remains the E5-S02 path; serve now **registers** those YAML files as Hayhooks `POST /{id}/run`. Tests: `tests/unit/deploy/test_copy_rules.py::test_e8_s01_ac3_exposed_pipelines_in_deploy`, `tests/integration/pipelines/test_serve_expose.py`.
 
 **Implementation (E5-S01, 2026-07-28):** Steps 1 and 3–6 are live: doctor preflight → `write_deploy_bundle` (stripped yaml, pin/copy, merged harness `models.yaml`, `manifest.json`, `README.deploy.md` from `install/templates/deploy/`, target install scripts from `install/`). Tests: `tests/integration/deploy/test_deploy.py` (`e5_s01`). Target install **Done** ([E5-S09a](../stories/epic-stories/49.1-story.md)–[E5-S09c](../stories/epic-stories/49.3-story.md), 2026-07-29) — core, wrappers, `--verify`.
 

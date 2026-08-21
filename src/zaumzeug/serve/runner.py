@@ -13,7 +13,7 @@ from haystack.components.agents import Agent
 from haystack.dataclasses import ChatMessage
 from hayhooks import BasePipelineWrapper, create_app, run_app
 from hayhooks.server.pipelines.registry import registry
-from hayhooks.server.utils.deploy_utils import add_pipeline_api_route
+from hayhooks.server.utils.deploy_utils import add_pipeline_api_route, deploy_pipeline_yaml, rebuild_openapi
 from hayhooks.settings import settings as hayhooks_settings
 
 from zaumzeug.config.harness_root import harness_root_segment, is_deploy_mode
@@ -21,6 +21,11 @@ from zaumzeug.config.schemas import HarnessConfig
 from zaumzeug.doctor.project import find_project_root
 from zaumzeug.runtime.factory import build_agent_bundle
 from zaumzeug.runtime.model_router import ModelRouter
+from zaumzeug.runtime.pipelines import (
+    PipelineExposeError,
+    expose_entries_from_harness,
+    resolve_pipeline_file,
+)
 from zaumzeug.runtime.preprocess import preprocess_openai_messages, preprocess_user_text
 from zaumzeug.serve.chainlit import ChainlitMissingError, require_chainlit
 from zaumzeug.serve.dry_run import format_dry_run
@@ -121,6 +126,7 @@ class ServePrepared:
     router: ModelRouter
     validation: ServeValidationResult
     chainlit: bool = False
+    exposed_pipeline_ids: tuple[str, ...] = ()
 
 
 def _assistant_text(result: dict[str, Any]) -> str:
@@ -195,6 +201,50 @@ def _register_agent_pipeline(
     return wrapper
 
 
+def _register_exposed_pipelines(
+    app: FastAPI,
+    *,
+    harness_dir: Path,
+    harness_name: str,
+    harness_config: HarnessConfig | None,
+    pipelines_dir: Path,
+) -> tuple[str, ...]:
+    """Register ``serve.expose`` YAML pipelines as ``POST /{id}/run`` routes."""
+    entries = expose_entries_from_harness(harness_config)
+    if not entries:
+        return ()
+
+    registered: list[str] = []
+    for index, entry in enumerate(entries):
+        if entry.id == harness_name:
+            raise PipelineExposeError(
+                f"serve.expose id {entry.id!r} collides with the harness name "
+                "(already used for the entry agent OpenAI /run route). "
+                "Rename the pipeline id."
+            )
+        yaml_path = resolve_pipeline_file(harness_dir, entry)
+        source = yaml_path.read_text(encoding="utf-8")
+        last = index == len(entries) - 1
+        deploy_pipeline_yaml(
+            entry.id,
+            source,
+            app=app,
+            overwrite=True,
+            options={
+                "save_file": True,
+                "description": f"ZaumZeug exposed pipeline ({entry.id})",
+                "skip_mcp": True,
+            },
+            _defer_openapi_rebuild=not last,
+        )
+        registered.append(entry.id)
+    if registered:
+        # Hayhooks persists YAML under settings.pipelines_dir (temp dir we set).
+        del pipelines_dir
+        rebuild_openapi(app)
+    return tuple(registered)
+
+
 def prepare_serve(
     harness_name: str,
     *,
@@ -253,6 +303,20 @@ def prepare_serve(
         router=router,
         input_rewrite_template=built.input_rewrite_template,
     )
+    try:
+        exposed_ids = _register_exposed_pipelines(
+            app,
+            harness_dir=validation.harness_dir,
+            harness_name=validation.harness_name,
+            harness_config=validation.harness_config,
+            pipelines_dir=pipelines_dir,
+        )
+    except PipelineExposeError:
+        raise
+    except Exception as exc:
+        raise PipelineExposeError(
+            f"Failed to register serve.expose pipelines: {exc}"
+        ) from exc
 
     return ServePrepared(
         harness_name=validation.harness_name,
@@ -265,6 +329,7 @@ def prepare_serve(
         router=router,
         validation=validation,
         chainlit=chainlit,
+        exposed_pipeline_ids=exposed_ids,
     )
 
 
@@ -299,6 +364,9 @@ def run_serve(
     except ChainlitMissingError as exc:
         print(str(exc), file=sys.stderr)
         return 1
+    except PipelineExposeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
     base = f"http://{prepared.host}:{prepared.port}"
     root_label = harness_root_segment(deploy=is_deploy_mode(deploy_flag=deploy))
@@ -308,6 +376,8 @@ def run_serve(
     )
     print(f"  POST {base}/v1/chat/completions")
     print(f"  GET  {base}/v1/models")
+    for pipeline_id in prepared.exposed_pipeline_ids:
+        print(f"  POST {base}/{pipeline_id}/run")
     if prepared.chainlit:
         print(f"  GET  {base}/chat  (Chainlit UI)")
     run_app(prepared.app, host=prepared.host, port=prepared.port)

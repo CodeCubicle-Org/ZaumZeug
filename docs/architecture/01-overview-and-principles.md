@@ -103,7 +103,7 @@ Each workflow stage runs **one Haystack `Agent` loop** for that step. The harnes
 | Harness component | Owner | Implementation |
 |---|---|---|
 | Agent loop | Haystack | `haystack.components.agents.Agent` |
-| Context / RAG | Haystack | Retriever → prompt builder → generator pipelines |
+| Context / RAG | Haystack | Retriever → prompt builder → generator pipelines ✅ (E8-S01; [pipelines.md](../../user-docs/guides/pipelines.md)) |
 | Tool interfaces | Haystack | `ComponentTool`, `MCPToolset`, Hayhooks MCP server |
 | **Guides** (feedforward) | DSPy → GEPA → Haystack | Optimized instructions/demos exported to `system_prompt`, Jinja templates, tool descriptions; **optional** `prompts/input_rewrite.md` for compile-time-optimized user-input preprocessing (**export** E4-S03a ✅ · **runtime preprocess** E4-S03b ✅) |
 | **Sensors** (feedback) | GEPA metric (+ optional DeepEval in `modules/metrics.py`) ✅ (E6-S07) | Score + **textual feedback** for compile |

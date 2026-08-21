@@ -31,6 +31,14 @@ from zaumzeug.logging import get_logger, log_request
 from zaumzeug.runtime.factory import RuntimeFactoryError, build_agent_bundle
 from zaumzeug.runtime.model_router import ModelRouter, ModelRouterError
 from zaumzeug.runtime.preprocess import preprocess_openai_messages
+from zaumzeug.runtime.pipelines import (
+    PipelineExposeError,
+    expose_entries_from_harness,
+    format_pipeline_output,
+    load_pipeline_yaml,
+    resolve_pipeline_file,
+    run_pipeline_query,
+)
 
 _FENCE_RE = re.compile(
     r"^\s*```(?:json)?\s*\n?(.*?)\n?\s*```\s*$",
@@ -175,19 +183,44 @@ def _resolve_harness_models_path(
     return path
 
 
-def _run_pipeline_stage_stub(
+def _run_pipeline_stage(
     *,
+    harness_dir: Path,
+    harness_config: Any,
     harness_name: str,
     pipeline_id: str,
-) -> None:
-    """Phase 1 stub for pipeline stages (AC-4 — full invoke is Phase 4 / E8-S01)."""
-    raise WorkflowError(
-        f"Harness '{harness_name}': pipeline stage {pipeline_id!r} is not "
-        "executable in Phase 1 (pipeline exposure ships in Phase 4). "
-        "Use agent stages only, or remove this stage from workflow.yaml.",
-        harness_name=harness_name,
-        stage=pipeline_id,
-    )
+    user_input: str,
+    prior_output: str | None,
+) -> str:
+    """Execute a ``workflow.yaml`` pipeline stage via ``serve.expose`` (E8-S01)."""
+    entries = expose_entries_from_harness(harness_config)
+    entry = next((item for item in entries if item.id == pipeline_id), None)
+    if entry is None:
+        raise WorkflowError(
+            f"Harness '{harness_name}': pipeline stage {pipeline_id!r} is not "
+            "listed in serve.expose. Add it to harness.yaml or remove the stage.",
+            harness_name=harness_name,
+            stage=pipeline_id,
+        )
+    try:
+        path = resolve_pipeline_file(harness_dir, entry)
+        source = path.read_text(encoding="utf-8")
+        pipeline = load_pipeline_yaml(path)
+        query = user_input.strip() or (prior_output or "")
+        extra = {"context": prior_output} if prior_output else None
+        result = run_pipeline_query(
+            pipeline,
+            query,
+            source_yaml=source,
+            extra=extra,
+        )
+        return format_pipeline_output(result)
+    except PipelineExposeError as exc:
+        raise WorkflowError(
+            f"Harness '{harness_name}': pipeline stage {pipeline_id!r}: {exc}",
+            harness_name=harness_name,
+            stage=pipeline_id,
+        ) from exc
 
 
 def _retry_config(harness_config: Any) -> RuntimeRetryConfig:
@@ -246,7 +279,32 @@ def run_workflow(
     for stage in stages:
         sid = stage_id(stage)
         if stage.pipeline:
-            _run_pipeline_stage_stub(harness_name=harness_name, pipeline_id=sid)
+            output = _run_pipeline_stage(
+                harness_dir=harness_path,
+                harness_config=harness_config,
+                harness_name=harness_name,
+                pipeline_id=sid,
+                user_input=user_input,
+                prior_output=prior_output,
+            )
+            log_request(
+                _logger,
+                "workflow stage success",
+                harness=harness_name,
+                agent=None,
+                model_id=None,
+                stage=sid,
+                level=logging.INFO,
+            )
+            result.stages.append(
+                StageResult(
+                    stage_id=sid,
+                    kind="pipeline",
+                    output=output,
+                )
+            )
+            prior_output = output
+            continue
 
         agent_name = stage.agent
         assert agent_name is not None

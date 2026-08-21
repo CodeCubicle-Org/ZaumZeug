@@ -101,13 +101,14 @@ SDK tools listed in `tools.builtin` need no Python under `tools/`:
 | `web_fetch` | 1 | HTTPS GET of public URLs (SSRF guard; 30s / 1 MB caps) |
 | `calculator` | 3 | Safe arithmetic (`+ - * / // % **` and parentheses; no names or calls) |
 | `read_file` | 3 | Read UTF-8 text under the **harness folder** (path sandbox; traversal blocked) |
+| `search_docs` | 4 | Query the RAG pipeline listed in `serve.expose` (retriever → prompt → generator) |
 
 ```yaml
 tools:
-  builtin: [web_fetch, calculator, read_file]
+  builtin: [web_fetch, calculator, read_file, search_docs]
 ```
 
-`read_file` cannot leave the harness workspace (`usr-harnesses/<name>/` in dev, `deploy/<name>/` in production). Unknown ids fail validation with the Phase 3 available list. `search_docs` is Phase 4 (RAG) — not a builtin yet; use `tools.custom` if you need local search today.
+`read_file` cannot leave the harness workspace (`usr-harnesses/<name>/` in dev, `deploy/<name>/` in production). Unknown ids fail validation with the Phase 4 available list. `search_docs` requires a pipeline in `serve.expose` (prefer `rag_pipeline` / `pipelines/rag.yaml`) — see [Pipelines and RAG](pipelines.md).
 
 ## Related
 

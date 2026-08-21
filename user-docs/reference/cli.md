@@ -68,7 +68,7 @@ zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose] [--port N]
 | `--verbose` | Enable SDK and Haystack debug logging |
 | `--port N` | Override `serve.hayhooks.port` from harness.yaml (CI smoke on an ephemeral free port) |
 
-**Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**), or `--port` when set. Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`). Optional **`serve.hayhooks.chainlit: true`** mounts Chainlit at `/chat` on the same port — requires `pip install "hayhooks[chainlit]"`. Open WebUI, SPA + Nginx, and Next.js layouts use the same REST `baseURL` (`http://127.0.0.1:1416/v1`, not `api.openai.com`) — see [Web deployment](../guides/web-deployment.md).
+**Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**), or `--port` when set. Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`). Pipelines listed in **`serve.expose`** are registered as **`POST /{id}/run`** (E8-S01). Optional **`serve.hayhooks.chainlit: true`** mounts Chainlit at `/chat` on the same port — requires `pip install "hayhooks[chainlit]"`. Open WebUI, SPA + Nginx, and Next.js layouts use the same REST `baseURL` (`http://127.0.0.1:1416/v1`, not `api.openai.com`) — see [Web deployment](../guides/web-deployment.md) and [Pipelines and RAG](../guides/pipelines.md).
 
 **Behavior (`--deploy` / production):** Same OpenAI REST API as dev serve (`POST /v1/chat/completions`, `GET /v1/models`, `POST /<harness>/run`), but paths resolve under `deploy/<name>/` only — `usr-harnesses/` is never consulted. Fails fast when the deploy folder is missing or `manifest.json` is absent/invalid. Typical ops flow after `zaumzeug deploy <name>` and target install: `zaumzeug serve <name> --deploy`, `zaumzeug mcp <name> --deploy` (**Done** E7-S06 — same MCP surface as dev), or set `HARNESS_ROOT=deploy` in the container/systemd environment (see [Global environment](#global-environment)).
 
@@ -78,7 +78,8 @@ CI mock smoke (E1-S07) uses `python install/ci_serve_smoke.py example` — start
 |---|---|
 | `POST /v1/chat/completions` | OpenAI-compatible chat — `"model": "<harness>"`; optional `"model_id": "<registry-key>"` selects the LLM |
 | `GET /v1/models` | Lists the served harness pipeline |
-| `POST /<harness>/run` | Direct Hayhooks run API |
+| `POST /<harness>/run` | Direct Hayhooks run API for the **entry agent** |
+| `POST /<pipeline-id>/run` | Exposed Haystack YAML from `serve.expose` (E8-S01) — see [Pipelines and RAG](../guides/pipelines.md) |
 | `GET /docs` | FastAPI Swagger UI for manual REST probes |
 | `GET /chat` | Optional Chainlit GUI — only when `serve.hayhooks.chainlit: true` and `pip install "hayhooks[chainlit]"` |
 
@@ -252,7 +253,7 @@ zaumzeug run example --from reviewer --input "Check the draft"
 HARNESS_LOG_LEVEL=INFO zaumzeug run example --input "…"   # stage start/success/retry/failure
 ```
 
-**Behavior:** Stages run top-to-bottom from `workflow.yaml`. Prior stage assistant text is prepended as a user message before `--input` for the next agent. Pipeline stages are not executable in Phase 1 (schema allowed; full invoke is Phase 4). Live generation failures become typed `WorkflowError` with harness / agent / stage. Optional `runtime.retry` on `harness.yaml` retries `Agent.run` (and optional `output.format: json`) per stage; build/config errors are not retried. Stage lifecycle logs use structured `stage` at INFO — set `HARNESS_LOG_LEVEL=INFO` or `--verbose` (default WARNING hides them). See [Multi-agent workflow — Run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run). **Serve/HTTP does not yet share this reliability layer.**
+**Behavior:** Stages run top-to-bottom from `workflow.yaml`. Prior stage assistant text is prepended as a user message before `--input` for the next agent. **`pipeline:`** stages invoke Haystack YAML listed in **`serve.expose`** (E8-S01) — see [Pipelines and RAG](../guides/pipelines.md). Live generation failures become typed `WorkflowError` with harness / agent / stage. Optional `runtime.retry` on `harness.yaml` retries `Agent.run` (and optional `output.format: json`) per stage; build/config errors are not retried. Stage lifecycle logs use structured `stage` at INFO — set `HARNESS_LOG_LEVEL=INFO` or `--verbose` (default WARNING hides them). See [Multi-agent workflow — Run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run). **Serve/HTTP does not yet share this reliability layer.**
 
 ---
 

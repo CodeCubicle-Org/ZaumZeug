@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/17-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-21 |
+| **Last modified** | 2026-08-21 |
 | **Story ID** | E3-S08 |
 | **Status** | Done |
 | **Epic** | [E3 — Runtime and Local Serve](../02-epic.md) |
@@ -59,7 +59,7 @@ if prior_output:
 - [x] **AC-1** Executes `workflow.yaml` stages in order (serial only Phase 1)
 - [x] **AC-2** Each agent stage loads `agents/<name>/` config and merged `agents-models.yaml`
 - [x] **AC-3** Prior stage output passed as context to next agent stage — append prior agent's final assistant message as a new `user` message: `{"role": "user", "content": "<prior_stage_output>"}` prepended before the workflow input; full message list forwarded to the next agent's Haystack Agent.run
-- [x] **AC-4** Pipeline stages invoke exposed pipeline when `serve.expose` lists id (Phase 4+; stub OK in Phase 1)
+- [x] **AC-4** Pipeline stages invoke exposed pipeline when `serve.expose` lists id *(stub in Phase 1; closed by [E8-S01](58-story.md), 2026-08-21)*
 - [x] **AC-5** `--from <stage>` runs partial workflow for debugging
 - [x] **AC-6** Fails fast with harness + agent name on resolution errors
 - [x] **AC-7** Integration test: two-agent serial workflow with mock models
@@ -79,7 +79,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-1 | `tests/integration/test_workflow_run.py::test_e3_s08_ac1_serial_stage_order` |
 | AC-2 | `tests/integration/test_workflow_run.py::test_e3_s08_ac2_per_agent_models_registry` |
 | AC-3 | `tests/integration/test_workflow_run.py::test_e3_s08_ac3_stage_output_forwarded` |
-| AC-4 | **manual:** pipeline stage deferred Phase 4 (Phase 1 raises actionable `WorkflowError` stub) |
+| AC-4 | **closed E8-S01:** `tests/integration/pipelines/test_serve_expose.py::test_e8_s01_workflow_invokes_exposed_pipeline` *(Phase 1 shipped an actionable stub)* |
 | AC-5 | `tests/integration/test_workflow_run.py::test_e3_s08_ac5_from_stage_partial_run` |
 | AC-6 | `tests/integration/test_workflow_run.py::test_e3_s08_ac6_actionable_agent_error` |
 | AC-7 | `tests/integration/test_workflow_run.py::test_e3_s08_ac7_two_agent_mock_workflow` |
@@ -91,3 +91,9 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 - [x] `zaumzeug run example` works with single-stage workflow
 - [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-21)
+
+AC-4 pipeline-stage stub closed by [E8-S01](58-story.md): `zaumzeug run` invokes YAML listed in `serve.expose`. Test: `tests/integration/pipelines/test_serve_expose.py::test_e8_s01_workflow_invokes_exposed_pipeline`.
+
+---

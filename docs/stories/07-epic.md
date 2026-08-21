@@ -417,7 +417,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 ### Implementation notes (2026-08-21)
 
-Canonical detail: [56-story.md](epic-stories/56-story.md). Phase 3 builtins `calculator` and `read_file`; `search_docs` stays Phase 4. `BUILTIN_CATALOG_PHASE = 3`; `CURRENT_SDK_PHASE` stays **1**.
+Canonical detail: [56-story.md](epic-stories/56-story.md). Phase 3 builtins `calculator` and `read_file`. Follow-up: [E8-S01](epic-stories/58-story.md) shipped `search_docs` and raised `BUILTIN_CATALOG_PHASE` to **4**. `CURRENT_SDK_PHASE` stays **1**.
 
 ---
 

@@ -5,7 +5,7 @@
 | **Document** | Epic E3 user stories |
 | **File** | `docs/stories/02-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-22 (E1-S07 closed E3-S02 AC-6/7 + E3-S07 DoD) |
+| **Last modified** | 2026-08-21 (E8-S01 closed E3-S08 AC-4 pipeline stub) |
 | **Status** | Phase 1 complete |
 | **Build order** | **2 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
@@ -531,7 +531,7 @@ As a **harness developer**, I want `zaumzeug run` to execute my harness workflow
 - [x] **AC-1** Executes `workflow.yaml` stages in order (serial only Phase 1)
 - [x] **AC-2** Each agent stage loads `agents/<name>/` config and merged `agents-models.yaml`
 - [x] **AC-3** Prior stage output passed as context to next agent stage
-- [x] **AC-4** Pipeline stages invoke exposed pipeline when `serve.expose` lists id (Phase 4+; stub OK in Phase 1)
+- [x] **AC-4** Pipeline stages invoke exposed pipeline when `serve.expose` lists id *(stub in Phase 1; closed by [E8-S01](epic-stories/58-story.md), 2026-08-21)*
 - [x] **AC-5** `--from <stage>` runs partial workflow for debugging
 - [x] **AC-6** Fails fast with harness + agent name on resolution errors
 - [x] **AC-7** Integration test: two-agent serial workflow with mock models
@@ -551,7 +551,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-1 | `tests/integration/test_workflow_run.py::test_e3_s08_ac1_serial_stage_order` |
 | AC-2 | `tests/integration/test_workflow_run.py::test_e3_s08_ac2_per_agent_models_registry` |
 | AC-3 | `tests/integration/test_workflow_run.py::test_e3_s08_ac3_stage_output_forwarded` |
-| AC-4 | **manual:** pipeline stage deferred Phase 4 (Phase 1 raises actionable `WorkflowError` stub) |
+| AC-4 | **closed E8-S01:** `tests/integration/pipelines/test_serve_expose.py::test_e8_s01_workflow_invokes_exposed_pipeline` *(Phase 1 shipped an actionable stub)* |
 | AC-5 | `tests/integration/test_workflow_run.py::test_e3_s08_ac5_from_stage_partial_run` |
 | AC-6 | `tests/integration/test_workflow_run.py::test_e3_s08_ac6_actionable_agent_error` |
 | AC-7 | `tests/integration/test_workflow_run.py::test_e3_s08_ac7_two_agent_mock_workflow` |
@@ -563,3 +563,9 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 - [x] `zaumzeug run example` works with single-stage workflow
 - [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-21)
+
+AC-4 pipeline-stage stub closed by [E8-S01](epic-stories/58-story.md). Test: `tests/integration/pipelines/test_serve_expose.py::test_e8_s01_workflow_invokes_exposed_pipeline`.
+
+---

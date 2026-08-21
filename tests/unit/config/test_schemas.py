@@ -144,7 +144,7 @@ def test_e3_s03_ac5_unknown_builtin_id_fails_with_list(tmp_path: Path) -> None:
 
 
 def test_e7_s07_ac3_unknown_builtin_phase3_list(tmp_path: Path) -> None:
-    """AC-3: Unknown builtin IDs fail with the Phase 3 available list."""
+    """AC-3: Unknown builtin IDs fail with the Phase 4 available list."""
     path = _write_yaml(
         tmp_path / "agent.yaml",
         {
@@ -159,11 +159,11 @@ def test_e7_s07_ac3_unknown_builtin_phase3_list(tmp_path: Path) -> None:
 
     message = str(exc_info.value)
     assert "not_a_real_tool" in message
-    assert "Phase 3" in message
+    assert "Phase 4" in message
     assert "web_fetch" in message
     assert "calculator" in message
     assert "read_file" in message
-    assert "search_docs" not in message
+    assert "search_docs" in message
 
     ok = _write_yaml(
         tmp_path / "ok-agent.yaml",

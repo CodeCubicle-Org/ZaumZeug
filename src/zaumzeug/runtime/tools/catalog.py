@@ -12,6 +12,7 @@ from zaumzeug.config.builtins import (
 )
 from zaumzeug.runtime.tools.calculator import build_calculator_tool
 from zaumzeug.runtime.tools.read_file import build_read_file_tool
+from zaumzeug.runtime.tools.search_docs import build_search_docs_tool
 from zaumzeug.runtime.tools.web_fetch import build_web_fetch_tool
 
 BuiltinToolFactory = Callable[..., Any]
@@ -20,6 +21,7 @@ BUILTIN_TOOL_FACTORIES: dict[str, BuiltinToolFactory] = {
     "web_fetch": build_web_fetch_tool,
     "calculator": build_calculator_tool,
     "read_file": build_read_file_tool,
+    "search_docs": build_search_docs_tool,
 }
 
 # Re-export config-layer validation under the runtime catalog name.

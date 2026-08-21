@@ -71,7 +71,7 @@ At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug run` (workflow
 
 **Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same `validate_serve` production root as serve. MCP Streamable HTTP matches dev (`POST /mcp`, `GET /status`). Docs: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`.
 
-**Implementation (E3-S08, 2026-07-21):** `zaumzeug run <harness>` executes the full (or `--from`-partial) stage graph via `runtime/workflow.run_workflow()` — stage-scoped ModelRouter + factory per agent stage; prior output forwarded as prepended user context. Pipeline stages stubbed until Phase 4.
+**Implementation (E3-S08, 2026-07-21):** `zaumzeug run <harness>` executes the full (or `--from`-partial) stage graph via `runtime/workflow.run_workflow()` — stage-scoped ModelRouter + factory per agent stage; prior output forwarded as prepended user context. Pipeline stages invoke YAML listed in `serve.expose` (**Done** E8-S01).
 
 **Implementation (E8-S07, 2026-08-01):** Same `run_workflow` path adds typed live errors, optional `runtime.retry`, JSON `output.format`, and INFO stage logs with structured `stage`. Serve/HTTP path is a follow-up.
 

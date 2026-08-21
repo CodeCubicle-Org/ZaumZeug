@@ -493,15 +493,31 @@ def _copy_exposed_pipelines(
     if not isinstance(expose, list) or not expose:
         return
     for pipeline_id in expose:
-        if not isinstance(pipeline_id, str) or not pipeline_id.strip():
+        name = ""
+        explicit_path: str | None = None
+        if isinstance(pipeline_id, str) and pipeline_id.strip():
+            name = pipeline_id.strip()
+        elif isinstance(pipeline_id, dict):
+            raw_id = pipeline_id.get("id")
+            raw_path = pipeline_id.get("path")
+            if isinstance(raw_path, str) and raw_path.strip():
+                explicit_path = raw_path.strip().replace("\\", "/")
+            if isinstance(raw_id, str) and raw_id.strip():
+                name = raw_id.strip()
+            elif explicit_path:
+                name = Path(explicit_path).stem
+        if not name:
             continue
-        name = pipeline_id.strip()
-        # Accept id with or without .yaml suffix.
-        candidates = [
-            harness_dir / "pipelines" / name,
-            harness_dir / "pipelines" / f"{name}.yaml",
-            harness_dir / "pipelines" / f"{name}.yml",
-        ]
+        candidates = []
+        if explicit_path:
+            candidates.append(harness_dir / explicit_path)
+        candidates.extend(
+            [
+                harness_dir / "pipelines" / name,
+                harness_dir / "pipelines" / f"{name}.yaml",
+                harness_dir / "pipelines" / f"{name}.yml",
+            ]
+        )
         src = next((path for path in candidates if path.is_file()), None)
         if src is None:
             raise DeployError(

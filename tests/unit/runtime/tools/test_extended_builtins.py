@@ -20,8 +20,9 @@ def test_e7_s07_ac1_calculator_and_read_file_in_catalog(tmp_path: Path) -> None:
     assert "calculator" in ids
     assert "read_file" in ids
     assert "web_fetch" in ids
-    assert BUILTIN_CATALOG_PHASE == 3
-    assert available_builtin_tool_ids() == ids
+    assert BUILTIN_CATALOG_PHASE == 4
+    assert "search_docs" in available_builtin_tool_ids()
+    assert available_builtin_tool_ids(phase=3) == ids
 
     calc = create_builtin_tool("calculator")
     assert calc.name == "calculator"
@@ -52,5 +53,4 @@ def test_e7_s07_ac4_search_docs_not_phase3() -> None:
     assert "read_file" in message
     assert "web_fetch" in message
 
-    with pytest.raises(BuiltinToolValidationError, match="search_docs"):
-        validate_builtin_tool_ids(["search_docs"])
+    validate_builtin_tool_ids(["search_docs"])

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers |
-| **Last updated** | 2026-08-14 |
+| **Last updated** | 2026-08-21 (E8-S01 pipeline exposure live) |
 
 A **harness** is not a single agent. It is a **workflow** (who runs, in what order) plus a **collection of agents** (each with its own prompts, tools, and LLM config). This guide explains `workflow.yaml`, how **pipeline** stages differ from **agent** stages, and where **looping and branching** belong in Phase 1.
 
@@ -22,7 +22,7 @@ usr-harnesses/<harness-name>/
 │   └── reviewer/
 │       ├── agent.yaml
 │       └── agents-models.yaml
-├── pipelines/         # Haystack pipelines (Phase 4+)
+├── pipelines/         # Haystack YAML — list ids in serve.expose (E8-S01)
 └── docs/
     └── workflow-diagram.md   # auto-generated at compile (E4-S08)
 ```
@@ -207,7 +207,7 @@ Pipelines are also callable over HTTP as **`POST /{pipeline-id}/run`** when the 
 
 ### Phase note
 
-Full **pipeline exposure** ships in **Phase 4** (RAG and production hardening). The **schema** already allows `- pipeline: <id>` in `workflow.yaml`; the reference Phase 1 **`example`** harness uses **agent stages only**. Until your project enables pipelines, treat pipeline stages as optional advanced configuration.
+**Pipeline exposure** (E8-S01) is live: list ids in **`serve.expose`**, keep YAML under **`pipelines/`**, call **`POST /{id}/run`**, and use **`pipeline:`** stages in **`zaumzeug run`**. RAG (retriever → prompt → generator) and the **`search_docs`** builtin are documented in [Pipelines and RAG](pipelines.md). The reference **`example`** harness still uses **agent stages only**.
 
 ---
 

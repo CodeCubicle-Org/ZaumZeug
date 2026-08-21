@@ -12,7 +12,7 @@ from typing import Any
 
 from haystack.components.agents import Agent
 
-from zaumzeug.config.loader import load_agent_config
+from zaumzeug.config.loader import load_agent_config, load_harness
 from zaumzeug.config.resolver import (
     ARTIFACT_MANIFEST,
     RuntimeSource,
@@ -21,9 +21,15 @@ from zaumzeug.config.resolver import (
 )
 from zaumzeug.runtime.model_router import ModelRouter
 from zaumzeug.runtime.preprocess import PreprocessError, load_input_rewrite_template
+from zaumzeug.runtime.pipelines import (
+    PipelineExposeError,
+    expose_entries_from_harness,
+    load_rag_pipeline,
+)
 from zaumzeug.runtime.tools.catalog import build_builtin_tools
 from zaumzeug.runtime.tools.custom import CustomToolError, build_custom_tools
 from zaumzeug.runtime.tools.mcp import McpBoundaryError, build_mcp_toolsets
+from zaumzeug.runtime.tools.search_docs import SearchDocsError
 
 _ARTIFACT_SYSTEM_PROMPT = Path("prompts") / "system.md"
 
@@ -112,23 +118,61 @@ def _custom_entries(agent_data: dict[str, Any]) -> list[Any]:
     return list(custom)
 
 
+def _search_docs_kwargs(
+    agent_data: dict[str, Any],
+    *,
+    harness_dir: Path | str | None,
+    harness_config: Any | None,
+) -> dict[str, Any]:
+    """Load the RAG pipeline when ``search_docs`` is listed in ``tools.builtin``."""
+    if "search_docs" not in _builtin_tool_ids(agent_data):
+        return {}
+    if harness_dir is None:
+        raise RuntimeFactoryError(
+            "search_docs requires the harness directory so the RAG pipeline in "
+            "serve.expose can be loaded"
+        )
+    entries = expose_entries_from_harness(harness_config)
+    try:
+        pipeline, entry, source = load_rag_pipeline(harness_dir, entries)
+    except PipelineExposeError as exc:
+        raise RuntimeFactoryError(str(exc)) from exc
+    return {
+        "pipeline": pipeline,
+        "source_yaml": source,
+        "pipeline_id": entry.id,
+    }
+
+
 def build_agent_tools(
     agent_data: dict[str, Any],
     *,
     agent_dir: Path | str | None = None,
     workspace: Path | str | None = None,
+    harness_config: Any | None = None,
 ) -> list[Any]:
     """Build Haystack tools from ``tools.builtin``, ``tools.mcp``, and ``tools.custom``."""
     tools: list[Any] = []
     resolved_workspace = workspace
     if resolved_workspace is None and agent_dir is not None:
         resolved_workspace = Path(agent_dir).resolve().parent.parent
-    tools.extend(
-        build_builtin_tools(
-            _builtin_tool_ids(agent_data),
-            workspace=resolved_workspace,
+    builtin_kwargs: dict[str, Any] = {"workspace": resolved_workspace}
+    builtin_kwargs.update(
+        _search_docs_kwargs(
+            agent_data,
+            harness_dir=resolved_workspace,
+            harness_config=harness_config,
         )
     )
+    try:
+        tools.extend(
+            build_builtin_tools(
+                _builtin_tool_ids(agent_data),
+                **builtin_kwargs,
+            )
+        )
+    except SearchDocsError as exc:
+        raise RuntimeFactoryError(str(exc)) from exc
     try:
         tools.extend(build_mcp_toolsets(_mcp_entries(agent_data)))
     except McpBoundaryError as exc:
@@ -161,10 +205,13 @@ def build_agent_bundle(
         agent_name=agent_name,
     )
     agent_config = load_agent_config(resolution.agent_yaml_path)
+    harness_yaml = harness_dir / "harness.yaml"
+    harness_config = load_harness(harness_yaml) if harness_yaml.is_file() else None
     tools = build_agent_tools(
         agent_config.model_dump(exclude_none=True),
         agent_dir=resolution.agent_yaml_path.parent,
         workspace=harness_dir,
+        harness_config=harness_config,
     )
     system_prompt = load_system_prompt(resolution)
     input_rewrite_template = load_input_rewrite(resolution)

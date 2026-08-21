@@ -140,7 +140,7 @@ REST (OpenAI-compatible), MCP, and ACP from one Haystack/Hayhooks core — witho
 - **GEPA compile lane** — offline prompt evolution from traces + textual feedback, exported into deploy artifacts (not just runtime skill learning)
 - **Production bundle discipline** — `usr-harnesses/` vs `deploy/` with GEPA excluded from production servers
 - **Integration-first serve** — REST/MCP/ACP endpoints for apps and IDEs, not a personal chat product
-- **Haystack/RAG pipeline stages** — deterministic pipeline steps in workflows (Phase 4+)
+- **Haystack/RAG pipeline stages** — deterministic pipeline steps in workflows ✅ ([E8-S01](docs/stories/epic-stories/58-story.md), 2026-08-21)
 - **Mock-first harness CI** — mock model profile, doctor, dry-run built for factory testing without API keys
 
 **When to pick which:**
@@ -166,7 +166,7 @@ LangGraph + LangSmith, OpenAI tracing, CrewAI community, AWS Strands docs, Herme
 - `deploy/` as the unit of shipping
 - GEPA feedback → recompile → redeploy loop
 - Mock-first + doctor + per-agent model config
-- Haystack RAG/pipeline stages in workflows (Phase 4+)
+- Haystack RAG/pipeline stages in workflows ✅ (E8-S01, 2026-08-21)
 
 **Do not try to out-LangGraph LangGraph:**
 
