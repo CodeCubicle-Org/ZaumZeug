@@ -12,7 +12,7 @@ HarnessDevelopment/
 │   ├── cli.py
 │   ├── config/               # Pydantic schemas, loaders (E2-S01), models merge (E2-S02), resolver (E2-S03); CompileConfig (E4-S02a)
 │   ├── doctor/               # Preflight checks — pass/warn/fail (E2-S04a–S04c, E4-S05 artifact_module, E4-S07 pinned_artifact, E7-S02 custom_tools)
-│   ├── runtime/              # ModelRouter (E3-S01, E3-S05), factory (E3-S00), tools/ (E3-S03, E7-S01 MCP, E7-S02 custom), input_rewrite preprocess (E4-S03b)
+│   ├── runtime/              # ModelRouter (E3-S01, E3-S05), factory (E3-S00), tools/ (E3-S03 web_fetch, E7-S07 calculator/read_file, E7-S01 MCP, E7-S02 custom), input_rewrite preprocess (E4-S03b)
 │   ├── compile/              # DSPy loader; CLI + GEPA + --dry-run; export; workflow diagram; immutable runs (E4-S01–S08)
 │   ├── deploy/               # Packager ✅ E5-S01; copy matrix ✅ E5-S02 (`resolve_deploy_copy_plan`); gate ✅ E6-S03/E5-S06; exclude/strip ✅ E6-S04 / E5-S01
 │   ├── eval/                 # Optional DeepEval bridge — [eval] extra + require_deepeval() (E6-S01); zaumzeug eval runner (E6-S02); invoked by deploy gate (E6-S03); harness eval/ pytest scaffold (E6-S04); trace export + --trace (E6-S05); Mode C --base-url (E6-S06); GEPA bridge append_failed_eval_to_train + deepeval_gepa_metric (E6-S07)
@@ -185,7 +185,7 @@ user-docs/
 │   ├── multi-agent-workflow.md   # workflow.yaml, agents vs pipelines, control flow
 │   ├── compile.md                # GEPA compile / export / rollback
 │   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05); git policy (E5-S07); platforms (E5-S08); target install + --verify (E5-S09a/b/c); mcp --deploy (E7-S06)
-│   ├── custom-tools.md           # tools.custom → ComponentTool / Tool (E7-S02)
+│   ├── custom-tools.md           # tools.custom → ComponentTool / Tool (E7-S02); builtin catalog calculator/read_file (E7-S07)
 │   ├── cursor-mcp.md             # Cursor mcp.json → localhost:{mcp_port}/mcp (E7-S03); --deploy (E7-S06)
 │   ├── web-deployment.md         # Chainlit /chat co-located with REST (E7-S04)
 │   ├── acp.md                    # zaumzeug acp stdio JSON-RPC for Zed / JetBrains (E7-S05); MCP --deploy pointer (E7-S06)
@@ -208,6 +208,8 @@ Install copies this tree from `install/templates/user-docs/` ([§3.4](02-reposit
 **Implementation (E7-S04, 2026-08-21):** [user-docs/guides/web-deployment.md](../../user-docs/guides/web-deployment.md) — optional Chainlit at `/chat` (`serve.hayhooks.chainlit: true` + `pip install "hayhooks[chainlit]"`). Open #2 (primary web UI) remains open.
 
 **Implementation (E7-S05, 2026-08-21):** [user-docs/guides/acp.md](../../user-docs/guides/acp.md) — `zaumzeug acp` Agent Client Protocol stdio JSON-RPC; Zed `agent_servers` and JetBrains `~/.jetbrains/acp.json` snippets; ACP ≠ IBM A2A; Cursor uses MCP. Tests: `tests/integration/acp/test_acp_stdio.py`.
+
+**Implementation (E7-S07, 2026-08-21):** Phase 3 builtin catalog — `calculator` and `read_file` (`runtime/tools/`); `search_docs` stays Phase 4. User guide: [custom-tools.md](../../user-docs/guides/custom-tools.md#builtin-catalog). Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`.
 
 **Implementation (E1-S06, 2026-07-22):** Short new-contributor onboarding guide at root [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (product `README.md` unchanged) — vision, install table, `< 15 min` / `~1–2.5 GB` planning ranges, mock-first serve, optional extras, updating dependencies, abbreviated layout; links to [installation.md](../../user-docs/getting-started/installation.md) for depth. Tests: `tests/unit/docs/test_contributing_guide.py`.
 

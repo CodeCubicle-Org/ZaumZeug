@@ -132,4 +132,5 @@ def web_fetch_tool(
 
 def build_web_fetch_tool(**kwargs: Any) -> ComponentTool:
     """Catalog factory entry for ``web_fetch``."""
-    return web_fetch_tool(**kwargs)
+    allowed = {k: kwargs[k] for k in ("timeout", "max_bytes", "client") if k in kwargs}
+    return web_fetch_tool(**allowed)

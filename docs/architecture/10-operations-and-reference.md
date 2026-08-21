@@ -72,6 +72,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) shares `validate_serve` with the serve runner; same MCP surface as dev. Docs: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`. Full suite 2026-08-21: 335 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate).
 
+**Implementation (E7-S07, 2026-08-21):** Phase 3 builtin catalog — `calculator` (restricted AST) and `read_file` (harness-folder sandbox). `BUILTIN_CATALOG_PHASE = 3`; `CURRENT_SDK_PHASE` stays **1**. `search_docs` stays Phase 4. Docs: [custom-tools.md](../../user-docs/guides/custom-tools.md#builtin-catalog). Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`, `tests/unit/config/test_schemas.py::test_e7_s07_ac3_unknown_builtin_phase3_list`. Full suite 2026-08-21: 339 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate).
+
 **Implementation (E2-S07, 2026-07-08):** `workflow.yaml` schema validation via `load_workflow()` — `workflow_config` check in doctor; `validate_serve()` fails fast on invalid workflow before entry resolution. Tests: `tests/unit/config/test_workflow_schema.py`.
 
 **Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` (`src/zaumzeug/integrations/mock.py`) returns fixture text from `tests/fixtures/responses/`; `ModelRouter` (`src/zaumzeug/runtime/model_router.py`) dispatches `provider: mock` without live API keys or provider integration packages. Shipped `install/templates/config/models.example.yaml`. Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`).
@@ -164,7 +166,7 @@ Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace da
 |---|---|
 | 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06), OpenAI REST contract ✅ (E3-S07) |
 | 2 | compile `--dry-run` (**E4-S06 Done** — `tests/integration/compile/test_compile_dry_run.py`), export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), `zaumzeug eval` (**E6-S02 Done** — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**E6-S04 Done** — `tests/integration/eval/test_deepeval_scaffold.py`), trace → `LLMTestCase` (**E6-S05 Done** — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**E6-S06 Done** — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**E6-S07 Done** — `tests/unit/eval/test_gepa_bridge.py`) |
-| 3 | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`, Starlette `TestClient`); MCP from deploy ✅ (**E7-S06** — `tests/integration/mcp/test_mcp_deploy.py`); custom tool loader ✅ (**E7-S02** — `tests/unit/runtime/tools/test_custom_loader.py`, doctor `custom_tools`); Cursor MCP setup ✅ (**E7-S03**); Chainlit `/chat` ✅ (**E7-S04** — `tests/integration/serve/test_chainlit.py`); ACP stdio ✅ (**E7-S05** — `tests/integration/acp/test_acp_stdio.py`); tool correctness eval when DeepEval present |
+| 3 | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`, Starlette `TestClient`); MCP from deploy ✅ (**E7-S06** — `tests/integration/mcp/test_mcp_deploy.py`); custom tool loader ✅ (**E7-S02** — `tests/unit/runtime/tools/test_custom_loader.py`, doctor `custom_tools`); Cursor MCP setup ✅ (**E7-S03**); Chainlit `/chat` ✅ (**E7-S04** — `tests/integration/serve/test_chainlit.py`); ACP stdio ✅ (**E7-S05** — `tests/integration/acp/test_acp_stdio.py`); extended builtins ✅ (**E7-S07** — `test_extended_builtins.py`, `test_read_file.py`); tool correctness eval when DeepEval present |
 | 4 | Run reliability ✅ (**E8-S07** — retry / JSON / stage logs / `phase_gated_tools`; serve path follow-up); `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
 
 Also compatible: Promptfoo, Ragas, custom pytest — no DeepEval lock-in.
@@ -226,6 +228,7 @@ pytest tests/unit/deploy/ tests/integration/deploy/test_deploy_golden.py -v -k e
 pytest tests/integration/serve/test_chainlit.py -v   # E7-S04; stubs Chainlit mount (no hayhooks[chainlit] needed)
 pytest tests/integration/acp/test_acp_stdio.py -v    # E7-S05; stdio JSON-RPC (no extra package)
 pytest tests/integration/mcp/test_mcp_deploy.py -v   # E7-S06; mcp --deploy / HARNESS_ROOT=deploy
+pytest tests/unit/runtime/tools/test_extended_builtins.py tests/unit/runtime/tools/test_read_file.py -v  # E7-S07
 
 # Optional harness regression (requires [eval])
 pip install -e ".[dev,eval]"

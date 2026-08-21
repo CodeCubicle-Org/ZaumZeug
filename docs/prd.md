@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-08-21 (E7-S06 MCP from deploy)
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S06 **Done** (2026-08-21); next E7-S07
+**Last updated:** 2026-08-21 (E7-S07 extended builtin catalog)
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S07 **Done** (2026-08-21); next E7-S08
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -374,10 +374,10 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E7.4 | Chainlit | **Done** (E7-S04, 2026-08-21). `serve.hayhooks.chainlit: true` serves `/chat` on the same port as OpenAI REST; extra `pip install "hayhooks[chainlit]"` (fail-fast if missing). Guide: [web-deployment.md](user-docs/guides/web-deployment.md). |
 | E7.5 | ACP adapter | **Done** (E7-S05, 2026-08-21). `zaumzeug acp <name>` stdio JSON-RPC (Agent Client Protocol; not IBM ACP/A2A). Zed/JetBrains registration snippets in [acp.md](user-docs/guides/acp.md). Cursor uses MCP, not ACP. Internal `tools.mcp` still wired. |
 | E7.6 | MCP + deploy | **Done** (E7-S06, 2026-08-21). `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) loads only `deploy/<name>/`; same MCP surface as dev (`POST /mcp`, `GET /status`). Docs: `README.deploy.md`, [deploy.md](user-docs/guides/deploy.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`. |
-| E7.7 | Extended builtin catalog | **AC:** Phase 3 builtins beyond `web_fetch` per [Architecture §6.5](architecture/05-configuration.md#65-builtin-tools-catalog). |
+| E7.7 | Extended builtin catalog | **Done** (E7-S07, 2026-08-21). Phase 3 ships `calculator` (restricted AST) and `read_file` (harness-folder sandbox) per [Architecture §6.5](architecture/05-configuration.md#65-builtin-tools-catalog). Unknown ids fail with the Phase 3 available list. `search_docs` remains Phase 4. Guide: [custom-tools.md](user-docs/guides/custom-tools.md#builtin-catalog). |
 | E7.8 | Web client layouts | **Partial.** Chainlit embedded co-location **Done** (E7-S04, 2026-08-21) — [web-deployment.md](user-docs/guides/web-deployment.md). Remaining (E7-S08): Open WebUI two-container, SPA + Nginx, Next.js. Open #2 (primary UI) stays open. |
 
-**Story seeds:** MCP **Done** (E7-S01). Custom tools **Done** (E7-S02). Cursor MCP setup **Done** (E7-S03 — `user-docs/guides/cursor-mcp.md`, `--cursor-mcp` live write). Chainlit embedded UI **Done** (E7-S04 — `serve.hayhooks.chainlit` → `/chat`; `user-docs/guides/web-deployment.md`). ACP adapter **Done** (E7-S05 — `zaumzeug acp` stdio JSON-RPC; [acp.md](user-docs/guides/acp.md)). MCP from deploy **Done** (E7-S06 — `zaumzeug mcp --deploy` / `HARNESS_ROOT=deploy`). Remaining: extended builtins, full web-layout recipes (E7-S08), tool correctness eval when DeepEval present.
+**Story seeds:** MCP **Done** (E7-S01). Custom tools **Done** (E7-S02). Cursor MCP setup **Done** (E7-S03 — `user-docs/guides/cursor-mcp.md`, `--cursor-mcp` live write). Chainlit embedded UI **Done** (E7-S04 — `serve.hayhooks.chainlit` → `/chat`; `user-docs/guides/web-deployment.md`). ACP adapter **Done** (E7-S05 — `zaumzeug acp` stdio JSON-RPC; [acp.md](user-docs/guides/acp.md)). MCP from deploy **Done** (E7-S06 — `zaumzeug mcp --deploy` / `HARNESS_ROOT=deploy`). Extended builtins **Done** (E7-S07 — `calculator`, `read_file`; `search_docs` stays Phase 4). Remaining: full web-layout recipes (E7-S08), tool correctness eval when DeepEval present.
 
 ---
 
@@ -467,7 +467,7 @@ All items below were addressed in PRD + Architecture updates.
 | V4 | Production server deps unclear | **Resolved** (E5-S05, 2026-07-28): Architecture §10.5 dependency table + [user-docs/guides/deploy.md](../user-docs/guides/deploy.md) / `README.deploy.md` ship workflow |
 | V5 | Example harness use case open | **Resolved:** general research agent (E3.4) |
 | V6 | Eval gate on deploy not config-shaped | `deploy.eval_gate` + `--eval-gate`; Architecture §6.4, E5.6 |
-| V7 | Builtin catalog underspecified | Architecture §6.5 catalog; E3.3, E7.7 |
+| V7 | Builtin catalog underspecified | **Resolved** (E7-S07, 2026-08-21): [Architecture §6.5](architecture/05-configuration.md#65-builtin-tools-catalog); E3.3 `web_fetch`; E7.7 `calculator` / `read_file`; `search_docs` remains Phase 4 |
 | V8 | Ideation mixed product + architecture | Split: PRD + architecture.md + ideation archive |
 | V9 | Ideation parity gaps (2026-06-24) | Full requirement-level port to PRD + Architecture (extension points, install flags, eval modes, deploy policy, debug, client layouts, ecosystem reference) |
 | V10 | Cross-platform scope limited to install only | **Resolved** (E5-S08, 2026-07-29): E1.7 CI matrix; E3.2 runtime AC; E5.8 deploy platform policy (Linux-first + Linux CI deploy→serve smoke); PRD §14 table; Architecture §2.5, §10.6 |

@@ -92,10 +92,27 @@ Expected file: .../agents/researcher/tools/broken.py. Import error: ...
 
 Keep modules inside `agents/<name>/tools/` — traversal (`../`) and absolute paths are rejected.
 
+## Builtin catalog
+
+SDK tools listed in `tools.builtin` need no Python under `tools/`:
+
+| ID | Phase | What it does |
+|---|---|---|
+| `web_fetch` | 1 | HTTPS GET of public URLs (SSRF guard; 30s / 1 MB caps) |
+| `calculator` | 3 | Safe arithmetic (`+ - * / // % **` and parentheses; no names or calls) |
+| `read_file` | 3 | Read UTF-8 text under the **harness folder** (path sandbox; traversal blocked) |
+
+```yaml
+tools:
+  builtin: [web_fetch, calculator, read_file]
+```
+
+`read_file` cannot leave the harness workspace (`usr-harnesses/<name>/` in dev, `deploy/<name>/` in production). Unknown ids fail validation with the Phase 3 available list. `search_docs` is Phase 4 (RAG) — not a builtin yet; use `tools.custom` if you need local search today.
+
 ## Related
 
 - [CLI — doctor](../reference/cli.md#zaumzeug-doctor) — `custom_tools` check
-- Builtin catalog (`web_fetch`) is separate: `tools.builtin` in `agent.yaml`
+- Builtin catalog — `tools.builtin` in `agent.yaml` (see [Builtin catalog](#builtin-catalog) above)
 - External MCP servers: `tools.mcp` — see [CLI — mcp](../reference/cli.md#zaumzeug-mcp)
 - Cursor as MCP host: [Cursor MCP setup](cursor-mcp.md)
 - ACP (harness as the IDE agent): [ACP (Zed / JetBrains)](acp.md) — `zaumzeug acp` may still use `tools.mcp` internally

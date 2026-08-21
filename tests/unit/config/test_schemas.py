@@ -143,6 +143,41 @@ def test_e3_s03_ac5_unknown_builtin_id_fails_with_list(tmp_path: Path) -> None:
     assert "available" in message.lower()
 
 
+def test_e7_s07_ac3_unknown_builtin_phase3_list(tmp_path: Path) -> None:
+    """AC-3: Unknown builtin IDs fail with the Phase 3 available list."""
+    path = _write_yaml(
+        tmp_path / "agent.yaml",
+        {
+            "name": "researcher",
+            "agent": {"system_prompt": "prompts/system.md"},
+            "tools": {"builtin": ["not_a_real_tool"]},
+        },
+    )
+
+    with pytest.raises(ConfigValidationError) as exc_info:
+        load_agent_config(path)
+
+    message = str(exc_info.value)
+    assert "not_a_real_tool" in message
+    assert "Phase 3" in message
+    assert "web_fetch" in message
+    assert "calculator" in message
+    assert "read_file" in message
+    assert "search_docs" not in message
+
+    ok = _write_yaml(
+        tmp_path / "ok-agent.yaml",
+        {
+            "name": "researcher",
+            "agent": {"system_prompt": "prompts/system.md"},
+            "tools": {"builtin": ["web_fetch", "calculator", "read_file"]},
+        },
+    )
+    config = load_agent_config(ok)
+    assert config.tools is not None
+    assert config.tools.builtin == ["web_fetch", "calculator", "read_file"]
+
+
 # --- E4-S02a / E4.2 ---
 
 

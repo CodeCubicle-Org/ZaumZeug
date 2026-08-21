@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/56-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-08-21 |
 | **Story ID** | E7-S07 |
+| **Status** | Done (2026-08-21) |
 | **Epic** | [E7 — Tools, MCP, and ACP](../07-epic.md) |
 | **Phase** | 3 |
 | **Epic build order** | 7 of 8 |
@@ -24,6 +25,7 @@
 | **Persona** | Harness developer |
 | **Priority** | P2 |
 | **Prerequisites** | [E3-S03](11-story.md#e3-s03-builtin-tool-web_fetch) · [E7-S01](50-story.md#e7-s01-mcp-tool-configuration) |
+| **Status** | Done (2026-08-21) |
 
 ### User story
 
@@ -44,15 +46,15 @@ As a **harness developer**, I want additional builtin tools beyond `web_fetch`, 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Phase 3 ships `calculator`, `read_file` per catalog
-- [ ] **AC-2** `read_file` sandboxed to harness workspace paths
-- [ ] **AC-3** Unknown builtin ID fails with phase-appropriate available list
-- [ ] **AC-4** `search_docs` remains Phase 4 (E8)
+- [x] **AC-1** Phase 3 ships `calculator`, `read_file` per catalog
+- [x] **AC-2** `read_file` sandboxed to harness workspace paths
+- [x] **AC-3** Unknown builtin ID fails with phase-appropriate available list
+- [x] **AC-4** `search_docs` remains Phase 4 (E8)
 
 ### Implementation tasks (build)
 
-- [ ] Implement `calculator` and `read_file` in runtime tools package
-- [ ] Extend phase gate in config validation
+- [x] Implement `calculator` and `read_file` in runtime tools package
+- [x] Extend phase gate in config validation
 
 ### Verification (after build)
 
@@ -65,12 +67,21 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-3 | `tests/unit/config/test_schemas.py::test_e7_s07_ac3_unknown_builtin_phase3_list` |
 | AC-4 | `tests/unit/runtime/tools/test_extended_builtins.py::test_e7_s07_ac4_search_docs_not_phase3` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/runtime/tools/test_extended_builtins.py tests/unit/runtime/tools/test_read_file.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/runtime/tools/test_extended_builtins.py tests/unit/runtime/tools/test_read_file.py -v` passes
+- [x] Full suite `pytest tests -q` (2026-08-21): 339 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate)
 
 ### Definition of done
 
-- [ ] Catalog table in Architecture §6.5 matches implementation
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Catalog table in Architecture §6.5 matches implementation
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-21)
+
+- `calculator` (`runtime/tools/calculator.py`) evaluates arithmetic with a restricted AST (`+ - * / // % **` and parentheses; no names or calls). Haystack `@component` + `ComponentTool`.
+- `read_file` (`runtime/tools/read_file.py`) reads UTF-8 text under the harness folder. Paths `resolve()` then `relative_to(workspace)`; traversal and absolute paths outside the workspace are blocked. Factory passes `workspace=harness_dir`.
+- Catalog factories in `runtime/tools/catalog.py`. `BUILTIN_CATALOG_PHASE = 3` (`config/constants.py`) is the default for `tools.builtin` validation so Phase 3 ids ship without bumping `CURRENT_SDK_PHASE` (stays **1**). `search_docs` stays Phase 4.
+- Unknown builtin ids fail with `available for Phase 3: ['calculator', 'read_file', 'web_fetch']`.
+- Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`, `tests/unit/config/test_schemas.py::test_e7_s07_ac3_unknown_builtin_phase3_list`.
 
 ---

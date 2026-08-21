@@ -116,10 +116,19 @@ def build_agent_tools(
     agent_data: dict[str, Any],
     *,
     agent_dir: Path | str | None = None,
+    workspace: Path | str | None = None,
 ) -> list[Any]:
     """Build Haystack tools from ``tools.builtin``, ``tools.mcp``, and ``tools.custom``."""
     tools: list[Any] = []
-    tools.extend(build_builtin_tools(_builtin_tool_ids(agent_data)))
+    resolved_workspace = workspace
+    if resolved_workspace is None and agent_dir is not None:
+        resolved_workspace = Path(agent_dir).resolve().parent.parent
+    tools.extend(
+        build_builtin_tools(
+            _builtin_tool_ids(agent_data),
+            workspace=resolved_workspace,
+        )
+    )
     try:
         tools.extend(build_mcp_toolsets(_mcp_entries(agent_data)))
     except McpBoundaryError as exc:
@@ -155,6 +164,7 @@ def build_agent_bundle(
     tools = build_agent_tools(
         agent_config.model_dump(exclude_none=True),
         agent_dir=resolution.agent_yaml_path.parent,
+        workspace=harness_dir,
     )
     system_prompt = load_system_prompt(resolution)
     input_rewrite_template = load_input_rewrite(resolution)
@@ -182,8 +192,9 @@ def build_agent(
     """Build a single Haystack ``Agent`` from harness config and a stage-scoped router.
 
     Shared by serve, MCP, and ACP (E3-S02+) — one factory, no nested agent loops.
-    Uses ``resolve_agent_serve()`` (E2-S03), the builtin tool catalog (E3-S03),
-    MCP toolsets (E7-S01), and custom tools from ``agents/<name>/tools/`` (E7-S02).
+    Uses ``resolve_agent_serve()`` (E2-S03), the builtin tool catalog (E3-S03,
+    E7-S07), MCP toolsets (E7-S01), and custom tools from ``agents/<name>/tools/``
+    (E7-S02).
     Prefer :func:`build_agent_bundle` when the caller needs ``input_rewrite``.
     """
     return build_agent_bundle(

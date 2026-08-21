@@ -5,8 +5,8 @@
 | **Document** | Epic E7 user stories |
 | **File** | `docs/stories/07-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-21 (E7-S06 Done) |
-| **Status** | In progress (E7-S06 Done 2026-08-21) |
+| **Last modified** | 2026-08-21 (E7-S07 Done) |
+| **Status** | In progress (E7-S07 Done 2026-08-21) |
 | **Build order** | **7 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -25,7 +25,7 @@
 ### Story implementation order (within this epic)
 
 1. **E7-S02** — Custom tools ✅
-2. **E7-S07** — Extended builtins
+2. **E7-S07** — Extended builtins ✅
 3. **E7-S01** — MCP config + `zaumzeug mcp` ✅
 4. **E7-S03** — Cursor setup ✅
 5. **E7-S05** — ACP adapter ✅
@@ -373,6 +373,7 @@ Canonical detail: [55-story.md](epic-stories/55-story.md). `zaumzeug mcp <name> 
 | **Feature** | E7.7 |
 | **Persona** | Harness developer |
 | **Priority** | P2 |
+| **Status** | Done (2026-08-21) |
 
 ### User story
 
@@ -385,15 +386,15 @@ As a **harness developer**, I want additional builtin tools beyond `web_fetch`, 
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Phase 3 ships `calculator`, `read_file` per catalog
-- [ ] **AC-2** `read_file` sandboxed to harness workspace paths
-- [ ] **AC-3** Unknown builtin ID fails with phase-appropriate available list
-- [ ] **AC-4** `search_docs` remains Phase 4 (E8)
+- [x] **AC-1** Phase 3 ships `calculator`, `read_file` per catalog
+- [x] **AC-2** `read_file` sandboxed to harness workspace paths
+- [x] **AC-3** Unknown builtin ID fails with phase-appropriate available list
+- [x] **AC-4** `search_docs` remains Phase 4 (E8)
 
 ### Implementation tasks (build)
 
-- [ ] Implement `calculator` and `read_file` in runtime tools package
-- [ ] Extend phase gate in config validation
+- [x] Implement `calculator` and `read_file` in runtime tools package
+- [x] Extend phase gate in config validation
 
 ### Verification (after build)
 
@@ -406,13 +407,17 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-3 | `tests/unit/config/test_schemas.py::test_e7_s07_ac3_unknown_builtin_phase3_list` |
 | AC-4 | `tests/unit/runtime/tools/test_extended_builtins.py::test_e7_s07_ac4_search_docs_not_phase3` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/runtime/tools/test_extended_builtins.py tests/unit/runtime/tools/test_read_file.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/runtime/tools/test_extended_builtins.py tests/unit/runtime/tools/test_read_file.py -v` passes
 
 ### Definition of done
 
-- [ ] Catalog table in Architecture §6.5 matches implementation
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Catalog table in Architecture §6.5 matches implementation
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-21)
+
+Canonical detail: [56-story.md](epic-stories/56-story.md). Phase 3 builtins `calculator` and `read_file`; `search_docs` stays Phase 4. `BUILTIN_CATALOG_PHASE = 3`; `CURRENT_SDK_PHASE` stays **1**.
 
 ---
 

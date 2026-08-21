@@ -37,6 +37,8 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 **Implementation (E7-S02, 2026-08-14):** `src/zaumzeug/runtime/tools/custom.py` — `load_custom_tools()` imports `tools.custom` from `agents/<name>/` (path, dotted module, or `module:attr`; no traversal; stale `sys.modules` dropped). Registers Haystack `Tool` / `ComponentTool` / `@component` / typed functions. Factory `build_agent_tools(..., agent_dir=)` appends custom tools after builtins and MCP; import errors raise `RuntimeFactoryError` with the module path. Tests: `tests/unit/runtime/tools/test_custom_loader.py`.
 
+**Implementation (E7-S07, 2026-08-21):** `src/zaumzeug/runtime/tools/calculator.py` and `read_file.py` — Haystack `@component` + `ComponentTool`. Factory `build_agent_tools(..., workspace=)` sandboxes `read_file` to the harness folder. Catalog phase is `BUILTIN_CATALOG_PHASE = 3` (`CURRENT_SDK_PHASE` stays **1**). Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`.
+
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract tests on ephemeral localhost port; optional request `model_id` overrides the entry agent's ModelRouter registry (`AgentPipelineWrapper`). Tests: `tests/integration/test_openai_contract.py` (`-k e3_s07`).
 
 **Implementation (E3-S08, 2026-07-21):** `src/zaumzeug/runtime/workflow.py` — `run_workflow()` executes `workflow.yaml` stages serially; per-stage `ModelRouter` + `build_agent()`; prior stage output prepended as a user message; `--from <stage>` partial runs; pipeline stages raise a Phase-1 stub error (full invoke Phase 4). CLI: `zaumzeug run <harness> [--from STAGE] [--input TEXT]`. Tests: `tests/integration/test_workflow_run.py` (`-k e3_s08`).

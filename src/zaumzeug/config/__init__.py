@@ -43,6 +43,7 @@ from zaumzeug.config.resolver import (
     resolve_agent_serve,
     resolve_serve_entry,
 )
+from zaumzeug.config.constants import BUILTIN_CATALOG_PHASE
 from zaumzeug.config.schemas import (
     CURRENT_SDK_PHASE,
     PHASE_GATED_FIELDS,
@@ -69,6 +70,7 @@ from zaumzeug.config.schemas import (
 
 __all__ = [
     "ARTIFACT_MANIFEST",
+    "BUILTIN_CATALOG_PHASE",
     "BUILTIN_TOOL_PHASES",
     "CURRENT_SDK_PHASE",
     "DEPLOY_HARNESS_ROOT",

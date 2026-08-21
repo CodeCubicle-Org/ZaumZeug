@@ -21,7 +21,7 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 | Guide | Description |
 |---|---|
 | [Multi-agent workflow](guides/multi-agent-workflow.md) | `workflow.yaml`, agent vs pipeline stages, control flow inside agents; **run reliability** (`runtime.retry`, `output.format: json`, stage INFO logs — E8-S07) |
-| [Custom tools](guides/custom-tools.md) | `tools.custom` Python modules under `agents/<name>/tools/`; Haystack `ComponentTool` / `Tool`; doctor/serve import errors include the module path (E7-S02) |
+| [Custom tools](guides/custom-tools.md) | `tools.custom` Python modules under `agents/<name>/tools/`; Haystack `ComponentTool` / `Tool`; doctor/serve import errors include the module path (E7-S02). Builtin catalog: `web_fetch`, `calculator`, `read_file` (`tools.builtin`; E7-S07) |
 | [Cursor MCP setup](guides/cursor-mcp.md) | Point Cursor at `http://localhost:{mcp_port}/mcp` (default **1417**); install `--cursor-mcp` writes live `.cursor/mcp.json`; `uv` only for stdio `tools.mcp` (E7-S03) |
 | [ACP (Zed / JetBrains)](guides/acp.md) | `zaumzeug acp` stdio JSON-RPC for Zed/JetBrains; Agent Client Protocol ≠ IBM ACP/A2A; Cursor uses MCP (E7-S05) |
 | [Web deployment](guides/web-deployment.md) | Optional Chainlit GUI at `/chat` on the serve port (`serve.hayhooks.chainlit: true` + `pip install "hayhooks[chainlit]"`); other layouts (Open WebUI / SPA / Next.js) previewed (E7-S04) |
@@ -32,7 +32,7 @@ End-user guides for building and running multi-agent harnesses. For SDK design a
 ## Quick links
 
 - **`zaumzeug init <name>`** — scaffold a new harness under `usr-harnesses/`
-- **Custom tools** — list Python modules in `tools.custom` on `agent.yaml` (`agents/<name>/tools/*.py`). Import errors fail `zaumzeug doctor` / serve with the module path. See [Custom tools](guides/custom-tools.md).
+- **Custom tools** — list Python modules in `tools.custom` on `agent.yaml` (`agents/<name>/tools/*.py`). Import errors fail `zaumzeug doctor` / serve with the module path. SDK builtins (`web_fetch`, `calculator`, `read_file`) use `tools.builtin` instead. See [Custom tools](guides/custom-tools.md).
 - **`zaumzeug mcp <harness>`** — serve the workflow entry agent as MCP at `http://127.0.0.1:{mcp_port}/mcp` (default **1417**). Production: `zaumzeug mcp <harness> --deploy` (or `HARNESS_ROOT=deploy`). Point Cursor at that URL via `.cursor/mcp.json` (install `--cursor-mcp` or copy the example). Declare external MCP servers in `tools.mcp` on `agent.yaml` (Haystack `MCPToolset`; stdio servers need `uv`). See [Cursor MCP setup](guides/cursor-mcp.md), [Deploy and ship](guides/deploy.md), and [CLI — mcp](reference/cli.md#zaumzeug-mcp).
 - **`zaumzeug acp <harness>`** — Agent Client Protocol stdio JSON-RPC for Zed / JetBrains (the IDE drives the harness as the primary agent). Not IBM ACP/A2A. Cursor uses MCP, not ACP. See [ACP (Zed / JetBrains)](guides/acp.md) and [CLI — acp](reference/cli.md#zaumzeug-acp).
 - **`zaumzeug serve <harness>`** — interactive chat with the workflow **entry** agent (dev: `usr-harnesses/`). Use **`--deploy`** or **`HARNESS_ROOT=deploy`** to serve a production bundle from `deploy/<name>/` only (E5-S03 / E5-S04) — same OpenAI REST API; no `usr-harnesses/` required. Optional **`serve.hayhooks.chainlit: true`** serves Chainlit at `/chat` on the same port (`pip install "hayhooks[chainlit]"`). See [CLI — serve](reference/cli.md#zaumzeug-serve), [Web deployment](guides/web-deployment.md), [Global environment](reference/cli.md#global-environment), and the bundle's `README.deploy.md`.
