@@ -184,12 +184,12 @@ user-docs/
 ├── guides/
 │   ├── multi-agent-workflow.md   # workflow.yaml, agents vs pipelines, control flow
 │   ├── compile.md                # GEPA compile / export / rollback
-│   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05); git policy (E5-S07); platforms (E5-S08); target install + --verify (E5-S09a/b/c)
+│   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05); git policy (E5-S07); platforms (E5-S08); target install + --verify (E5-S09a/b/c); mcp --deploy (E7-S06)
 │   ├── custom-tools.md           # tools.custom → ComponentTool / Tool (E7-S02)
-│   ├── cursor-mcp.md             # Cursor mcp.json → localhost:{mcp_port}/mcp (E7-S03)
+│   ├── cursor-mcp.md             # Cursor mcp.json → localhost:{mcp_port}/mcp (E7-S03); --deploy (E7-S06)
 │   ├── web-deployment.md         # Chainlit /chat co-located with REST (E7-S04)
-│   ├── acp.md                    # zaumzeug acp stdio JSON-RPC for Zed / JetBrains (E7-S05)
-│   └── testing.md                # unit, integration, eval; mock profile; CI tiers
+│   ├── acp.md                    # zaumzeug acp stdio JSON-RPC for Zed / JetBrains (E7-S05); MCP --deploy pointer (E7-S06)
+│   └── testing.md                # unit, integration, eval; mock profile; CI tiers; mcp --deploy (E7-S06)
 └── reference/cli.md
 ```
 

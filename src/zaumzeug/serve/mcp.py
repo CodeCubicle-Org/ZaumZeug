@@ -1,4 +1,4 @@
-"""Hayhooks MCP server boot — canonical entry for ``zaumzeug mcp`` (E7-S01)."""
+"""Hayhooks MCP server boot — canonical entry for ``zaumzeug mcp`` (E7-S01 / E7-S06)."""
 
 from __future__ import annotations
 
@@ -98,6 +98,10 @@ def prepare_mcp(
 
     Does not bind a socket. Serves Streamable HTTP at ``/mcp`` (plus ``/status``).
     Optional ``port`` overrides ``serve.hayhooks.mcp_port`` (default 1417).
+    Root resolution is shared with :func:`zaumzeug.serve.validate.validate_serve`
+    / the serve runner: when ``deploy`` is true (or ``HARNESS_ROOT=deploy``),
+    loads only ``deploy/<name>/`` and requires a valid deploy ``manifest.json``
+    (E7-S06).
     """
     import tempfile
 

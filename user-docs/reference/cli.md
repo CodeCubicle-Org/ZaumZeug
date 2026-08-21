@@ -70,7 +70,7 @@ zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose] [--port N]
 
 **Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**), or `--port` when set. Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`). Optional **`serve.hayhooks.chainlit: true`** mounts Chainlit at `/chat` on the same port — requires `pip install "hayhooks[chainlit]"` (see [Web deployment](../guides/web-deployment.md)).
 
-**Behavior (`--deploy` / production):** Same OpenAI REST API as dev serve (`POST /v1/chat/completions`, `GET /v1/models`, `POST /<harness>/run`), but paths resolve under `deploy/<name>/` only — `usr-harnesses/` is never consulted. Fails fast when the deploy folder is missing or `manifest.json` is absent/invalid. Typical ops flow after `zaumzeug deploy <name>` and target install: `zaumzeug serve <name> --deploy`, or set `HARNESS_ROOT=deploy` in the container/systemd environment (see [Global environment](#global-environment)).
+**Behavior (`--deploy` / production):** Same OpenAI REST API as dev serve (`POST /v1/chat/completions`, `GET /v1/models`, `POST /<harness>/run`), but paths resolve under `deploy/<name>/` only — `usr-harnesses/` is never consulted. Fails fast when the deploy folder is missing or `manifest.json` is absent/invalid. Typical ops flow after `zaumzeug deploy <name>` and target install: `zaumzeug serve <name> --deploy`, `zaumzeug mcp <name> --deploy` (**Done** E7-S06 — same MCP surface as dev), or set `HARNESS_ROOT=deploy` in the container/systemd environment (see [Global environment](#global-environment)).
 
 CI mock smoke (E1-S07) uses `python install/ci_serve_smoke.py example` — starts `zaumzeug serve` on an ephemeral port, probes `GET /v1/models`, then stops the process.
 
@@ -156,6 +156,10 @@ zaumzeug mcp <harness> [--deploy] [--verbose] [--port N]
 
 ```bash
 zaumzeug mcp example
+# production bundle (no usr-harnesses/):
+zaumzeug mcp example --deploy
+# equivalent env override (containers / systemd):
+# HARNESS_ROOT=deploy zaumzeug mcp example
 # Cursor / Claude Desktop URL:
 # http://127.0.0.1:1417/mcp
 ```
@@ -172,7 +176,7 @@ tools:
 
 `zaumzeug doctor` warns (non-blocking) when stdio MCP is configured but `uv` is not on PATH. MCP JSON-RPC errors use `{jsonrpc, error: {code, message, data}}` with `data.ok: false`.
 
-Cursor setup (`.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`): [Cursor MCP setup](../guides/cursor-mcp.md).
+Cursor setup (`.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`): [Cursor MCP setup](../guides/cursor-mcp.md). Production: [Deploy and ship](../guides/deploy.md).
 
 ---
 
@@ -369,7 +373,7 @@ If `eval:` is absent, `warn` / `block` are a no-op. Gate logic lives only in `de
 
 **Bundle contents** (`deploy/<name>/`): stripped `harness.yaml` (no `eval`/`deploy`/`compile`), `workflow.yaml`, per-agent runtime files (`prompts/` / `tools/` / `hooks.py` / `agents-models.yaml` when referenced) + pinned `artifacts/<run_id>/`, `docs/workflow-diagram.md`, `manifest.json`, `README.deploy.md`, and `target_install.py` (+ `.sh` / `.ps1` wrappers). **Never** copies `modules/`, `skills/`, `data/`, or `eval/` (Architecture §10.1 / E5-S02). Missing required runtime paths abort deploy before writing. Idempotent — overwrites an existing bundle. Target install (**Done** E5-S09a/b/c): optional `.venv`, `pip install zaumzeug` (runtime only), seed `.env` from `.env.example` when missing, wrappers forward flags/exit codes, optional `--verify` runs `zaumzeug doctor <name> --deploy` then `zaumzeug serve <name> --deploy --dry-run`.
 
-**After deploy:** copy `deploy/<name>/` to the target → run bundled `target_install` → create `.env` on the target → `zaumzeug serve <name> --deploy` (**Done** E5-S03) or `HARNESS_ROOT=deploy zaumzeug serve <name>` (**Done** E5-S04). Ship workflow docs **Done** E5-S05 — see [Deploy and ship](../guides/deploy.md) and the bundle `README.deploy.md`. Deploy git policy **Done** E5-S07 — default ignore `deploy/` / artifacts; optional release commit or CI upload ([Git policy](../guides/deploy.md#git-policy-for-deploy-bundles)). Platform policy **Done** E5-S08 — Linux-first ops target; OS-neutral bundle; Win/macOS best-effort not CI-gated; Linux CI deploy→serve smoke ([Platforms](../guides/deploy.md#platforms)). Target install **Done** E5-S09a/b/c (core / wrappers / `--verify`). Same OpenAI REST as dev serve; `usr-harnesses/` is not required. See also [serve](#zaumzeug-serve) and [Global environment](#global-environment).
+**After deploy:** copy `deploy/<name>/` to the target → run bundled `target_install` → create `.env` on the target → `zaumzeug serve <name> --deploy` (**Done** E5-S03) or `zaumzeug mcp <name> --deploy` (**Done** E7-S06) or `HARNESS_ROOT=deploy zaumzeug serve|mcp <name>` (**Done** E5-S04). Ship workflow docs **Done** E5-S05 — see [Deploy and ship](../guides/deploy.md) and the bundle `README.deploy.md`. Deploy git policy **Done** E5-S07 — default ignore `deploy/` / artifacts; optional release commit or CI upload ([Git policy](../guides/deploy.md#git-policy-for-deploy-bundles)). Platform policy **Done** E5-S08 — Linux-first ops target; OS-neutral bundle; Win/macOS best-effort not CI-gated; Linux CI deploy→serve smoke ([Platforms](../guides/deploy.md#platforms)). Target install **Done** E5-S09a/b/c (core / wrappers / `--verify`). Same OpenAI REST as dev serve; same MCP surface as `zaumzeug mcp` in development; `usr-harnesses/` is not required. See also [serve](#zaumzeug-serve), [mcp](#zaumzeug-mcp), and [Global environment](#global-environment).
 
 ```bash
 zaumzeug deploy example

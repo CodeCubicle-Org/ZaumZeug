@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers |
-| **Last updated** | 2026-08-21 |
+| **Last updated** | 2026-08-21 (E7-S06 MCP `--deploy`) |
 
 After [installation](installation.md), use this guide to add harnesses beyond the shipped `example` and to understand the project layout.
 
@@ -58,6 +58,7 @@ zaumzeug init my-agent --force
 zaumzeug doctor my-agent
 zaumzeug serve my-agent
 # zaumzeug mcp my-agent     # Cursor / Claude Desktop
+# zaumzeug mcp my-agent --deploy   # production bundle (same MCP surface)
 # zaumzeug acp my-agent     # Zed / JetBrains (stdio JSON-RPC; not IBM A2A)
 # optional (needs pip install "zaumzeug[eval]"):
 # deepeval test run usr-harnesses/my-agent/eval/

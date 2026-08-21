@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Ops / platform · Harness developers |
-| **Last updated** | 2026-08-21 (E7-S05 ACP `--deploy` / `HARNESS_ROOT`) |
+| **Last updated** | 2026-08-21 (E7-S06 MCP `--deploy`) |
 
 Ship a production harness to a clean server **without** DSPy, GEPA, or DeepEval on the target. Compile and eval stay on the developer machine (or CI); the target only runs Haystack via `zaumzeug`.
 
@@ -19,6 +19,7 @@ dev/CI:  zaumzeug compile <name>  →  zaumzeug deploy <name>
          deploy/<name>/   (self-contained bundle)
               ↓
 target:  copy folder  →  target_install  →  create .env  →  zaumzeug serve <name> --deploy
+                                                                   zaumzeug mcp <name> --deploy
 ```
 
 | Step | Where | What |
@@ -27,7 +28,7 @@ target:  copy folder  →  target_install  →  create .env  →  zaumzeug serve
 | 2. Copy | Ops | Copy **only** `deploy/<name>/` to the target (no `usr-harnesses/` required) |
 | 3. Install | Target | Run bundled `target_install` → `pip install zaumzeug` (**runtime only**); optional `--verify` runs doctor + serve dry-run |
 | 4. Secrets | Target | Create `.env` from `.env.example` if needed — **never** ship `.env` in the bundle |
-| 5. Serve | Target | `zaumzeug serve <name> --deploy` (or `HARNESS_ROOT=deploy`) |
+| 5. Serve / MCP | Target | `zaumzeug serve <name> --deploy` or `zaumzeug mcp <name> --deploy` (or `HARNESS_ROOT=deploy`) |
 
 Python files listed in an agent's `tools.custom` are copied into the bundle (`tools/search_docs.py`, dotted `tools.search_docs`, or `tools.search_docs:attr` all resolve to `tools/search_docs.py`). Extra `.py` files under `tools/` stay in the dev tree. See [Custom tools](custom-tools.md).
 
@@ -96,12 +97,14 @@ From the **project root** that contains `deploy/<name>/` (parent of the bundle, 
 ```bash
 zaumzeug doctor <name> --deploy
 zaumzeug serve <name> --deploy
+zaumzeug mcp <name> --deploy
 ```
 
 ```powershell
 # Windows (PowerShell) — same CLI
 zaumzeug doctor <name> --deploy
 zaumzeug serve <name> --deploy
+zaumzeug mcp <name> --deploy
 ```
 
 Containers / systemd (no flag on every invocation):
@@ -109,14 +112,16 @@ Containers / systemd (no flag on every invocation):
 ```bash
 export HARNESS_ROOT=deploy
 zaumzeug serve <name>
+zaumzeug mcp <name>
 ```
 
 ```powershell
 $env:HARNESS_ROOT = "deploy"
 zaumzeug serve <name>
+zaumzeug mcp <name>
 ```
 
-Same OpenAI REST surface as local serve (`POST /v1/chat/completions`, `GET /v1/models`). Optional **`GET /chat`** when the shipped `harness.yaml` has `serve.hayhooks.chainlit: true` and the target has `pip install "hayhooks[chainlit]"` — see [Web deployment](web-deployment.md). Validate without binding:
+Same OpenAI REST surface as local serve (`POST /v1/chat/completions`, `GET /v1/models`). **`zaumzeug mcp <name> --deploy`** (or `HARNESS_ROOT=deploy`) exposes the same MCP surface as development (`POST /mcp`, `GET /status` on `serve.hayhooks.mcp_port`, default **1417**) — see [Cursor MCP setup](cursor-mcp.md). Optional **`GET /chat`** when the shipped `harness.yaml` has `serve.hayhooks.chainlit: true` and the target has `pip install "hayhooks[chainlit]"` — see [Web deployment](web-deployment.md). Validate without binding:
 
 ```bash
 zaumzeug serve <name> --deploy --dry-run
@@ -182,6 +187,7 @@ Remove or restore the ignore later with `git rm -r --cached deploy/<name>/` if y
 - [Platforms](#platforms) (E5-S08) — Linux-first production; OS-neutral bundle; Win/macOS best-effort
 - [Git policy for deploy bundles](#git-policy-for-deploy-bundles) (E5-S07)
 - [CLI — deploy](../reference/cli.md#zaumzeug-deploy) · [CLI — serve](../reference/cli.md#zaumzeug-serve) · [CLI — mcp](../reference/cli.md#zaumzeug-mcp) · [CLI — acp](../reference/cli.md#zaumzeug-acp)
+- [Cursor MCP setup](cursor-mcp.md) — `zaumzeug mcp <name> --deploy` (same production root and MCP surface as dev)
 - [ACP (Zed / JetBrains)](acp.md) — `zaumzeug acp <name> --deploy` (same production root as serve)
 - [Testing — deploy gates](testing.md#deploy-eval-gate)
 - [Installation — production disk](../getting-started/installation.md#disk-space-planning-estimates)

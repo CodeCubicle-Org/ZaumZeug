@@ -33,7 +33,7 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 **Implementation (E3-S02, 2026-07-20):** `src/zaumzeug/serve/runner.py` — `validate_serve()` → `build_agent()` → Hayhooks `create_app` / `run_app` on `127.0.0.1` and `serve.hayhooks.port`. OpenAI routes via Hayhooks registry (`/v1/chat/completions`, `GET /v1/models`). Production `--deploy` path closed by [E5-S03](../stories/epic-stories/43-story.md) (2026-07-28). Optional `/chat` (E7-S04) uses the same runner when `serve.hayhooks.chainlit: true`.
 
-**Implementation (E7-S01, 2026-08-14):** `src/zaumzeug/serve/mcp.py` — `zaumzeug mcp <name>` validates like serve, builds the entry agent, registers it with `skip_mcp=False`, and starts Hayhooks MCP (`create_mcp_server` / `create_starlette_app`) on `127.0.0.1`:`serve.hayhooks.mcp_port` (default 1417). Endpoints: `POST /mcp`, `GET /status`. Malformed `POST /mcp` returns JSON-RPC 2.0 `{jsonrpc, error: {code, message, data}}` with `data.ok: false`. `zaumzeug serve` keeps `skip_mcp=True`. `tools.mcp` → Haystack `MCPToolset` in `runtime/tools/mcp.py`. Tests: `tests/integration/mcp/` (`-k e7_s01`).
+**Implementation (E7-S01, 2026-08-14):** `src/zaumzeug/serve/mcp.py` — `zaumzeug mcp <name>` validates like serve, builds the entry agent, registers it with `skip_mcp=False`, and starts Hayhooks MCP (`create_mcp_server` / `create_starlette_app`) on `127.0.0.1`:`serve.hayhooks.mcp_port` (default 1417). Endpoints: `POST /mcp`, `GET /status`. Malformed `POST /mcp` returns JSON-RPC 2.0 `{jsonrpc, error: {code, message, data}}` with `data.ok: false`. `zaumzeug serve` keeps `skip_mcp=True`. `tools.mcp` → Haystack `MCPToolset` in `runtime/tools/mcp.py`. Tests: `tests/integration/mcp/` (`-k e7_s01`). Production `--deploy` / `HARNESS_ROOT=deploy` closed by [E7-S06](../stories/epic-stories/55-story.md) (2026-08-21).
 
 **Implementation (E7-S02, 2026-08-14):** `src/zaumzeug/runtime/tools/custom.py` — `load_custom_tools()` imports `tools.custom` from `agents/<name>/` (path, dotted module, or `module:attr`; no traversal; stale `sys.modules` dropped). Registers Haystack `Tool` / `ComponentTool` / `@component` / typed functions. Factory `build_agent_tools(..., agent_dir=)` appends custom tools after builtins and MCP; import errors raise `RuntimeFactoryError` with the module path. Tests: `tests/unit/runtime/tools/test_custom_loader.py`.
 
@@ -53,7 +53,7 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 |---|---|
 | `zaumzeug init <name>` | Scaffold `usr-harnesses/<name>/` from template ([E1-S04](../stories/epic-stories/21-story.md)); `--force` overwrites |
 | `zaumzeug install-project` | **Deferred** — PyPI consumer scaffold (no editable install); after package publish ([E1-S08](../stories/epic-stories/25-story.md)) |
-| `zaumzeug mcp <harness>` | Hayhooks MCP Streamable HTTP on `serve.hayhooks.mcp_port` (default **1417**) — `{host}:{mcp_port}/mcp` ✅ (E7-S01) |
+| `zaumzeug mcp <harness>` | Hayhooks MCP Streamable HTTP on `serve.hayhooks.mcp_port` (default **1417**) — `{host}:{mcp_port}/mcp` ✅ (E7-S01); `--deploy` / `HARNESS_ROOT=deploy` same as serve ✅ (E7-S06) |
 | `zaumzeug acp <harness>` | Agent Client Protocol newline-delimited JSON-RPC on **stdio** (`serve/acp.py`); logs on stderr; `--deploy` / `HARNESS_ROOT=deploy` same as serve ✅ (E7-S05) |
 | `zaumzeug serve <harness> --deploy` | Same OpenAI REST as dev serve, loads **only** `deploy/<name>/` (manifest required; no `usr-harnesses/`) ([E5-S03](../stories/epic-stories/43-story.md)) |
 | `HARNESS_ROOT=deploy` | Env equivalent of `--deploy` for serve / mcp / acp (and doctor / run); preferred in containers / systemd ([E5-S04](../stories/epic-stories/44-story.md)) |
@@ -98,7 +98,7 @@ Product context: [PRD §5, §7](../prd.md#5-users-and-personas). Web UI choice: 
 | Client | Protocol | Command | Endpoint |
 |---|---|---|---|
 | Web app, Chainlit, Open WebUI | OpenAI-compatible REST | `zaumzeug serve` | `/v1/chat/completions` |
-| Cursor, Claude Desktop | MCP | `zaumzeug mcp` | `{host}:{mcp_port}/mcp` |
+| Cursor, Claude Desktop | MCP | `zaumzeug mcp` (`--deploy` for production) | `{host}:{mcp_port}/mcp` |
 | Zed, JetBrains, Neovim | ACP | `zaumzeug acp` | stdio JSON-RPC |
 | Batch jobs | Direct REST | `zaumzeug serve` | `POST /{pipeline}/run` |
 | Agent fleets (Phase 4) | A2A | `serve.a2a: true` | Agent Card |
@@ -110,6 +110,8 @@ Product context: [PRD §5, §7](../prd.md#5-users-and-personas). Web UI choice: 
 Use when harness is a **capability** invoked by Cursor's (or another host's) agent. Limitations: no native IDE agent UX; host stays in control; not designed for agent-to-agent delegation.
 
 **Implementation (E7-S03, 2026-08-21):** Cursor setup guide [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md) — `mcp.json` URL `http://localhost:{mcp_port}/mcp` (default 1417); install scaffolds `.cursor/mcp.json.example`; `--cursor-mcp` writes live `.cursor/mcp.json` (copy-if-missing). `uv` is required only when the harness uses stdio `tools.mcp` servers. Tests: `tests/unit/install/test_scaffolding.py::test_e7_s03_ac2_mcp_json_example_scaffolded`, `tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json`.
+
+**Implementation (E7-S06, 2026-08-21):** Production MCP — `zaumzeug mcp <name> --deploy` (or `HARNESS_ROOT=deploy`) loads only `deploy/<name>/`; same Streamable HTTP surface as dev. Docs: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`.
 
 ### 9.3 ACP — when to use
 

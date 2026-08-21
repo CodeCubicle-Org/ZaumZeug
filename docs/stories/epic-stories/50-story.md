@@ -5,7 +5,7 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/50-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-14 |
+| **Last modified** | 2026-08-21 |
 | **Story ID** | E7-S01 |
 | **Status** | Done (2026-08-14) |
 | **Epic** | [E7 — Tools, MCP, and ACP](../07-epic.md) |
@@ -35,6 +35,7 @@ As a **harness developer**, I want MCP tools declared in yaml, so that my agent 
 - [PRD E7.1](../../prd.md#epic-e7--tools-mcp-and-acp-phase-3)
 - [Architecture §9](../../architecture/06-runtime-and-protocols.md#9-client-access-and-protocols)
 - [Architecture §6.2 — `tools.mcp`](../../architecture/05-configuration.md#62-config-sections)
+- Follow-up: [E7-S06 — MCP from deploy](55-story.md)
 
 
 ### Implementation resources
@@ -96,6 +97,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 - Runtime: `runtime/tools/mcp.py` builds Haystack `MCPToolset` (`eager_connect=False`, 30s timeouts) from `tools.mcp`; factory appends toolsets to builtins.
 - Serve: `serve/mcp.py` (`prepare_mcp` / `run_mcp`) registers the entry pipeline with `skip_mcp=False`; Hayhooks `create_mcp_server` + `create_starlette_app`; bind `127.0.0.1` only. `zaumzeug serve` keeps `skip_mcp=True`. Malformed `POST /mcp` returns JSON-RPC 2.0 `{jsonrpc, error: {code, message, data}}` with `data.ok: false`.
 - CLI: `zaumzeug mcp <harness> [--deploy] [--verbose] [--port N]`. Doctor `mcp_uv` warns (non-blocking) when stdio MCP is configured and `uv` is missing; HTTP-only MCP does not require `uv`.
+- Production `--deploy` / `HARNESS_ROOT=deploy` closed by [E7-S06](55-story.md) (2026-08-21) — same MCP surface from `deploy/<name>/`.
 - Compile follow-up (same session): DSPy loader drops stale `sys.modules` before import — [E4-S01](26-story.md).
 
 ---

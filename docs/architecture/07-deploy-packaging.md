@@ -105,7 +105,7 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 | `.env` (API keys) | Yes | Yes — **never** inside bundle; create on target |
 | Haystack/Hayhooks | Via SDK | Via SDK |
 
-**Target command on server:** `zaumzeug serve <name> --deploy` (or `HARNESS_ROOT=deploy`).
+**Target command on server:** `zaumzeug serve <name> --deploy` or `zaumzeug mcp <name> --deploy` (or `HARNESS_ROOT=deploy`).
 
 **Implementation (E5-S03, 2026-07-28):** Full Hayhooks serve from `deploy/<name>/` is live — same OpenAI REST as dev, fails on missing/invalid manifest, works without `usr-harnesses/`. Tests: `tests/integration/deploy/test_serve_deploy.py`.
 
@@ -115,7 +115,9 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 
 **Implementation (E7-S04, 2026-08-21):** Bundle `README.deploy.md` and [deploy.md](../../user-docs/guides/deploy.md) list optional `GET /chat` when the shipped harness has `serve.hayhooks.chainlit: true` and the target has `pip install "hayhooks[chainlit]"`.
 
-**Implementation (E7-S05, 2026-08-21):** `zaumzeug acp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same production root as serve. Ops snippets: `README.deploy.md`, [acp.md](../../user-docs/guides/acp.md). MCP-from-deploy packaging remains [E7-S06](../stories/epic-stories/55-story.md).
+**Implementation (E7-S05, 2026-08-21):** `zaumzeug acp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same production root as serve. Ops snippets: `README.deploy.md`, [acp.md](../../user-docs/guides/acp.md).
+
+**Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same production root as serve; MCP surface matches dev. Ops snippets: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`.
 
 ### 10.6 Deploy platform targets
 

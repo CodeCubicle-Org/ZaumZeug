@@ -67,6 +67,8 @@ At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug run` (workflow
 
 **Implementation (E7-S05, 2026-08-21):** `zaumzeug acp <name>` uses the same factory/resolution path as serve (including `tools.mcp`) then serves Agent Client Protocol JSON-RPC on stdio instead of Hayhooks. Docs: [acp.md](../../user-docs/guides/acp.md). Tests: `tests/integration/acp/test_acp_stdio.py`.
 
+**Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same `validate_serve` production root as serve. MCP Streamable HTTP matches dev (`POST /mcp`, `GET /status`). Docs: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`.
+
 **Implementation (E3-S08, 2026-07-21):** `zaumzeug run <harness>` executes the full (or `--from`-partial) stage graph via `runtime/workflow.run_workflow()` — stage-scoped ModelRouter + factory per agent stage; prior output forwarded as prepended user context. Pipeline stages stubbed until Phase 4.
 
 **Implementation (E8-S07, 2026-08-01):** Same `run_workflow` path adds typed live errors, optional `runtime.retry`, JSON `output.format`, and INFO stage logs with structured `stage`. Serve/HTTP path is a follow-up.
@@ -180,6 +182,8 @@ production failure → trace → dataset row → zaumzeug eval (optional) → GE
 **Implementation (E5-S03, 2026-07-28):** `zaumzeug serve --deploy` runs production bundles under `deploy/<name>/` (same OpenAI REST as dev). Tests: `tests/integration/deploy/test_serve_deploy.py`.
 
 **Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` forces the same production root without `--deploy` (serve / mcp / acp / doctor / run) via `config/harness_root.resolve_harness_path()`. Tests: `tests/unit/deploy/test_harness_root.py`.
+
+**Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp --deploy` is the production MCP path on that same root (same surface as dev). Tests: `tests/integration/mcp/test_mcp_deploy.py`.
 
 **Implementation (E5-S05, 2026-07-28):** Target ship workflow documented — copy `deploy/<name>/` → `target_install` → create `.env` → `zaumzeug serve --deploy`. Runtime-only install (no DSPy/GEPA/DeepEval); `.env` never in bundle. Docs: [user-docs/guides/deploy.md](../user-docs/guides/deploy.md), bundle `README.deploy.md`. Tests: `tests/integration/deploy/test_target_install.py`, `test_deploy.py::test_e5_s05_ac5_no_env_in_bundle`.
 

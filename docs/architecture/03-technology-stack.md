@@ -16,7 +16,7 @@
 | [GEPA](https://github.com/gepa-ai/gepa) | Optimization | `gepa` | `dspy.GEPA`, `optimize_anything` — offline |
 | [DeepEval](https://github.com/confident-ai/deepeval) | Dev eval (optional) | `deepeval` via `[eval]` extra ✅ (E6-S01); `zaumzeug eval` ✅ (E6-S02); deploy gate ✅ (E6-S03 / E5-S06); `eval/` pytest scaffold ✅ (E6-S04); trace → test case ✅ (E6-S05); Mode C HTTP `--base-url` ✅ (E6-S06); GEPA ↔ DeepEval bridge ✅ (E6-S07) | Regression tests; not required for production serve |
 
-Optional: Hayhooks `[chainlit]` extra for embedded GUI at `/chat` ✅ (E7-S04, 2026-08-21) — **primary MCP serving** is via Hayhooks (`zaumzeug mcp`). `mcp-haystack` is a **runtime** dependency for `MCPToolset` (E7-S01). **ACP** (`zaumzeug acp`) is stdio JSON-RPC in `serve/acp.py` ✅ (E7-S05, 2026-08-21) — no extra package.
+Optional: Hayhooks `[chainlit]` extra for embedded GUI at `/chat` ✅ (E7-S04, 2026-08-21) — **primary MCP serving** is via Hayhooks (`zaumzeug mcp`; production `--deploy` / `HARNESS_ROOT=deploy` ✅ E7-S06). `mcp-haystack` is a **runtime** dependency for `MCPToolset` (E7-S01). **ACP** (`zaumzeug acp`) is stdio JSON-RPC in `serve/acp.py` ✅ (E7-S05, 2026-08-21) — no extra package.
 
 ### 4.2 Library boundaries (when to use what)
 
@@ -75,6 +75,8 @@ Canonical package layout. Root `pyproject.toml` exists as of E2-S00 (2026-07-08)
 **Implementation (E7-S04, 2026-08-21):** Optional Chainlit GUI is **not** a `zaumzeug` extra — install `pip install "hayhooks[chainlit]"` then set `serve.hayhooks.chainlit: true`. `zaumzeug.serve.chainlit.require_chainlit()` fails serve with that hint when missing. Docs: [web-deployment.md](../user-docs/guides/web-deployment.md).
 
 **Implementation (E7-S05, 2026-08-21):** `zaumzeug acp` is in-process Agent Client Protocol JSON-RPC on stdio — not a Hayhooks extra and not IBM ACP/A2A. Docs: [acp.md](../user-docs/guides/acp.md). Tests: `tests/integration/acp/test_acp_stdio.py`.
+
+**Implementation (E7-S06, 2026-08-21):** Production MCP uses the same Hayhooks MCP extra — `zaumzeug mcp --deploy` / `HARNESS_ROOT=deploy`. Tests: `tests/integration/mcp/test_mcp_deploy.py`.
 
 **Implementation (E6-S02, 2026-07-28):** `zaumzeug eval` CLI via `eval/runner.py` — `EvalConfig` on `HarnessConfig`; `framework: builtin` (JSONL exact/substring, no DeepEval) or `deepeval` (default when omitted); CLI `--framework` override. Tests: `tests/unit/eval/test_runner.py`.
 
@@ -139,7 +141,7 @@ Test libraries ship in **`[dev]`** (SDK repo) and **`[eval]`** (optional harness
 | **pytest-recording** *(optional)* | Integration | 2+ | VCR cassettes for re-recordable provider HTTP when mock profile is insufficient |
 | **deepeval** | Harness eval | 2+ (`[eval]`) ✅ E6-S01 / CLI ✅ E6-S02 / deploy gate ✅ E6-S03 / pytest scaffold ✅ E6-S04 / trace ✅ E6-S05 / Mode C ✅ E6-S06 / GEPA bridge ✅ E6-S07 | Optional LLM regression via `zaumzeug eval` or `usr-harnesses/<name>/eval/test_*.py` ([E6](../stories/05-epic.md)); import guard in `zaumzeug.eval`; `deploy.eval_gate` on release ([E5-S06](../stories/epic-stories/46-story.md)); `init --with-eval` scaffold; `eval --trace`; Mode C `--base-url` staging/debug; failed→train + optional DeepEval GEPA metric |
 
-**Not in v1 `[dev]` pins (bring your own if needed):** `pytest-cov` (coverage signal), `freezegun` (time determinism). MCP serve tests use Starlette `TestClient` against `zaumzeug mcp` (**Done** [E7-S01](../stories/07-epic.md#e7-s01-mcp-tool-configuration) — `tests/integration/mcp/`); custom tool loader tests import fixture modules under `agents/<name>/tools/` (**Done** [E7-S02](../stories/07-epic.md#e7-s02-custom-tool-loader) — `tests/unit/runtime/tools/test_custom_loader.py`); ACP stdio tests drive `serve/acp.py` in-process and via `python -m zaumzeug.cli acp` (**Done** [E7-S05](../stories/07-epic.md#e7-s05--acp-adapter) — `tests/integration/acp/test_acp_stdio.py`); no extra stub-transport pin.
+**Not in v1 `[dev]` pins (bring your own if needed):** `pytest-cov` (coverage signal), `freezegun` (time determinism). MCP serve tests use Starlette `TestClient` against `zaumzeug mcp` (**Done** [E7-S01](../stories/07-epic.md#e7-s01-mcp-tool-configuration) — `tests/integration/mcp/`); MCP from deploy (**Done** [E7-S06](../stories/epic-stories/55-story.md) — `tests/integration/mcp/test_mcp_deploy.py`); custom tool loader tests import fixture modules under `agents/<name>/tools/` (**Done** [E7-S02](../stories/07-epic.md#e7-s02-custom-tool-loader) — `tests/unit/runtime/tools/test_custom_loader.py`); ACP stdio tests drive `serve/acp.py` in-process and via `python -m zaumzeug.cli acp` (**Done** [E7-S05](../stories/07-epic.md#e7-s05--acp-adapter) — `tests/integration/acp/test_acp_stdio.py`); no extra stub-transport pin.
 
 **Mock-first default:** CI and local default runs use the **`mock`** model profile and file fixtures under `tests/fixtures/responses/` — no API keys. Live LLM and cassette re-record are opt-in ([§13.6](10-operations-and-reference.md#136-testing-playbook)).
 

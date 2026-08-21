@@ -102,9 +102,10 @@ From the **project root** that contains `deploy/{{harness_name}}/` (not from ins
 zaumzeug serve {{harness_name}} --deploy
 # equivalent env override (containers / systemd):
 HARNESS_ROOT=deploy zaumzeug serve {{harness_name}}
-# MCP (Cursor / Claude Desktop) and ACP (Zed / JetBrains) honour the same root:
-# zaumzeug mcp {{harness_name}} --deploy
-# zaumzeug acp {{harness_name}} --deploy
+# MCP (Cursor / Claude Desktop) — same production root, same MCP surface as dev:
+zaumzeug mcp {{harness_name}} --deploy
+# ACP (Zed / JetBrains):
+zaumzeug acp {{harness_name}} --deploy
 ```
 
 `--deploy` or `HARNESS_ROOT=deploy` loads **only** this production tree — no `usr-harnesses/` required. The OpenAI-compatible API matches dev serve:
@@ -122,6 +123,28 @@ Validate without binding a port:
 zaumzeug doctor {{harness_name}} --deploy
 zaumzeug serve {{harness_name}} --deploy --dry-run
 ```
+
+---
+
+## MCP (Cursor / Claude Desktop)
+
+Production MCP uses the **same** `deploy/{{harness_name}}/` tree as serve — no `usr-harnesses/` required. The Streamable HTTP surface matches `zaumzeug mcp` in development (`POST /mcp`, `GET /status` on `serve.hayhooks.mcp_port`, default **1417**).
+
+From the **project root** that contains `deploy/{{harness_name}}/`:
+
+```bash
+zaumzeug mcp {{harness_name}} --deploy
+# equivalent env override (containers / systemd):
+HARNESS_ROOT=deploy zaumzeug mcp {{harness_name}}
+```
+
+Cursor / Claude Desktop URL (localhost bind, same Phase 1 rule as serve):
+
+```text
+http://127.0.0.1:1417/mcp
+```
+
+Override the port with `--port N` or `serve.hayhooks.mcp_port` in the shipped `harness.yaml`. Reverse-proxy to `{mcp_port}/mcp` for a remote host.
 
 ---
 

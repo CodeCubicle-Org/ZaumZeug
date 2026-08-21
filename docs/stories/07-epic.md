@@ -5,8 +5,8 @@
 | **Document** | Epic E7 user stories |
 | **File** | `docs/stories/07-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-21 (E7-S05 Done) |
-| **Status** | In progress (E7-S05 Done 2026-08-21) |
+| **Last modified** | 2026-08-21 (E7-S06 Done) |
+| **Status** | In progress (E7-S06 Done 2026-08-21) |
 | **Build order** | **7 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -29,7 +29,7 @@
 3. **E7-S01** — MCP config + `zaumzeug mcp` ✅
 4. **E7-S03** — Cursor setup ✅
 5. **E7-S05** — ACP adapter ✅
-6. **E7-S06** — MCP from deploy
+6. **E7-S06** — MCP from deploy ✅
 7. **E7-S04** → **E7-S08** — Chainlit ✅; remaining Open WebUI / SPA / Next.js recipes
 
 ---
@@ -333,13 +333,13 @@ As **ops**, I want `zaumzeug mcp <name> --deploy`, so that production bundles ex
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `zaumzeug mcp <name> --deploy` loads from `deploy/<name>/`
-- [ ] **AC-2** Same MCP surface as dev mode
-- [ ] **AC-3** Respects `HARNESS_ROOT=deploy`
+- [x] **AC-1** `zaumzeug mcp <name> --deploy` loads from `deploy/<name>/`
+- [x] **AC-2** Same MCP surface as dev mode
+- [x] **AC-3** Respects `HARNESS_ROOT=deploy`
 
 ### Implementation tasks (build)
 
-- [ ] Share root resolution with serve runner
+- [x] Share root resolution with serve runner
 
 ### Verification (after build)
 
@@ -350,15 +350,19 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-1 | `tests/integration/mcp/test_mcp_deploy.py::test_e7_s06_ac1_loads_deploy_root` |
 | AC-2 | `tests/integration/mcp/test_mcp_deploy.py::test_e7_s06_ac2_same_surface_as_dev` |
 | AC-3 | `tests/integration/mcp/test_mcp_deploy.py::test_e7_s06_ac3_respects_harness_root_env` |
-| AC-1–3 | **optional CI:** Linux deploy → mcp smoke (Phase 3) |
+| AC-1–3 | **optional CI (deferred):** Linux deploy → mcp smoke — pytest covers ACs; not required to close this story |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/mcp/test_mcp_deploy.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/mcp/test_mcp_deploy.py -v` passes
 
 ### Definition of done
 
-- [ ] Documented in `README.deploy.md`
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Documented in `README.deploy.md`
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-21)
+
+Canonical detail: [55-story.md](epic-stories/55-story.md). `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same `validate_serve` root as serve; MCP surface matches dev (`POST /mcp`, `GET /status`). Docs: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md).
 
 ---
 

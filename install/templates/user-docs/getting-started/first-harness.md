@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | New developers |
-| **Last updated** | 2026-08-21 |
+| **Last updated** | 2026-08-21 (E7-S06 MCP `--deploy`) |
 
 This walkthrough uses the shipped **`example`** harness — a general research agent with one workflow stage and the mock model profile. You can chat locally without API keys. Phase 2 also ships a compile seed (`compile.module` + train/val data) so `zaumzeug compile example` works offline via stub GEPA.
 
@@ -57,6 +57,7 @@ zaumzeug serve example
 #   serve.hayhooks.chainlit: true  →  http://127.0.0.1:1416/chat
 # MCP for Cursor / Claude Desktop (default port 1417):
 # zaumzeug mcp example
+# production bundle: zaumzeug mcp example --deploy
 # Point Cursor at http://localhost:1417/mcp — see Cursor MCP setup
 # ACP for Zed / JetBrains (stdio JSON-RPC; not IBM A2A):
 # zaumzeug acp example

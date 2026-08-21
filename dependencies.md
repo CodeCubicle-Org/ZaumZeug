@@ -85,7 +85,7 @@ Then run story tests as usual, e.g.:
 | Standard / tool | Role |
 |---|---|
 | [OpenAI Chat Completions API](https://platform.openai.com/docs/api-reference/chat) | REST contract for `/v1/chat/completions` |
-| [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) | IDE and tool integration (`zaumzeug mcp`) |
+| [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) | IDE and tool integration (`zaumzeug mcp`; production: `zaumzeug mcp --deploy`) |
 | [Agent Client Protocol (ACP)](https://agentclientprotocol.com/) | Zed / JetBrains / Neovim (`zaumzeug acp` stdio JSON-RPC) |
 
 ## Development and testing

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | New developers |
-| **Last updated** | 2026-08-21 |
+| **Last updated** | 2026-08-21 (E7-S06 MCP `--deploy`) |
 
 Get from a fresh clone to a working ZaumZeug dev environment with one command. This page is the full walkthrough (prerequisites, effort, disk, extras, updates, troubleshooting). The short new-contributor summary is [CONTRIBUTING.md](../../CONTRIBUTING.md); it links here for depth.
 
@@ -120,11 +120,13 @@ Sizes are **approximate ranges**, not guarantees. The first `pip install` usuall
 ```bash
 zaumzeug doctor <name> --deploy
 zaumzeug serve <name> --deploy
+zaumzeug mcp <name> --deploy
 # equivalent without the flag (containers / systemd):
 HARNESS_ROOT=deploy zaumzeug serve <name>
+HARNESS_ROOT=deploy zaumzeug mcp <name>
 ```
 
-(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required. `HARNESS_ROOT=deploy` is **Done** E5-S04 — env equivalent for serve/mcp/acp. Ship docs **Done** E5-S05. Deploy git policy **Done** E5-S07 — see [Deploy and ship — Git policy](../guides/deploy.md#git-policy-for-deploy-bundles). Platform policy **Done** E5-S08 — Linux-first production; OS-neutral bundle; Linux CI `deploy` → `serve --deploy` smoke — see [Platforms](../guides/deploy.md#platforms).)
+(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required. `zaumzeug mcp <name> --deploy` is **Done** E7-S06 — same MCP surface as dev. `HARNESS_ROOT=deploy` is **Done** E5-S04 — env equivalent for serve/mcp/acp. Ship docs **Done** E5-S05. Deploy git policy **Done** E5-S07 — see [Deploy and ship — Git policy](../guides/deploy.md#git-policy-for-deploy-bundles). Platform policy **Done** E5-S08 — Linux-first production; OS-neutral bundle; Linux CI `deploy` → `serve --deploy` smoke — see [Platforms](../guides/deploy.md#platforms).)
 
 ---
 
@@ -137,7 +139,7 @@ Not required to start a harness with the mock profile.
 | **Compile / GEPA** | Included in `[dev]` | Offline prompt optimization + Haystack export (`zaumzeug compile`, Pattern A) — Phase 2 (E4-S02b/S03a); `--dry-run` validates modules/registry without GEPA (**Done** E4-S06); Pattern B `optimize_anything` adapter (**Done** E4-S04 — `optimize_haystack_artifact`); runtime applies optional `input_rewrite` at serve/run (E4-S03b); pin/rollback to immutable `artifacts/<run_id>/` without re-GEPA (**Done** E4-S07); workflow diagram `docs/workflow-diagram.md` (**Done** E4-S08); live task/reflection models need API keys in `.env`. See [Compile and export](../guides/compile.md). |
 | **DeepEval** | `pip install "zaumzeug[eval]"` | Optional DeepEval for harness regression — **Done** (E6-S01, 2026-07-28): not in core install; missing import shows install hint. `zaumzeug eval` CLI **Done** (E6-S02, 2026-07-28). Deploy eval gate **Done** (E6-S03 / E5-S06, 2026-07-28): `deploy.eval_gate` / `zaumzeug deploy --eval-gate`. Harness `eval/` pytest scaffold **Done** (E6-S04, 2026-07-28): `zaumzeug init --with-eval` / `deepeval test run`. Trace → test case **Done** (E6-S05, 2026-07-28): `data/traces/` + `zaumzeug eval --trace`. Mode C HTTP black-box **Done** (E6-S06, 2026-07-28): `zaumzeug eval --base-url` (staging/debug). GEPA ↔ DeepEval bridge **Done** (E6-S07, 2026-07-28): `append_failed_eval_to_train`, shared val aliases, optional `modules/metrics.py`. See [Testing](../guides/testing.md) and [CLI — deploy](../reference/cli.md#zaumzeug-deploy). |
 | **Provider plugins** | e.g. `openai-haystack`, `anthropic-haystack` | Only for configured live providers |
-| **MCP serve** | included (`mcp`, `mcp-haystack`) | `zaumzeug mcp` serves `{host}:{mcp_port}/mcp` (default **1417**). `uv` is needed only for stdio `tools.mcp` servers (`zaumzeug doctor` warns if missing). Cursor live `mcp.json` write is opt-in (`--cursor-mcp`). See [Cursor MCP setup](../guides/cursor-mcp.md) and [CLI — mcp](../reference/cli.md#zaumzeug-mcp). |
+| **MCP serve** | included (`mcp`, `mcp-haystack`) | `zaumzeug mcp` serves `{host}:{mcp_port}/mcp` (default **1417**). Production: `zaumzeug mcp <name> --deploy` (or `HARNESS_ROOT=deploy`) — same surface, `deploy/<name>/` only. `uv` is needed only for stdio `tools.mcp` servers (`zaumzeug doctor` warns if missing). Cursor live `mcp.json` write is opt-in (`--cursor-mcp`). See [Cursor MCP setup](../guides/cursor-mcp.md), [Deploy and ship](../guides/deploy.md), and [CLI — mcp](../reference/cli.md#zaumzeug-mcp). |
 | **ACP adapter** | included | `zaumzeug acp` speaks Agent Client Protocol JSON-RPC on stdio for Zed / JetBrains. Not IBM ACP/A2A. Cursor uses MCP. See [ACP (Zed / JetBrains)](../guides/acp.md) and [CLI — acp](../reference/cli.md#zaumzeug-acp). |
 | **Chainlit UI** | `pip install "hayhooks[chainlit]"` | Optional embedded GUI at `/chat` on the same port as REST. Set `serve.hayhooks.chainlit: true` then `zaumzeug serve`. Missing extra fails serve with this install hint. **Not** the resolved primary web UI (Open WebUI / SPA / Next.js remain valid). See [Web deployment](../guides/web-deployment.md). |
 

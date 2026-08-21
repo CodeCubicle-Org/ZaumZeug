@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Client integrators · Cursor users |
-| **Last updated** | 2026-08-21 |
+| **Last updated** | 2026-08-21 (E7-S06 MCP `--deploy`) |
 
 Connect Cursor to a ZaumZeug harness over MCP. Cursor’s agent then invokes the harness as tools (Cursor stays in control — this is not ACP).
 
@@ -51,11 +51,14 @@ Match the `url` port to `{mcp_port}`. Cursor also accepts a global MCP config in
 
 ```bash
 zaumzeug mcp example
+# production bundle (same MCP surface; no usr-harnesses/):
+zaumzeug mcp example --deploy
+# HARNESS_ROOT=deploy zaumzeug mcp example
 ```
 
 Keep this process running. Cursor connects to `http://localhost:1417/mcp` (or your `mcp_port`). Health check: `GET http://127.0.0.1:1417/status`.
 
-`zaumzeug mcp` binds **127.0.0.1** only. For a remote host, reverse-proxy to `{mcp_port}/mcp` and put the public HTTPS URL in `mcp.json`.
+`zaumzeug mcp` binds **127.0.0.1** only. For a remote host, reverse-proxy to `{mcp_port}/mcp` and put the public HTTPS URL in `mcp.json`. `--deploy` / `HARNESS_ROOT=deploy` load **only** `deploy/<name>/` (valid `manifest.json` required) — see [Deploy and ship](deploy.md).
 
 See [CLI — mcp](../reference/cli.md#zaumzeug-mcp).
 
@@ -80,7 +83,7 @@ Walk this once after install (mock model is enough):
 1. [ ] Client install has written `.cursor/mcp.json.example`.
 2. [ ] Live `.cursor/mcp.json` exists (install `--cursor-mcp`, or copy the example).
 3. [ ] `url` is `http://localhost:{mcp_port}/mcp` (default `http://localhost:1417/mcp`).
-4. [ ] `zaumzeug mcp <harness>` is running; `GET /status` returns ok.
+4. [ ] `zaumzeug mcp <harness>` is running (`--deploy` when serving a production bundle); `GET /status` returns ok.
 5. [ ] Cursor **Settings → MCP** shows the `zaumzeug` server (reload the window if needed).
 6. [ ] If any agent uses stdio `tools.mcp`, `uv` is on PATH (`zaumzeug doctor` has no `mcp_uv` warning). HTTP-only MCP does not need `uv`.
 7. [ ] Ask Cursor to use the harness tool and confirm a response.
@@ -88,6 +91,7 @@ Walk this once after install (mock model is enough):
 ## Related
 
 - [CLI — mcp](../reference/cli.md#zaumzeug-mcp)
+- [Deploy and ship](deploy.md) — `zaumzeug mcp <name> --deploy` / `HARNESS_ROOT=deploy`
 - [Installation](../getting-started/installation.md) — `--cursor-mcp` flag
 - [ACP (Zed / JetBrains)](acp.md) — Agent Client Protocol for IDEs that drive the harness (Cursor uses MCP, not ACP)
 - [Cursor MCP docs](https://cursor.com/docs/mcp)

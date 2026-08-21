@@ -5,8 +5,9 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/55-story.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-05 |
+| **Last modified** | 2026-08-21 |
 | **Story ID** | E7-S06 |
+| **Status** | Done (2026-08-21) |
 | **Epic** | [E7 — Tools, MCP, and ACP](../07-epic.md) |
 | **Phase** | 3 |
 | **Epic build order** | 7 of 8 |
@@ -45,13 +46,13 @@ As **ops**, I want `zaumzeug mcp <name> --deploy`, so that production bundles ex
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `zaumzeug mcp <name> --deploy` loads from `deploy/<name>/`
-- [ ] **AC-2** Same MCP surface as dev mode
-- [ ] **AC-3** Respects `HARNESS_ROOT=deploy`
+- [x] **AC-1** `zaumzeug mcp <name> --deploy` loads from `deploy/<name>/`
+- [x] **AC-2** Same MCP surface as dev mode
+- [x] **AC-3** Respects `HARNESS_ROOT=deploy`
 
 ### Implementation tasks (build)
 
-- [ ] Share root resolution with serve runner
+- [x] Share root resolution with serve runner
 
 ### Verification (after build)
 
@@ -62,14 +63,23 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | AC-1 | `tests/integration/mcp/test_mcp_deploy.py::test_e7_s06_ac1_loads_deploy_root` |
 | AC-2 | `tests/integration/mcp/test_mcp_deploy.py::test_e7_s06_ac2_same_surface_as_dev` |
 | AC-3 | `tests/integration/mcp/test_mcp_deploy.py::test_e7_s06_ac3_respects_harness_root_env` |
-| AC-1–3 | **optional CI:** Linux deploy → mcp smoke (Phase 3) |
+| AC-1–3 | **optional CI (deferred):** Linux deploy → mcp smoke — pytest covers ACs; not required to close this story |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/mcp/test_mcp_deploy.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/mcp/test_mcp_deploy.py -v` passes
+- [x] Full suite `pytest tests -q` (2026-08-21): 335 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate)
 
 ### Definition of done
 
-- [ ] Documented in `README.deploy.md`
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Documented in `README.deploy.md`
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-21)
+
+- `prepare_mcp` / `run_mcp` share `validate_serve()` with the serve runner (`config/harness_root.resolve_harness_path`). `--deploy` and `HARNESS_ROOT=deploy` load only `deploy/<name>/` (valid `manifest.json` required); `usr-harnesses/` is not used.
+- MCP Streamable HTTP is unchanged from dev: `POST /mcp`, `GET /status` on `127.0.0.1`:`serve.hayhooks.mcp_port` (default **1417**).
+- Docs: bundle [README.deploy.md](../../../install/templates/deploy/README.deploy.md), [deploy.md](../../../user-docs/guides/deploy.md), [cursor-mcp.md](../../../user-docs/guides/cursor-mcp.md), [cli.md](../../../user-docs/reference/cli.md).
+- CLI: `zaumzeug mcp <harness> [--deploy] [--verbose] [--port N]`.
+- Full suite 2026-08-21: 335 passed, 1 skipped (`HARNESS_LIVE_LLM` e2e gate).
 
 ---

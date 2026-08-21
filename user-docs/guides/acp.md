@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Client integrators · Zed / JetBrains users |
-| **Last updated** | 2026-08-21 |
+| **Last updated** | 2026-08-21 (E7-S06 MCP `--deploy`) |
 
 Connect Zed or JetBrains to a ZaumZeug harness so the **IDE drives the harness as the primary agent** over stdio JSON-RPC.
 
@@ -11,12 +11,12 @@ This is the **Agent Client Protocol** used by Zed and JetBrains ([agentclientpro
 
 ## Cursor limitation
 
-**Cursor is not a generic ACP client for third-party agents.** Cursor is primarily an ACP *server* for other editors. To use a ZaumZeug harness from Cursor, use **MCP** instead: `zaumzeug mcp` and [Cursor MCP setup](cursor-mcp.md).
+**Cursor is not a generic ACP client for third-party agents.** Cursor is primarily an ACP *server* for other editors. To use a ZaumZeug harness from Cursor, use **MCP** instead: `zaumzeug mcp` (or `zaumzeug mcp --deploy` on a production bundle) and [Cursor MCP setup](cursor-mcp.md).
 
 | Client | Protocol | Command |
 |---|---|---|
 | **Zed, JetBrains, Neovim** | **ACP** (harness *is* the agent) | `zaumzeug acp <harness>` |
-| **Cursor, Claude Desktop** | **MCP** (host stays in control) | `zaumzeug mcp <harness>` |
+| **Cursor, Claude Desktop** | **MCP** (host stays in control) | `zaumzeug mcp <harness>` (`--deploy` for production) |
 
 ACP and MCP sit on different sides: ACP = the editor drives your harness; MCP = your harness as tools **or** the harness calling external MCP servers. A harness started with `zaumzeug acp` may still use `tools.mcp` internally for its own tools.
 
