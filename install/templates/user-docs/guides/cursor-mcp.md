@@ -94,4 +94,5 @@ Walk this once after install (mock model is enough):
 - [Deploy and ship](deploy.md) — `zaumzeug mcp <name> --deploy` / `HARNESS_ROOT=deploy`
 - [Installation](../getting-started/installation.md) — `--cursor-mcp` flag
 - [ACP (Zed / JetBrains)](acp.md) — Agent Client Protocol for IDEs that drive the harness (Cursor uses MCP, not ACP)
+- [Web deployment](web-deployment.md) — Chainlit / Open WebUI / SPA / Next.js against OpenAI REST
 - [Cursor MCP docs](https://cursor.com/docs/mcp)

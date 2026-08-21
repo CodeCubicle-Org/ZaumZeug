@@ -89,4 +89,5 @@ tools:
 
 - [CLI — acp](../reference/cli.md#zaumzeug-acp)
 - [Cursor MCP setup](cursor-mcp.md) — Cursor path (MCP, not ACP)
+- [Web deployment](web-deployment.md) — Chainlit / Open WebUI / SPA / Next.js against OpenAI REST
 - [Agent Client Protocol](https://agentclientprotocol.com/)

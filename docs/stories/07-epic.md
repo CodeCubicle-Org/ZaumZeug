@@ -5,8 +5,8 @@
 | **Document** | Epic E7 user stories |
 | **File** | `docs/stories/07-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-21 (E7-S07 Done) |
-| **Status** | In progress (E7-S07 Done 2026-08-21) |
+| **Last modified** | 2026-08-21 (E7-S08 Done) |
+| **Status** | Done (E7-S08 2026-08-21) |
 | **Build order** | **7 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -30,7 +30,7 @@
 4. **E7-S03** — Cursor setup ✅
 5. **E7-S05** — ACP adapter ✅
 6. **E7-S06** — MCP from deploy ✅
-7. **E7-S04** → **E7-S08** — Chainlit ✅; remaining Open WebUI / SPA / Next.js recipes
+7. **E7-S04** → **E7-S08** — Chainlit ✅; Open WebUI / SPA / Next.js recipes ✅
 
 ---
 
@@ -249,7 +249,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 ### Definition of done
 
-- [x] Align docs with open #2 primary web UI decision when resolved — **open #2 remains open**; Chainlit is an optional layout, not a product default
+- [x] Align docs with open #2 primary web UI decision when resolved — **open #2 remains open**; Chainlit is an optional layout, not a product default (Open WebUI / SPA / Next.js recipes **Done** E7-S08)
 - [x] Verification checklist complete; all ACs traced to tests
 
 ### Implementation notes (2026-08-21)
@@ -442,37 +442,35 @@ As a **web integrator**, I want documented deployment layouts, so that I can cho
 ### Acceptance criteria
 
 - [x] **AC-1** Document Chainlit embedded co-location — **shipped in E7-S04** ([web-deployment.md](../../user-docs/guides/web-deployment.md))
-- [ ] **AC-2** Document Open WebUI + Hayhooks two-container pattern
-- [ ] **AC-3** Document custom SPA + Nginx proxy pattern
-- [ ] **AC-4** Document Next.js co-located pattern
-- [ ] **AC-5** Clarify OpenAI `baseURL` points at harness server, not OpenAI API
+- [x] **AC-2** Document Open WebUI + Hayhooks two-container pattern
+- [x] **AC-3** Document custom SPA + Nginx proxy pattern
+- [x] **AC-4** Document Next.js co-located pattern
+- [x] **AC-5** Clarify OpenAI `baseURL` points at harness server, not OpenAI API
 
 ### Implementation tasks (build)
 
-- [x] Author `user-docs/guides/web-deployment.md` — **file exists** (E7-S04 Chainlit recipe + preview of other layouts)
-- [ ] Expand Open WebUI / SPA / Next.js recipes (preview only today)
-- [ ] Include example `baseURL` and env vars for remaining layouts
-- [ ] Cross-link Hayhooks `/v1/models`, `/docs` endpoints for remaining layouts
+- [x] Author `user-docs/guides/web-deployment.md` — **file exists** (E7-S04 Chainlit recipe + remaining layouts)
+- [x] Expand Open WebUI / SPA / Next.js recipes
+- [x] Include example `baseURL` and env vars for remaining layouts
+- [x] Cross-link Hayhooks `/v1/models`, `/docs` endpoints for remaining layouts
 
 ### Verification (after build)
 
-Per [Story verification](00-README.md#story-verification-required). **Docs-only** — manual checklist.
+Per [Story verification](00-README.md#story-verification-required). **Docs-only** with content-assertion tests. Canonical: [57-story.md](epic-stories/57-story.md).
 
 | AC | Verification |
 |---|---|
-| AC-1 | **manual:** web-deployment.md Chainlit section — **done** (E7-S04, 2026-08-21) |
-| AC-2 | **manual:** Open WebUI two-container section |
-| AC-3 | **manual:** SPA + Nginx section |
-| AC-4 | **manual:** Next.js co-located section |
-| AC-5 | **manual:** baseURL examples point at harness host |
+| AC-1 | **manual + automated:** web-deployment.md Chainlit section — **done** (E7-S04, 2026-08-21); `test_e7_s04_ac2_user_docs_list_chainlit_extra` |
+| AC-2 | `tests/unit/docs/test_web_deployment.py::test_e7_s08_ac2_open_webui_two_container_section` |
+| AC-3 | `tests/unit/docs/test_web_deployment.py::test_e7_s08_ac3_spa_nginx_proxy_section` |
+| AC-4 | `tests/unit/docs/test_web_deployment.py::test_e7_s08_ac4_nextjs_colocated_section` |
+| AC-5 | `tests/unit/docs/test_web_deployment.py::test_e7_s08_ac5_baseurl_points_at_harness_not_openai` |
 
-- [ ] Manual checklist completed for all five ACs
+- [x] Every AC row above has a passing test or documented manual exception
 
 ### Definition of done
 
-- [ ] No implementation required beyond docs unless Chainlit flag (E7-S04) — **flag shipped 2026-08-21**; this story remains docs for the other layouts
-- [ ] Verification checklist complete
+- [x] No implementation required beyond docs unless Chainlit flag (E7-S04) — **flag shipped 2026-08-21**; remaining layouts are docs only
+- [x] Verification checklist complete
 
-### Implementation notes (2026-08-21)
-
-E7-S04 shipped the Chainlit recipe and created `user-docs/guides/web-deployment.md`. Remaining layouts stay on this story.
+Canonical detail: [57-story.md](epic-stories/57-story.md). Open WebUI / SPA + Nginx / Next.js recipes in [web-deployment.md](../../user-docs/guides/web-deployment.md). Open #2 stays open.

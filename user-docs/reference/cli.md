@@ -68,7 +68,7 @@ zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose] [--port N]
 | `--verbose` | Enable SDK and Haystack debug logging |
 | `--port N` | Override `serve.hayhooks.port` from harness.yaml (CI smoke on an ephemeral free port) |
 
-**Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**), or `--port` when set. Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`). Optional **`serve.hayhooks.chainlit: true`** mounts Chainlit at `/chat` on the same port — requires `pip install "hayhooks[chainlit]"` (see [Web deployment](../guides/web-deployment.md)).
+**Behavior (dev mode):** Loads the harness, runs the same validation as `--dry-run`, builds the workflow **entry** agent via `runtime/factory.build_agent()`, then starts self-hosted Hayhooks on `serve.hayhooks.port` (default **1416**), or `--port` when set. Phase 1 binds **`127.0.0.1`** only (no wide-open `0.0.0.0`). Optional **`serve.hayhooks.chainlit: true`** mounts Chainlit at `/chat` on the same port — requires `pip install "hayhooks[chainlit]"`. Open WebUI, SPA + Nginx, and Next.js layouts use the same REST `baseURL` (`http://127.0.0.1:1416/v1`, not `api.openai.com`) — see [Web deployment](../guides/web-deployment.md).
 
 **Behavior (`--deploy` / production):** Same OpenAI REST API as dev serve (`POST /v1/chat/completions`, `GET /v1/models`, `POST /<harness>/run`), but paths resolve under `deploy/<name>/` only — `usr-harnesses/` is never consulted. Fails fast when the deploy folder is missing or `manifest.json` is absent/invalid. Typical ops flow after `zaumzeug deploy <name>` and target install: `zaumzeug serve <name> --deploy`, `zaumzeug mcp <name> --deploy` (**Done** E7-S06 — same MCP surface as dev), or set `HARNESS_ROOT=deploy` in the container/systemd environment (see [Global environment](#global-environment)).
 
@@ -79,6 +79,7 @@ CI mock smoke (E1-S07) uses `python install/ci_serve_smoke.py example` — start
 | `POST /v1/chat/completions` | OpenAI-compatible chat — `"model": "<harness>"`; optional `"model_id": "<registry-key>"` selects the LLM |
 | `GET /v1/models` | Lists the served harness pipeline |
 | `POST /<harness>/run` | Direct Hayhooks run API |
+| `GET /docs` | FastAPI Swagger UI for manual REST probes |
 | `GET /chat` | Optional Chainlit GUI — only when `serve.hayhooks.chainlit: true` and `pip install "hayhooks[chainlit]"` |
 
 **OpenAI `model` vs `model_id`:** Clients pass the harness name as OpenAI `model` (deployment identity). To override which registry LLM answers, add optional `model_id` (a key from the entry agent's merged `agents-models.yaml`). Omit `model_id` to use the agent's `default_model_id`.

@@ -115,6 +115,8 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 
 **Implementation (E7-S04, 2026-08-21):** Bundle `README.deploy.md` and [deploy.md](../../user-docs/guides/deploy.md) list optional `GET /chat` when the shipped harness has `serve.hayhooks.chainlit: true` and the target has `pip install "hayhooks[chainlit]"`.
 
+**Implementation (E7-S08, 2026-08-21):** Same ship docs point web clients at the harness OpenAI `baseURL` (`/v1`, not `api.openai.com`) and at [web-deployment.md](../../user-docs/guides/web-deployment.md) for Open WebUI / SPA / Next.js. Tests: `tests/unit/docs/test_web_deployment.py`.
+
 **Implementation (E7-S05, 2026-08-21):** `zaumzeug acp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same production root as serve. Ops snippets: `README.deploy.md`, [acp.md](../../user-docs/guides/acp.md).
 
 **Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same production root as serve; MCP surface matches dev. Ops snippets: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`.

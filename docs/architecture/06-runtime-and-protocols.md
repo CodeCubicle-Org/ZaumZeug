@@ -142,6 +142,8 @@ Clients use OpenAI-shaped requests against your `baseURL` (e.g. `http://127.0.0.
 
 **Implementation (E7-S04, 2026-08-21):** Optional Chainlit GUI — `serve.hayhooks.chainlit: true` sets Hayhooks `chainlit_enabled` before `create_app()` so `/chat` shares the REST port. Requires `pip install "hayhooks[chainlit]"` (fail-fast install hint if missing). OpenAI `/v1/chat/completions` stays mounted. Docs: [web-deployment.md](../../user-docs/guides/web-deployment.md). Tests: `tests/integration/serve/test_chainlit.py`. PRD open #2 (primary web UI) remains open — Chainlit is one layout, not a product default.
 
+**Implementation (E7-S08, 2026-08-21):** Remaining §9.4 recipes in [web-deployment.md](../../user-docs/guides/web-deployment.md) — Open WebUI two-container (`OPENAI_API_BASE_URL=http://hayhooks:1416/v1`), SPA + Nginx (`/api/v1/` → `127.0.0.1:1416/v1/`), Next.js co-located (`OPENAI_BASE_URL=http://127.0.0.1:1416/v1`). Clients use the harness `baseURL`, not `api.openai.com`. Probes: `GET /v1/models`, `GET /docs`. Tests: `tests/unit/docs/test_web_deployment.py`. Open #2 remains open.
+
 **Implementation (E7-S05, 2026-08-21):** `src/zaumzeug/serve/acp.py` — `zaumzeug acp <name>` validates like serve, builds the entry agent (including `tools.mcp`), and serves Agent Client Protocol JSON-RPC on stdio (`initialize`, `session/new`, `session/prompt`; logs on stderr). Zed/JetBrains registration: [acp.md](../../user-docs/guides/acp.md). Cursor remains MCP-primary. Tests: `tests/integration/acp/test_acp_stdio.py`.
 
 ### 9.5 What does NOT call the harness directly

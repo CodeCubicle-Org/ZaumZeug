@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-08-21 (E7-S07 extended builtin catalog)
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S07 **Done** (2026-08-21); next E7-S08
+**Last updated:** 2026-08-21 (E7-S08 web client deployment layouts)
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S08 **Done** (2026-08-21); next E8-S01
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -199,7 +199,7 @@ No pinned size until `pyproject.toml` locks dependencies; README must set expect
 | **DeepEval** | `pip install "zaumzeug[eval]"` | Dev regression only — `[eval]` extra **Done** (E6-S01, 2026-07-28); `zaumzeug eval` CLI **Done** (E6-S02, 2026-07-28) |
 | **Provider plugins** | e.g. `openai-haystack`, `anthropic-haystack` | Only configured providers |
 | **MCP in Cursor** | `--cursor-mcp` writes live `.cursor/mcp.json`; `uv` only for stdio `tools.mcp` | **Done** (E7-S03, 2026-08-21) — [cursor-mcp.md](user-docs/guides/cursor-mcp.md) |
-| **Chainlit UI** | `pip install "hayhooks[chainlit]"` | Optional embedded `/chat` on the serve port. Set `serve.hayhooks.chainlit: true`. **Done** (E7-S04, 2026-08-21) — [web-deployment.md](user-docs/guides/web-deployment.md). Not a resolved primary web UI (open #2). |
+| **Chainlit UI** | `pip install "hayhooks[chainlit]"` | Optional embedded `/chat` on the serve port. Set `serve.hayhooks.chainlit: true`. **Done** (E7-S04, 2026-08-21). Open WebUI / SPA / Next.js recipes **Done** (E7-S08, 2026-08-21) — [web-deployment.md](user-docs/guides/web-deployment.md). Not a resolved primary web UI (open #2). |
 
 #### Updating dependencies (must appear in README)
 
@@ -375,9 +375,9 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E7.5 | ACP adapter | **Done** (E7-S05, 2026-08-21). `zaumzeug acp <name>` stdio JSON-RPC (Agent Client Protocol; not IBM ACP/A2A). Zed/JetBrains registration snippets in [acp.md](user-docs/guides/acp.md). Cursor uses MCP, not ACP. Internal `tools.mcp` still wired. |
 | E7.6 | MCP + deploy | **Done** (E7-S06, 2026-08-21). `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) loads only `deploy/<name>/`; same MCP surface as dev (`POST /mcp`, `GET /status`). Docs: `README.deploy.md`, [deploy.md](user-docs/guides/deploy.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`. |
 | E7.7 | Extended builtin catalog | **Done** (E7-S07, 2026-08-21). Phase 3 ships `calculator` (restricted AST) and `read_file` (harness-folder sandbox) per [Architecture §6.5](architecture/05-configuration.md#65-builtin-tools-catalog). Unknown ids fail with the Phase 3 available list. `search_docs` remains Phase 4. Guide: [custom-tools.md](user-docs/guides/custom-tools.md#builtin-catalog). |
-| E7.8 | Web client layouts | **Partial.** Chainlit embedded co-location **Done** (E7-S04, 2026-08-21) — [web-deployment.md](user-docs/guides/web-deployment.md). Remaining (E7-S08): Open WebUI two-container, SPA + Nginx, Next.js. Open #2 (primary UI) stays open. |
+| E7.8 | Web client layouts | **Done** (E7-S08, 2026-08-21). Chainlit `/chat`, Open WebUI two-container, SPA + Nginx, Next.js co-located in [web-deployment.md](user-docs/guides/web-deployment.md). OpenAI `baseURL` points at the harness (`http://127.0.0.1:1416/v1`), not `api.openai.com`. Open #2 (primary UI) stays open — layouts are peers. |
 
-**Story seeds:** MCP **Done** (E7-S01). Custom tools **Done** (E7-S02). Cursor MCP setup **Done** (E7-S03 — `user-docs/guides/cursor-mcp.md`, `--cursor-mcp` live write). Chainlit embedded UI **Done** (E7-S04 — `serve.hayhooks.chainlit` → `/chat`; `user-docs/guides/web-deployment.md`). ACP adapter **Done** (E7-S05 — `zaumzeug acp` stdio JSON-RPC; [acp.md](user-docs/guides/acp.md)). MCP from deploy **Done** (E7-S06 — `zaumzeug mcp --deploy` / `HARNESS_ROOT=deploy`). Extended builtins **Done** (E7-S07 — `calculator`, `read_file`; `search_docs` stays Phase 4). Remaining: full web-layout recipes (E7-S08), tool correctness eval when DeepEval present.
+**Story seeds:** MCP **Done** (E7-S01). Custom tools **Done** (E7-S02). Cursor MCP setup **Done** (E7-S03 — `user-docs/guides/cursor-mcp.md`, `--cursor-mcp` live write). Chainlit embedded UI **Done** (E7-S04 — `serve.hayhooks.chainlit` → `/chat`; `user-docs/guides/web-deployment.md`). ACP adapter **Done** (E7-S05 — `zaumzeug acp` stdio JSON-RPC; [acp.md](user-docs/guides/acp.md)). MCP from deploy **Done** (E7-S06 — `zaumzeug mcp --deploy` / `HARNESS_ROOT=deploy`). Extended builtins **Done** (E7-S07 — `calculator`, `read_file`; `search_docs` stays Phase 4). Web client layouts **Done** (E7-S08 — Open WebUI / SPA + Nginx / Next.js recipes; open #2 stays open). Remaining: tool correctness eval when DeepEval present.
 
 ---
 
@@ -446,7 +446,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 | # | Decision | Impact |
 |---|---|---|
 | 1 | Compile cadence (PR, nightly, on failure) | CI design |
-| 2 | Primary web UI (Chainlit vs Open WebUI vs custom) | E7 docs — **still open**. E7-S04 shipped optional Chainlit at `/chat`; it is not a product default. E7-S08 will document the other layouts as peers. |
+| 2 | Primary web UI (Chainlit vs Open WebUI vs custom) | E7 docs — **still open**. E7-S04 shipped optional Chainlit at `/chat`; E7-S08 documented Open WebUI / SPA / Next.js as peers. None is a product default. |
 | 4 | MCP granularity (per agent vs per pipeline) | E7 |
 | 5 | A2A in Phase 4 or defer | E8.4 |
 | 6 | Multi-tenant Hayhooks | NG1 / future |

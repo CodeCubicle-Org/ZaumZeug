@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Ops / platform · Harness developers |
-| **Last updated** | 2026-08-21 (E7-S06 MCP `--deploy`) |
+| **Last updated** | 2026-08-21 (E7-S08 web layouts) |
 
 Ship a production harness to a clean server **without** DSPy, GEPA, or DeepEval on the target. Compile and eval stay on the developer machine (or CI); the target only runs Haystack via `zaumzeug`.
 
@@ -121,7 +121,7 @@ zaumzeug serve <name>
 zaumzeug mcp <name>
 ```
 
-Same OpenAI REST surface as local serve (`POST /v1/chat/completions`, `GET /v1/models`). **`zaumzeug mcp <name> --deploy`** (or `HARNESS_ROOT=deploy`) exposes the same MCP surface as development (`POST /mcp`, `GET /status` on `serve.hayhooks.mcp_port`, default **1417**) — see [Cursor MCP setup](cursor-mcp.md). Optional **`GET /chat`** when the shipped `harness.yaml` has `serve.hayhooks.chainlit: true` and the target has `pip install "hayhooks[chainlit]"` — see [Web deployment](web-deployment.md). Validate without binding:
+Same OpenAI REST surface as local serve (`POST /v1/chat/completions`, `GET /v1/models`, `GET /docs`). Point web clients at the harness `baseURL` (`http://127.0.0.1:1416/v1`), not `api.openai.com`. **`zaumzeug mcp <name> --deploy`** (or `HARNESS_ROOT=deploy`) exposes the same MCP surface as development (`POST /mcp`, `GET /status` on `serve.hayhooks.mcp_port`, default **1417**) — see [Cursor MCP setup](cursor-mcp.md). Optional **`GET /chat`** when the shipped `harness.yaml` has `serve.hayhooks.chainlit: true` and the target has `pip install "hayhooks[chainlit]"`. Open WebUI two-container, SPA + Nginx, and Next.js layouts: [Web deployment](web-deployment.md). Validate without binding:
 
 ```bash
 zaumzeug serve <name> --deploy --dry-run

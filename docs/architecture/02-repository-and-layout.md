@@ -187,7 +187,7 @@ user-docs/
 │   ├── deploy.md                 # copy → target_install → .env → serve --deploy (E5-S05); git policy (E5-S07); platforms (E5-S08); target install + --verify (E5-S09a/b/c); mcp --deploy (E7-S06)
 │   ├── custom-tools.md           # tools.custom → ComponentTool / Tool (E7-S02); builtin catalog calculator/read_file (E7-S07)
 │   ├── cursor-mcp.md             # Cursor mcp.json → localhost:{mcp_port}/mcp (E7-S03); --deploy (E7-S06)
-│   ├── web-deployment.md         # Chainlit /chat co-located with REST (E7-S04)
+│   ├── web-deployment.md         # Chainlit /chat (E7-S04); Open WebUI / SPA / Next.js + baseURL (E7-S08)
 │   ├── acp.md                    # zaumzeug acp stdio JSON-RPC for Zed / JetBrains (E7-S05); MCP --deploy pointer (E7-S06)
 │   └── testing.md                # unit, integration, eval; mock profile; CI tiers; mcp --deploy (E7-S06)
 └── reference/cli.md
@@ -206,6 +206,8 @@ Install copies this tree from `install/templates/user-docs/` ([§3.4](02-reposit
 **Implementation (E7-S03, 2026-08-21):** [user-docs/guides/cursor-mcp.md](../../user-docs/guides/cursor-mcp.md) — Cursor `mcp.json` → `http://localhost:{mcp_port}/mcp` (default 1417); install `--cursor-mcp` writes live `.cursor/mcp.json`; `uv` only for stdio `tools.mcp`. Tests: `tests/unit/install/test_scaffolding.py::test_e7_s03_ac2_mcp_json_example_scaffolded`, `tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json`.
 
 **Implementation (E7-S04, 2026-08-21):** [user-docs/guides/web-deployment.md](../../user-docs/guides/web-deployment.md) — optional Chainlit at `/chat` (`serve.hayhooks.chainlit: true` + `pip install "hayhooks[chainlit]"`). Open #2 (primary web UI) remains open.
+
+**Implementation (E7-S08, 2026-08-21):** Same guide expanded — Open WebUI two-container, SPA + Nginx, Next.js co-located; OpenAI `baseURL` at the harness (`http://127.0.0.1:1416/v1`), not `api.openai.com`. Tests: `tests/unit/docs/test_web_deployment.py`. Open #2 remains open.
 
 **Implementation (E7-S05, 2026-08-21):** [user-docs/guides/acp.md](../../user-docs/guides/acp.md) — `zaumzeug acp` Agent Client Protocol stdio JSON-RPC; Zed `agent_servers` and JetBrains `~/.jetbrains/acp.json` snippets; ACP ≠ IBM A2A; Cursor uses MCP. Tests: `tests/integration/acp/test_acp_stdio.py`.
 

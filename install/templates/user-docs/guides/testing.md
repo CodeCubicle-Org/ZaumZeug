@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers · SDK contributors |
-| **Last updated** | 2026-08-21 (E7-S06 MCP from deploy) |
+| **Last updated** | 2026-08-21 (E7-S08 web layouts) |
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
@@ -506,7 +506,7 @@ zaumzeug compile example --dry-run
 |---|---|
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
 | **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (**Done** E6-S05 — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**Done** E6-S06 — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**Done** E6-S07 — `tests/unit/eval/test_gepa_bridge.py`), `zaumzeug deploy` packager (**Done** E5-S01 — `tests/integration/deploy/test_deploy.py`), deploy copy matrix (**Done** E5-S02 — `tests/unit/deploy/test_copy_rules.py`, `tests/integration/deploy/test_deploy_golden.py`), serve `--deploy` (**Done** E5-S03 — `tests/integration/deploy/test_serve_deploy.py`, 4 passed / 0 skipped), `HARNESS_ROOT=deploy` (**Done** E5-S04 — `tests/unit/deploy/test_harness_root.py`, 2 passed / 0 skipped), target ship workflow docs (**Done** E5-S05 — `tests/integration/deploy/test_target_install.py` + `test_e5_s05_ac5_no_env_in_bundle`, 5 passed / 0 skipped), deploy git policy (**Done** E5-S07 — `tests/unit/install/test_scaffolding.py::test_e5_s07_ac1_gitignore_deploy_and_artifacts`, 6 passed / 0 skipped in file), deploy platform policy (**Done** E5-S08 — `tests/integration/deploy/test_deploy_golden.py::test_e5_s08_*`, 3 passed / 0 skipped in file; Linux CI `deploy` → `serve --deploy` smoke), target install core (**Done** E5-S09a — `tests/integration/deploy/test_target_install.py` `e5_s09_*`, 5 passed / 0 skipped), target install wrappers (**Done** E5-S09b — `test_e5_s09b_*` + `test_e5_s09_ac7_scripts_in_bundle`, 3 passed / 0 skipped) |
-| **3** | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`); custom tool loader ✅ (**E7-S02** — `tests/unit/runtime/tools/test_custom_loader.py`, doctor `custom_tools`); Cursor MCP setup ✅ (**E7-S03** — `test_e7_s03_ac2_*`, `test_e7_s03_ac3_*`); Chainlit `/chat` ✅ (**E7-S04** — `tests/integration/serve/test_chainlit.py`); ACP stdio ✅ (**E7-S05** — `tests/integration/acp/test_acp_stdio.py`); tool-correctness eval |
+| **3** | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`); custom tool loader ✅ (**E7-S02** — `tests/unit/runtime/tools/test_custom_loader.py`, doctor `custom_tools`); Cursor MCP setup ✅ (**E7-S03** — `test_e7_s03_ac2_*`, `test_e7_s03_ac3_*`); Chainlit `/chat` ✅ (**E7-S04** — `tests/integration/serve/test_chainlit.py`); ACP stdio ✅ (**E7-S05** — `tests/integration/acp/test_acp_stdio.py`); MCP from deploy ✅ (**E7-S06** — `tests/integration/mcp/test_mcp_deploy.py`); extended builtins ✅ (**E7-S07** — `test_extended_builtins.py`, `test_read_file.py`); web layouts ✅ (**E7-S08** — `tests/unit/docs/test_web_deployment.py`); tool-correctness eval |
 | **4** | Production trace ratchet, `@observe` / Confident AI sync |
 
 ---
@@ -516,6 +516,7 @@ zaumzeug compile example --dry-run
 - [Custom tools](custom-tools.md) — `tools.custom` import errors fail `zaumzeug doctor` / serve with the module path
 - [Cursor MCP setup](cursor-mcp.md) — `.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`; `--cursor-mcp`; `uv` for stdio `tools.mcp`
 - [ACP (Zed / JetBrains)](acp.md) — `zaumzeug acp` stdio JSON-RPC; Agent Client Protocol ≠ A2A
+- [Web deployment](web-deployment.md) — Chainlit `/chat`, Open WebUI, SPA + Nginx, Next.js; OpenAI `baseURL` at the harness (E7-S08)
 - [Multi-agent workflow](multi-agent-workflow.md) — `workflow.yaml` and stage routing under test
 - [Deploy and ship](deploy.md) — copy → `target_install` → `.env` → `serve --deploy` (E5-S05); git policy for bundles (E5-S07); platforms / Linux CI smoke (E5-S08); target install + `--verify` (E5-S09a/b/c)
 - [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_ROOT=deploy` (E5-S04), `HARNESS_LIVE_LLM`, debugpy, serve/compile `--dry-run`, serve `--deploy` (E5-S03), `doctor`, `eval` / `--trace` / `--base-url`, GEPA ↔ DeepEval bridge, Phase 1 security notes

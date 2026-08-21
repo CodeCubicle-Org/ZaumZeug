@@ -82,7 +82,7 @@ Not required for mock serve:
 - **MCP in Cursor** — install `--cursor-mcp` writes live `.cursor/mcp.json`; `uv` only if the harness uses stdio `tools.mcp`. Production: `zaumzeug mcp <name> --deploy` (or `HARNESS_ROOT=deploy`). See [Cursor MCP setup](user-docs/guides/cursor-mcp.md).
 - **Builtin tools** — `tools.builtin` on `agent.yaml`: `web_fetch` (Phase 1), `calculator` and `read_file` (Phase 3; `read_file` sandboxed to the harness folder). `search_docs` is Phase 4. See [Custom tools — Builtin catalog](user-docs/guides/custom-tools.md#builtin-catalog).
 - **ACP in Zed / JetBrains** — `zaumzeug acp <harness>` (Agent Client Protocol stdio JSON-RPC; not IBM ACP/A2A). Cursor uses MCP. See [ACP](user-docs/guides/acp.md).
-- **Chainlit UI** — `pip install "hayhooks[chainlit]"` then `serve.hayhooks.chainlit: true` (embedded `/chat` on the serve port; optional, not a primary-UI decision). See [Web deployment](user-docs/guides/web-deployment.md).
+- **Web UIs** — optional Chainlit (`pip install "hayhooks[chainlit]"` then `serve.hayhooks.chainlit: true` for `/chat`); or Open WebUI two-container / SPA + Nginx / Next.js against the harness OpenAI `baseURL` (`http://127.0.0.1:1416/v1`, not `api.openai.com`). None is a product default. See [Web deployment](user-docs/guides/web-deployment.md).
 
 ---
 

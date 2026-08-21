@@ -115,7 +115,10 @@ zaumzeug acp {{harness_name}} --deploy
 | `POST /v1/chat/completions` | Chat — `"model": "{{harness_name}}"` |
 | `GET /v1/models` | Lists the served harness |
 | `POST /{{harness_name}}/run` | Direct Hayhooks run API |
+| `GET /docs` | FastAPI Swagger UI for manual REST probes |
 | `GET /chat` | Optional Chainlit GUI — only if `serve.hayhooks.chainlit: true` and `pip install "hayhooks[chainlit]"` on the target |
+
+Web clients (Open WebUI, SPA + Nginx, Next.js) set OpenAI `baseURL` to this server's `/v1` (for example `http://127.0.0.1:1416/v1`, or `http://hayhooks:1416/v1` on a Docker network) — **not** `https://api.openai.com/v1`. Layout recipes live in the project's `user-docs/guides/web-deployment.md`.
 
 Validate without binding a port:
 

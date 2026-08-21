@@ -126,7 +126,7 @@ As **ops**, I want an auth story for production serve, so that harness endpoints
 
 - [ ] Author `user-docs/guides/production-auth.md` with Traefik examples
 - [ ] Add `deploy/<name>/` optional `traefik/` snippet or comment block in `README.deploy.md`
-- [ ] Cross-link from [E7-S08](07-epic.md) web-deployment guide
+- [ ] Cross-link from [E7-S08](07-epic.md) web-deployment guide — **forward link already in** [web-deployment.md](../../user-docs/guides/web-deployment.md) (2026-08-21); this task is the reverse link from `production-auth.md`
 - [ ] **Do not** add in-process auth to serve layer in v1
 
 ### Verification (after build)
@@ -274,7 +274,7 @@ As **ops**, I want an optional generated Dockerfile in the deploy bundle, so tha
 
 - [ ] Add Dockerfile template to deploy packager
 - [ ] Document build/run in `README.deploy.md`
-- [ ] Example docker-compose for Open WebUI + harness (optional)
+- [ ] Example docker-compose for Open WebUI + harness (optional) — **layout recipe already in** [web-deployment.md](../../user-docs/guides/web-deployment.md) (E7-S08, 2026-08-21); this story still owns a generated bundle Dockerfile
 
 ### Verification (after build)
 

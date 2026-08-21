@@ -5,7 +5,7 @@
 | **Document** | Stories index |
 | **File** | `docs/stories/00-README.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-21 (E7-S07 Done) |
+| **Last modified** | 2026-08-21 (E7-S08 Done) |
 | **Status** | Active |
 
 ---
@@ -98,8 +98,9 @@ File numbers follow **technical build order**, not PRD epic ID order. Each file 
 | [E7-S05](epic-stories/54-story.md) — ACP adapter | Done | 2026-08-21 |
 | [E7-S06](epic-stories/55-story.md) — MCP from deploy bundle | Done | 2026-08-21 |
 | [E7-S07](epic-stories/56-story.md) — Extended builtin tools catalog | Done | 2026-08-21 |
+| [E7-S08](epic-stories/57-story.md) — Web client deployment layouts | Done | 2026-08-21 |
 
-Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done. [E1-S08](epic-stories/25-story.md) (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved 2026-07-22). Phase 2: [E4-S01](epic-stories/26-story.md)–[E4-S08](epic-stories/33-story.md) done; [E6-S01](epic-stories/34-story.md)–[E6-S07](epic-stories/40-story.md) done ([E5-S06](epic-stories/46-story.md) shipped early with E6-S03); [E5-S01](epic-stories/41-story.md)–[E5-S05](epic-stories/45-story.md), [E5-S07](epic-stories/47-story.md)–[E5-S09c](epic-stories/49.3-story.md) done (2026-07-28 / 2026-07-29) — epic **E5 complete**. [E8-S07](epic-stories/64-story.md) (workflow reliability) **Done** (2026-08-01). [E7-S01](epic-stories/50-story.md) (MCP tool configuration) **Done** (2026-08-14). [E7-S02](epic-stories/51-story.md) (custom tool loader) **Done** (2026-08-14). [E7-S03](epic-stories/52-story.md) (Cursor MCP setup) **Done** (2026-08-21). [E7-S04](epic-stories/53-story.md) (Chainlit embedded UI) **Done** (2026-08-21). [E7-S05](epic-stories/54-story.md) (ACP adapter) **Done** (2026-08-21). [E7-S06](epic-stories/55-story.md) (MCP from deploy) **Done** (2026-08-21). [E7-S07](epic-stories/56-story.md) (extended builtin tools) **Done** (2026-08-21). Next build: [E7-S08](epic-stories/57-story.md) (web client deployment layouts).
+Phase 1 implementation: package skeleton, `harness.yaml` validation, three-tier `models.yaml` merge, runtime agent resolution, `zaumzeug doctor` (E2-S00–S04c), serve dry-run (E2-S05), structured logging (E2-S06), workflow schema (E2-S07), mock model profile (E3-S05), config-driven ModelRouter (E3-S01), builtin `web_fetch` tool (E3-S03), runtime factory (E3-S00), `zaumzeug serve` Hayhooks runner (E3-S02), the reference `example` research harness (E3-S04), Phase 1 test infra (E3-S06), OpenAI REST contract tests (E3-S07), serial `zaumzeug run` (E3-S08), `install/client_install.py` (E1-S01), install shell wrappers (E1-S02), project scaffolding on install (E1-S03), `zaumzeug init` (E1-S04), user-docs skeleton (E1-S05), new-contributor guide `CONTRIBUTING.md` (E1-S06), and three-OS CI matrix (E1-S07) are done. [E1-S08](epic-stories/25-story.md) (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved 2026-07-22). Phase 2: [E4-S01](epic-stories/26-story.md)–[E4-S08](epic-stories/33-story.md) done; [E6-S01](epic-stories/34-story.md)–[E6-S07](epic-stories/40-story.md) done ([E5-S06](epic-stories/46-story.md) shipped early with E6-S03); [E5-S01](epic-stories/41-story.md)–[E5-S05](epic-stories/45-story.md), [E5-S07](epic-stories/47-story.md)–[E5-S09c](epic-stories/49.3-story.md) done (2026-07-28 / 2026-07-29) — epic **E5 complete**. [E8-S07](epic-stories/64-story.md) (workflow reliability) **Done** (2026-08-01). [E7-S01](epic-stories/50-story.md) (MCP tool configuration) **Done** (2026-08-14). [E7-S02](epic-stories/51-story.md) (custom tool loader) **Done** (2026-08-14). [E7-S03](epic-stories/52-story.md) (Cursor MCP setup) **Done** (2026-08-21). [E7-S04](epic-stories/53-story.md) (Chainlit embedded UI) **Done** (2026-08-21). [E7-S05](epic-stories/54-story.md) (ACP adapter) **Done** (2026-08-21). [E7-S06](epic-stories/55-story.md) (MCP from deploy) **Done** (2026-08-21). [E7-S07](epic-stories/56-story.md) (extended builtin tools) **Done** (2026-08-21). [E7-S08](epic-stories/57-story.md) (web client deployment layouts) **Done** (2026-08-21). Next build: [E8-S01](epic-stories/58-story.md) (pipeline exposure).
 
 ---
 
@@ -202,7 +203,8 @@ E7-S06  MCP from deploy bundle ✅ (2026-08-21)
 E7-S07  Extended builtin tools catalog ✅ (2026-08-21)
         — calculator + read_file; search_docs stays Phase 4
    ↓
-E7-S08  Web client deployment layouts  ← next in global build order
+E7-S08  Web client deployment layouts ✅ (2026-08-21)
+        — Open WebUI two-container, SPA + Nginx, Next.js; baseURL at harness
 ```
 
 ## Validation summary (2026-07-05, re-checked)

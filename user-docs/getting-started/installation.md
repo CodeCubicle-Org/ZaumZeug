@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | New developers |
-| **Last updated** | 2026-08-21 (E7-S06 MCP `--deploy`) |
+| **Last updated** | 2026-08-21 (E7-S08 web layouts) |
 
 Get from a fresh clone to a working ZaumZeug dev environment with one command. This page is the full walkthrough (prerequisites, effort, disk, extras, updates, troubleshooting). The short new-contributor summary is [CONTRIBUTING.md](../../CONTRIBUTING.md); it links here for depth.
 
@@ -141,7 +141,7 @@ Not required to start a harness with the mock profile.
 | **Provider plugins** | e.g. `openai-haystack`, `anthropic-haystack` | Only for configured live providers |
 | **MCP serve** | included (`mcp`, `mcp-haystack`) | `zaumzeug mcp` serves `{host}:{mcp_port}/mcp` (default **1417**). Production: `zaumzeug mcp <name> --deploy` (or `HARNESS_ROOT=deploy`) — same surface, `deploy/<name>/` only. `uv` is needed only for stdio `tools.mcp` servers (`zaumzeug doctor` warns if missing). Cursor live `mcp.json` write is opt-in (`--cursor-mcp`). See [Cursor MCP setup](../guides/cursor-mcp.md), [Deploy and ship](../guides/deploy.md), and [CLI — mcp](../reference/cli.md#zaumzeug-mcp). |
 | **ACP adapter** | included | `zaumzeug acp` speaks Agent Client Protocol JSON-RPC on stdio for Zed / JetBrains. Not IBM ACP/A2A. Cursor uses MCP. See [ACP (Zed / JetBrains)](../guides/acp.md) and [CLI — acp](../reference/cli.md#zaumzeug-acp). |
-| **Chainlit UI** | `pip install "hayhooks[chainlit]"` | Optional embedded GUI at `/chat` on the same port as REST. Set `serve.hayhooks.chainlit: true` then `zaumzeug serve`. Missing extra fails serve with this install hint. **Not** the resolved primary web UI (Open WebUI / SPA / Next.js remain valid). See [Web deployment](../guides/web-deployment.md). |
+| **Chainlit UI** | `pip install "hayhooks[chainlit]"` | Optional embedded GUI at `/chat` on the same port as REST. Set `serve.hayhooks.chainlit: true` then `zaumzeug serve`. Missing extra fails serve with this install hint. **Not** the resolved primary web UI — Open WebUI two-container, SPA + Nginx, and Next.js recipes are in [Web deployment](../guides/web-deployment.md) (E7-S08). Client `baseURL` is the harness (`http://127.0.0.1:1416/v1`), not `api.openai.com`. |
 
 ---
 

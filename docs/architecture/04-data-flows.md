@@ -65,6 +65,8 @@ At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug run` (workflow
 
 **Implementation (E7-S04, 2026-08-21):** Optional `serve.hayhooks.chainlit: true` mounts `/chat` on that same process/port (`pip install "hayhooks[chainlit]"`). REST stays available. Docs: [web-deployment.md](../../user-docs/guides/web-deployment.md).
 
+**Implementation (E7-S08, 2026-08-21):** Open WebUI, SPA + Nginx, and Next.js clients call the same OpenAI REST `baseURL` (`http://127.0.0.1:1416/v1`, not `api.openai.com`). Docs: [web-deployment.md](../../user-docs/guides/web-deployment.md).
+
 **Implementation (E7-S05, 2026-08-21):** `zaumzeug acp <name>` uses the same factory/resolution path as serve (including `tools.mcp`) then serves Agent Client Protocol JSON-RPC on stdio instead of Hayhooks. Docs: [acp.md](../../user-docs/guides/acp.md). Tests: `tests/integration/acp/test_acp_stdio.py`.
 
 **Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same `validate_serve` production root as serve. MCP Streamable HTTP matches dev (`POST /mcp`, `GET /status`). Docs: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`.

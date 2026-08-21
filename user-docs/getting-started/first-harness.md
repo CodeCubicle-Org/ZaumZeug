@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | New developers |
-| **Last updated** | 2026-08-21 (E7-S07 builtin catalog) |
+| **Last updated** | 2026-08-21 (E7-S08 web layouts) |
 
 This walkthrough uses the shipped **`example`** harness — a general research agent with one workflow stage and the mock model profile. You can chat locally without API keys. Phase 2 also ships a compile seed (`compile.module` + train/val data) so `zaumzeug compile example` works offline via stub GEPA.
 
@@ -66,7 +66,7 @@ zaumzeug serve example
 # HARNESS_LOG_LEVEL=INFO zaumzeug run example --input "Summarize this topic"
 ```
 
-Then open an OpenAI-compatible client against `http://127.0.0.1:1416` (port from `serve.hayhooks.port`). The chat model id is the harness name: `example`. Optional Chainlit UI: [Web deployment](../guides/web-deployment.md).
+Then open an OpenAI-compatible client against `http://127.0.0.1:1416/v1` (port from `serve.hayhooks.port`) — that `baseURL` is the **harness**, not `api.openai.com`. The chat model id is the harness name: `example`. Web UIs (Chainlit `/chat`, Open WebUI, SPA + Nginx, Next.js): [Web deployment](../guides/web-deployment.md).
 
 `zaumzeug serve example` works **without** a `.env` file while the entry agent stays on the mock profile. For flaky local models later, see [Run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run) (`runtime.retry`, optional `output.format: json`).
 

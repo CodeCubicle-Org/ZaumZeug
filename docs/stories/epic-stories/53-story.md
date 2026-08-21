@@ -72,7 +72,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 ### Definition of done
 
-- [x] Align docs with open #2 primary web UI decision when resolved — **open #2 remains open**; Chainlit is documented as an **optional** layout, not a product default (Open WebUI / SPA / Next.js stay valid; E7-S08 expands those recipes)
+- [x] Align docs with open #2 primary web UI decision when resolved — **open #2 remains open**; Chainlit is documented as an **optional** layout, not a product default (Open WebUI / SPA / Next.js recipes **Done** E7-S08)
 - [x] Verification checklist complete; all ACs traced to tests
 
 ### Implementation notes (2026-08-21)
