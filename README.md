@@ -138,45 +138,57 @@ Model routing is configuration-driven via `models.yaml` — swap providers witho
 
 ## CLI
 
-**Implemented:**
+Quick reference for all shipped subcommands — full flags in [CLI reference](user-docs/reference/cli.md).
+
+### Scaffold & validate
 
 ```bash
-zaumzeug doctor [harness]     # Preflight env + config (scan all harnesses if name omitted)
-zaumzeug doctor --deploy      # Validate production bundle under deploy/ (or HARNESS_ROOT=deploy)
-zaumzeug doctor --verbose     # Include passing checks
-zaumzeug doctor --json        # Machine-readable report (exit 1 on fail; warns are non-blocking)
+zaumzeug init <name> [--force] [--with-eval]   # New harness under usr-harnesses/ (E1-S04; --with-eval → eval/ scaffold E6-S04)
+zaumzeug doctor [harness] [--deploy] [--verbose] [--json]   # Preflight env + config (E2-S04)
 ```
 
 Doctor validates `harness.yaml`, **`workflow.yaml`** (entry, stages, agent refs, agent folder names), merged model registries, and runtime paths. It warns (non-blocking) when: MCP tools are configured but `uv` is missing; `workflow.yaml` is newer than `docs/workflow-diagram.md`; or `docs/workflow-paths.md` is missing or stale vs `workflow.yaml` / workflow-listed `agents/*/agent.yaml`. Optional `eval:` / `deploy:` sections are validated (no Phase warn after E6-S02 / E6-S03). In `--deploy` mode, doctor validates `manifest.json`, pinned artifact runs, and reuses core config/runtime checks against the deploy bundle (dev-only warnings are skipped).
 
+### Run & serve
+
 ```bash
-zaumzeug serve <harness> --dry-run    # Validate harness.yaml, workflow.yaml, and resolved paths (no Hayhooks, no LLM)
-zaumzeug serve <harness> --dry-run --deploy   # Same against deploy/<harness>/
-zaumzeug serve <harness> --deploy     # Production serve from deploy/<harness>/ (E5-S03)
-HARNESS_ROOT=deploy zaumzeug serve <harness>  # Same without --deploy (E5-S04; containers / systemd)
-zaumzeug serve <harness> --dry-run --json     # Machine-readable summary
-zaumzeug serve <harness> --verbose    # SDK + Haystack debug logging (or HARNESS_LOG_LEVEL=DEBUG)
-# Optional GUI: pip install "hayhooks[chainlit]" + serve.hayhooks.chainlit: true → /chat (E7-S04)
-zaumzeug run <harness> --input "…" --json   # Machine-readable stage output (E8-S07)
-zaumzeug compile <harness>                  # GEPA compile + docs/workflow-diagram.md + workflow-paths.md (E4-S08/S09)
-zaumzeug compile <harness> --verbose        # Same logging for compile
-zaumzeug compile <harness> --workflow-diagram-only  # Refresh diagram + paths without GEPA
-zaumzeug eval <harness>               # Builtin JSONL or DeepEval regression (E6-S02)
-zaumzeug eval <harness> --trace PATH  # Score a captured data/traces/ JSONL turn (E6-S05)
-zaumzeug eval <harness> --base-url    # Mode C HTTP black-box vs running serve (E6-S06; staging/debug)
-zaumzeug rate <harness> --unrated     # Rate oldest unrated trace; merge/compile optional (E6-S08)
-zaumzeug run <harness> --input "…" --rate   # Run workflow then rate last agent stage (E6-S08)
-deepeval test run usr-harnesses/<name>/eval/   # Optional pytest scaffold (E6-S04; needs [eval])
-zaumzeug deploy <harness>             # Doctor + eval gate + write deploy/<name>/ (E5-S01)
-zaumzeug deploy <harness> --eval-gate block  # Override deploy.eval_gate for one run
-zaumzeug init <name> --with-eval      # Scaffold harness + optional eval/ DeepEval tests (E6-S04)
-zaumzeug mcp <harness>                # Serve MCP at http://127.0.0.1:{mcp_port}/mcp (E7-S01; default 1417)
-zaumzeug mcp <harness> --deploy       # Same MCP surface from deploy/<name>/ (E7-S06)
-# Cursor: .cursor/mcp.json → that URL (install --cursor-mcp or copy the example; E7-S03)
-zaumzeug acp <harness>                # Agent Client Protocol stdio JSON-RPC (E7-S05; Zed / JetBrains)
-zaumzeug a2a <harness>                # Optional A2A agent card (E8-S04; needs serve.a2a: true + hayhooks[a2a])
-zaumzeug a2a <harness> --deploy       # Same A2A surface from deploy/<name>/ (E8-S04)
+zaumzeug run <harness> [--input "…"] [--from STAGE] [--deploy] [--json] [--verbose]   # Serial workflow (E3-S08; --json E8-S07)
+zaumzeug serve <harness> [--dry-run] [--deploy] [--json] [--verbose] [--port N]   # Hayhooks REST + optional Chainlit /chat (E3-S02; E7-S04)
+HARNESS_ROOT=deploy zaumzeug serve|run <harness>   # Production root without --deploy (E5-S04)
 ```
+
+Live serve binds `127.0.0.1:{port}` (default **1416**); pipelines in `serve.expose` get `POST /{id}/run` (E8-S01). Opt-in trace capture: `eval.trace_capture` or `ZAUMZEUG_TRACE_CAPTURE=1` (E8-S03).
+
+### Improve (Journey C)
+
+```bash
+zaumzeug rate <harness> (--trace PATH | --unrated) [--apply] [--compile] [--force]   # Human rating → gold → optional GEPA (E6-S08)
+zaumzeug run <harness> --input "…" --rate [--apply] [--compile]   # Run then rate last agent stage (E6-S08)
+zaumzeug eval <harness> [--framework builtin|deepeval] [--agent NAME] [--trace PATH] [--base-url]   # Regression + trace score + HTTP black-box (E6-S02/S05/S06)
+deepeval test run usr-harnesses/<name>/eval/   # Optional pytest scaffold (E6-S04; needs [eval])
+```
+
+**`zaumzeug rate`** scores a captured turn in `data/traces/`, writes `data/ratings/`, merges gold into val/train on `keep_val` / `keep_train`, and optionally recompiles — **stdlib only**, no DeepEval required. See [Human quality rating → recompile](user-docs/guides/testing.md#human-quality-rating--recompile).
+
+### Compile & deploy
+
+```bash
+zaumzeug compile <harness> [--agent NAME] [--dry-run | --workflow-diagram-only] [--verbose]   # GEPA + workflow docs (E4-S02/S08/S09)
+zaumzeug deploy <harness> [--eval-gate skip|warn|block] [--dockerfile] [--verbose]   # Production bundle (E5-S01; gate E6-S03; Dockerfile E8-S05)
+```
+
+Every compile (except `--dry-run`) regenerates `docs/workflow-diagram.md` and `docs/workflow-paths.md`. Deploy runs doctor + eval gate, then writes `deploy/<name>/`.
+
+### Client protocols
+
+```bash
+zaumzeug mcp <harness> [--deploy] [--port N] [--verbose]   # MCP at http://127.0.0.1:{mcp_port}/mcp (E7-S01; deploy E7-S06)
+zaumzeug acp <harness> [--deploy] [--verbose]                # ACP stdio JSON-RPC — Zed / JetBrains (E7-S05)
+zaumzeug a2a <harness> [--deploy] [--port N] [--verbose]     # Optional A2A agent card (E8-S04; needs serve.a2a + hayhooks[a2a])
+# Cursor: .cursor/mcp.json → MCP URL (install --cursor-mcp or copy example; E7-S03)
+```
+
+**Deferred:** `zaumzeug install-project` (PyPI scaffold — E1-S08) · `zaumzeug replay` (PRD §9).
 
 ---
 
