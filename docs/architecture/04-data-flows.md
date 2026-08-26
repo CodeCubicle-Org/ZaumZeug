@@ -73,6 +73,8 @@ At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug a2a` / `zaumze
 
 **Implementation (E8-S05, 2026-08-26):** Optional container path — `zaumzeug deploy --dockerfile` / `deploy.dockerfile: true` writes `Dockerfile` (+ `.dockerignore`, `docker-compose.example.yml`) into `deploy/<name>/`. CMD `zaumzeug serve <name> --deploy`; `.env` at runtime only. Docs: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md). Tests: `tests/integration/deploy/test_dockerfile.py`.
 
+**Implementation (E8-S06, 2026-08-26):** Opt-in Mode B observe on serve — when `eval.confident_ai.enabled`, `Agent.run` is wrapped with DeepEval `@observe` for Confident AI sync (requires `[eval]` + login on that host). Local JSONL capture (E8-S03) remains independent. Docs: [testing.md — Mode B](../../user-docs/guides/testing.md#mode-b--deepeval-observe--confident-ai-opt-in).
+
 **Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same `validate_serve` production root as serve. MCP Streamable HTTP matches dev (`POST /mcp`, `GET /status`). Docs: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`.
 
 **Implementation (E3-S08, 2026-07-21):** `zaumzeug run <harness>` executes the full (or `--from`-partial) stage graph via `runtime/workflow.run_workflow()` — stage-scoped ModelRouter + factory per agent stage; prior output forwarded as prepended user context. Pipeline stages invoke YAML listed in `serve.expose` (**Done** E8-S01).

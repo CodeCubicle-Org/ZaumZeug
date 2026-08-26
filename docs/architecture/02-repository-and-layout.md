@@ -90,6 +90,8 @@ usr-harnesses/<harness-name>/
 
 **Implementation (E8-S03, 2026-08-26):** Production capture on serve (`eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE`); `merge_traces_into_datasets` appends val + train JSONL. Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`.
 
+**Implementation (E8-S06, 2026-08-26):** Mode B production observe — `eval.confident_ai.enabled` wraps serve with DeepEval `@observe` (`eval/observe.py`); not a default deploy dependency. Docs: [testing.md — Mode B](../../user-docs/guides/testing.md#mode-b--deepeval-observe--confident-ai-opt-in). Tests: `tests/unit/eval/test_observe.py`.
+
 **Implementation (E6-S06, 2026-07-28):** Mode C HTTP black-box — `zaumzeug eval --base-url` / `eval.base_url` against a running serve `/v1/chat/completions` (staging/debug). See [user-docs/guides/testing.md](../user-docs/guides/testing.md#mode-c--http-black-box-stagingdebug).
 
 **Implementation (E6-S07, 2026-07-28):** GEPA ↔ DeepEval bridge — failed eval → `data/train.jsonl` via `eval/gepa_bridge.append_failed_eval_to_train`; shared val aliases; optional DeepEval GEPA metric in `agents/<agent>/modules/metrics.py` (compile auto-loads `metric`). Example researcher ships the template. See [testing.md — GEPA ↔ DeepEval bridge](../user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile).

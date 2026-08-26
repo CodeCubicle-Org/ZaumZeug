@@ -12,6 +12,7 @@ ZaumZeug command-line interface reference for harness developers.
 | `HARNESS_ROOT` | `deploy` | Force production root (`deploy/<name>/`) for **serve**, **mcp**, **acp**, **a2a**, and other root-aware commands (`doctor`, `run`) instead of `usr-harnesses/`. Equivalent to `--deploy`. Use in containers / systemd so the flag is not required on every invocation. Default when unset: `usr-harnesses/` |
 | `HARNESS_LIVE_LLM` | `1` | Opt-in live provider e2e (`pytest tests/e2e`). Unset in default CI — mock profile only |
 | `ZAUMZEUG_TRACE_CAPTURE` | `1` / `0` | Opt-in production trace export on `zaumzeug serve` (`data/traces/*.jsonl`). Overrides `eval.trace_capture.enabled`. Default off. See [Testing — Trace → test case](../guides/testing.md#trace--test-case-journey-c) |
+| `CONFIDENT_API_KEY` | (secret) | Optional Mode B Confident AI sync when `eval.confident_ai.enabled` (E8-S06). Alternative to `deepeval login`. Never commit. See [Testing — Mode B](../guides/testing.md#mode-b--deepeval-observe--confident-ai-opt-in) |
 
 ---
 
@@ -376,7 +377,7 @@ zaumzeug eval example --framework builtin --base-url
 zaumzeug eval example --framework builtin --base-url http://127.0.0.1:1416
 ```
 
-See [Testing — Trace → test case](../guides/testing.md#trace--test-case-journey-c) for the JSONL schema, production capture (`eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE`), and valset/train merge; [Mode C](../guides/testing.md#mode-c--http-black-box-stagingdebug) for HTTP black-box eval; and [GEPA ↔ DeepEval bridge](../guides/testing.md#gepa--deepeval-bridge-compile--eval--compile) for failed-eval → train / shared valset.
+See [Testing — Trace → test case](../guides/testing.md#trace--test-case-journey-c) for the JSONL schema, production capture (`eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE`), and valset/train merge; [Mode B](../guides/testing.md#mode-b--deepeval-observe--confident-ai-opt-in) for opt-in DeepEval `@observe` / Confident AI; [Mode C](../guides/testing.md#mode-c--http-black-box-stagingdebug) for HTTP black-box eval; and [GEPA ↔ DeepEval bridge](../guides/testing.md#gepa--deepeval-bridge-compile--eval--compile) for failed-eval → train / shared valset.
 
 ---
 
@@ -449,7 +450,7 @@ zaumzeug doctor [<harness>] [--deploy] [--verbose] [--json]
 | `--json` | Emit machine-readable JSON report |
 | `--deploy` | Validate deploy bundle under `deploy/` (or set `HARNESS_ROOT=deploy`) |
 
-**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig`, `deploy:` / `DeployConfig`, and `runtime:` / `RuntimeRetryConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. **Failing (blocking):** `tools.custom` import errors — `custom_tools` fails in default **and** `--deploy` modes with the module path and expected file (E7-S02). Warnings (non-blocking): MCP without `uv` when stdio `tools.mcp` is configured, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`. Doctor does **not** require the optional `[eval]` / DeepEval extra (E6-S01); use `zaumzeug eval` for regression (E6-S02), `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06), `zaumzeug eval --trace` for captured failures (E6-S05), `zaumzeug eval --base-url` for Mode C staging/debug (E6-S06), and `zaumzeug.eval.gepa_bridge` for failed-eval → train / optional DeepEval GEPA metrics (E6-S07).
+**Checks include:** Python version, package import, `.env`/API keys for live models, `harness.yaml` (including optional `eval:` / `EvalConfig`, `deploy:` / `DeployConfig`, and `runtime:` / `RuntimeRetryConfig`), **`workflow.yaml`** (required `entry` and `stages`, agent refs, unique agent folder names), per-agent model registries, runtime paths, pinned artifact manifests, and port availability. **Failing (blocking):** `tools.custom` import errors — `custom_tools` fails in default **and** `--deploy` modes with the module path and expected file (E7-S02). Warnings (non-blocking): MCP without `uv` when stdio `tools.mcp` is configured, stale `workflow-diagram.md`, stale compiled artifact vs `compile.module` `source_hash` (re-run `zaumzeug compile`), pin ≠ `artifacts/current`, and **`confident_ai_observe`** when `eval.confident_ai.enabled` but `[eval]` / `deepeval login` / `CONFIDENT_API_KEY` are missing (E8-S06). Doctor does **not** require the optional `[eval]` / DeepEval extra by default (E6-S01); use `zaumzeug eval` for regression (E6-S02), `deploy.eval_gate` on `zaumzeug deploy` (E6-S03 / E5-S06), `zaumzeug eval --trace` for captured failures (E6-S05), `zaumzeug eval --base-url` for Mode C staging/debug (E6-S06), `zaumzeug.eval.gepa_bridge` for failed-eval → train / optional DeepEval GEPA metrics (E6-S07), and Mode B `@observe` only when explicitly enabled (E8-S06).
 
 Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack debug logs on serve, compile, eval, deploy, or run, use `--verbose` on those commands or `HARNESS_LOG_LEVEL` (`INFO` for run stage lifecycle; `DEBUG` for full request noise).
 
@@ -457,7 +458,7 @@ Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack
 
 ## Related
 
-- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, `--trace` / Journey C ratchet, Mode C `--base-url`, GEPA ↔ DeepEval bridge, deploy eval gates; `zaumzeug replay` deferred
+- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, `--trace` / Journey C ratchet, Mode B `@observe` / Confident AI, Mode C `--base-url`, GEPA ↔ DeepEval bridge, deploy eval gates; `zaumzeug replay` deferred
 - [Custom tools](../guides/custom-tools.md) — `tools.custom` Python modules, `ComponentTool` / `Tool`, doctor import errors
 - [Cursor MCP setup](../guides/cursor-mcp.md) — `.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`; `--cursor-mcp`; `uv` for stdio `tools.mcp`
 - [ACP (Zed / JetBrains)](../guides/acp.md) — `zaumzeug acp` stdio JSON-RPC; Agent Client Protocol ≠ A2A; Cursor uses MCP

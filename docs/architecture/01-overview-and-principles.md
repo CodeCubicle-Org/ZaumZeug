@@ -109,7 +109,7 @@ Each workflow stage runs **one Haystack `Agent` loop** for that step. The harnes
 | **Sensors** (feedback) | GEPA metric (+ optional DeepEval in `modules/metrics.py`) ✅ (E6-S07) | Score + **textual feedback** for compile |
 | Regression testing | Optional DeepEval (or Promptfoo / custom pytest) | `[eval]` extra ✅ (E6-S01); `zaumzeug eval` ✅ (E6-S02); `eval/test_*.py` ✅ (E6-S04); trace → test case ✅ (E6-S05); Mode C HTTP `--base-url` ✅ (E6-S06); production dataset ratchet ✅ (E8-S03) |
 | Serving | Haystack + Hayhooks | REST, MCP, ACP ✅, optional A2A ✅ (E8-S04); production HTTP **proxy-only** (Traefik ✅ E8-S02) |
-| Observability | Haystack `track_stats`; optional OTel (Phase 4); DeepEval `@observe` if opted in | Trace export ✅ (E6-S05); production dataset ratchet ✅ (E8-S03, 2026-08-26) |
+| Observability | Haystack `track_stats`; optional OTel stub (E8-S03); DeepEval `@observe` if opted in ✅ (E8-S06) | Trace export ✅ (E6-S05); production dataset ratchet ✅ (E8-S03, 2026-08-26); Mode B Confident AI sync ✅ (E8-S06, 2026-08-26) |
 
 ### 2.4 Industry patterns
 

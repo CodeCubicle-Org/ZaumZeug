@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | **Audience** | Harness developers · SDK contributors |
-| **Last updated** | 2026-08-26 (E8-S03 production trace → dataset ratchet) |
+| **Last updated** | 2026-08-26 (E8-S06 Mode B DeepEval observe) |
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
-DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra. Optional harness `eval/` pytest files (`zaumzeug init --with-eval` or the example harness) run with `deepeval test run` (**Done** E6-S04). Captured Haystack turns export to `data/traces/` and score with `zaumzeug eval --trace` (**Done** E6-S05). Mode C black-boxes a running serve with `zaumzeug eval --base-url` (**Done** E6-S06) — staging/debug only. Failed eval rows feed GEPA training via `append_failed_eval_to_train`; shared `val.jsonl` and optional DeepEval GEPA metrics close the loop (**Done** E6-S07). Production serve can capture Haystack turns to `data/traces/` (`eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1`); merge those JSONL rows into `data/val.jsonl` / `data/train.jsonl` and run eval → compile → deploy (**Done** E8-S03). Production bundles from `zaumzeug deploy` are served with `zaumzeug serve <name> --deploy` (**Done** E5-S03 — `tests/integration/deploy/test_serve_deploy.py`) or as MCP with `zaumzeug mcp <name> --deploy` (**Done** E7-S06 — `tests/integration/mcp/test_mcp_deploy.py`).
+DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra. Optional harness `eval/` pytest files (`zaumzeug init --with-eval` or the example harness) run with `deepeval test run` (**Done** E6-S04). Captured Haystack turns export to `data/traces/` and score with `zaumzeug eval --trace` (**Done** E6-S05). Mode C black-boxes a running serve with `zaumzeug eval --base-url` (**Done** E6-S06) — staging/debug only. Failed eval rows feed GEPA training via `append_failed_eval_to_train`; shared `val.jsonl` and optional DeepEval GEPA metrics close the loop (**Done** E6-S07). Production serve can capture Haystack turns to `data/traces/` (`eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1`); merge those JSONL rows into `data/val.jsonl` / `data/train.jsonl` and run eval → compile → deploy (**Done** E8-S03). Opt-in Mode B wraps serve with DeepEval `@observe` + Confident AI sync when `eval.confident_ai.enabled` (**Done** E8-S06 — see [Mode B](#mode-b--deepeval-observe--confident-ai-opt-in)). Production bundles from `zaumzeug deploy` are served with `zaumzeug serve <name> --deploy` (**Done** E5-S03 — `tests/integration/deploy/test_serve_deploy.py`) or as MCP with `zaumzeug mcp <name> --deploy` (**Done** E7-S06 — `tests/integration/mcp/test_mcp_deploy.py`).
 
 For SDK design detail, see internal `docs/architecture/10-operations-and-reference.md` §13 and `docs/architecture/03-technology-stack.md` §4.5.
 
@@ -325,6 +325,40 @@ zaumzeug serve example --deploy
 
 SDK tests: `pytest tests/unit/eval/test_trace_ratchet.py tests/integration/eval/test_journey_c.py -v`.
 
+### Mode B — DeepEval `@observe` / Confident AI (opt-in)
+
+Production serve can wrap Haystack `Agent.run` with DeepEval `@observe` and sync traces to [Confident AI](https://www.confident-ai.com/). This is **opt-in only** (PRD NG2) — off by default, and **not** part of the default production deploy image (no DeepEval dependency on target unless you install `[eval]` yourself).
+
+```yaml
+# harness.yaml — explicit opt-in
+eval:
+  framework: builtin
+  valset: data/val.jsonl
+  confident_ai:
+    enabled: true          # default: false
+    sync_test_results: true
+```
+
+**Prerequisites on the serve host when enabled:**
+
+1. `pip install "zaumzeug[eval]"` (DeepEval)
+2. `deepeval login` **or** set `CONFIDENT_API_KEY` in the process env / `.env`
+
+`zaumzeug doctor` warns (non-blocking) when `eval.confident_ai.enabled` is true but the `[eval]` extra or credentials are missing.
+
+#### Privacy and cost implications
+
+| Concern | Implication |
+|---|---|
+| **Privacy** | User prompts, assistant replies, and tool-step metadata leave your host and sync to Confident AI. Do **not** enable on workloads with regulated / confidential traffic unless your Confident AI org and retention policy allow it. |
+| **Cost** | Cloud sync and optional online evals are billed by Confident AI (and any judge-model usage they invoke). High-traffic serve can generate many traces — budget accordingly. |
+| **Latency** | `@observe` is designed to be non-blocking for the live request; span updates that fail are logged and never fail the user turn. |
+| **Default deploy** | Core/`target_install` production path does **not** install DeepEval. Mode B only applies when you explicitly enable it **and** install `[eval]` on that server. |
+
+Local JSONL capture (`eval.trace_capture` / Journey C) stays on-disk under `data/traces/` and does **not** require Confident AI. Prefer that when you need a ratchet without cloud sync.
+
+SDK tests: `pytest tests/unit/eval/test_observe.py tests/unit/cli/test_doctor.py -k e8_s06 -v`.
+
 ### GEPA ↔ DeepEval bridge (compile → eval → compile)
 
 After eval fails, fold those rows into GEPA training and re-compile. Trace capture (above) feeds the **valset**; this bridge feeds the **trainset** and optionally shares one val file between compile and eval ([Journey C](../../docs/prd.md#73-journey-c--improve-after-failure-phase-2)):
@@ -544,7 +578,7 @@ zaumzeug compile example --dry-run
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
 | **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (**Done** E6-S05 — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**Done** E6-S06 — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**Done** E6-S07 — `tests/unit/eval/test_gepa_bridge.py`), `zaumzeug deploy` packager (**Done** E5-S01 — `tests/integration/deploy/test_deploy.py`), deploy copy matrix (**Done** E5-S02 — `tests/unit/deploy/test_copy_rules.py`, `tests/integration/deploy/test_deploy_golden.py`), serve `--deploy` (**Done** E5-S03 — `tests/integration/deploy/test_serve_deploy.py`, 4 passed / 0 skipped), `HARNESS_ROOT=deploy` (**Done** E5-S04 — `tests/unit/deploy/test_harness_root.py`, 2 passed / 0 skipped), target ship workflow docs (**Done** E5-S05 — `tests/integration/deploy/test_target_install.py` + `test_e5_s05_ac5_no_env_in_bundle`, 5 passed / 0 skipped), deploy git policy (**Done** E5-S07 — `tests/unit/install/test_scaffolding.py::test_e5_s07_ac1_gitignore_deploy_and_artifacts`, 6 passed / 0 skipped in file), deploy platform policy (**Done** E5-S08 — `tests/integration/deploy/test_deploy_golden.py::test_e5_s08_*`, 3 passed / 0 skipped in file; Linux CI `deploy` → `serve --deploy` smoke), target install core (**Done** E5-S09a — `tests/integration/deploy/test_target_install.py` `e5_s09_*`, 5 passed / 0 skipped), target install wrappers (**Done** E5-S09b — `test_e5_s09b_*` + `test_e5_s09_ac7_scripts_in_bundle`, 3 passed / 0 skipped) |
 | **3** | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`); custom tool loader ✅ (**E7-S02** — `tests/unit/runtime/tools/test_custom_loader.py`, doctor `custom_tools`); Cursor MCP setup ✅ (**E7-S03** — `test_e7_s03_ac2_*`, `test_e7_s03_ac3_*`); Chainlit `/chat` ✅ (**E7-S04** — `tests/integration/serve/test_chainlit.py`); ACP stdio ✅ (**E7-S05** — `tests/integration/acp/test_acp_stdio.py`); MCP from deploy ✅ (**E7-S06** — `tests/integration/mcp/test_mcp_deploy.py`); extended builtins ✅ (**E7-S07** — `test_extended_builtins.py`, `test_read_file.py`); web layouts ✅ (**E7-S08** — `tests/unit/docs/test_web_deployment.py`); tool-correctness eval |
-| **4** | Pipeline exposure ✅ (**E8-S01** — `tests/integration/pipelines/test_serve_expose.py`); run reliability ✅ (**E8-S07**); production trace ratchet ✅ (**E8-S03** — `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`); optional A2A ✅ (**E8-S04** — `tests/integration/a2a/`); `@observe` / Confident AI sync |
+| **4** | Pipeline exposure ✅ (**E8-S01** — `tests/integration/pipelines/test_serve_expose.py`); run reliability ✅ (**E8-S07**); production trace ratchet ✅ (**E8-S03** — `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`); optional A2A ✅ (**E8-S04** — `tests/integration/a2a/`); Dockerfile template ✅ (**E8-S05** — `tests/integration/deploy/test_dockerfile.py`); Mode B `@observe` / Confident AI ✅ (**E8-S06** — `tests/unit/eval/test_observe.py`, doctor `confident_ai_observe`) |
 
 ---
 
@@ -559,4 +593,4 @@ zaumzeug compile example --dry-run
 - [Pipelines and RAG](pipelines.md) — `serve.expose` → `POST /{id}/run`; `search_docs`; RAG retriever → prompt → generator (E8-S01)
 - [Multi-agent workflow](multi-agent-workflow.md) — `workflow.yaml` and stage routing under test
 - [Deploy and ship](deploy.md) — copy → `target_install` → `.env` → `serve --deploy` (E5-S05); git policy for bundles (E5-S07); platforms / Linux CI smoke (E5-S08); target install + `--verify` (E5-S09a/b/c); optional `traefik/` snippets (E8-S02)
-- [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_ROOT=deploy` (E5-S04), `HARNESS_LIVE_LLM`, debugpy, serve/compile `--dry-run`, serve `--deploy` (E5-S03), `doctor`, `eval` / `--trace` / `--base-url`, GEPA ↔ DeepEval bridge, Phase 1 security notes
+- [CLI reference](../reference/cli.md) — `--verbose`, `HARNESS_LOG_LEVEL`, `HARNESS_ROOT=deploy` (E5-S04), `HARNESS_LIVE_LLM`, `CONFIDENT_API_KEY` (E8-S06), debugpy, serve/compile `--dry-run`, serve `--deploy` (E5-S03), `doctor`, `eval` / `--trace` / `--base-url`, Mode B observe, GEPA ↔ DeepEval bridge, Phase 1 security notes

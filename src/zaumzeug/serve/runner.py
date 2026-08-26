@@ -294,7 +294,15 @@ def prepare_serve(
     eval_config = (
         validation.harness_config.eval if validation.harness_config is not None else None
     )
+    from zaumzeug.eval.observe import install_production_observe_hook, observe_enabled
     from zaumzeug.eval.ratchet import ProductionTraceHook, trace_capture_enabled
+
+    # Mode B (E8-S06): opt-in DeepEval @observe before local JSONL capture wrap.
+    if observe_enabled(eval_config):
+        install_production_observe_hook(
+            built.agent,
+            agent_name=validation.entry.agent_name,
+        )
 
     trace_hook = None
     if trace_capture_enabled(eval_config):

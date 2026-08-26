@@ -399,3 +399,59 @@ def test_e8_s07_ac5_phase_gated_mcp_fails_in_deploy_mode(tmp_path: Path) -> None
     assert report.exit_code == 0
     # Dev-only mcp_uv remains skipped in deploy.
     assert not any(c.name == "mcp_uv" for c in report.checks)
+
+
+def test_e8_s06_ac3_doctor_warns_missing_deepeval_login(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-3 (E8-S06): doctor warns when confident_ai enabled without credentials."""
+    from zaumzeug.doctor.checks import check_confident_ai_observe
+
+    project_root = tmp_path / "project"
+    harness_dir = _minimal_harness(
+        project_root,
+        harness_yaml={
+            "name": "example",
+            "serve": {"hayhooks": {"port": 1416}},
+            "eval": {
+                "framework": "builtin",
+                "valset": "data/val.jsonl",
+                "confident_ai": {"enabled": True},
+            },
+        },
+    )
+    (harness_dir / "data").mkdir(parents=True, exist_ok=True)
+    (harness_dir / "data" / "val.jsonl").write_text(
+        '{"input":"x","expected_output":"y"}\n',
+        encoding="utf-8",
+    )
+
+    monkeypatch.delenv("CONFIDENT_API_KEY", raising=False)
+    monkeypatch.setattr(
+        "zaumzeug.eval.observe.is_deepeval_available",
+        lambda: True,
+    )
+    monkeypatch.setattr(
+        "zaumzeug.eval.observe._deepeval_stored_key_present",
+        lambda: False,
+    )
+    monkeypatch.setattr(
+        "zaumzeug.eval.is_deepeval_available",
+        lambda: True,
+    )
+
+    direct = check_confident_ai_observe(
+        "example",
+        harness_dir,
+        project_root=project_root,
+    )
+    assert direct.severity == "warn"
+    assert "deepeval login" in direct.message.lower()
+    assert "CONFIDENT_API_KEY" in direct.message
+
+    report = run_doctor(harness_name="example", project_root=project_root)
+    cai = [c for c in report.checks if c.name == "confident_ai_observe"]
+    assert cai
+    assert cai[0].severity == "warn"
+    assert report.exit_code == 0  # warn is non-blocking

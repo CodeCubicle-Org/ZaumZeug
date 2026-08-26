@@ -490,7 +490,13 @@ class EvalMetricConfig(BaseModel):
 
 
 class EvalConfidentAiConfig(BaseModel):
-    """Optional Confident AI sync settings under ``eval.confident_ai``."""
+    """Optional Confident AI sync under ``eval.confident_ai`` (E8-S06 Mode B).
+
+    Off by default (PRD NG2). When ``enabled: true``, serve wraps ``Agent.run``
+    with DeepEval ``@observe`` and syncs traces to Confident AI. Requires
+    ``pip install "zaumzeug[eval]"`` and ``deepeval login`` (or
+    ``CONFIDENT_API_KEY``) on that host — not part of the default deploy image.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -521,6 +527,9 @@ class EvalConfig(BaseModel):
 
     Optional ``trace_capture`` enables the production trace → dataset ratchet
     (E8-S03). Default off (privacy). Env ``ZAUMZEUG_TRACE_CAPTURE`` overrides.
+
+    Optional ``confident_ai.enabled`` turns on Mode B DeepEval ``@observe``
+    + Confident AI sync on serve (E8-S06). Default off (PRD NG2).
     """
 
     model_config = ConfigDict(extra="forbid")

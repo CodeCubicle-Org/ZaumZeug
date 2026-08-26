@@ -76,7 +76,7 @@ Full schema examples: Phase 1 canonical examples in [§6.6](05-configuration.md#
 | Mode | Description | Phase |
 |---|---|---|
 | **A — In-process black-box** | Default: SDK runs Haystack agent, builds `LLMTestCase`, runs metrics (`zaumzeug eval`, `deepeval test run`) | 2 |
-| **B — In-process tracing** | Wrap `Agent.run()` with DeepEval `@observe` / `update_current_span` | 4 |
+| **B — In-process tracing** | Wrap `Agent.run()` with DeepEval `@observe` / `update_current_span` ✅ (E8-S06, 2026-08-26) | 4 |
 | **C — HTTP black-box** | Client calls running `zaumzeug serve` `/v1/chat/completions`; same metrics — staging/debug ✅ (E6-S06, 2026-07-28) | 2+ |
 
 If `framework: deepeval` (or default) and `deepeval` not installed:
@@ -101,6 +101,8 @@ Or set eval.framework: builtin for JSONL checks without DeepEval.
 
 **Implementation (E8-S03, 2026-08-26):** Production trace ratchet — `eval.trace_capture.enabled` (or `ZAUMZEUG_TRACE_CAPTURE=1`) wraps serve `Agent.run`; `eval/ratchet.py` merges traces into `data/val.jsonl` / `data/train.jsonl`. Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`. Docs: [testing.md — Journey C](../user-docs/guides/testing.md#trace--test-case-journey-c).
 
+**Implementation (E8-S06, 2026-08-26):** Mode B production observe — `eval.confident_ai.enabled` wraps serve `Agent.run` with DeepEval `@observe` + Confident AI sync (`eval/observe.py`). Opt-in only (PRD NG2); doctor warns when enabled without `[eval]` / `deepeval login` / `CONFIDENT_API_KEY`. Tests: `tests/unit/eval/test_observe.py`, `tests/unit/cli/test_doctor.py::test_e8_s06_ac3_*`. Docs: [testing.md — Mode B](../user-docs/guides/testing.md#mode-b--deepeval-observe--confident-ai-opt-in).
+
 CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 `zaumzeug eval <name> --trace data/traces/run-001.jsonl` scores a captured turn (E6-S05).
 `zaumzeug eval <name> --base-url` (or `--base-url http://host:port`) black-boxes a running serve (E6-S06).
@@ -113,7 +115,7 @@ CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 | `eval.valset` | JSONL — `input`, `expected_output`, optional `retrieval_context` |
 | `eval.metrics` | DeepEval metric types + thresholds |
 | `eval.judge_model_id` | `models.yaml` key for LLM-as-judge |
-| `eval.confident_ai` | Optional cloud sync (`enabled`, `sync_test_results`); requires `deepeval login` |
+| `eval.confident_ai` | Optional Mode B — DeepEval `@observe` + Confident AI sync (`enabled`, `sync_test_results`); requires `deepeval login` / `CONFIDENT_API_KEY` + `[eval]` extra; default off (E8-S06) |
 | `eval.base_url` | Optional Mode C — HTTP black-box against running serve (empty = localhost + harness port); staging/debug only |
 | `eval.trace_capture.enabled` | Optional production capture on serve (E8-S03); default off; env `ZAUMZEUG_TRACE_CAPTURE` overrides |
 

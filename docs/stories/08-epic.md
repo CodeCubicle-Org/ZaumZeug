@@ -5,8 +5,8 @@
 | **Document** | Epic E8 user stories |
 | **File** | `docs/stories/08-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-26 (E8-S05 Dockerfile template) |
-| **Status** | Active (E8-S07 / E8-S01–S05 Done) |
+| **Last modified** | 2026-08-26 (E8-S06 DeepEval production observe) |
+| **Status** | Done (E8-S01–S07 — Phase 4 complete, 2026-08-26) |
 | **Build order** | **8 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -352,6 +352,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E8.6 |
 | **Persona** | Harness developer |
 | **Priority** | P3 |
+| **Status** | Done (2026-08-26) |
 
 ### User story
 
@@ -362,20 +363,21 @@ As a **harness developer**, I want optional DeepEval `@observe` in production, s
 - [PRD E8.6](../prd.md#epic-e8--rag-and-production-hardening-phase-4)
 - [Architecture §6.3 — Mode B tracing](../architecture/05-configuration.md#63-zaumzeug-eval-frameworks)
 - [DeepEval](https://github.com/confident-ai/deepeval)
+- Full story: [63-story.md](epic-stories/63-story.md)
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Opt-in only — not default for production ([PRD NG2](../prd.md#4-non-goals-v1))
-- [ ] **AC-2** `@observe` + Confident AI sync when `eval.confident_ai.enabled`
-- [ ] **AC-3** Requires `deepeval login` and `[eval]` extra on server if enabled
-- [ ] **AC-4** Document privacy and cost implications
-- [ ] **AC-5** Default production deploy has no DeepEval dependency (E5-S05)
+- [x] **AC-1** Opt-in only — not default for production ([PRD NG2](../prd.md#4-non-goals-v1))
+- [x] **AC-2** `@observe` + Confident AI sync when `eval.confident_ai.enabled`
+- [x] **AC-3** Requires `deepeval login` and `[eval]` extra on server if enabled
+- [x] **AC-4** Document privacy and cost implications
+- [x] **AC-5** Default production deploy has no DeepEval dependency (E5-S05)
 
 ### Implementation tasks (build)
 
-- [ ] Wrap agent run path with optional observe decorator
-- [ ] Config gate: explicit `serve.observability.deepeval: true` or similar
-- [ ] Warn in doctor when enabled without credentials
+- [x] Wrap agent run path with optional observe decorator
+- [x] Config gate: explicit `eval.confident_ai.enabled` (Mode B)
+- [x] Warn in doctor when enabled without credentials
 
 ### Verification (after build)
 
@@ -389,13 +391,17 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | AC-4 | **manual:** user-docs privacy and cost section |
 | AC-5 | **shared:** `tests/integration/deploy/test_target_install.py::test_e5_s05_ac3_no_dspy_gepa_deepeval` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/eval/test_observe.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/eval/test_observe.py -v` passes
 
 ### Definition of done
 
-- [ ] Default production deploy has no DeepEval dependency (E5-S05)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Default production deploy has no DeepEval dependency (E5-S05)
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-26)
+
+- `eval/observe.py` + serve wiring; doctor `confident_ai_observe`; docs Mode B privacy/cost in testing.md.
 
 ---
 

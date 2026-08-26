@@ -13,6 +13,7 @@ from zaumzeug.config import load_harness_for_doctor
 from zaumzeug.doctor.checks import (
     _live_providers,
     check_artifact_module_staleness,
+    check_confident_ai_observe,
     check_custom_tools,
     check_deploy_manifest,
     check_env_for_live_models,
@@ -139,6 +140,9 @@ def run_doctor(
         # errors for custom tools fail with the module path (dev + --deploy).
         checks.append(check_phase_gated_agent_tools(name, harness_dir))
         checks.extend(check_custom_tools(name, harness_dir))
+        checks.append(
+            check_confident_ai_observe(name, harness_dir, project_root=root)
+        )
         if not deploy_mode:
             checks.append(check_mcp_uv_presence(name, harness_dir))
             checks.append(check_workflow_diagram_staleness(name, harness_dir))

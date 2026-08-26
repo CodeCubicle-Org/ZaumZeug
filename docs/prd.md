@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-08-26 (E8-S05 Dockerfile template)
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S08 **Done** (2026-08-21); E8-S01–S05 **Done** (2026-08-21 / 2026-08-26); next E8-S06
+**Last updated:** 2026-08-26 (E8-S06 DeepEval production observe)
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S08 **Done** (2026-08-21); E8-S01–S06 **Done** (2026-08-21 / 2026-08-26) — **Phase 4 / E8 complete**
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -394,7 +394,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E8.3 | Trace → dataset ratchet | **Done** (E8-S03, 2026-08-26). Production traces append to JSONL under `data/` (`eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE`); merge into `data/val.jsonl` / `data/train.jsonl`; feed eval → compile → deploy. `zaumzeug replay <name> --trace` remains **deferred** (PRD §9). Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`. Docs: [testing.md — Journey C](user-docs/guides/testing.md#trace--test-case-journey-c). |
 | E8.4 | Optional A2A | **Done** (E8-S04, 2026-08-26). `serve.a2a: true` (or `{enabled, port}`) + `zaumzeug a2a` hosts Hayhooks agent card at `/{harness}/.well-known/agent-card.json` (default port **1418**; needs `hayhooks[a2a]`). Documented separately from MCP/ACP; one harness per process (NG1 unchanged). Tests: `tests/integration/a2a/`. Docs: [a2a.md](user-docs/guides/a2a.md). |
 | E8.5 | Dockerfile template | **Done** (E8-S05, 2026-08-26). Optional generated `deploy/<name>/Dockerfile` via `deploy.dockerfile: true` or `zaumzeug deploy --dockerfile` (also `.dockerignore` + `docker-compose.example.yml`). Base `python:3.11-slim`; build runs `target_install --skip-venv`; CMD `zaumzeug serve <name> --deploy`; `.env` injected at runtime (never baked). Tests: `tests/integration/deploy/test_dockerfile.py`. Docs: `README.deploy.md`, [deploy.md](user-docs/guides/deploy.md). |
-| E8.6 | DeepEval production observe | **AC:** Optional `@observe` + Confident AI sync (opt-in). |
+| E8.6 | DeepEval production observe | **Done** (E8-S06, 2026-08-26). Opt-in Mode B: `eval.confident_ai.enabled` wraps serve `Agent.run` with DeepEval `@observe` + Confident AI sync (`eval/observe.py`). Requires `[eval]` extra + `deepeval login` / `CONFIDENT_API_KEY` on that host; doctor warns when missing. Default production deploy has no DeepEval (PRD NG2 / E5-S05). Tests: `tests/unit/eval/test_observe.py`, `tests/unit/cli/test_doctor.py::test_e8_s06_ac3_*`. Docs: [testing.md — Mode B](user-docs/guides/testing.md#mode-b--deepeval-observe--confident-ai-opt-in). |
 | E8.7 | Workflow run reliability | **Done** (E8-S07, 2026-08-01). **`zaumzeug run` / `run_workflow` only** (serve/HTTP follow-up). Live generation → typed `WorkflowError` with stage context; `runtime.retry` (`max_attempts >= 1`, default 1; build once; retry `Agent.run` / JSON parse); INFO `log_request` with structured `stage`; optional `output.format: json` (fence strip; no JSON Schema); doctor + `doctor --deploy` no longer fail on `tools.custom` as of E7-S02 (`tools.mcp` allowed as of E7-S01). Story: [64-story.md](stories/epic-stories/64-story.md). |
 
 ---

@@ -495,6 +495,85 @@ def check_mcp_uv_presence(harness_name: str, harness_dir: Path) -> CheckResult:
     )
 
 
+def check_confident_ai_observe(
+    harness_name: str,
+    harness_dir: Path,
+    *,
+    project_root: Path | None = None,
+) -> CheckResult:
+    """AC-3 (E8-S06): Warn when Mode B observe is enabled without login / ``[eval]``.
+
+    Non-blocking. Default production has observe off — this check only runs
+    meaningful warnings when ``eval.confident_ai.enabled: true``.
+    """
+    from zaumzeug.eval import is_deepeval_available
+    from zaumzeug.eval.observe import (
+        CONFIDENT_API_KEY_ENV,
+        confident_ai_credentials_present,
+        observe_enabled,
+    )
+
+    harness_yaml = harness_dir / "harness.yaml"
+    if not harness_yaml.is_file():
+        return CheckResult(
+            name="confident_ai_observe",
+            severity="pass",
+            message="No harness.yaml; Confident AI observe not configured",
+            harness=harness_name,
+        )
+
+    try:
+        from zaumzeug.config import load_harness_for_doctor
+
+        harness_cfg = load_harness_for_doctor(harness_yaml)
+    except Exception as exc:  # noqa: BLE001 — doctor already reports config fails
+        return CheckResult(
+            name="confident_ai_observe",
+            severity="pass",
+            message=f"Skipped Confident AI observe check (harness load: {exc})",
+            harness=harness_name,
+        )
+
+    if not observe_enabled(harness_cfg.eval):
+        return CheckResult(
+            name="confident_ai_observe",
+            severity="pass",
+            message="eval.confident_ai.enabled is off (default; no DeepEval observe)",
+            harness=harness_name,
+        )
+
+    if not is_deepeval_available():
+        return CheckResult(
+            name="confident_ai_observe",
+            severity="warn",
+            message=(
+                "eval.confident_ai.enabled is true but deepeval is not installed; "
+                'install with: pip install "zaumzeug[eval]" then run `deepeval login`'
+            ),
+            harness=harness_name,
+        )
+
+    root = project_root if project_root is not None else harness_dir.parent.parent
+    if confident_ai_credentials_present(project_root=root):
+        return CheckResult(
+            name="confident_ai_observe",
+            severity="pass",
+            message="eval.confident_ai.enabled and Confident AI credentials are present",
+            harness=harness_name,
+        )
+
+    return CheckResult(
+        name="confident_ai_observe",
+        severity="warn",
+        message=(
+            "eval.confident_ai.enabled is true but Confident AI credentials are missing; "
+            f"run `deepeval login` or set {CONFIDENT_API_KEY_ENV} "
+            "(privacy/cost: production traces sync to Confident AI when observe is on)"
+        ),
+        harness=harness_name,
+    )
+
+
 def check_workflow_diagram_staleness(harness_name: str, harness_dir: Path) -> CheckResult:
     """AC-3 (E2-S04b): Warn when workflow.yaml is newer than the diagram."""
     workflow_yaml = harness_dir / "workflow.yaml"

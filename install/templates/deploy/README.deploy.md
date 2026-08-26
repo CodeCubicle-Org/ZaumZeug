@@ -48,7 +48,7 @@ On a **clean target** (desktop PC or server):
 |---|---|
 | **Python 3.11+** | Must already be on PATH — `target_install` does **not** install Python |
 | **Runtime package** | `pip install zaumzeug` only (Haystack / Hayhooks via the SDK) |
-| **Not installed by default** | DSPy, GEPA, DeepEval, `[dev]`, `[eval]` — compile and eval stay on the **dev/CI** machine |
+| **Not installed by default** | DSPy, GEPA, DeepEval, `[dev]`, `[eval]` — compile and eval stay on the **dev/CI** machine. Exception: Mode B (`eval.confident_ai.enabled`) needs `"zaumzeug[eval]"` + `deepeval login` / `CONFIDENT_API_KEY` on this host |
 
 ---
 
