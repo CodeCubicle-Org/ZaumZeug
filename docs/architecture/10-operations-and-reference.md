@@ -93,6 +93,7 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract on ephemeral port — `tests/integration/conftest.py::ephemeral_serve_url`, `tests/integration/test_openai_contract.py` (`-k e3_s07`); HTTP `model_id` override wired in `serve/runner.py`. Cross-OS green closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
 
 | `zaumzeug eval` | **Done** (E6-S02 / E6-S05 / E6-S06 / E6-S07) — optional regression; `--trace <file>` scores a captured turn; `--base-url` Mode C HTTP against running serve (staging/debug); GEPA bridge helpers for failed→train |
+| `zaumzeug rate` | **Done** (E6-S08, 2026-08-26) — human quality + gold → `data/ratings/`; optional `--apply` / `--compile`; also `run --rate`; no DeepEval required |
 | `--dry-run` on serve | **Done** (E2-S05) — validate without Hayhooks or LLM |
 | `zaumzeug serve` (dev) | **Done** (E3-S02, 2026-07-20; optional `/chat` **E7-S04**, 2026-08-21; web layout recipes **E7-S08**, 2026-08-21; Traefik proxy-only **E8-S02**, 2026-08-21) — Hayhooks runner, OpenAI REST, localhost bind; `serve.hayhooks.chainlit: true` needs `hayhooks[chainlit]`; Open WebUI / SPA / Next.js use harness `baseURL`; production TLS/auth at Traefik |
 | `zaumzeug mcp` | **Done** (E7-S01, 2026-08-14; **E7-S06**, 2026-08-21) — Hayhooks MCP Streamable HTTP at `{mcp_port}/mcp`; `--deploy` / `HARNESS_ROOT=deploy` same root as serve |
@@ -156,7 +157,7 @@ usr-harnesses/<harness>/eval/
 
 **Implementation (E6-S07, 2026-07-28):** GEPA ↔ DeepEval bridge — `eval/gepa_bridge.py` (`append_failed_eval_to_train`, shared val aliases, `deepeval_gepa_metric`); example `agents/.../modules/metrics.py`. Tests: `tests/unit/eval/test_gepa_bridge.py`. Docs: [testing.md — GEPA ↔ DeepEval bridge](../user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile).
 
-Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace data/traces/….jsonl`, `zaumzeug eval <harness> --base-url`, or `deepeval test run usr-harnesses/<harness>/eval/`. See [user-docs/guides/testing.md](../user-docs/guides/testing.md).
+Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace data/traces/….jsonl`, `zaumzeug eval <harness> --base-url`, `zaumzeug rate <harness> --trace …` / `--unrated`, `zaumzeug run <harness> --rate`, or `deepeval test run usr-harnesses/<harness>/eval/`. See [user-docs/guides/testing.md](../user-docs/guides/testing.md).
 
 ### 13.4 Trace capture (Phase 2+)
 
@@ -166,12 +167,15 @@ Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace da
 | `zaumzeug eval --trace` | Score captured trace — **Done** (E6-S05) |
 | Production capture | Serve `Agent.run` wrap when `eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1` — **Done** (E8-S03, 2026-08-26) |
 | Dataset merge | `merge_traces_into_datasets` → `data/val.jsonl` / `data/train.jsonl` — **Done** (E8-S03) |
+| Human rating | `zaumzeug rate` / `run --rate` → `data/ratings/<stem>.jsonl`; optional `--apply` / `--compile` — **Done** (E6-S08, 2026-08-26) |
 | Mode B `@observe` | DeepEval + Confident AI sync when `eval.confident_ai.enabled` — **Done** (E8-S06, 2026-08-26) |
 | `zaumzeug replay` (future) | Re-run tool loop with recorded outputs — **deferred** (PRD §9) |
 
 **Implementation (E6-S05, 2026-07-28):** `eval/trace.py` writes valset-compatible JSONL (`input`, `actual_output`, optional `expected_output` / `retrieval_context`) under `usr-harnesses/<name>/data/traces/`. CLI `zaumzeug eval <name> --trace <path>` scores without re-running the agent. Docs: [user-docs/guides/testing.md](../user-docs/guides/testing.md#trace--test-case-journey-c). Tests: `tests/unit/eval/test_trace.py`.
 
 **Implementation (E8-S03, 2026-08-26):** Production auto-capture + dataset ratchet — `eval/ratchet.py`; serve hook; merge into val/train JSONL; Journey C eval → compile → deploy. `zaumzeug replay --trace` deferred. Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`.
+
+**Implementation (E6-S08, 2026-08-26):** Human rating gate — `eval/rate.py` (`run_rate`, `RateError`); CLI `zaumzeug rate` / `run --rate`; writes `data/ratings/` (dev-only; excluded from deploy with other `data/`). Merge via ratchet helpers; optional `--compile` for rated agent. No DeepEval required. Docs: [testing.md — Human quality rating](../user-docs/guides/testing.md#human-quality-rating--recompile). Tests: `tests/unit/eval/test_rate.py`, `tests/unit/cli/test_rate_cli.py`, `tests/integration/eval/test_rate_compile.py`.
 
 **Implementation (E8-S06, 2026-08-26):** Mode B — `eval/observe.py` wraps serve `Agent.run` with DeepEval `@observe` when `eval.confident_ai.enabled`; doctor warns without credentials. Privacy/cost: [testing.md — Mode B](../user-docs/guides/testing.md#mode-b--deepeval-observe--confident-ai-opt-in). Tests: `tests/unit/eval/test_observe.py`.
 
@@ -180,9 +184,9 @@ Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace da
 | Phase | Debug/test deliverables |
 |---|---|
 | 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06), OpenAI REST contract ✅ (E3-S07) |
-| 2 | compile `--dry-run` (**E4-S06 Done** — `tests/integration/compile/test_compile_dry_run.py`), export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), `zaumzeug eval` (**E6-S02 Done** — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**E6-S04 Done** — `tests/integration/eval/test_deepeval_scaffold.py`), trace → `LLMTestCase` (**E6-S05 Done** — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**E6-S06 Done** — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**E6-S07 Done** — `tests/unit/eval/test_gepa_bridge.py`) |
+| 2 | compile `--dry-run` (**E4-S06 Done** — `tests/integration/compile/test_compile_dry_run.py`), export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), `zaumzeug eval` (**E6-S02 Done** — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**E6-S04 Done** — `tests/integration/eval/test_deepeval_scaffold.py`), trace → `LLMTestCase` (**E6-S05 Done** — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**E6-S06 Done** — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**E6-S07 Done** — `tests/unit/eval/test_gepa_bridge.py`), human rate → compile (**E6-S08 Done** — `tests/unit/eval/test_rate.py`, `test_rate_cli.py`, `test_rate_compile.py`) |
 | 3 | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`, Starlette `TestClient`); MCP from deploy ✅ (**E7-S06** — `tests/integration/mcp/test_mcp_deploy.py`); custom tool loader ✅ (**E7-S02** — `tests/unit/runtime/tools/test_custom_loader.py`, doctor `custom_tools`); Cursor MCP setup ✅ (**E7-S03**); Chainlit `/chat` ✅ (**E7-S04** — `tests/integration/serve/test_chainlit.py`); ACP stdio ✅ (**E7-S05** — `tests/integration/acp/test_acp_stdio.py`); extended builtins ✅ (**E7-S07** — `test_extended_builtins.py`, `test_read_file.py`); web layouts ✅ (**E7-S08** — `tests/unit/docs/test_web_deployment.py`); tool correctness eval when DeepEval present |
-| 4 | Pipeline exposure / RAG ✅ (**E8-S01** — `serve.expose`, `POST /{id}/run`, `search_docs`; `tests/integration/pipelines/test_serve_expose.py`); Run reliability ✅ (**E8-S07** — retry / JSON / stage logs / `phase_gated_tools`; serve path follow-up); production trace → dataset ratchet ✅ (**E8-S03** — `eval/ratchet.py`, `test_trace_ratchet.py`, `test_journey_c.py`); optional A2A agent card ✅ (**E8-S04** — `serve.a2a` + `zaumzeug a2a`, `tests/integration/a2a/`); optional Dockerfile template ✅ (**E8-S05** — `deploy.dockerfile` / `--dockerfile`, `tests/integration/deploy/test_dockerfile.py`); Mode B `@observe` / Confident AI ✅ (**E8-S06** — `eval/observe.py`, `test_observe.py`, doctor `confident_ai_observe`) |
+| 4 | Pipeline exposure / RAG ✅ (**E8-S01** — `serve.expose`, `POST /{id}/run`, `search_docs`; `tests/integration/pipelines/test_serve_expose.py`); Run reliability ✅ (**E8-S07** — retry / JSON / stage logs / `phase_gated_tools`; serve path follow-up); production trace → dataset ratchet ✅ (**E8-S03** — `eval/ratchet.py`, `test_trace_ratchet.py`, `test_journey_c.py`); human rating gate ✅ (**E6-S08** — `eval/rate.py`, `-k e6_s08`); optional A2A agent card ✅ (**E8-S04** — `serve.a2a` + `zaumzeug a2a`, `tests/integration/a2a/`); optional Dockerfile template ✅ (**E8-S05** — `deploy.dockerfile` / `--dockerfile`, `tests/integration/deploy/test_dockerfile.py`); Mode B `@observe` / Confident AI ✅ (**E8-S06** — `eval/observe.py`, `test_observe.py`, doctor `confident_ai_observe`) |
 
 Also compatible: Promptfoo, Ragas, custom pytest — no DeepEval lock-in.
 

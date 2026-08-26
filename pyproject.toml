@@ -60,3 +60,9 @@ markers = [
   "live_llm: live provider e2e — requires HARNESS_LIVE_LLM=1 (not default CI)",
   "eval: optional DeepEval tests — requires pip install \"zaumzeug[eval]\"",
 ]
+# DSPy 3.2.x avatar optimizer still uses deprecated InputField/OutputField `prefix=`
+# internally (dspy/predict/avatar/*, dspy/teleprompt/avatar_optimizer.py). ZaumZeug
+# uses string signatures (dspy.Predict("question -> answer")) only — not actionable here.
+filterwarnings = [
+  "ignore:The 'prefix' argument in InputField/OutputField is deprecated:DeprecationWarning:dspy",
+]

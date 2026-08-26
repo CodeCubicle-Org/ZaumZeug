@@ -455,3 +455,29 @@ def test_e8_s01_ac3_exposed_pipelines_in_deploy(tmp_path: Path) -> None:
         harness_config=_harness_config(),
     )
     assert (bundle / "pipelines" / "summarize.yaml").is_file()
+
+
+def test_e6_s08_ac7_excludes_data_ratings(tmp_path: Path) -> None:
+    """AC-7: seeded data/ratings/ is excluded from the deploy bundle (top-level data/)."""
+    harness_dir = _seed_matrix_harness(
+        tmp_path,
+        with_artifact=False,
+        with_tools_hooks=False,
+    )
+    ratings = harness_dir / "data" / "ratings"
+    ratings.mkdir(parents=True, exist_ok=True)
+    (ratings / "trace-001.jsonl").write_text(
+        '{"schema_version":1,"quality":"fail","decision":"discard"}\n',
+        encoding="utf-8",
+    )
+    assert is_excluded_from_deploy("data/ratings/trace-001.jsonl") is True
+    assert is_excluded_from_deploy("data/ratings/") is True
+
+    bundle = write_deploy_bundle(
+        "example",
+        project_root=tmp_path,
+        harness_dir=harness_dir,
+        harness_config=_harness_config(),
+    )
+    assert not (bundle / "data").exists()
+    assert not (bundle / "data" / "ratings").exists()

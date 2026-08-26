@@ -274,7 +274,7 @@ Full registration notes: [ACP (Zed / JetBrains)](../guides/acp.md).
 Execute `workflow.yaml` stages serially (multi-agent orchestration). Each agent stage loads that agent's config and merged `agents-models.yaml`, builds a Haystack Agent via the runtime factory, and forwards prior stage output as context to the next stage.
 
 ```bash
-zaumzeug run <harness> [--from STAGE] [--input TEXT] [--deploy] [--verbose]
+zaumzeug run <harness> [--from STAGE] [--input TEXT] [--deploy] [--verbose] [--rate …]
 ```
 
 | Flag | Description |
@@ -283,14 +283,56 @@ zaumzeug run <harness> [--from STAGE] [--input TEXT] [--deploy] [--verbose]
 | `--input TEXT` | User input passed to each agent stage (also receives prior stage output as context) |
 | `--deploy` | Load harness from `deploy/<name>/` (or set `HARNESS_ROOT=deploy`) |
 | `--verbose` | Enable SDK and Haystack structured debug logging (includes stage INFO lifecycle) |
+| `--rate` | After a successful run, rate the **last agent stage** (export `data/traces/` + prompt; E6-S08) |
+| `--quality` / `--expected` / `--decision` / `--notes` | With `--rate --no-input`: non-interactive rating fields |
+| `--apply` / `--compile` / `--all-agents` / `--force` / `--no-input` | With `--rate`: same semantics as [`zaumzeug rate`](#zaumzeug-rate) |
 
 ```bash
 zaumzeug run example --input "Summarize the latest release notes"
 zaumzeug run example --from reviewer --input "Check the draft"
 HARNESS_LOG_LEVEL=INFO zaumzeug run example --input "…"   # stage start/success/retry/failure
+zaumzeug run example --input "…" --rate   # rate last agent stage after run (E6-S08)
 ```
 
-**Behavior:** Stages run top-to-bottom from `workflow.yaml`. Prior stage assistant text is prepended as a user message before `--input` for the next agent. **`pipeline:`** stages invoke Haystack YAML listed in **`serve.expose`** (E8-S01) — see [Pipelines and RAG](../guides/pipelines.md). Live generation failures become typed `WorkflowError` with harness / agent / stage. Optional `runtime.retry` on `harness.yaml` retries `Agent.run` (and optional `output.format: json`) per stage; build/config errors are not retried. Stage lifecycle logs use structured `stage` at INFO — set `HARNESS_LOG_LEVEL=INFO` or `--verbose` (default WARNING hides them). See [Multi-agent workflow — Run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run). **Serve/HTTP does not yet share this reliability layer.**
+**Behavior:** Stages run top-to-bottom from `workflow.yaml`. Prior stage assistant text is prepended as a user message before `--input` for the next agent. **`pipeline:`** stages invoke Haystack YAML listed in **`serve.expose`** (E8-S01) — see [Pipelines and RAG](../guides/pipelines.md). Live generation failures become typed `WorkflowError` with harness / agent / stage. Optional `runtime.retry` on `harness.yaml` retries `Agent.run` (and optional `output.format: json`) per stage; build/config errors are not retried. Stage lifecycle logs use structured `stage` at INFO — set `HARNESS_LOG_LEVEL=INFO` or `--verbose` (default WARNING hides them). See [Multi-agent workflow — Run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run). **Serve/HTTP does not yet share this reliability layer.** With `--rate`, ZaumZeug selects the last `kind == "agent"` stage (not a trailing pipeline), exports a synthetic Haystack trace (`extra.source: run`), then offers the same rating prompt as `zaumzeug rate`.
+
+---
+
+## `zaumzeug rate`
+
+Human quality rating → gold → optional GEPA recompile (E6-S08). Core path — **no** DeepEval / `[eval]` required. See [Testing — Human quality rating → recompile](../guides/testing.md#human-quality-rating--recompile).
+
+```bash
+zaumzeug rate <harness> (--trace PATH | --unrated)
+  [--quality Q] [--expected TEXT] [--decision keep_val|keep_train|discard] [--notes TEXT]
+  [--apply] [--compile] [--all-agents] [--force] [--no-input] [--deploy] [--verbose]
+```
+
+| Flag | Description |
+|---|---|
+| `--trace PATH` | Rate one captured JSONL turn under `data/traces/` |
+| `--unrated` | Rate the **oldest** `data/traces/<stem>.jsonl` that has no matching `data/ratings/<stem>.jsonl` (one stem per invocation) |
+| `--quality Q` | `pass` \| `partial` \| `fail` or integer `1–5` (5→pass, 3–4→partial, 1–2→fail) |
+| `--expected TEXT` | Gold `expected_output` (required when applying `keep_val` / `keep_train`) |
+| `--decision` | `keep_val` (val only) · `keep_train` (train **and** val) · `discard` (rating file only) |
+| `--notes TEXT` | Short feedback (rating-only; never copied into datasets) |
+| `--apply` | Merge into resolved val/train paths (default in interactive mode for `keep_*`; required with `--no-input`) |
+| `--compile` | After apply, run GEPA for the **rated agent** (`agent` / last agent `stage_id`) |
+| `--all-agents` | With `--compile`: compile the whole harness |
+| `--force` | Overwrite an existing `data/ratings/<stem>.jsonl` |
+| `--no-input` | Non-interactive; require `--quality` and `--decision` |
+| `--deploy` | Load harness from `deploy/<name>/` |
+| `--verbose` | Enable SDK and Haystack structured debug logging |
+
+```bash
+zaumzeug rate example --unrated
+zaumzeug rate example --trace data/traces/trace-….jsonl --force
+zaumzeug rate example --trace data/traces/trace-….jsonl \
+  --quality fail --expected "cite the failing stage" --decision keep_train \
+  --apply --compile --no-input
+```
+
+Writes `data/ratings/<stem>.jsonl` (includes `trace_path`); leaves the original trace immutable. High quality alone never copies `actual_output` as gold.
 
 ---
 

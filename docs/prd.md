@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-08-26 (E4-S09 workflow path Mermaid docs — Ready)
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S08 **Done** (2026-08-21); E8-S01–S06 **Done** (2026-08-21 / 2026-08-26) — **Phase 4 / E8 complete**; post–Phase 4: **E6-S08 Ready** (human rate → compile); **E4-S09 Ready** (workflow path Mermaid docs)
+**Last updated:** 2026-08-26 (E6-S08 human rate → compile — Done)
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S08 **Done** (2026-08-21); E8-S01–S06 **Done** (2026-08-21 / 2026-08-26) — **Phase 4 / E8 complete**; post–Phase 4: **E6-S08 Done** (2026-08-26, human rate → compile); **E4-S09 Ready** (workflow path Mermaid docs)
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -114,7 +114,7 @@ production / local run → trace → [human rate / set gold] → add to valset /
 
 **Implementation (E8-S03, 2026-08-26):** Production auto-capture on serve (`eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1`) → `data/traces/`; `merge_traces_into_datasets` appends `data/val.jsonl` / `data/train.jsonl`; then eval → compile → deploy. `zaumzeug replay --trace` deferred (PRD §9). Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`.
 
-**Planned (E6-S08 / E6.8):** Human rating gate — `zaumzeug rate` and `zaumzeug run --rate` collect quality + feedback + gold answer, merge into val/train, optional `--compile` to recompile prompts. Story: [65-story.md](stories/epic-stories/65-story.md).
+**Implementation (E6-S08, 2026-08-26):** Human rating gate — `zaumzeug rate` / `zaumzeug run --rate` collect quality + feedback + gold into `data/ratings/`; merge into resolved (deduped) val/train; optional `--compile` for the rated agent. No DeepEval required. Tests: `tests/unit/eval/test_rate.py`, `tests/unit/cli/test_rate_cli.py`, `tests/integration/eval/test_rate_compile.py`. Docs: [testing.md — Human quality rating](user-docs/guides/testing.md#human-quality-rating--recompile).
 
 ### 7.4 User installation guide (content for README — Phase 1)
 
@@ -362,9 +362,9 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E6.5 | Trace → test case | **Done** (E6-S05, 2026-07-28). **AC:** Haystack trace export to JSONL (`data/traces/`); score single trace with `zaumzeug eval --trace`; schema documented for valset append. |
 | E6.6 | HTTP black-box eval | **Done** (E6-S06, 2026-07-28). **AC:** Optional Mode C — eval against running `zaumzeug serve` via `/v1/chat/completions` (staging/debug); `--base-url` / `eval.base_url`. |
 | E6.7 | GEPA ↔ DeepEval bridge | **Done** (E6-S07, 2026-07-28). **AC:** Failed eval rows can append to `data/train.jsonl`; shared `data/val.jsonl`; GEPA custom metric may delegate to DeepEval `.measure()`. |
-| E6.8 | Human quality rating → compile | **Ready** (E6-S08, 2026-08-26). **AC:** `zaumzeug rate` / `run --rate` collect quality + notes + `expected_output` + decision; merge `keep_val` / `keep_train` into datasets; optional `--compile` recompiles prompts; no DeepEval required; ratings dev-only. Story: [65-story.md](stories/epic-stories/65-story.md). |
+| E6.8 | Human quality rating → compile | **Done** (E6-S08, 2026-08-26). **AC:** `zaumzeug rate` / `run --rate` collect quality + notes + `expected_output` + decision; merge `keep_val` / `keep_train` into datasets; optional `--compile` recompiles prompts; no DeepEval required; ratings dev-only. Story: [65-story.md](stories/epic-stories/65-story.md). |
 
-**Story seeds:** Eval without deepeval shows install hint ✅ (E6-S01 `require_deepeval()`); Mode C `--base-url` vs running serve ✅ (E6-S06); GEPA metric delegates to DeepEval `.measure()` optionally ✅ (E6-S07); human rate → train/val → compile ✅ planned (E6-S08).
+**Story seeds:** Eval without deepeval shows install hint ✅ (E6-S01 `require_deepeval()`); Mode C `--base-url` vs running serve ✅ (E6-S06); GEPA metric delegates to DeepEval `.measure()` optionally ✅ (E6-S07); human rate → train/val → compile ✅ (E6-S08).
 
 ---
 
@@ -412,16 +412,16 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 | `zaumzeug init` | 1 | E1 |
 | `zaumzeug doctor` | 1 | E2 |
 | `zaumzeug serve [--deploy]` | 1–4 | E3, E5 (**E5-S03 Done** 2026-07-28 — production root; **E5-S04 Done** — `HARNESS_ROOT=deploy`); **E8.1 Done** (E8-S01, 2026-08-21) — `serve.expose` → `POST /{id}/run`; **E8.3 Done** (E8-S03, 2026-08-26) — opt-in `eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE` |
-| `zaumzeug run [--deploy]` | 1–4 | E3, E5 (`HARNESS_ROOT=deploy` via E5-S04); **E8.7 Done** (E8-S07, 2026-08-01) — retry / JSON / stage logs on run path; **E8.1 Done** (E8-S01, 2026-08-21) — `pipeline:` stages + `serve.expose` |
+| `zaumzeug run [--deploy] [--rate]` | 1–4 | E3, E5 (`HARNESS_ROOT=deploy` via E5-S04); **E8.7 Done** (E8-S07, 2026-08-01) — retry / JSON / stage logs on run path; **E8.1 Done** (E8-S01, 2026-08-21) — `pipeline:` stages + `serve.expose`; **E6.8 Done** (E6-S08, 2026-08-26) — `--rate` last agent stage → `data/ratings/` |
 | `zaumzeug compile [--workflow-diagram-only]` | 2 | E4 |
 | `zaumzeug deploy` | 2–4 | E5; **E8.5 Done** (E8-S05, 2026-08-26) — optional `--dockerfile` / `deploy.dockerfile` |
 | `zaumzeug eval` | 2–4 | E6 (optional); **E8.3 Done** (E8-S03) — production traces feed val/train via `merge_traces_into_datasets` |
-| `zaumzeug rate` | 2+ | E6 **Ready** E6-S08 — human quality + feedback → val/train; optional `--compile`; also `zaumzeug run --rate` |
+| `zaumzeug rate` | 2+ | E6 **Done** E6-S08 (2026-08-26) — human quality + feedback → val/train; optional `--compile`; also `zaumzeug run --rate` |
 | `zaumzeug mcp` | 3 | E7 **Done** E7-S01 (2026-08-14); deploy bundle **Done** E7-S06 (2026-08-21) — `--deploy` / `HARNESS_ROOT=deploy` same root as serve |
 | `zaumzeug acp` | 3 | E7 **Done** E7-S05 (2026-08-21); `HARNESS_ROOT=deploy` / `--deploy` honour E5-S04 |
 | `zaumzeug a2a` | 4 | E8 **Done** E8-S04 (2026-08-26) — requires `serve.a2a: true`; agent card on port **1418** |
 
-**Future commands (not Phase 1–4 v1):** `zaumzeug rate <name>` (human quality rating → compile — [E6-S08](stories/epic-stories/65-story.md), Ready); `zaumzeug export <name>` (tarball of `deploy/`); `zaumzeug replay <name> --trace` (trace replay); `zaumzeug install-project` (PyPI consumer scaffold — [E1-S08](stories/epic-stories/25-story.md); deferred until package publish).
+**Future commands (not Phase 1–4 v1):** `zaumzeug export <name>` (tarball of `deploy/`); `zaumzeug replay <name> --trace` (trace replay); `zaumzeug install-project` (PyPI consumer scaffold — [E1-S08](stories/epic-stories/25-story.md); deferred until package publish).
 
 ---
 

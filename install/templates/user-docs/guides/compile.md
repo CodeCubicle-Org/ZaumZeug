@@ -127,6 +127,8 @@ By default, compile uses a keyword-containment metric with textual feedback. To 
 
 Failed `zaumzeug eval` rows can append to `data/train.jsonl` for the next compile — see [Testing — GEPA ↔ DeepEval bridge](testing.md#gepa--deepeval-bridge-compile--eval--compile) (E6-S07).
 
+After rating harness output with [`zaumzeug rate`](../reference/cli.md#zaumzeug-rate) / `run --rate`, merge gold into val/train and recompile with `--apply --compile` — see [Testing — Human quality rating → recompile](testing.md#human-quality-rating--recompile) (E6-S08).
+
 ## Rollback to a pinned run
 
 Compile never overwrites an existing `artifacts/<run_id>/` folder — only `artifacts/current` moves forward. To recover from a bad compile **without** re-running GEPA:

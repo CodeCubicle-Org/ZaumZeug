@@ -44,7 +44,8 @@ This creates `usr-harnesses/my-agent/` from the Phase 1 template:
 | **`agents/agent/`** | Runtime via `system_prompt`, mock `agents-models.yaml` |
 | **`models.yaml`** | Optional harness-wide aliases (comments by default) |
 | **`eval/`** *(with `--with-eval`)* | Optional DeepEval `metrics.py` + `test_*.py` (dev-only; not shipped in deploy) |
-| **`data/traces/`** | Captured Haystack turns (JSONL) for `zaumzeug eval --trace`; opt-in auto-capture on serve via `eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE` (E8-S03). Separate opt-in: Mode B Confident AI sync via `eval.confident_ai.enabled` (E8-S06) — see [Journey C](../guides/testing.md#trace--test-case-journey-c) and [Mode B](../guides/testing.md#mode-b--deepeval-observe--confident-ai-opt-in) |
+| **`data/traces/`** | Captured Haystack turns (JSONL) for `zaumzeug eval --trace` and `zaumzeug rate`; opt-in auto-capture on serve via `eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE` (E8-S03). Separate opt-in: Mode B Confident AI sync via `eval.confident_ai.enabled` (E8-S06) — see [Journey C](../guides/testing.md#trace--test-case-journey-c) and [Mode B](../guides/testing.md#mode-b--deepeval-observe--confident-ai-opt-in) |
+| **`data/ratings/`** | Human quality ratings + gold for a trace stem (`zaumzeug rate` / `run --rate`, E6-S08); never deployed — see [Human quality rating → recompile](../guides/testing.md#human-quality-rating--recompile) |
 
 The harness name must be a single safe path segment (letters, digits, `_`, `-`; no `..` or separators). If the folder already exists, init fails unless you pass `--force` (overwrites the folder).
 

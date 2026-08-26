@@ -23,6 +23,7 @@ _COMMANDS: tuple[str, ...] = (
     "compile",
     "deploy",
     "eval",
+    "rate",
     "mcp",
     "acp",
     "a2a",
@@ -130,7 +131,7 @@ def _serve_command(args: argparse.Namespace) -> int:
 
 
 def _run_command(args: argparse.Namespace) -> int:
-    """Execute ``workflow.yaml`` stages serially (E3-S08)."""
+    """Execute ``workflow.yaml`` stages serially (E3-S08); optional ``--rate`` (E6-S08)."""
     configure_logging(verbose=args.verbose)
     try:
         result = run_workflow(
@@ -144,7 +145,49 @@ def _run_command(args: argparse.Namespace) -> int:
         return 1
     if result.final_output:
         print(result.final_output)
-    return 0
+
+    if not getattr(args, "rate", False):
+        return 0
+
+    from zaumzeug.compile import CompileError
+    from zaumzeug.eval.rate import RateError, format_rate_result, run_rate
+
+    no_input = bool(getattr(args, "no_input", False))
+    if getattr(args, "apply", False):
+        apply_flag: bool | None = True
+    elif no_input:
+        apply_flag = False
+    else:
+        apply_flag = None
+
+    try:
+        rate_result = run_rate(
+            args.harness_name,
+            workflow_result=result,
+            user_input=args.input or "",
+            quality=getattr(args, "quality", None),
+            expected_output=getattr(args, "expected", None),
+            decision=getattr(args, "decision", None),
+            notes=getattr(args, "notes", None),
+            apply=apply_flag,
+            compile_after=bool(getattr(args, "compile", False)),
+            all_agents=bool(getattr(args, "all_agents", False)),
+            force=bool(getattr(args, "force", False)),
+            no_input=no_input,
+            deploy=args.deploy,
+        )
+    except RateError as exc:
+        print(str(exc), file=sys.stderr)
+        if exc.suggestion:
+            print(f"Suggestion: {exc.suggestion}", file=sys.stderr)
+        return 1
+    except CompileError as exc:
+        print(str(exc), file=sys.stderr)
+        if exc.suggestion:
+            print(f"Suggestion: {exc.suggestion}", file=sys.stderr)
+        return 1
+    print(format_rate_result(rate_result))
+    return rate_result.exit_code
 
 
 def _eval_command(args: argparse.Namespace) -> int:
@@ -166,6 +209,50 @@ def _eval_command(args: argparse.Namespace) -> int:
             print(f"Suggestion: {exc.suggestion}", file=sys.stderr)
         return 1
     print(format_eval_result(result))
+    return result.exit_code
+
+
+def _rate_command(args: argparse.Namespace) -> int:
+    """Human quality rating → val/train merge / optional compile (E6-S08)."""
+    configure_logging(verbose=args.verbose)
+    from zaumzeug.compile import CompileError
+    from zaumzeug.eval.rate import RateError, format_rate_result, run_rate
+
+    # Interactive: apply defaults for keep_*; non-interactive: require --apply.
+    if args.apply:
+        apply_flag: bool | None = True
+    elif args.no_input:
+        apply_flag = False
+    else:
+        apply_flag = None
+
+    try:
+        result = run_rate(
+            args.harness_name,
+            trace=args.trace,
+            unrated=bool(args.unrated),
+            quality=args.quality,
+            expected_output=args.expected,
+            decision=args.decision,
+            notes=args.notes,
+            apply=apply_flag,
+            compile_after=bool(args.compile),
+            all_agents=bool(args.all_agents),
+            force=bool(args.force),
+            no_input=bool(args.no_input),
+            deploy=args.deploy,
+        )
+    except RateError as exc:
+        print(str(exc), file=sys.stderr)
+        if exc.suggestion:
+            print(f"Suggestion: {exc.suggestion}", file=sys.stderr)
+        return 1
+    except CompileError as exc:
+        print(str(exc), file=sys.stderr)
+        if getattr(exc, "suggestion", None):
+            print(f"Suggestion: {exc.suggestion}", file=sys.stderr)
+        return 1
+    print(format_rate_result(result))
     return result.exit_code
 
 
@@ -324,6 +411,66 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="enable SDK and Haystack debug logging",
     )
+    run_cmd.add_argument(
+        "--rate",
+        action="store_true",
+        help=(
+            "after a successful run, rate the last agent stage "
+            "(export trace + prompt; E6-S08)"
+        ),
+    )
+    run_cmd.add_argument(
+        "--quality",
+        default=None,
+        metavar="Q",
+        help="with --rate: quality pass|partial|fail or 1-5 (non-interactive)",
+    )
+    run_cmd.add_argument(
+        "--expected",
+        default=None,
+        metavar="TEXT",
+        help="with --rate: gold expected_output (non-interactive)",
+    )
+    run_cmd.add_argument(
+        "--decision",
+        default=None,
+        choices=("keep_val", "keep_train", "discard"),
+        help="with --rate: keep_val|keep_train|discard (non-interactive)",
+    )
+    run_cmd.add_argument(
+        "--notes",
+        default=None,
+        metavar="TEXT",
+        help="with --rate: short feedback notes",
+    )
+    run_cmd.add_argument(
+        "--apply",
+        action="store_true",
+        help="with --rate --no-input: merge keep_val/keep_train into datasets",
+    )
+    run_cmd.add_argument(
+        "--compile",
+        action="store_true",
+        dest="compile",
+        help="with --rate: run GEPA compile for the rated agent after apply",
+    )
+    run_cmd.add_argument(
+        "--all-agents",
+        action="store_true",
+        dest="all_agents",
+        help="with --rate --compile: compile the whole harness",
+    )
+    run_cmd.add_argument(
+        "--force",
+        action="store_true",
+        help="with --rate: overwrite an existing data/ratings/<stem>.jsonl",
+    )
+    run_cmd.add_argument(
+        "--no-input",
+        action="store_true",
+        dest="no_input",
+        help="with --rate: non-interactive (require --quality / --decision flags)",
+    )
     run_cmd.set_defaults(_handler=_run_command)
 
     for name in _COMMANDS:
@@ -335,6 +482,7 @@ def build_parser() -> argparse.ArgumentParser:
             "compile",
             "deploy",
             "eval",
+            "rate",
             "mcp",
             "acp",
             "a2a",
@@ -493,6 +641,90 @@ def build_parser() -> argparse.ArgumentParser:
         help="enable SDK and Haystack debug logging",
     )
     eval_cmd.set_defaults(_handler=_eval_command)
+
+    rate_cmd = sub.add_parser(
+        "rate",
+        help="rate harness output and merge gold into val/train (optional compile)",
+    )
+    rate_cmd.add_argument(
+        "harness_name",
+        help="harness name under usr-harnesses/ (or deploy/ with --deploy)",
+    )
+    rate_source = rate_cmd.add_mutually_exclusive_group()
+    rate_source.add_argument(
+        "--trace",
+        default=None,
+        metavar="PATH",
+        help="rate a captured JSONL turn under data/traces/",
+    )
+    rate_source.add_argument(
+        "--unrated",
+        action="store_true",
+        help="rate the oldest data/traces/ stem that has no data/ratings/ match",
+    )
+    rate_cmd.add_argument(
+        "--quality",
+        default=None,
+        metavar="Q",
+        help="quality pass|partial|fail or integer 1-5",
+    )
+    rate_cmd.add_argument(
+        "--expected",
+        default=None,
+        metavar="TEXT",
+        help="gold expected_output (required for keep_val / keep_train apply)",
+    )
+    rate_cmd.add_argument(
+        "--decision",
+        default=None,
+        choices=("keep_val", "keep_train", "discard"),
+        help="keep_val|keep_train|discard",
+    )
+    rate_cmd.add_argument(
+        "--notes",
+        default=None,
+        metavar="TEXT",
+        help="short feedback notes (rating-only; never copied to datasets)",
+    )
+    rate_cmd.add_argument(
+        "--apply",
+        action="store_true",
+        help="merge keep_val/keep_train into resolved val/train paths",
+    )
+    rate_cmd.add_argument(
+        "--compile",
+        action="store_true",
+        dest="compile",
+        help="after apply, run GEPA compile for the rated agent",
+    )
+    rate_cmd.add_argument(
+        "--all-agents",
+        action="store_true",
+        dest="all_agents",
+        help="with --compile: compile the whole harness (default: rated agent only)",
+    )
+    rate_cmd.add_argument(
+        "--force",
+        action="store_true",
+        help="overwrite an existing data/ratings/<stem>.jsonl",
+    )
+    rate_cmd.add_argument(
+        "--no-input",
+        action="store_true",
+        dest="no_input",
+        help="non-interactive; require --quality and --decision (and --expected when applying)",
+    )
+    rate_cmd.add_argument(
+        "--deploy",
+        action="store_true",
+        help="load harness from deploy/<name>/ (or HARNESS_ROOT=deploy)",
+    )
+    rate_cmd.add_argument(
+        "--verbose",
+        action="store_true",
+        help="enable SDK and Haystack debug logging",
+    )
+    rate_cmd.set_defaults(_handler=_rate_command)
 
     compile_cmd = sub.add_parser(
         "compile",

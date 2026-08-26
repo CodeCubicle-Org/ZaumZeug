@@ -98,6 +98,8 @@ Canonical package layout. Root `pyproject.toml` exists as of E2-S00 (2026-07-08)
 
 **Implementation (E6-S07, 2026-07-28):** GEPA ↔ DeepEval bridge — `eval/gepa_bridge.py` (`append_failed_eval_to_train`, shared val aliases, `deepeval_gepa_metric`); compile auto-loads optional `agents/<agent>/modules/metrics.py`. Tests: `tests/unit/eval/test_gepa_bridge.py`. Docs: [testing.md — GEPA ↔ DeepEval bridge](../user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile).
 
+**Implementation (E6-S08, 2026-08-26):** Human quality rating → compile — `eval/rate.py` (`run_rate`, `RateError`); CLI `zaumzeug rate` / `run --rate`; writes `data/ratings/`; merges gold into val/train; optional `--compile`. **No DeepEval / `[eval]` required.** Tests: `tests/unit/eval/test_rate.py`, `tests/unit/cli/test_rate_cli.py`, `tests/integration/eval/test_rate_compile.py`. Docs: [testing.md — Human quality rating](../user-docs/guides/testing.md#human-quality-rating--recompile).
+
 **Provider integrations** (`openai-haystack`, `anthropic-haystack`, `openrouter-haystack`, …): **not** in core or `[dev]`. Install only providers referenced in `models.yaml`. `ModelRouter` fails at startup with an actionable message if a configured provider package is missing.
 
 **`[project]` fragment (matches repo `pyproject.toml`):**

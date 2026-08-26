@@ -111,6 +111,7 @@ usr-harnesses/<harness-name>/
 | GEPA metrics | `agents/<agent-name>/modules/metrics.py` | Textual feedback per agent; optional DeepEval `.measure()` via `deepeval_gepa_metric` (E6-S07) |
 | DeepEval tests | `eval/test_*.py` | Harness-level; may target specific agents |
 | Captured traces | `data/traces/*.jsonl` | Export Haystack runs; score with `zaumzeug eval --trace` (E6-S05); production capture + dataset merge (E8-S03) |
+| Human ratings | `data/ratings/*.jsonl` | Developer quality ratings + gold for a matching trace stem; `zaumzeug rate` / `run --rate` (E6-S08); never deployed |
 | Mode C HTTP eval | `zaumzeug eval --base-url` | Black-box a running serve `/v1/chat/completions` (E6-S06; staging/debug) |
 | Failed eval → train | `zaumzeug.eval.gepa_bridge.append_failed_eval_to_train` | Append failing cases to `data/train.jsonl` for next compile (E6-S07) |
 | Trace → dataset ratchet | `zaumzeug.eval.ratchet.merge_traces_into_datasets` | Production traces → `data/val.jsonl` / `data/train.jsonl` (E8-S03) |

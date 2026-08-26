@@ -103,9 +103,12 @@ Or set eval.framework: builtin for JSONL checks without DeepEval.
 
 **Implementation (E8-S06, 2026-08-26):** Mode B production observe — `eval.confident_ai.enabled` wraps serve `Agent.run` with DeepEval `@observe` + Confident AI sync (`eval/observe.py`). Opt-in only (PRD NG2); doctor warns when enabled without `[eval]` / `deepeval login` / `CONFIDENT_API_KEY`. Tests: `tests/unit/eval/test_observe.py`, `tests/unit/cli/test_doctor.py::test_e8_s06_ac3_*`. Docs: [testing.md — Mode B](../user-docs/guides/testing.md#mode-b--deepeval-observe--confident-ai-opt-in).
 
+**Implementation (E6-S08, 2026-08-26):** Human rate → compile — `eval/rate.py` (`run_rate`, `RateError`); CLI `zaumzeug rate` / `run --rate`; writes `data/ratings/`; merges via ratchet helpers; optional `--compile`. **No DeepEval required** for the rate path. Tests: `tests/unit/eval/test_rate.py`, `tests/unit/cli/test_rate_cli.py`, `tests/integration/eval/test_rate_compile.py`. Docs: [testing.md — Human quality rating](../user-docs/guides/testing.md#human-quality-rating--recompile).
+
 CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 `zaumzeug eval <name> --trace data/traces/run-001.jsonl` scores a captured turn (E6-S05).
 `zaumzeug eval <name> --base-url` (or `--base-url http://host:port`) black-boxes a running serve (E6-S06).
+`zaumzeug rate <name> --trace …` / `--unrated` rates a turn; `zaumzeug run <name> --rate` rates after a run (E6-S08).
 
 **`eval` config fields (deepeval):**
 

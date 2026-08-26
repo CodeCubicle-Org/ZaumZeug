@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | **Audience** | Harness developers · SDK contributors |
-| **Last updated** | 2026-08-26 (E8-S06 Mode B DeepEval observe) |
+| **Last updated** | 2026-08-26 (E6-S08 human quality rating → recompile) |
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
-DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra. Optional harness `eval/` pytest files (`zaumzeug init --with-eval` or the example harness) run with `deepeval test run` (**Done** E6-S04). Captured Haystack turns export to `data/traces/` and score with `zaumzeug eval --trace` (**Done** E6-S05). Mode C black-boxes a running serve with `zaumzeug eval --base-url` (**Done** E6-S06) — staging/debug only. Failed eval rows feed GEPA training via `append_failed_eval_to_train`; shared `val.jsonl` and optional DeepEval GEPA metrics close the loop (**Done** E6-S07). Production serve can capture Haystack turns to `data/traces/` (`eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1`); merge those JSONL rows into `data/val.jsonl` / `data/train.jsonl` and run eval → compile → deploy (**Done** E8-S03). Opt-in Mode B wraps serve with DeepEval `@observe` + Confident AI sync when `eval.confident_ai.enabled` (**Done** E8-S06 — see [Mode B](#mode-b--deepeval-observe--confident-ai-opt-in)). Production bundles from `zaumzeug deploy` are served with `zaumzeug serve <name> --deploy` (**Done** E5-S03 — `tests/integration/deploy/test_serve_deploy.py`) or as MCP with `zaumzeug mcp <name> --deploy` (**Done** E7-S06 — `tests/integration/mcp/test_mcp_deploy.py`).
+DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra. Optional harness `eval/` pytest files (`zaumzeug init --with-eval` or the example harness) run with `deepeval test run` (**Done** E6-S04). Captured Haystack turns export to `data/traces/` and score with `zaumzeug eval --trace` (**Done** E6-S05). Mode C black-boxes a running serve with `zaumzeug eval --base-url` (**Done** E6-S06) — staging/debug only. Failed eval rows feed GEPA training via `append_failed_eval_to_train`; shared `val.jsonl` and optional DeepEval GEPA metrics close the loop (**Done** E6-S07). Human quality rating via `zaumzeug rate` / `run --rate` writes `data/ratings/`, merges gold into val/train, and optionally recompiles (**Done** E6-S08 — no DeepEval required). Production serve can capture Haystack turns to `data/traces/` (`eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1`); merge those JSONL rows into `data/val.jsonl` / `data/train.jsonl` and run eval → compile → deploy (**Done** E8-S03). Opt-in Mode B wraps serve with DeepEval `@observe` + Confident AI sync when `eval.confident_ai.enabled` (**Done** E8-S06 — see [Mode B](#mode-b--deepeval-observe--confident-ai-opt-in)). Production bundles from `zaumzeug deploy` are served with `zaumzeug serve <name> --deploy` (**Done** E5-S03 — `tests/integration/deploy/test_serve_deploy.py`) or as MCP with `zaumzeug mcp <name> --deploy` (**Done** E7-S06 — `tests/integration/mcp/test_mcp_deploy.py`).
 
 For SDK design detail, see internal `docs/architecture/10-operations-and-reference.md` §13 and `docs/architecture/03-technology-stack.md` §4.5.
 
@@ -324,6 +324,76 @@ zaumzeug serve example --deploy
 `zaumzeug replay <name> --trace` (re-run the tool loop with recorded tool outputs) is **deferred** — not in v1 (PRD §9). Score captured turns with `zaumzeug eval --trace` instead.
 
 SDK tests: `pytest tests/unit/eval/test_trace_ratchet.py tests/integration/eval/test_journey_c.py -v`.
+
+### Human quality rating → recompile
+
+Rate harness output (especially when building a new harness/feature or switching LLM / model version), write gold + short feedback, merge into `val.jsonl` / `train.jsonl`, then optionally recompile with GEPA — without hand-editing JSONL.
+
+```text
+zaumzeug run … [--rate]  →  data/traces/ + data/ratings/
+  → decide keep_val | keep_train | discard  (+ expected_output gold)
+  → --apply merges into val/train
+  → --compile (rated agent) regenerates prompts/artifacts
+  → optional: zaumzeug eval → zaumzeug deploy → serve --deploy
+```
+
+Rates the **last agent stage** only (walk workflow stages reversed for `kind == "agent"` — not a trailing pipeline). Layout: `data/traces/` is immutable; ratings land in `data/ratings/<stem>.jsonl` with `trace_path`. `--unrated` picks **one** oldest stem without a matching rating. `--force` overwrites an existing rating. Val/train paths come from `eval.valset` / `compile.valset` / `compile.trainset` (point both valsets at the same file when you want one golden set). No DeepEval / `[eval]` required for rate — only if you later run DeepEval metrics or Mode B. `data/ratings/` is never shipped in `deploy/` (same as other `data/`).
+
+| Decision | When to use | Datasets | Recompile? |
+|---|---|---|---|
+| `keep_val` | Good gold for regression | Val only | Optional `--compile` |
+| `keep_train` | Bad/partial output; teach GEPA | Train **and** val | Yes — `--apply --compile` |
+| `discard` | Noise / one-off | None | No |
+
+Gold (`expected_output`) is required before merge — a high quality score alone does **not** copy `actual_output` as gold or train GEPA. Rating-only fields (`quality`, `score`, `notes`, `decision`, `rater`, `rated_at`) never appear in dataset rows. Each rating stores `model_id` (when resolvable) and optional `artifact` so LLM / version switches stay comparable.
+
+#### Workflow A — New harness or feature
+
+```bash
+# 1. Run and rate the last agent stage
+zaumzeug run <harness> --input "…" --rate
+# prompts: quality · notes · expected_output (gold) · decision
+
+# 2. Or rate an existing / production trace later
+zaumzeug rate <harness> --unrated
+# zaumzeug rate <harness> --trace data/traces/<stem>.jsonl
+
+# 3. Merge gold into datasets and recompile prompts for that agent
+zaumzeug rate <harness> --trace data/traces/<stem>.jsonl \
+  --quality fail --expected "…" --decision keep_train \
+  --apply --compile --no-input
+
+# 4. Optional regression check + ship
+zaumzeug eval <harness> --framework builtin   # needs eval: in harness.yaml
+zaumzeug deploy <harness>
+zaumzeug serve <harness> --deploy
+```
+
+Interactive `--rate` / `rate` already applies on `keep_val` / `keep_train`; step 3 shows the scripted form.
+
+#### Workflow B — Switch LLM or model version
+
+```bash
+# Same input under model A, then model B (change agents-models.yaml / default_model_id between runs)
+zaumzeug run <harness> --input "…" --rate   # rate A; note model_id on rating
+zaumzeug run <harness> --input "…" --rate   # rate B
+# Prefer B’s gold → keep_train/keep_val on the preferred rating (--force if re-rating)
+zaumzeug rate <harness> --trace data/traces/<preferred-stem>.jsonl --apply --compile
+```
+
+Ratings store `model_id` / optional `artifact` for comparison; pin/rollback of compile artifacts remains via [Compile — Rollback](compile.md#rollback-to-a-pinned-run).
+
+#### Workflow C — Production / serve traces
+
+```text
+serve capture → copy data/traces/ back to usr-harnesses/<name>/
+→ zaumzeug rate <harness> --unrated  (set gold + decision)
+→ --apply [--compile]
+```
+
+Use existing Journey C capture flags (`eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE`). **Rating and compile stay on the dev machine** — production does not run GEPA (NG3).
+
+SDK tests: `pytest tests/unit/eval/test_rate.py tests/unit/cli/test_rate_cli.py tests/integration/eval/test_rate_compile.py -k e6_s08 -v`.
 
 ### Mode B — DeepEval `@observe` / Confident AI (opt-in)
 

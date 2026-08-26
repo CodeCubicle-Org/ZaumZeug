@@ -18,6 +18,7 @@ REQUIRED_SUBCOMMANDS = (
     "compile",
     "deploy",
     "eval",
+    "rate",
     "mcp",
     "acp",
     "a2a",

@@ -5,8 +5,8 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/65-story.md` |
 | **Created** | 2026-08-26 |
-| **Last modified** | 2026-08-26 (tester verification gaps closed) |
-| **Status** | Ready |
+| **Last modified** | 2026-08-26 (implemented; verification complete) |
+| **Status** | Done |
 | **Story ID** | E6-S08 |
 | **Epic** | [E6 — Evaluation and Quality](../05-epic.md) |
 | **Phase** | 2+ *(post–Phase 4 backlog; Journey C human gate)* |
@@ -61,7 +61,7 @@ Journey C already captures traces and merges them into datasets once `expected_o
 
 **Internal**
 
-- `src/zaumzeug/eval/rate.py` — **new** `RateError`, rating schema, gold validation, path resolve + dedup, `--unrated` index, `--force`, decision apply wrapper; **`run_rate()` is the primary unit/SDK hook** (CLI is a thin wrapper; prefer `run_rate` + `--no-input` in tests)
+- `src/zaumzeug/eval/rate.py` — **Done** (2026-08-26) `RateError`, rating schema, gold validation, path resolve + dedup, `--unrated` index, `--force`, decision apply wrapper; **`run_rate()` is the primary unit/SDK hook** (CLI is a thin wrapper; prefer `run_rate` + `--no-input` in tests)
 - `src/zaumzeug/eval/trace.py` — `build_trace_row` / `export_haystack_trace` for `run --rate` export (do **not** reuse serve `ProductionTraceHook`)
 - `src/zaumzeug/eval/ratchet.py` — `merge_traces_into_datasets`; call from rate apply (thin wrapper — do not put rating semantics in ratchet)
 - `src/zaumzeug/eval/gepa_bridge.py` — train aliases (`question` / `answer`)
@@ -238,13 +238,13 @@ Install templates that mirror user-docs (`install/templates/user-docs/…`) must
 
 ### Acceptance criteria
 
-- [ ] **AC-1** `zaumzeug rate <harness>` rates a turn from `--trace PATH` or via `--unrated` (**one** oldest unrated stem per invocation). Interactive prompts collect `quality`, optional `notes`, `expected_output`, and `decision`. Writes `data/ratings/<stem>.jsonl` with `trace_path`; leaves the original trace immutable. Existing rating file errors unless `--force`. **No DeepEval / `[eval]` required.** Domain failures raise `RateError` (CLI exit non-zero).
-- [ ] **AC-2** `zaumzeug run <harness> --rate` (after a successful run) selects the **last agent stage** (walk `stages` reversed for `kind == "agent"`; `RateError` if none). When stages are `[agent, pipeline]`, rate the **agent** stage (output / `stage_id` / `model_id`), not the trailing pipeline or blind `final_output`. Exports a trace via synthetic Haystack dict + `build_trace_row` / `export_haystack_trace` (`extra.source: "run"`, `agent=stage_id`, `model_id` from that `StageResult`), then offers the same prompt as `rate`. Skipping / Ctrl-C leaves datasets unchanged (rating file may exist; no merge). Unit/CLI tests may inject a synthetic `WorkflowRunResult` (mocked `run_workflow`).
-- [ ] **AC-3** `--apply` (default when `decision` is `keep_val` / `keep_train` in interactive mode; explicit in non-interactive) resolves val/train paths per the path-resolution table, **dedupes** resolved val paths, validates non-empty `expected_output` in `eval/rate.py`, then merges via `merge_traces_into_datasets` / train helpers. `keep_val` touches val only; `keep_train` touches train **and** val; `discard` never merges. High `quality` alone must not copy `actual_output` as gold. Rating-only fields never appear in dataset rows. Missing gold → clear non-zero `RateError` (do not call append helpers that silently skip).
-- [ ] **AC-4** `zaumzeug rate <harness> --apply --compile` runs merge then `run_compile` for the **rated agent** (`agent_name=stage_id` / rating `agent`) by default. `--all-agents` compiles the whole harness. Compile failures surface as today (`CompileError`); ratings already written are not rolled back. Agent without `compile:` → `CompileError`. Integration tests use `run_compile(..., gepa_cls=StubGEPA)` (same pattern as `tests/integration/eval/test_journey_c.py`) — no live LLM.
-- [ ] **AC-5** Non-interactive rate works for scripts: `--quality`, `--expected`, `--decision`, `--notes`, `--trace`, `--no-input`, `--force`. Integer `quality` `1–5` maps per rules (5→pass, 3–4→partial, 1–2→fail). Exit non-zero when required fields for the chosen decision are missing.
-- [ ] **AC-6** Each rating stores `model_id` when resolvable and optional `artifact` pin/path so LLM or version switches remain comparable.
-- [ ] **AC-7** **User workflow docs (required).** Publish the [User workflow](#user-workflow-document-for-harness-developers) content for harness developers:
+- [x] **AC-1** `zaumzeug rate <harness>` rates a turn from `--trace PATH` or via `--unrated` (**one** oldest unrated stem per invocation). Interactive prompts collect `quality`, optional `notes`, `expected_output`, and `decision`. Writes `data/ratings/<stem>.jsonl` with `trace_path`; leaves the original trace immutable. Existing rating file errors unless `--force`. **No DeepEval / `[eval]` required.** Domain failures raise `RateError` (CLI exit non-zero).
+- [x] **AC-2** `zaumzeug run <harness> --rate` (after a successful run) selects the **last agent stage** (walk `stages` reversed for `kind == "agent"`; `RateError` if none). When stages are `[agent, pipeline]`, rate the **agent** stage (output / `stage_id` / `model_id`), not the trailing pipeline or blind `final_output`. Exports a trace via synthetic Haystack dict + `build_trace_row` / `export_haystack_trace` (`extra.source: "run"`, `agent=stage_id`, `model_id` from that `StageResult`), then offers the same prompt as `rate`. Skipping / Ctrl-C leaves datasets unchanged (rating file may exist; no merge). Unit/CLI tests may inject a synthetic `WorkflowRunResult` (mocked `run_workflow`).
+- [x] **AC-3** `--apply` (default when `decision` is `keep_val` / `keep_train` in interactive mode; explicit in non-interactive) resolves val/train paths per the path-resolution table, **dedupes** resolved val paths, validates non-empty `expected_output` in `eval/rate.py`, then merges via `merge_traces_into_datasets` / train helpers. `keep_val` touches val only; `keep_train` touches train **and** val; `discard` never merges. High `quality` alone must not copy `actual_output` as gold. Rating-only fields never appear in dataset rows. Missing gold → clear non-zero `RateError` (do not call append helpers that silently skip).
+- [x] **AC-4** `zaumzeug rate <harness> --apply --compile` runs merge then `run_compile` for the **rated agent** (`agent_name=stage_id` / rating `agent`) by default. `--all-agents` compiles the whole harness. Compile failures surface as today (`CompileError`); ratings already written are not rolled back. Agent without `compile:` → `CompileError`. Integration tests use `run_compile(..., gepa_cls=StubGEPA)` (same pattern as `tests/integration/eval/test_journey_c.py`) — no live LLM.
+- [x] **AC-5** Non-interactive rate works for scripts: `--quality`, `--expected`, `--decision`, `--notes`, `--trace`, `--no-input`, `--force`. Integer `quality` `1–5` maps per rules (5→pass, 3–4→partial, 1–2→fail). Exit non-zero when required fields for the chosen decision are missing.
+- [x] **AC-6** Each rating stores `model_id` when resolvable and optional `artifact` pin/path so LLM or version switches remain comparable.
+- [x] **AC-7** **User workflow docs (required).** Publish the [User workflow](#user-workflow-document-for-harness-developers) content for harness developers:
   - New subsection under Journey C in `user-docs/guides/testing.md` (and matching install template) titled clearly for human rating → recompile, with Workflows **A** (new harness/feature), **B** (LLM switch), and **C** (production traces), the end-to-end loop diagram, decision cheat-sheet, and “also document” bullets above. Live and template trees must stay in sync.
   - Full CLI reference for `zaumzeug rate` and `zaumzeug run --rate` in `user-docs/reference/cli.md` (flags, one-stem `--unrated`, `--force`, `--apply --compile`, last-agent-stage note).
   - Cross-links: testing Journey C ↔ compile guide (recompile after rating) ↔ CLI; mention `zaumzeug rate` in `user-docs/README.md` command overview.
@@ -253,14 +253,14 @@ Install templates that mirror user-docs (`install/templates/user-docs/…`) must
 
 ### Implementation tasks (build)
 
-- [ ] Add `eval/rate.py`: `RateError`, schema, write `data/ratings/<stem>.jsonl`, `--unrated` (one stem / oldest-first), `--force`, gold validation, path resolution + dedup, decision apply wrapper; **`run_rate()` required**
-- [ ] Implement `zaumzeug rate` in `cli.py` (interactive + non-interactive; `--trace` / `--unrated` / `--apply` / `--compile` / `--all-agents` / `--force` / `--no-input`)
-- [ ] Add `zaumzeug run --rate`: last-agent-stage selection; synthetic Haystack export + rate prompt
-- [ ] Wire decisions to `merge_traces_into_datasets` / train append (reuse E8-S03 / E6-S07; no rating logic inside ratchet)
-- [ ] Capture `model_id` / `artifact` / `agent` (`stage_id`) on rating records
-- [ ] **User docs:** Journey C subsection (Workflows A/B/C + decision table + loop diagram); CLI `rate` / `run --rate`; cross-links from compile.md + user-docs README; sync `install/templates/user-docs/`
-- [ ] Architecture §5.5 / §6.3 / §9 / layout `data/ratings/`
-- [ ] Extend deploy copy-rules / golden tests: seed `data/ratings/` and assert absent from deploy bundle
+- [x] Add `eval/rate.py`: `RateError`, schema, write `data/ratings/<stem>.jsonl`, `--unrated` (one stem / oldest-first), `--force`, gold validation, path resolution + dedup, decision apply wrapper; **`run_rate()` required**
+- [x] Implement `zaumzeug rate` in `cli.py` (interactive + non-interactive; `--trace` / `--unrated` / `--apply` / `--compile` / `--all-agents` / `--force` / `--no-input`)
+- [x] Add `zaumzeug run --rate`: last-agent-stage selection; synthetic Haystack export + rate prompt
+- [x] Wire decisions to `merge_traces_into_datasets` / train append (reuse E8-S03 / E6-S07; no rating logic inside ratchet)
+- [x] Capture `model_id` / `artifact` / `agent` (`stage_id`) on rating records
+- [x] **User docs:** Journey C subsection (Workflows A/B/C + decision table + loop diagram); CLI `rate` / `run --rate`; cross-links from compile.md + user-docs README; sync `install/templates/user-docs/`
+- [x] Architecture §5.5 / §6.3 / §9 / layout `data/ratings/`
+- [x] Extend deploy copy-rules / golden tests: seed `data/ratings/` and assert absent from deploy bundle
 
 ### Verification (after build)
 
@@ -289,18 +289,22 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 | `user-docs/guides/compile.md` | Cross-link to testing Journey C / human rating subsection |
 | Architecture §5.5 / §6.3 / §9 / layout | `zaumzeug rate` or human rate gate; no DeepEval required for rate; `eval/rate.py`; `data/ratings/` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/eval/test_rate.py tests/unit/cli/test_rate_cli.py tests/integration/eval/test_rate_compile.py tests/unit/docs/test_rate_docs.py tests/unit/deploy/test_copy_rules.py -k e6_s08 -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/eval/test_rate.py tests/unit/cli/test_rate_cli.py tests/integration/eval/test_rate_compile.py tests/unit/docs/test_rate_docs.py tests/unit/deploy/test_copy_rules.py -k e6_s08 -v` passes (37 passed, 2026-08-26)
 
 ### Definition of done
 
-- [ ] Developer can rate a run in one interactive flow (`run --rate` or `rate --trace`) without editing JSONL by hand
-- [ ] `keep_val` / `keep_train` feed resolved (deduped) datasets; `--compile` recompiles the rated agent’s prompts by default
-- [ ] Core rate path has no DeepEval dependency; `RateError` for domain failures
-- [ ] `run_rate()` covered by ≥1 AC-1 / AC-3 unit test; CLI covered via `--no-input`
-- [ ] `data/ratings/` layout locked; traces immutable; last-**agent**-stage rule (incl. agent-before-pipeline); ratings excluded from deploy (asserted in tests)
-- [ ] **User workflow documented:** testing.md Journey C subsection (A/B/C + decision table + loop), live↔template sync, CLI reference, compile + README cross-links, Architecture §5.5 / §6.3 / §9 / layout
-- [ ] Verification checklist complete; all ACs traced to tests (including AC-7 doc + architecture markers)
+- [x] Developer can rate a run in one interactive flow (`run --rate` or `rate --trace`) without editing JSONL by hand
+- [x] `keep_val` / `keep_train` feed resolved (deduped) datasets; `--compile` recompiles the rated agent’s prompts by default
+- [x] Core rate path has no DeepEval dependency; `RateError` for domain failures
+- [x] `run_rate()` covered by ≥1 AC-1 / AC-3 unit test; CLI covered via `--no-input`
+- [x] `data/ratings/` layout locked; traces immutable; last-**agent**-stage rule (incl. agent-before-pipeline); ratings excluded from deploy (asserted in tests)
+- [x] **User workflow documented:** testing.md Journey C subsection (A/B/C + decision table + loop), live↔template sync, CLI reference, compile + README cross-links, Architecture §5.5 / §6.3 / §9 / layout
+- [x] Verification checklist complete; all ACs traced to tests (including AC-7 doc + architecture markers)
+
+### Implementation note (2026-08-26)
+
+Shipped: `src/zaumzeug/eval/rate.py` (`run_rate`, `RateError`), CLI `zaumzeug rate` + `run --rate`, `data/ratings/<stem>.jsonl` layout, val/train merge + optional `--compile` (rated agent default). Tests: 37 × `-k e6_s08` (unit + CLI + integration + docs + deploy). Third-party DSPy `InputField`/`OutputField` `prefix=` deprecation warnings filtered in `pyproject.toml` (library internals — ZaumZeug uses string signatures only).
 ### PO decisions (2026-08-26)
 
 Locked after validation against E6-S05 / E6-S07 / E8-S03 / run / deploy code — no hard conflicts; soft conflicts resolved as: config-resolved val/train paths, `data/ratings/<stem>.jsonl`, last-stage `run --rate` export (not serve hook), gold check in `rate.py`, `--compile` defaults to rated agent, explicit copy-rules test for `data/ratings/`.

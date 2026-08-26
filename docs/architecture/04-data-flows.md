@@ -191,7 +191,7 @@ run / production failure → trace → [human rate / set gold] → dataset row
 
 **Implementation (E8-S03, 2026-08-26):** Production trace → dataset ratchet — serve wraps `Agent.run` when `eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1`; JSONL under `data/traces/`; `merge_traces_into_datasets` appends `data/val.jsonl` / `data/train.jsonl`; Journey C: eval → compile → deploy. `zaumzeug replay --trace` deferred (PRD §9). Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`. Docs: [testing.md — Journey C](../user-docs/guides/testing.md#trace--test-case-journey-c).
 
-**Planned (E6-S08 / E6.8, Ready):** Human rating gate — `zaumzeug rate` / `zaumzeug run --rate` collect quality + feedback + gold; merge into val/train; optional `--compile`. Story: [65-story.md](../stories/epic-stories/65-story.md).
+**Implementation (E6-S08, 2026-08-26):** Human rating gate — `zaumzeug rate` / `zaumzeug run --rate` collect quality + feedback + gold into `data/ratings/`; merge into resolved (deduped) val/train; optional `--compile` for the rated agent. No DeepEval required. Tests: `tests/unit/eval/test_rate.py`, `tests/unit/cli/test_rate_cli.py`, `tests/integration/eval/test_rate_compile.py`. Docs: [testing.md — Human quality rating](../user-docs/guides/testing.md#human-quality-rating--recompile).
 
 **Implementation (E5-S03, 2026-07-28):** `zaumzeug serve --deploy` runs production bundles under `deploy/<name>/` (same OpenAI REST as dev). Tests: `tests/integration/deploy/test_serve_deploy.py`.
 
