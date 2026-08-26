@@ -458,9 +458,9 @@ Parallel fan-out (`parallelism: N`) is **deferred** post–Phase 1 — not a sep
 
 ---
 
-#### A2A (optional) — illustrative
+#### A2A (optional) — illustrative → **shipped E8-S04 (2026-08-26)**
 
-A2A is for **delegating to external harnesses** — not required for agents within one user harness.
+A2A is for **delegating to external harnesses** — not required for agents within one user harness. Product path: `serve.a2a: true` + `zaumzeug a2a` ([a2a.md](../user-docs/guides/a2a.md)).
 
 ---
 

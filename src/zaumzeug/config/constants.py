@@ -1,6 +1,6 @@
 """Shared SDK constants for config and runtime."""
 
-# YAML key gating (compile/a2a/…). Kept at 1 so remaining Phase 4 field hints
+# YAML key gating (compile/…). Kept at 1 so remaining Phase 2+ field hints
 # stay intact while later epics unblock specific keys. Do not bump for catalog
 # tools — use ``BUILTIN_CATALOG_PHASE`` instead (E7-S07 / E8-S01).
 CURRENT_SDK_PHASE = 1

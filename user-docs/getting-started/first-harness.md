@@ -62,6 +62,8 @@ zaumzeug serve example
 # Point Cursor at http://localhost:1417/mcp — see Cursor MCP setup
 # ACP for Zed / JetBrains (stdio JSON-RPC; not IBM A2A):
 # zaumzeug acp example
+# Optional A2A agent fleets (needs serve.a2a: true + hayhooks[a2a]):
+# zaumzeug a2a example
 # or batch all workflow stages (mock):
 # HARNESS_LOG_LEVEL=INFO zaumzeug run example --input "Summarize this topic"
 ```
@@ -99,5 +101,6 @@ Global defaults can live in `config/models.yaml`; harness and agent files deep-m
 - Add Python tools under `agents/<name>/tools/` — see [Custom tools](../guides/custom-tools.md). Builtins (`web_fetch`, `calculator`, `read_file`) go in `tools.builtin` — no custom Python.
 - Connect Cursor over MCP — see [Cursor MCP setup](../guides/cursor-mcp.md).
 - Connect Zed or JetBrains over ACP — see [ACP (Zed / JetBrains)](../guides/acp.md).
+- Optional A2A agent card for fleets — see [A2A agent card](../guides/a2a.md) (`serve.a2a: true`; `zaumzeug a2a`).
 - Testing and the mock profile — see [Testing](../guides/testing.md).
-- CLI flags — see [CLI reference](../reference/cli.md) (`compile`, `serve`, `mcp`, `acp`, `run`, …).
+- CLI flags — see [CLI reference](../reference/cli.md) (`compile`, `serve`, `mcp`, `acp`, `a2a`, `run`, …).

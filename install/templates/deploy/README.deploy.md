@@ -85,7 +85,7 @@ Python **3.11+** must already be on PATH. From this directory:
 
 | Variable | Values | Effect |
 |---|---|---|
-| `HARNESS_ROOT` | `deploy` | Force production root (`deploy/`) for `serve` / `mcp` / `acp` (and other root-aware CLIs) without passing `--deploy` — intended for containers and systemd |
+| `HARNESS_ROOT` | `deploy` | Force production root (`deploy/`) for `serve` / `mcp` / `acp` / `a2a` (and other root-aware CLIs) without passing `--deploy` — intended for containers and systemd |
 | Provider keys | (see `.env.example`) | Put API keys in `.env` only — never in YAML or this bundle |
 
 1. Copy `.env.example` → `.env` if present (never commit secrets; never overwrite an existing `.env`).
@@ -106,6 +106,8 @@ HARNESS_ROOT=deploy zaumzeug serve {{harness_name}}
 zaumzeug mcp {{harness_name}} --deploy
 # ACP (Zed / JetBrains):
 zaumzeug acp {{harness_name}} --deploy
+# optional A2A (needs serve.a2a: true + pip install "hayhooks[a2a]"):
+zaumzeug a2a {{harness_name}} --deploy
 ```
 
 `--deploy` or `HARNESS_ROOT=deploy` loads **only** this production tree — no `usr-harnesses/` required. The OpenAI-compatible API matches dev serve:
@@ -138,6 +140,7 @@ Public path map (Traefik → localhost):
 | `/v1/chat/completions` (REST) | `127.0.0.1:1416` |
 | `/chat` (Chainlit, if enabled) | `127.0.0.1:1416` |
 | `/mcp` (MCP) | `127.0.0.1:1417` |
+| `/{harness}/.well-known/agent-card.json` (optional A2A) | `127.0.0.1:1418` |
 
 Full guide: the project's `user-docs/guides/production-auth.md`.
 
@@ -169,6 +172,25 @@ http://127.0.0.1:1417/mcp
 ```
 
 Override the port with `--port N` or `serve.hayhooks.mcp_port` in the shipped `harness.yaml`. Reverse-proxy to `{mcp_port}/mcp` for a remote host.
+
+---
+
+## A2A (optional agent fleets)
+
+Optional Agent2Agent hosting uses the **same** `deploy/{{harness_name}}/` tree. Requires `serve.a2a: true` in the shipped `harness.yaml` and `pip install "hayhooks[a2a]"` on the target.
+
+```bash
+zaumzeug a2a {{harness_name}} --deploy
+# HARNESS_ROOT=deploy zaumzeug a2a {{harness_name}}
+```
+
+Agent card (default port **1418**):
+
+```text
+http://127.0.0.1:1418/{{harness_name}}/.well-known/agent-card.json
+```
+
+One process = one harness (multi-tenant Hayhooks remains out of scope). Full guide: the project's `user-docs/guides/a2a.md`.
 
 ---
 

@@ -9,7 +9,7 @@ ZaumZeug command-line interface reference for harness developers.
 | Variable | Values | Effect |
 |---|---|---|
 | `HARNESS_LOG_LEVEL` | `DEBUG`, `INFO`, `WARNING`, `ERROR` | Sets SDK and Haystack log verbosity (`DEBUG` ≈ `--verbose`). Use **`INFO`** with `zaumzeug run` to see stage lifecycle (`stage=…`); default `WARNING` hides those INFO lines |
-| `HARNESS_ROOT` | `deploy` | Force production root (`deploy/<name>/`) for **serve**, **mcp**, **acp**, and other root-aware commands (`doctor`, `run`) instead of `usr-harnesses/`. Equivalent to `--deploy`. Use in containers / systemd so the flag is not required on every invocation. Default when unset: `usr-harnesses/` |
+| `HARNESS_ROOT` | `deploy` | Force production root (`deploy/<name>/`) for **serve**, **mcp**, **acp**, **a2a**, and other root-aware commands (`doctor`, `run`) instead of `usr-harnesses/`. Equivalent to `--deploy`. Use in containers / systemd so the flag is not required on every invocation. Default when unset: `usr-harnesses/` |
 | `HARNESS_LIVE_LLM` | `1` | Opt-in live provider e2e (`pytest tests/e2e`). Unset in default CI — mock profile only |
 | `ZAUMZEUG_TRACE_CAPTURE` | `1` / `0` | Opt-in production trace export on `zaumzeug serve` (`data/traces/*.jsonl`). Overrides `eval.trace_capture.enabled`. Default off. See [Testing — Trace → test case](../guides/testing.md#trace--test-case-journey-c) |
 
@@ -180,6 +180,41 @@ tools:
 `zaumzeug doctor` warns (non-blocking) when stdio MCP is configured but `uv` is not on PATH. MCP JSON-RPC errors use `{jsonrpc, error: {code, message, data}}` with `data.ok: false`.
 
 Cursor setup (`.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`): [Cursor MCP setup](../guides/cursor-mcp.md). Production: [Deploy and ship](../guides/deploy.md).
+
+---
+
+## `zaumzeug a2a`
+
+Optional **Agent2Agent (A2A)** hosting so other agents can discover and delegate to your harness. Requires `serve.a2a: true` (or `serve.a2a.enabled: true`) in `harness.yaml` and `pip install "hayhooks[a2a]"`. This is **not** MCP and **not** ACP — see [A2A guide](../guides/a2a.md).
+
+```bash
+zaumzeug a2a <harness> [--deploy] [--verbose] [--port N]
+```
+
+| Flag | Description |
+|---|---|
+| `--deploy` | Load harness **only** from `deploy/<name>/` (or `HARNESS_ROOT=deploy`); requires a valid `manifest.json` |
+| `--verbose` | Enable SDK and Haystack debug logging |
+| `--port N` | Override `serve.a2a.port` from harness.yaml (default **1418**) |
+
+**Bind:** `127.0.0.1` only (same Phase 1 localhost rule as `zaumzeug serve` / `zaumzeug mcp`).
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /{harness}/.well-known/agent-card.json` | Agent Card for discovery |
+| `POST /{harness}/` | A2A JSON-RPC binding |
+| `GET /status` | Health + list of exposed agents |
+
+```bash
+# harness.yaml must include serve.a2a: true
+zaumzeug a2a example
+# production bundle:
+zaumzeug a2a example --deploy
+# HARNESS_ROOT=deploy zaumzeug a2a example
+# curl http://127.0.0.1:1418/example/.well-known/agent-card.json
+```
+
+One process = one harness (NG1 multi-tenant remains out of scope). Fleet layout: [A2A guide](../guides/a2a.md#agent-fleet-layout-one-harness-per-process).
 
 ---
 
@@ -423,6 +458,7 @@ Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack
 - [Custom tools](../guides/custom-tools.md) — `tools.custom` Python modules, `ComponentTool` / `Tool`, doctor import errors
 - [Cursor MCP setup](../guides/cursor-mcp.md) — `.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`; `--cursor-mcp`; `uv` for stdio `tools.mcp`
 - [ACP (Zed / JetBrains)](../guides/acp.md) — `zaumzeug acp` stdio JSON-RPC; Agent Client Protocol ≠ A2A; Cursor uses MCP
+- [A2A (agent fleets)](../guides/a2a.md) — optional `zaumzeug a2a` / `serve.a2a: true`; agent card; ≠ MCP/ACP
 - [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml`, agent routing, [run reliability](../guides/multi-agent-workflow.md#run-reliability-zaumzeug-run) (`runtime.retry`, `output.format: json`, stage logs)
 - [Web deployment](../guides/web-deployment.md) — Chainlit `/chat`, Open WebUI, SPA + Nginx, Next.js; OpenAI `baseURL` at the harness
 - [Production auth](../guides/production-auth.md) — Traefik proxy-only TLS + ForwardAuth; no `serve.auth` in v1

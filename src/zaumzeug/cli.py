@@ -10,7 +10,7 @@ from zaumzeug.doctor import run_doctor
 from zaumzeug.logging import configure_logging
 from zaumzeug.runtime.workflow import WorkflowError, run_workflow
 from zaumzeug.scaffold import ScaffoldError, init_harness
-from zaumzeug.serve import format_dry_run, run_acp, run_mcp, run_serve, validate_serve
+from zaumzeug.serve import format_dry_run, run_a2a, run_acp, run_mcp, run_serve, validate_serve
 from zaumzeug.serve.dry_run import dry_run_to_json
 
 
@@ -25,6 +25,7 @@ _COMMANDS: tuple[str, ...] = (
     "eval",
     "mcp",
     "acp",
+    "a2a",
 )
 
 
@@ -47,6 +48,13 @@ def _acp_command(args: argparse.Namespace) -> int:
     """Serve the harness as an ACP stdio JSON-RPC agent (E7-S05)."""
     configure_logging(verbose=args.verbose)
     return run_acp(args.harness_name, deploy=args.deploy)
+
+
+def _a2a_command(args: argparse.Namespace) -> int:
+    """Host the harness A2A agent card (E8-S04). Requires ``serve.a2a: true``."""
+    configure_logging(verbose=args.verbose)
+    port: int | None = args.port
+    return run_a2a(args.harness_name, deploy=args.deploy, port=port)
 
 
 def _init_command(args: argparse.Namespace) -> int:
@@ -325,6 +333,7 @@ def build_parser() -> argparse.ArgumentParser:
             "eval",
             "mcp",
             "acp",
+            "a2a",
         }:
             continue
         cmd = sub.add_parser(name, help=f"{name} command (stub)")
@@ -376,6 +385,33 @@ def build_parser() -> argparse.ArgumentParser:
         help="enable SDK and Haystack debug logging (stderr only)",
     )
     acp_cmd.set_defaults(_handler=_acp_command)
+
+    a2a_cmd = sub.add_parser(
+        "a2a",
+        help="host A2A agent card at /{harness}/.well-known/agent-card.json",
+    )
+    a2a_cmd.add_argument(
+        "harness_name",
+        help="harness name under usr-harnesses/ (or deploy/ with --deploy)",
+    )
+    a2a_cmd.add_argument(
+        "--deploy",
+        action="store_true",
+        help="load harness from deploy/<name>/ (or HARNESS_ROOT=deploy)",
+    )
+    a2a_cmd.add_argument(
+        "--verbose",
+        action="store_true",
+        help="enable SDK and Haystack debug logging",
+    )
+    a2a_cmd.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        metavar="N",
+        help="override serve.a2a.port from harness.yaml (default 1418)",
+    )
+    a2a_cmd.set_defaults(_handler=_a2a_command)
 
     deploy_cmd = sub.add_parser(
         "deploy",

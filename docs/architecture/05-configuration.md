@@ -57,7 +57,7 @@ Requirements: [PRD E2.2](../prd.md#epic-e2--configuration-and-validation-phase-1
 | `compile` | `agent.yaml` | 2 | DSPy + GEPA → agent `artifacts/` | E4 |
 | `eval` | `harness.yaml` | 2 | Optional eval (`builtin` or `deepeval`) | E6 |
 | `deploy` | `harness.yaml` | 2 | Eval gate on `zaumzeug deploy` ✅ (E6-S03 / E5-S06) | E5 |
-| `serve` | `harness.yaml` | 1+ | Hayhooks ports, Chainlit `/chat` ✅ (E7-S04), MCP, ACP stdio ✅ (E7-S05), `serve.expose` pipelines ✅ (E8-S01); **no `serve.auth`** (extra-forbid; proxy-only ✅ E8-S02), A2A | E3, E7, E8 |
+| `serve` | `harness.yaml` | 1+ | Hayhooks ports, Chainlit `/chat` ✅ (E7-S04), MCP, ACP stdio ✅ (E7-S05), `serve.expose` pipelines ✅ (E8-S01); **no `serve.auth`** (extra-forbid; proxy-only ✅ E8-S02), optional A2A ✅ (E8-S04) | E3, E7, E8 |
 
 Full schema examples: Phase 1 canonical examples in [§6.6](05-configuration.md#66-phase-1-config-schema); full multi-phase reference in [ideation-stage.md](../ideation-stage.md) until `user-docs/reference/harness-yaml.md` exists.
 
@@ -182,7 +182,7 @@ Custom tools use `tools.custom` (user Python), not this catalog — [PRD E7.2](.
 
 Canonical examples for [PRD E2.1](../prd.md#epic-e2--configuration-and-validation-phase-1), [E3.4](../prd.md#epic-e3--runtime-and-local-serve-phase-1), [E3.5](../prd.md#epic-e3--runtime-and-local-serve-phase-1).
 
-**Implementation (E2-S01, 2026-07-08):** Phase 1 `harness.yaml` root fields are validated by `zaumzeug.config.load_harness()` → `HarnessConfig` (`src/zaumzeug/config/schemas.py`, `loader.py`). Phase-gated keys (`compile`, `serve.a2a`, …) fail with a phase hint. **`eval` unblocked by E6-S02** (validated as `EvalConfig` when present). **`deploy` unblocked by E6-S03 / E5-S06** (validated as `DeployConfig` with `eval_gate`). **`serve.acp` unblocked by E7-S05**.
+**Implementation (E2-S01, 2026-07-08):** Phase 1 `harness.yaml` root fields are validated by `zaumzeug.config.load_harness()` → `HarnessConfig` (`src/zaumzeug/config/schemas.py`, `loader.py`). Phase-gated keys (`compile`, …) fail with a phase hint. **`eval` unblocked by E6-S02** (validated as `EvalConfig` when present). **`deploy` unblocked by E6-S03 / E5-S06** (validated as `DeployConfig` with `eval_gate`). **`serve.acp` unblocked by E7-S05**. **`serve.a2a` unblocked by E8-S04** (boolean or `{enabled, port}`).
 
 **Implementation (E8-S07, 2026-08-01):** Optional `runtime` on `HarnessConfig` (`HarnessRuntimeConfig` / `RuntimeRetryConfig`) and optional `output` on `AgentConfig` (`AgentOutputConfig`, `format: json` only). Consumed by `run_workflow` / `zaumzeug run` — stage build once, retry `Agent.run` + JSON parse with backoff; INFO stage lifecycle via `log_request(..., stage=...)`. **Serve/HTTP does not yet share this reliability layer** (follow-up). **`tools.mcp` unblocked by E7-S01** (2026-08-14). **`tools.custom` unblocked by E7-S02** (2026-08-14); doctor `custom_tools` fails on import errors with the module path. Tests: `tests/unit/runtime/test_workflow_reliability.py`, `tests/integration/test_workflow_reliability.py`, `tests/unit/cli/test_doctor.py` (`-k e8_s07`).
 
@@ -238,7 +238,7 @@ compile:
 
 **Implementation (E2-S04c, 2026-07-08):** `zaumzeug doctor --deploy` (or `HARNESS_ROOT=deploy`) resolves harnesses under `deploy/<name>/`. Validates deploy `manifest.json` (§10.3 schema) and pinned `artifact-manifest.json` paths when `artifact_run_id` is a per-agent map; reuses E2-S04a core checks (config, models, runtime paths, port). Dev-only warnings (`mcp_uv`, `workflow_diagram`, `artifact_module`) are skipped in deploy mode. **E7-S01:** `tools.mcp` is allowed. **E7-S02:** `tools.custom` is allowed; `custom_tools` still runs in deploy mode. Root resolution: `src/zaumzeug/config/harness_root.py`.
 
-**Implementation (E5-S04, 2026-07-28):** Canonical env-aware API `resolve_harness_path()` in `config/harness_root.py` — `HARNESS_ROOT=deploy` forces `deploy/` for serve / mcp / acp (and doctor / run). Tests: `tests/unit/deploy/test_harness_root.py`.
+**Implementation (E5-S04, 2026-07-28):** Canonical env-aware API `resolve_harness_path()` in `config/harness_root.py` — `HARNESS_ROOT=deploy` forces `deploy/` for serve / mcp / acp / a2a (and doctor / run). Tests: `tests/unit/deploy/test_harness_root.py`.
 
 **Implementation (E4-S05, 2026-07-28):** Dev-mode warn check `artifact_module` (`check_artifact_module_staleness`) compares `compile.module` source SHA-256 to `source_hash` in `artifact-manifest.json`. Mismatch → warn (exit 0) suggesting re-compile. Export records `source_hash` via `compile/export.py`. Tests: `tests/integration/test_doctor.py::test_e4_s05_ac5_stale_artifact_warn`.
 
@@ -264,6 +264,8 @@ compile:
 
 **Implementation (E8-S03, 2026-08-26):** `EvalTraceCaptureConfig` on `eval.trace_capture` (default off). Serve wraps `Agent.run` when enabled or `ZAUMZEUG_TRACE_CAPTURE=1`. Tests: `tests/unit/config/test_schemas.py::test_e8_s03_eval_trace_capture_schema`, `tests/unit/eval/test_trace_ratchet.py`.
 
+**Implementation (E8-S04, 2026-08-26):** `A2aConfig` on `ServeConfig.a2a` — boolean `serve.a2a: true` or `{enabled, port}` (default port **1418**); removed from `PHASE_GATED_FIELDS`. `zaumzeug a2a <name>` requires enabled + `hayhooks[a2a]`; hosts `/{harness}/.well-known/agent-card.json`. Docs: [a2a.md](../../user-docs/guides/a2a.md). Tests: `tests/integration/a2a/`, `tests/unit/config/test_schemas.py::test_e8_s04_a2a_schema_unblocked`. `CURRENT_SDK_PHASE` stays **1**.
+
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract — `AgentPipelineWrapper.run_chat_completion` reads optional request `model_id` and swaps the agent `chat_generator` via stage-scoped `ModelRouter`. Ephemeral-port fixture `tests/integration/conftest.py::ephemeral_serve_url`; tests `tests/integration/test_openai_contract.py` (`-k e3_s07`); `web_fetch` stubbed with `respx` for offline CI. Cross-OS green closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
 
 **Implementation (E3-S05, 2026-07-08):** Mock model profile — `MockChatGenerator` in `src/zaumzeug/integrations/mock.py` returns canned text from `tests/fixtures/responses/{model}.txt` (or `.json` with a `content` field); bundled copy under `src/zaumzeug/fixtures/responses/` for pip installs. `ModelRouter` in `src/zaumzeug/runtime/model_router.py` dispatches `provider: mock` without `haystack_integrations` packages. Shipped default: `install/templates/config/models.example.yaml` (`default_model_id: mock`, `model: harness-fixture`). Tests: `tests/unit/runtime/test_model_router.py` (`-k e3_s05`).
@@ -284,6 +286,7 @@ serve:
   hayhooks:
     port: 1416
     # chainlit: true   # optional GUI at /chat — pip install "hayhooks[chainlit]" (E7-S04)
+  # a2a: true          # optional agent card — pip install "hayhooks[a2a]"; zaumzeug a2a (E8-S04)
 
 # Optional — zaumzeug run only (E8-S07). Omit or max_attempts: 1 = one-shot.
 # runtime:
@@ -355,7 +358,7 @@ User-facing explanation of `workflow.yaml`, pipeline stages, and agent-internal 
 
 ## 7. Model routing
 
-**Resolved (PRD open #5):** Ship a **custom `ModelRouter`** (`runtime/model_router.py`) as the default. It reads `model_id` from the **active agent's** merged `agents-models.yaml` and optional request override; lazily constructs the matching Haystack `ChatGenerator`. **Phase 1 live providers:** `openrouter` via `openrouter-haystack`; **`openai_compatible`** via `openai-haystack` with `api_base_url` for local OpenAI-compatible servers (LM Studio, Ollama, vLLM). Native cloud providers (`openai`, `anthropic`, …) are Phase 2+.
+**Resolved (ModelRouter):** Ship a **custom `ModelRouter`** (`runtime/model_router.py`) as the default. It reads `model_id` from the **active agent's** merged `agents-models.yaml` and optional request override; lazily constructs the matching Haystack `ChatGenerator`. **Phase 1 live providers:** `openrouter` via `openrouter-haystack`; **`openai_compatible`** via `openai-haystack` with `api_base_url` for local OpenAI-compatible servers (LM Studio, Ollama, vLLM). Native cloud providers (`openai`, `anthropic`, …) are Phase 2+.
 
 ```mermaid
 flowchart LR

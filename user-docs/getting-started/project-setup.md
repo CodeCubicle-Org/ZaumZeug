@@ -60,6 +60,7 @@ zaumzeug serve my-agent
 # zaumzeug mcp my-agent     # Cursor / Claude Desktop
 # zaumzeug mcp my-agent --deploy   # production bundle (same MCP surface)
 # zaumzeug acp my-agent     # Zed / JetBrains (stdio JSON-RPC; not IBM A2A)
+# zaumzeug a2a my-agent     # optional A2A (needs serve.a2a: true + hayhooks[a2a])
 # optional (needs pip install "zaumzeug[eval]"):
 # deepeval test run usr-harnesses/my-agent/eval/
 # Mode C staging/debug — black-box a running serve:
@@ -72,9 +73,10 @@ Edit `agents/agent/prompts/system.md`, tools, and models as needed. For a fuller
 
 ## Related
 
-- [CLI reference](../reference/cli.md) — `init`, `doctor`, `serve`, `mcp`, `acp`, `run`
+- [CLI reference](../reference/cli.md) — `init`, `doctor`, `serve`, `mcp`, `acp`, `a2a`, `run`
 - [Multi-agent workflow](../guides/multi-agent-workflow.md) — `workflow.yaml` and stages
 - [Custom tools](../guides/custom-tools.md) — `tools.custom` Python modules under `agents/<name>/tools/`
 - [Cursor MCP setup](../guides/cursor-mcp.md) — `.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`
 - [ACP (Zed / JetBrains)](../guides/acp.md) — `zaumzeug acp` stdio JSON-RPC; Agent Client Protocol ≠ A2A
+- [A2A agent card](../guides/a2a.md) — `serve.a2a: true`; `zaumzeug a2a` (Hayhooks A2A, separate from ACP/MCP)
 - [Installation](installation.md) — first-time project scaffold

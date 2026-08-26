@@ -114,7 +114,7 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 
 **Implementation (E5-S03, 2026-07-28):** Full Hayhooks serve from `deploy/<name>/` is live — same OpenAI REST as dev, fails on missing/invalid manifest, works without `usr-harnesses/`. Tests: `tests/integration/deploy/test_serve_deploy.py`.
 
-**Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` is the env equivalent of `--deploy` for serve / mcp / acp (and doctor / run) via `config/harness_root.resolve_harness_path()`. Docs: `README.deploy.md`, CLI reference. Tests: `tests/unit/deploy/test_harness_root.py` (`e5_s04`). Linux CI smoke **Done** ([E5-S08](../stories/epic-stories/48-story.md), 2026-07-29).
+**Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` is the env equivalent of `--deploy` for serve / mcp / acp / a2a (and doctor / run) via `config/harness_root.resolve_harness_path()`. Docs: `README.deploy.md`, CLI reference. Tests: `tests/unit/deploy/test_harness_root.py` (`e5_s04`). Linux CI smoke **Done** ([E5-S08](../stories/epic-stories/48-story.md), 2026-07-29).
 
 **Implementation (E5-S05, 2026-07-28):** Target ship workflow documented — copy `deploy/<name>/` → `target_install` → create `.env` → `zaumzeug serve --deploy`. Runtime-only `pip install zaumzeug` (no DSPy/GEPA/DeepEval); Python 3.11+ prerequisite; `.env` never in bundle. Docs: `install/templates/deploy/README.deploy.md`, [user-docs/guides/deploy.md](../user-docs/guides/deploy.md), root README production note. Tests: `tests/integration/deploy/test_target_install.py` (`e5_s05`) + `test_deploy.py::test_e5_s05_ac5_no_env_in_bundle`.
 
@@ -123,6 +123,8 @@ Written to **`deploy/<name>/manifest.json`** only (not to be confused with **`ar
 **Implementation (E7-S08, 2026-08-21):** Same ship docs point web clients at the harness OpenAI `baseURL` (`/v1`, not `api.openai.com`) and at [web-deployment.md](../../user-docs/guides/web-deployment.md) for Open WebUI / SPA / Next.js. Tests: `tests/unit/docs/test_web_deployment.py`.
 
 **Implementation (E7-S05, 2026-08-21):** `zaumzeug acp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same production root as serve. Ops snippets: `README.deploy.md`, [acp.md](../../user-docs/guides/acp.md).
+
+**Implementation (E8-S04, 2026-08-26):** Optional A2A — `zaumzeug a2a <name> --deploy` / `HARNESS_ROOT=deploy` same root; requires `serve.a2a: true` + `hayhooks[a2a]`. Docs: [a2a.md](../../user-docs/guides/a2a.md), `README.deploy.md`. Tests: `tests/integration/a2a/`.
 
 **Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same production root as serve; MCP surface matches dev. Ops snippets: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`.
 

@@ -46,7 +46,7 @@ flowchart TB
 
 ### 5.2 Runtime agent resolution
 
-At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug run` (workflow):
+At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug a2a` / `zaumzeug run` (workflow):
 
 1. Load `workflow.yaml` and resolve the requested stage (or default entry stage for interactive serve).
 2. Resolve `agents/<agent-name>/` for that stage; load **`agents-models.yaml`** (merged per [§3.3.1](02-repository-and-layout.md#331-model-config-files-naming)) into a **stage-scoped `ModelRouter`**.
@@ -68,6 +68,8 @@ At `zaumzeug serve` / `zaumzeug mcp` / `zaumzeug acp` / `zaumzeug run` (workflow
 **Implementation (E7-S08, 2026-08-21):** Open WebUI, SPA + Nginx, and Next.js clients call the same OpenAI REST `baseURL` (`http://127.0.0.1:1416/v1`, not `api.openai.com`). Docs: [web-deployment.md](../../user-docs/guides/web-deployment.md).
 
 **Implementation (E7-S05, 2026-08-21):** `zaumzeug acp <name>` uses the same factory/resolution path as serve (including `tools.mcp`) then serves Agent Client Protocol JSON-RPC on stdio instead of Hayhooks. Docs: [acp.md](../../user-docs/guides/acp.md). Tests: `tests/integration/acp/test_acp_stdio.py`.
+
+**Implementation (E8-S04, 2026-08-26):** `zaumzeug a2a <name>` uses the same factory/resolution path as serve when `serve.a2a: true`, then hosts Hayhooks A2A (agent card + JSON-RPC) on port **1418** (needs `hayhooks[a2a]`). Docs: [a2a.md](../../user-docs/guides/a2a.md). Tests: `tests/integration/a2a/`.
 
 **Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp <name> --deploy` (and `HARNESS_ROOT=deploy`) uses the same `validate_serve` production root as serve. MCP Streamable HTTP matches dev (`POST /mcp`, `GET /status`). Docs: `README.deploy.md`, [deploy.md](../../user-docs/guides/deploy.md). Tests: `tests/integration/mcp/test_mcp_deploy.py`.
 
@@ -185,7 +187,7 @@ production failure → trace → dataset row → zaumzeug eval (optional) → GE
 
 **Implementation (E5-S03, 2026-07-28):** `zaumzeug serve --deploy` runs production bundles under `deploy/<name>/` (same OpenAI REST as dev). Tests: `tests/integration/deploy/test_serve_deploy.py`.
 
-**Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` forces the same production root without `--deploy` (serve / mcp / acp / doctor / run) via `config/harness_root.resolve_harness_path()`. Tests: `tests/unit/deploy/test_harness_root.py`.
+**Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` forces the same production root without `--deploy` (serve / mcp / acp / a2a / doctor / run) via `config/harness_root.resolve_harness_path()`. Tests: `tests/unit/deploy/test_harness_root.py`.
 
 **Implementation (E7-S06, 2026-08-21):** `zaumzeug mcp --deploy` is the production MCP path on that same root (same surface as dev). Tests: `tests/integration/mcp/test_mcp_deploy.py`.
 

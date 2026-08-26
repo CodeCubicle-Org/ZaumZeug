@@ -17,7 +17,7 @@ DEPLOY_HARNESS_ROOT = "deploy"
 DEPLOY_MANIFEST = "manifest.json"
 
 # Protocol / ops surfaces that must honour ``HARNESS_ROOT`` (E5-S04 AC-1).
-PROTOCOL_ROOT_COMMANDS = frozenset({"serve", "mcp", "acp"})
+PROTOCOL_ROOT_COMMANDS = frozenset({"serve", "mcp", "acp", "a2a"})
 
 
 def is_deploy_mode(*, deploy_flag: bool = False) -> bool:

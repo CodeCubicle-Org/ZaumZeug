@@ -29,7 +29,7 @@ def test_e5_s04_ac1_env_forces_deploy_root(
     """AC-1: ``HARNESS_ROOT=deploy`` forces deploy root for serve, mcp, acp."""
     monkeypatch.setenv(HARNESS_ROOT_ENV, "deploy")
 
-    assert PROTOCOL_ROOT_COMMANDS == frozenset({"serve", "mcp", "acp"})
+    assert PROTOCOL_ROOT_COMMANDS == frozenset({"serve", "mcp", "acp", "a2a"})
     assert is_deploy_mode() is True
     assert is_deploy_mode(deploy_flag=False) is True
     assert harness_root_segment(deploy=True) == DEPLOY_HARNESS_ROOT
@@ -43,9 +43,9 @@ def test_e5_s04_ac1_env_forces_deploy_root(
     assert DEPLOY_HARNESS_ROOT in validation.harness_dir.parts
     assert DEV_HARNESS_ROOT not in validation.harness_dir.parts
 
-    # mcp / acp honour the same resolver + env without --deploy
+    # mcp / acp / a2a honour the same resolver + env without --deploy
     parser = build_parser()
-    for command in ("mcp", "acp"):
+    for command in ("mcp", "acp", "a2a"):
         assert command in PROTOCOL_ROOT_COMMANDS
         args = parser.parse_args([command, "shipped"])
         assert args.deploy is False

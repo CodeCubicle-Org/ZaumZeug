@@ -176,6 +176,8 @@ def _register_agent_pipeline(
     router: ModelRouter,
     input_rewrite_template: str | None = None,
     skip_mcp: bool = True,
+    skip_a2a: bool = True,
+    a2a_card: dict[str, Any] | None = None,
     trace_hook: Any | None = None,
 ) -> AgentPipelineWrapper:
     """Register a factory-built agent as a Hayhooks pipeline (OpenAI + /run)."""
@@ -199,8 +201,8 @@ def _register_agent_pipeline(
             "description": f"ZaumZeug harness entry agent ({pipeline_name})",
             "request_model": None,
             "skip_mcp": skip_mcp,
-            "skip_a2a": True,
-            "a2a_card": None,
+            "skip_a2a": skip_a2a,
+            "a2a_card": a2a_card,
         },
     )
     add_pipeline_api_route(app, pipeline_name, wrapper)

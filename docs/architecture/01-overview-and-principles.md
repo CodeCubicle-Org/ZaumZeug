@@ -108,7 +108,7 @@ Each workflow stage runs **one Haystack `Agent` loop** for that step. The harnes
 | **Guides** (feedforward) | DSPy → GEPA → Haystack | Optimized instructions/demos exported to `system_prompt`, Jinja templates, tool descriptions; **optional** `prompts/input_rewrite.md` for compile-time-optimized user-input preprocessing (**export** E4-S03a ✅ · **runtime preprocess** E4-S03b ✅) |
 | **Sensors** (feedback) | GEPA metric (+ optional DeepEval in `modules/metrics.py`) ✅ (E6-S07) | Score + **textual feedback** for compile |
 | Regression testing | Optional DeepEval (or Promptfoo / custom pytest) | `[eval]` extra ✅ (E6-S01); `zaumzeug eval` ✅ (E6-S02); `eval/test_*.py` ✅ (E6-S04); trace → test case ✅ (E6-S05); Mode C HTTP `--base-url` ✅ (E6-S06); production dataset ratchet ✅ (E8-S03) |
-| Serving | Haystack + Hayhooks | REST, MCP, optional ACP/A2A; production HTTP **proxy-only** (Traefik ✅ E8-S02) |
+| Serving | Haystack + Hayhooks | REST, MCP, ACP ✅, optional A2A ✅ (E8-S04); production HTTP **proxy-only** (Traefik ✅ E8-S02) |
 | Observability | Haystack `track_stats`; optional OTel (Phase 4); DeepEval `@observe` if opted in | Trace export ✅ (E6-S05); production dataset ratchet ✅ (E8-S03, 2026-08-26) |
 
 ### 2.4 Industry patterns
@@ -128,7 +128,7 @@ Requirements: **[PRD G4](../prd.md#3-goals)**, **[E1.7](../prd.md#epic-e1--onboa
 | **CI matrix (Win / macOS / Linux)** | **Done** (E1-S07, 2026-07-22) — [`.github/workflows/ci-matrix.yml`](../../.github/workflows/ci-matrix.yml); Python 3.11; install wrappers → doctor → dry-run → `ci_serve_smoke.py` → contract + unit/integration pytest. **Phase 2+ Linux deploy smoke** ✅ (E5-S08, 2026-07-29) — `zaumzeug deploy example` → `ci_serve_smoke.py example --deploy` on `ubuntu-latest` only |
 | **No hardcoded paths** | SDK and install use `pathlib.Path`; no `/` or `\` literals for harness roots, venv, or artifacts |
 | **OS detection** | `platform.system()` for venv paths (`Scripts` vs `bin`), activation hints, and optional shell-specific messaging — not duplicated in shell scripts |
-| **Env over convention** | `HARNESS_ROOT`, `HARNESS_LOG_LEVEL`, port overrides in yaml — avoid OS-specific defaults in code. **`HARNESS_ROOT=deploy`** ✅ (E5-S04, 2026-07-28) forces `deploy/` for serve/mcp/acp via `config/harness_root.py` |
+| **Env over convention** | `HARNESS_ROOT`, `HARNESS_LOG_LEVEL`, port overrides in yaml — avoid OS-specific defaults in code. **`HARNESS_ROOT=deploy`** ✅ (E5-S04, 2026-07-28) forces `deploy/` for serve/mcp/acp/a2a via `config/harness_root.py` |
 | **Line endings** | Repo `.gitattributes` normalizes text; generated files use `\n` |
 | **Subprocess** | Use list-form `subprocess` args; no shell=True for install/serve unless documented for a specific wrapper |
 

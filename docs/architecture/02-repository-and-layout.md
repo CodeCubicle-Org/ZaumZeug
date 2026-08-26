@@ -51,7 +51,7 @@ HarnessDevelopment/
 | Entry point | `zaumzeug = "zaumzeug.cli:main"` |
 | Source layout | `src/zaumzeug/` |
 
-**Domain terms:** `harness.yaml`, `usr-harnesses/`, `deploy/` refer to a **multi-agent harness instance**, not the product name and not a single agent. Env vars `HARNESS_ROOT`, `HARNESS_LOG_LEVEL` keep the domain prefix. **`HARNESS_ROOT=deploy`** ✅ (E5-S04, 2026-07-28) forces production root for serve/mcp/acp via `config/harness_root.py`.
+**Domain terms:** `harness.yaml`, `usr-harnesses/`, `deploy/` refer to a **multi-agent harness instance**, not the product name and not a single agent. Env vars `HARNESS_ROOT`, `HARNESS_LOG_LEVEL` keep the domain prefix. **`HARNESS_ROOT=deploy`** ✅ (E5-S04, 2026-07-28) forces production root for serve/mcp/acp/a2a via `config/harness_root.py`.
 
 ### 3.3 Harness folder layout
 
@@ -194,11 +194,12 @@ user-docs/
 │   ├── web-deployment.md         # Chainlit /chat (E7-S04); Open WebUI / SPA / Next.js + baseURL (E7-S08)
 │   ├── production-auth.md        # Traefik proxy-only TLS + ForwardAuth (E8-S02); Nginx/Caddy alternatives
 │   ├── acp.md                    # zaumzeug acp stdio JSON-RPC for Zed / JetBrains (E7-S05); MCP --deploy pointer (E7-S06)
+│   ├── a2a.md                    # optional zaumzeug a2a agent card (E8-S04); ≠ MCP/ACP
 │   └── testing.md                # unit, integration, eval; mock profile; CI tiers; mcp --deploy (E7-S06)
 └── reference/cli.md
 ```
 
-Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [project-setup.md](../../user-docs/getting-started/project-setup.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [compile.md](../../user-docs/guides/compile.md), [deploy.md](../../user-docs/guides/deploy.md), [custom-tools.md](../../user-docs/guides/custom-tools.md), [pipelines.md](../../user-docs/guides/pipelines.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md), [web-deployment.md](../../user-docs/guides/web-deployment.md), [production-auth.md](../../user-docs/guides/production-auth.md), [acp.md](../../user-docs/guides/acp.md), [testing.md](../../user-docs/guides/testing.md).
+Install copies this tree from `install/templates/user-docs/` ([§3.4](02-repository-and-layout.md#34-install-scripts-dev-vs-target)). End-user guides: [installation.md](../../user-docs/getting-started/installation.md), [project-setup.md](../../user-docs/getting-started/project-setup.md), [first-harness.md](../../user-docs/getting-started/first-harness.md), [multi-agent-workflow.md](../../user-docs/guides/multi-agent-workflow.md), [compile.md](../../user-docs/guides/compile.md), [deploy.md](../../user-docs/guides/deploy.md), [custom-tools.md](../../user-docs/guides/custom-tools.md), [pipelines.md](../../user-docs/guides/pipelines.md), [cursor-mcp.md](../../user-docs/guides/cursor-mcp.md), [web-deployment.md](../../user-docs/guides/web-deployment.md), [production-auth.md](../../user-docs/guides/production-auth.md), [acp.md](../../user-docs/guides/acp.md), [a2a.md](../../user-docs/guides/a2a.md), [testing.md](../../user-docs/guides/testing.md).
 
 **Implementation (E1-S03, 2026-07-22):** Install copies `install/templates/user-docs/` into project `user-docs/` (copy-if-missing). Content completeness (installation prerequisites / troubleshooting) → [E1-S05](../stories/epic-stories/22-story.md).
 
@@ -215,6 +216,8 @@ Install copies this tree from `install/templates/user-docs/` ([§3.4](02-reposit
 **Implementation (E7-S08, 2026-08-21):** Same guide expanded — Open WebUI two-container, SPA + Nginx, Next.js co-located; OpenAI `baseURL` at the harness (`http://127.0.0.1:1416/v1`), not `api.openai.com`. Tests: `tests/unit/docs/test_web_deployment.py`. Open #2 remains open.
 
 **Implementation (E7-S05, 2026-08-21):** [user-docs/guides/acp.md](../../user-docs/guides/acp.md) — `zaumzeug acp` Agent Client Protocol stdio JSON-RPC; Zed `agent_servers` and JetBrains `~/.jetbrains/acp.json` snippets; ACP ≠ IBM A2A; Cursor uses MCP. Tests: `tests/integration/acp/test_acp_stdio.py`.
+
+**Implementation (E8-S04, 2026-08-26):** [user-docs/guides/a2a.md](../../user-docs/guides/a2a.md) — optional `serve.a2a: true` + `zaumzeug a2a`; agent card at `/{harness}/.well-known/agent-card.json` (default **1418**; needs `hayhooks[a2a]`); separate from MCP/ACP; one harness per process (NG1). Tests: `tests/integration/a2a/`.
 
 **Implementation (E7-S07, 2026-08-21):** Phase 3 builtin catalog — `calculator` and `read_file` (`runtime/tools/`); `search_docs` shipped in [E8-S01](../stories/epic-stories/58-story.md). User guide: [custom-tools.md](../../user-docs/guides/custom-tools.md#builtin-catalog). Tests: `tests/unit/runtime/tools/test_extended_builtins.py`, `tests/unit/runtime/tools/test_read_file.py`.
 

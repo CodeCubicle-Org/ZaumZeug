@@ -95,5 +95,6 @@ Walk this once after install (mock model is enough):
 - [Production auth](production-auth.md) — Traefik proxy-only TLS + ForwardAuth in front of `{mcp_port}/mcp`
 - [Installation](../getting-started/installation.md) — `--cursor-mcp` flag
 - [ACP (Zed / JetBrains)](acp.md) — Agent Client Protocol for IDEs that drive the harness (Cursor uses MCP, not ACP)
+- [A2A (agent fleets)](a2a.md) — optional agent-to-agent card hosting (≠ MCP)
 - [Web deployment](web-deployment.md) — Chainlit / Open WebUI / SPA / Next.js against OpenAI REST
 - [Cursor MCP docs](https://cursor.com/docs/mcp)

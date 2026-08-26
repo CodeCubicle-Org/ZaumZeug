@@ -7,7 +7,7 @@
 
 Connect Zed or JetBrains to a ZaumZeug harness so the **IDE drives the harness as the primary agent** over stdio JSON-RPC.
 
-This is the **Agent Client Protocol** used by Zed and JetBrains ([agentclientprotocol.com](https://agentclientprotocol.com/)). It is **not** IBM Agent Communication Protocol (that work merged into **A2A**, which ZaumZeug does not implement in v1).
+This is the **Agent Client Protocol** used by Zed and JetBrains ([agentclientprotocol.com](https://agentclientprotocol.com/)). It is **not** IBM Agent Communication Protocol (that work merged into **A2A**). ZaumZeug optional A2A hosting is a separate surface — see [A2A](a2a.md).
 
 ## Cursor limitation
 
@@ -89,5 +89,6 @@ tools:
 
 - [CLI — acp](../reference/cli.md#zaumzeug-acp)
 - [Cursor MCP setup](cursor-mcp.md) — Cursor path (MCP, not ACP)
+- [A2A (agent fleets)](a2a.md) — optional agent-to-agent card hosting (≠ ACP)
 - [Web deployment](web-deployment.md) — Chainlit / Open WebUI / SPA / Next.js against OpenAI REST
 - [Agent Client Protocol](https://agentclientprotocol.com/)

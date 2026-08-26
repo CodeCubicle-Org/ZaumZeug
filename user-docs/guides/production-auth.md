@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | **Audience** | Ops / platform |
-| **Last updated** | 2026-08-21 |
+| **Last updated** | 2026-08-26 (E8-S04 A2A port note) |
 
-Hayhooks (`zaumzeug serve` / `zaumzeug mcp`) has **no built-in auth in v1**. There is no `serve.auth` key. Production protection lives at the **edge**: terminate TLS and check credentials **before** traffic reaches the harness process.
+Hayhooks (`zaumzeug serve` / `zaumzeug mcp` / optional `zaumzeug a2a`) has **no built-in auth in v1**. There is no `serve.auth` key. Production protection lives at the **edge**: terminate TLS and check credentials **before** traffic reaches the harness process.
 
 **Reference pattern: Traefik.** Nginx and Caddy are documented below as the same proxy-only idea.
 
@@ -15,9 +15,10 @@ Internet  →  Traefik :443  (TLS + auth middleware)
                  ▼
          127.0.0.1:1416   zaumzeug serve   REST /v1  ·  /chat  ·  /docs
          127.0.0.1:1417   zaumzeug mcp     /mcp
+         127.0.0.1:1418   zaumzeug a2a     /{harness}/.well-known/agent-card.json  (optional)
 ```
 
-Keep serve/mcp bound to **localhost** (or a Docker internal network). Do not publish 1416/1417 on the public internet.
+Keep serve/mcp/a2a bound to **localhost** (or a Docker internal network). Do not publish 1416/1417/1418 on the public internet.
 
 Credentials live in **Traefik host env** (systemd `EnvironmentFile`, Docker secret, or a ForwardAuth sidecar). Never put API keys, bearer tokens, or htpasswd hashes in `harness.yaml`, Traefik snippets inside `deploy/<name>/`, or git.
 
@@ -37,6 +38,8 @@ Same OpenAI REST, MCP, and Chainlit surfaces as local serve. Traefik matches **p
 | `GET /chat` | `http://127.0.0.1:1416/chat` | `zaumzeug serve` | Chainlit — only if `serve.hayhooks.chainlit: true` |
 | `POST /mcp` | `http://127.0.0.1:1417/mcp` | `zaumzeug mcp` | Streamable HTTP MCP |
 | `GET /status` | `http://127.0.0.1:1417/status` | `zaumzeug mcp` | MCP health |
+| `GET /{harness}/.well-known/agent-card.json` | `http://127.0.0.1:1418/…` | `zaumzeug a2a` | Optional A2A — only when `serve.a2a: true` ([A2A](a2a.md)) |
+| `POST /{harness}/` | `http://127.0.0.1:1418/…` | `zaumzeug a2a` | Optional A2A JSON-RPC |
 
 Ports come from `serve.hayhooks.port` (default **1416**) and `serve.hayhooks.mcp_port` (default **1417**). Replace `harness.example.com` with your public hostname.
 

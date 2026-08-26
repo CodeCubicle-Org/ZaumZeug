@@ -5,8 +5,8 @@
 | **Document** | Epic E8 user stories |
 | **File** | `docs/stories/08-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-26 (E8-S03 trace → dataset ratchet) |
-| **Status** | Active (E8-S07 / E8-S01 / E8-S02 / E8-S03 Done) |
+| **Last modified** | 2026-08-26 (E8-S04 optional A2A agent card) |
+| **Status** | Active (E8-S07 / E8-S01 / E8-S02 / E8-S03 / E8-S04 Done) |
 | **Build order** | **8 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -21,7 +21,7 @@
 | **PRD** | [Epic E8](../prd.md#epic-e8--rag-and-production-hardening-phase-4) |
 | **Architecture** | [§6.2 pipelines](../architecture/05-configuration.md#62-config-sections) · [§10.1 deploy copy](../architecture/07-deploy-packaging.md#101-dev-vs-deploy) · [§12 Pattern B](../architecture/08-compile-and-optimization.md#pattern-b-optimize-anything-deferred-phase-4) · [§13.5 Phase 4](../architecture/10-operations-and-reference.md#135-phase-mapping) |
 | **Journey** | [Journey C](../prd.md#73-journey-c--improve-after-failure-phase-2) |
-| **Open decisions** | [#5 A2A](../prd.md#12-open-decisions-blockers-for-some-stories) |
+| **Open decisions** | *(none for E8 — open #5 A2A resolved 2026-08-26)* |
 
 ### Story implementation order (within this epic)
 
@@ -29,9 +29,9 @@
 2. **E8-S01** — Pipeline exposure / RAG ✅ *(2026-08-21)*
 3. **E8-S02** — Production auth ✅ *(2026-08-21; Traefik proxy-only)*
 4. **E8-S03** — Trace → dataset ratchet ✅ *(2026-08-26)*
-5. **E8-S05** — Dockerfile template
-6. **E8-S06** — DeepEval observe
-7. **E8-S04** — A2A *(if open #5 resolves to Phase 4)*
+5. **E8-S04** — Optional A2A agent card ✅ *(2026-08-26; open #5 ship Phase 4)*
+6. **E8-S05** — Dockerfile template
+7. **E8-S06** — DeepEval observe
 
 *(E4-S04 Pattern B evaluator ✅ 2026-07-28 — no longer queued under E8.)*
 *(E8-S07 added 2026-08-01 from adoption evaluation — run-path retry, typed live errors, INFO logs with structured `stage`, `output.format: json` only, doctor fail on phase-gated MCP in default + `--deploy`, docs AC-6. No OTel / no JSON Schema / serve path follow-up.)*
@@ -231,7 +231,8 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 |---|---|
 | **Feature** | E8.4 |
 | **Persona** | Client integrator |
-| **Priority** | P3 (defer per open #5) |
+| **Priority** | P3 |
+| **Status** | Done (2026-08-26) |
 
 ### User story
 
@@ -241,31 +242,44 @@ As an **integrator building agent fleets**, I want optional A2A hosting, so that
 
 - [PRD E8.4](../prd.md#epic-e8--rag-and-production-hardening-phase-4)
 - [Architecture §9.1 — A2A row](../architecture/06-runtime-and-protocols.md#91-protocol-selection)
-- [PRD open #5](../prd.md#12-open-decisions-blockers-for-some-stories)
+- [PRD open #5](../prd.md#12-open-decisions-blockers-for-some-stories) — **Resolved: ship Phase 4** (2026-08-26)
 
 ### Blocker
 
-- [ ] Resolve A2A in Phase 4 vs defer before implementation
+- [x] Resolve A2A in Phase 4 vs defer before implementation — **ship Phase 4** (open #5, 2026-08-26)
 
-### Acceptance criteria (when prioritized)
+### Acceptance criteria
 
-- [ ] **AC-1** `serve.a2a: true` hosts agent card endpoint
-- [ ] **AC-2** Documented separately from MCP and ACP
-- [ ] **AC-3** Does not conflict with NG1 multi-tenant scope
+- [x] **AC-1** `serve.a2a: true` hosts agent card endpoint
+- [x] **AC-2** Documented separately from MCP and ACP
+- [x] **AC-3** Does not conflict with NG1 multi-tenant scope
 
-### Implementation tasks (when unblocked)
+### Implementation tasks (build)
 
-- [ ] Evaluate Haystack/A2A integration path
-- [ ] Add config schema and serve registration
-- [ ] Document agent fleet layout
+- [x] Evaluate Haystack/A2A integration path — Hayhooks `hayhooks[a2a]` / `create_a2a_app`
+- [x] Add config schema and serve registration — `A2aConfig`, `zaumzeug a2a`
+- [x] Document agent fleet layout — [a2a.md](../../user-docs/guides/a2a.md)
 
-### Verification (when unblocked)
+### Verification (after build)
 
 Apply [Story verification](00-README.md#story-verification-required). `tests/integration/a2a/` with AC-1–AC-3 mapping.
 
+| AC | Test |
+|---|---|
+| AC-1 | `tests/integration/a2a/test_a2a_agent_card.py::test_e8_s04_ac1_serve_a2a_hosts_agent_card` |
+| AC-2 | `tests/integration/a2a/test_a2a_agent_card.py::test_e8_s04_ac2_documented_separately_from_mcp_and_acp` |
+| AC-3 | `tests/integration/a2a/test_a2a_agent_card.py::test_e8_s04_ac3_does_not_conflict_with_ng1` |
+
 ### Definition of done
 
-- [ ] Explicit phase gate in PRD updated when shipped or deferred
+- [x] Explicit phase gate in PRD updated when shipped or deferred — open #5 resolved; E8.4 Done
+
+### Implementation notes (2026-08-26)
+
+- Config: `serve.a2a: true` or `{enabled, port}` (default **1418**); `A2aConfig` unblocked from `PHASE_GATED_FIELDS`.
+- CLI: `zaumzeug a2a <name>` → Hayhooks `create_a2a_app`; agent card `/{harness}/.well-known/agent-card.json`. Requires `pip install "hayhooks[a2a]"`.
+- Docs: [a2a.md](../../user-docs/guides/a2a.md); PRD open #5 resolved ship Phase 4; NG1 unchanged.
+- Tests: `tests/integration/a2a/test_a2a_agent_card.py`.
 
 ---
 

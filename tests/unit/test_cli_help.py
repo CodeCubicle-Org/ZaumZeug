@@ -20,6 +20,7 @@ REQUIRED_SUBCOMMANDS = (
     "eval",
     "mcp",
     "acp",
+    "a2a",
 )
 
 

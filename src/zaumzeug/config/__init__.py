@@ -47,6 +47,7 @@ from zaumzeug.config.constants import BUILTIN_CATALOG_PHASE
 from zaumzeug.config.schemas import (
     CURRENT_SDK_PHASE,
     PHASE_GATED_FIELDS,
+    A2aConfig,
     AcpConfig,
     AgentConfig,
     AgentOutputConfig,
@@ -81,6 +82,7 @@ __all__ = [
     "HARNESS_ROOT_ENV",
     "PHASE_GATED_FIELDS",
     "PROTOCOL_ROOT_COMMANDS",
+    "A2aConfig",
     "AcpConfig",
     "AgentConfig",
     "AgentModelsConfig",

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | New developers |
-| **Last updated** | 2026-08-26 (E8-S03 production trace → dataset ratchet) |
+| **Last updated** | 2026-08-26 (E8-S04 optional A2A) |
 
 Get from a fresh clone to a working ZaumZeug dev environment with one command. This page is the full walkthrough (prerequisites, effort, disk, extras, updates, troubleshooting). The short new-contributor summary is [CONTRIBUTING.md](../../CONTRIBUTING.md); it links here for depth.
 
@@ -126,7 +126,7 @@ HARNESS_ROOT=deploy zaumzeug serve <name>
 HARNESS_ROOT=deploy zaumzeug mcp <name>
 ```
 
-(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required. `zaumzeug mcp <name> --deploy` is **Done** E7-S06 — same MCP surface as dev. `HARNESS_ROOT=deploy` is **Done** E5-S04 — env equivalent for serve/mcp/acp. Ship docs **Done** E5-S05. Deploy git policy **Done** E5-S07 — see [Deploy and ship — Git policy](../guides/deploy.md#git-policy-for-deploy-bundles). Platform policy **Done** E5-S08 — Linux-first production; OS-neutral bundle; Linux CI `deploy` → `serve --deploy` smoke — see [Platforms](../guides/deploy.md#platforms).)
+(`--deploy` is **Done** E5-S03 — same OpenAI REST as local serve; `usr-harnesses/` is not required. `zaumzeug mcp <name> --deploy` is **Done** E7-S06 — same MCP surface as dev. `HARNESS_ROOT=deploy` is **Done** E5-S04 — env equivalent for serve/mcp/acp/a2a. Optional A2A **Done** E8-S04 — `serve.a2a: true` + `zaumzeug a2a` ([A2A](../guides/a2a.md)). Ship docs **Done** E5-S05. Deploy git policy **Done** E5-S07 — see [Deploy and ship — Git policy](../guides/deploy.md#git-policy-for-deploy-bundles). Platform policy **Done** E5-S08 — Linux-first production; OS-neutral bundle; Linux CI `deploy` → `serve --deploy` smoke — see [Platforms](../guides/deploy.md#platforms).)
 
 ---
 
@@ -142,6 +142,7 @@ Not required to start a harness with the mock profile.
 | **MCP serve** | included (`mcp`, `mcp-haystack`) | `zaumzeug mcp` serves `{host}:{mcp_port}/mcp` (default **1417**). Production: `zaumzeug mcp <name> --deploy` (or `HARNESS_ROOT=deploy`) — same surface, `deploy/<name>/` only. `uv` is needed only for stdio `tools.mcp` servers (`zaumzeug doctor` warns if missing). Cursor live `mcp.json` write is opt-in (`--cursor-mcp`). See [Cursor MCP setup](../guides/cursor-mcp.md), [Deploy and ship](../guides/deploy.md), and [CLI — mcp](../reference/cli.md#zaumzeug-mcp). |
 | **ACP adapter** | included | `zaumzeug acp` speaks Agent Client Protocol JSON-RPC on stdio for Zed / JetBrains. Not IBM ACP/A2A. Cursor uses MCP. See [ACP (Zed / JetBrains)](../guides/acp.md) and [CLI — acp](../reference/cli.md#zaumzeug-acp). |
 | **Chainlit UI** | `pip install "hayhooks[chainlit]"` | Optional embedded GUI at `/chat` on the same port as REST. Set `serve.hayhooks.chainlit: true` then `zaumzeug serve`. Missing extra fails serve with this install hint. **Not** the resolved primary web UI — Open WebUI two-container, SPA + Nginx, and Next.js recipes are in [Web deployment](../guides/web-deployment.md) (E7-S08). Client `baseURL` is the harness (`http://127.0.0.1:1416/v1`), not `api.openai.com`. |
+| **A2A agent card** | `pip install "hayhooks[a2a]"` | Optional agent-to-agent hosting. Set `serve.a2a: true` then `zaumzeug a2a`. Agent card at `/{harness}/.well-known/agent-card.json` (default port **1418**). Separate from MCP and ACP. One harness per process (NG1 unchanged). See [A2A](../guides/a2a.md) and [CLI — a2a](../reference/cli.md#zaumzeug-a2a). |
 
 ---
 
@@ -155,7 +156,7 @@ There is **no `zaumzeug update-deps` command in v1**. Updates stay **pip-based**
 |---|---|
 | **After `git pull`** (SDK repo clone) | Re-run the same client install command (idempotent); then `zaumzeug doctor` or install with `--verify` |
 | **Refresh SDK + `[dev]` stack manually** | Activate `.venv`, then `pip install -e ".[dev]"`, then `zaumzeug doctor` |
-| **Update optional extras** | `pip install -U "zaumzeug[eval]"`, provider packages, or `hayhooks[chainlit]` as needed |
+| **Update optional extras** | `pip install -U "zaumzeug[eval]"`, provider packages, `hayhooks[chainlit]`, or `hayhooks[a2a]` as needed |
 | **Production server** | Ship a new `deploy/<name>/` bundle → re-run bundled `target_install` (idempotent); do **not** `pip upgrade` ad hoc on the server |
 | **PyPI consumer project** (deferred until package publish — [E1-S08](../../docs/stories/epic-stories/25-story.md)) | `pip install -U zaumzeug` then `zaumzeug install-project` (optionally pin `zaumzeug==x.y.z`) |
 
@@ -210,5 +211,6 @@ Still stuck? Run `zaumzeug doctor` / `zaumzeug serve example --dry-run` and chec
 - Run the shipped example — [Your first harness](first-harness.md)
 - Add another harness — [Project setup](project-setup.md) (`zaumzeug init <name>`)
 - Connect Zed or JetBrains — [ACP (Zed / JetBrains)](../guides/acp.md)
+- Optional agent fleets — [A2A](../guides/a2a.md)
 - Testing with the mock profile — [Testing](../guides/testing.md)
 - CLI reference — [cli.md](../reference/cli.md)

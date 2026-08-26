@@ -159,6 +159,7 @@ zaumzeug mcp <harness>                # Serve MCP at http://127.0.0.1:{mcp_port}
 zaumzeug mcp <harness> --deploy       # Same MCP surface from deploy/<name>/ (E7-S06)
 # Cursor: .cursor/mcp.json → that URL (install --cursor-mcp or copy the example; E7-S03)
 zaumzeug acp <harness>                # Agent Client Protocol stdio JSON-RPC (E7-S05; Zed / JetBrains)
+zaumzeug a2a <harness>                # Optional A2A agent card (E8-S04; needs serve.a2a: true + hayhooks[a2a])
 ```
 
 ---
@@ -184,7 +185,7 @@ zaumzeug acp <harness>                # Agent Client Protocol stdio JSON-RPC (E7
 | [Product Requirements (PRD)](docs/prd.md) | Goals, personas, epics, acceptance criteria, phases |
 | [Architecture](docs/architecture.md) | Technical design — stack, data flows, config, deploy |
 | [Epic stories](docs/stories/00-README.md) | Implementation backlog broken into epics and stories |
-| [User guides](user-docs/README.md) | How to build and run harnesses — install, workflow, compile, [deploy/ship](user-docs/guides/deploy.md), [production auth](user-docs/guides/production-auth.md), [ACP](user-docs/guides/acp.md), testing |
+| [User guides](user-docs/README.md) | How to build and run harnesses — install, workflow, compile, [deploy/ship](user-docs/guides/deploy.md), [production auth](user-docs/guides/production-auth.md), [ACP](user-docs/guides/acp.md), [A2A](user-docs/guides/a2a.md), testing |
 | [Dependencies](dependencies.md) | External tools, libraries, and protocols |
 | [Competitive landscape](docs/competitive-landscape.md) | How ZaumZeug compares to other harness SDKs |
 
@@ -194,7 +195,7 @@ zaumzeug acp <harness>                # Agent Client Protocol stdio JSON-RPC (E7
 
 - **Harness developers** — Scaffold a harness, configure models and tools, compile, deploy
 - **SDK maintainers** — Extend the framework, examples, CI, and docs; deploy git policy (ignore vs release commit vs CI artifact) in [CONTRIBUTING.md](CONTRIBUTING.md#deploy-git-policy-maintainers)
-- **Ops / platform** — Copy `deploy/<name>/` → `target_install` → `.env` → `zaumzeug serve --deploy` or `zaumzeug mcp --deploy` (or `HARNESS_ROOT=deploy`). Put Traefik in front for TLS + auth ([Production auth](user-docs/guides/production-auth.md)). Linux-first production (VM / bare metal / Docker/K8s); Win/macOS best-effort. Full guide: [Deploy and ship](user-docs/guides/deploy.md).
+- **Ops / platform** — Copy `deploy/<name>/` → `target_install` → `.env` → `zaumzeug serve --deploy` or `zaumzeug mcp --deploy` or `zaumzeug a2a --deploy` (or `HARNESS_ROOT=deploy`). Put Traefik in front for TLS + auth ([Production auth](user-docs/guides/production-auth.md)). Linux-first production (VM / bare metal / Docker/K8s); Win/macOS best-effort. Full guide: [Deploy and ship](user-docs/guides/deploy.md).
 - **Client integrators** — Call a harness via REST, MCP, or ACP from an app or IDE
 
 ---

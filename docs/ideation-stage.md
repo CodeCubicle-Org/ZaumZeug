@@ -1332,7 +1332,7 @@ MCP is the best fit for **one specific role**: exposing your harness as **tools*
 | **MCP** | Agent ↔ tools | Host calls your harness as tools | Capability plugin inside another agent | Yes (primary) | Rare | Agent uses MCP internally |
 | **ACP** (Agent Client Protocol) | Editor ↔ agent | IDE drives your harness as the agent | Full agent UX: streaming, diffs, permissions | Limited¹ | No | Yes (native) |
 | **OpenAI-compatible REST** | App ↔ service | HTTP chat completions | Custom web apps, Chainlit, Open WebUI | No | Yes (primary) | No |
-| **A2A** | Agent ↔ agent | Orchestrator delegates tasks | Multi-agent fleets, cross-vendor delegation | Future | Via gateway | Via gateway |
+| **A2A** | Agent ↔ agent | Orchestrator delegates tasks | Multi-agent fleets, cross-vendor delegation | Optional ✅ (E8-S04) | Via gateway | Via gateway |
 | **Direct REST** | App ↔ service | Typed `POST /run` | Batch jobs, webhooks, structured I/O | No | Yes | No |
 
 ¹ Cursor is primarily an **ACP agent** (`agent acp`) for *other* editors to connect to — not a generic ACP client to arbitrary third-party agents. For Cursor today, **MCP is the practical integration path** for an external harness.
@@ -1986,7 +1986,7 @@ Model choice lives in **config** (`models.yaml`), not in source code.
 10. ~~**Install entrypoint**~~ — **Resolved (2026-07-22):** both — repo `install/client_install.py` for SDK clones (Phase 1–4 v1); `zaumzeug install-project` for PyPI consumers after publish (deferred with package creation — [E1-S08](stories/epic-stories/25-story.md)).
 11. **Production auth** — API keys on Hayhooks, OAuth reverse proxy, MCP gateway, or VPN-only?
 12. **MCP granularity** — one tool per harness agent, or granular tools per pipeline?
-13. **A2A exposure** — needed for agent-fleet delegation in Phase 4, or defer?
+13. **A2A exposure** — **Resolved ship Phase 4** (E8-S04, 2026-08-26): `serve.a2a: true` + `zaumzeug a2a`.
 14. **Multi-tenant serving** — **out of scope v1** (one process per harness); revisit post-Phase 3 — see PRD NG1 and [architecture.md §8.3](architecture/06-runtime-and-protocols.md#83-multi-harness-serving).
 
 **Resolved in this doc (no longer open):** Cursor → MCP (Phase 3); Zed/JetBrains → ACP (Phase 3); web → OpenAI-compatible REST; compile/runtime split; `models.yaml` merge rules; runtime artifact precedence; **`usr-harnesses/` dev vs `deploy/` production bundles**; **`target_install.py` for target-machine runtime deps**; **Python 3.11+ required for SDK**; **YAML for config**; clients may use any language via HTTP/MCP; **DeepEval optional** for dev-time eval/monitor (GEPA for optimize; not required to use the SDK).

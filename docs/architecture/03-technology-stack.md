@@ -16,7 +16,7 @@
 | [GEPA](https://github.com/gepa-ai/gepa) | Optimization | `gepa` | `dspy.GEPA`, `optimize_anything` — offline |
 | [DeepEval](https://github.com/confident-ai/deepeval) | Dev eval (optional) | `deepeval` via `[eval]` extra ✅ (E6-S01); `zaumzeug eval` ✅ (E6-S02); deploy gate ✅ (E6-S03 / E5-S06); `eval/` pytest scaffold ✅ (E6-S04); trace → test case ✅ (E6-S05); Mode C HTTP `--base-url` ✅ (E6-S06); GEPA ↔ DeepEval bridge ✅ (E6-S07) | Regression tests; not required for production serve |
 
-Optional: Hayhooks `[chainlit]` extra for embedded GUI at `/chat` ✅ (E7-S04, 2026-08-21) — **primary MCP serving** is via Hayhooks (`zaumzeug mcp`; production `--deploy` / `HARNESS_ROOT=deploy` ✅ E7-S06). `mcp-haystack` is a **runtime** dependency for `MCPToolset` (E7-S01). **ACP** (`zaumzeug acp`) is stdio JSON-RPC in `serve/acp.py` ✅ (E7-S05, 2026-08-21) — no extra package.
+Optional: Hayhooks `[chainlit]` extra for embedded GUI at `/chat` ✅ (E7-S04, 2026-08-21) — **primary MCP serving** is via Hayhooks (`zaumzeug mcp`; production `--deploy` / `HARNESS_ROOT=deploy` ✅ E7-S06). `mcp-haystack` is a **runtime** dependency for `MCPToolset` (E7-S01). **ACP** (`zaumzeug acp`) is stdio JSON-RPC in `serve/acp.py` ✅ (E7-S05, 2026-08-21) — no extra package. **A2A** (`zaumzeug a2a`) needs `hayhooks[a2a]` ✅ (E8-S04, 2026-08-26).
 
 ### 4.2 Library boundaries (when to use what)
 
@@ -77,6 +77,8 @@ Canonical package layout. Root `pyproject.toml` exists as of E2-S00 (2026-07-08)
 **Implementation (E7-S08, 2026-08-21):** Open WebUI, SPA + Nginx, and Next.js are documented peers of Chainlit (no extra packages). Clients use the harness OpenAI `baseURL`. Docs: [web-deployment.md](../../user-docs/guides/web-deployment.md). Tests: `tests/unit/docs/test_web_deployment.py`.
 
 **Implementation (E7-S05, 2026-08-21):** `zaumzeug acp` is in-process Agent Client Protocol JSON-RPC on stdio — not a Hayhooks extra and not IBM ACP/A2A. Docs: [acp.md](../user-docs/guides/acp.md). Tests: `tests/integration/acp/test_acp_stdio.py`.
+
+**Implementation (E8-S04, 2026-08-26):** Optional A2A agent card — `serve.a2a: true` + `zaumzeug a2a` via Hayhooks `create_a2a_app` (needs `pip install "hayhooks[a2a]"`). Docs: [a2a.md](../user-docs/guides/a2a.md). Tests: `tests/integration/a2a/`.
 
 **Implementation (E7-S06, 2026-08-21):** Production MCP uses the same Hayhooks MCP extra — `zaumzeug mcp --deploy` / `HARNESS_ROOT=deploy`. Tests: `tests/integration/mcp/test_mcp_deploy.py`.
 

@@ -399,6 +399,7 @@ Production: same host or sidecar; `zaumzeug serve --deploy` / `HARNESS_ROOT=depl
 - [CLI — serve](../reference/cli.md#zaumzeug-serve) — OpenAI REST, `GET /v1/models`, optional `/chat`, `/docs`
 - [CLI — mcp](../reference/cli.md#zaumzeug-mcp) — Cursor / Claude Desktop
 - [ACP (Zed / JetBrains)](acp.md) — `zaumzeug acp` stdio JSON-RPC; not IBM ACP/A2A; Cursor uses MCP
+- [A2A (agent fleets)](a2a.md) — optional agent-to-agent card hosting (≠ MCP/ACP)
 - [Deploy and ship](deploy.md) — production `--deploy` / `HARNESS_ROOT=deploy`
 - [Production auth](production-auth.md) — Traefik proxy-only TLS + bearer/ForwardAuth (Hayhooks has no built-in auth in v1)
 - [Architecture §9.4](../../docs/architecture/06-runtime-and-protocols.md#94-web-deployment-layouts)

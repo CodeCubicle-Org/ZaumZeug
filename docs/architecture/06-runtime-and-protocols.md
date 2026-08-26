@@ -19,7 +19,7 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 **Implementation (E5-S03, 2026-07-28):** Full Hayhooks `zaumzeug serve <name> --deploy` loads only `deploy/<name>/` (same OpenAI REST as dev serve), fails on missing folder or invalid `manifest.json`, and works without `usr-harnesses/`. Tests: `tests/integration/deploy/test_serve_deploy.py` (`e5_s03`).
 
-**Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` is the env equivalent of `--deploy` for serve / mcp / acp (and doctor / run). Canonical API: `resolve_harness_path()` in `config/harness_root.py`. Docs: `README.deploy.md`, CLI reference. Tests: `tests/unit/deploy/test_harness_root.py` (`e5_s04`).
+**Implementation (E5-S04, 2026-07-28):** `HARNESS_ROOT=deploy` is the env equivalent of `--deploy` for serve / mcp / acp / a2a (and doctor / run). Canonical API: `resolve_harness_path()` in `config/harness_root.py`. Docs: `README.deploy.md`, CLI reference. Tests: `tests/unit/deploy/test_harness_root.py` (`e5_s04`).
 
 **Implementation (E5-S05, 2026-07-28):** Ops ship path (copy → `target_install` → `.env` → serve) documented in `README.deploy.md` and [user-docs/guides/deploy.md](../../user-docs/guides/deploy.md). Tests: `tests/integration/deploy/test_target_install.py`.
 
@@ -55,7 +55,7 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 
 ### 8.2 `harness` vs raw `hayhooks`
 
-**Canonical:** `zaumzeug serve|mcp|acp|run`. SDK loads config, builds agents from `agents/<name>/`, invokes **self-hosted Hayhooks** for serve paths.
+**Canonical:** `zaumzeug serve|mcp|acp|a2a|run`. SDK loads config, builds agents from `agents/<name>/`, invokes **self-hosted Hayhooks** for serve paths.
 
 | Command | Behavior |
 |---|---|
@@ -63,8 +63,9 @@ Command list and epic mapping: **[PRD §9](../prd.md#9-cli-surface-epic-mapping)
 | `zaumzeug install-project` | **Deferred** — PyPI consumer scaffold (no editable install); after package publish ([E1-S08](../stories/epic-stories/25-story.md)) |
 | `zaumzeug mcp <harness>` | Hayhooks MCP Streamable HTTP on `serve.hayhooks.mcp_port` (default **1417**) — `{host}:{mcp_port}/mcp` ✅ (E7-S01); `--deploy` / `HARNESS_ROOT=deploy` same as serve ✅ (E7-S06) |
 | `zaumzeug acp <harness>` | Agent Client Protocol newline-delimited JSON-RPC on **stdio** (`serve/acp.py`); logs on stderr; `--deploy` / `HARNESS_ROOT=deploy` same as serve ✅ (E7-S05) |
+| `zaumzeug a2a <harness>` | Optional A2A agent card (`serve.a2a: true`); default port **1418**; needs `hayhooks[a2a]` ✅ (E8-S04) |
 | `zaumzeug serve <harness> --deploy` | Same OpenAI REST as dev serve, loads **only** `deploy/<name>/` (manifest required; no `usr-harnesses/`) ([E5-S03](../stories/epic-stories/43-story.md)) |
-| `HARNESS_ROOT=deploy` | Env equivalent of `--deploy` for serve / mcp / acp (and doctor / run); preferred in containers / systemd ([E5-S04](../stories/epic-stories/44-story.md)) |
+| `HARNESS_ROOT=deploy` | Env equivalent of `--deploy` for serve / mcp / acp / a2a (and doctor / run); preferred in containers / systemd ([E5-S04](../stories/epic-stories/44-story.md)) |
 | `zaumzeug serve <harness> --dry-run` | Validate `harness.yaml`, `workflow.yaml`, and resolved paths; print summary — no Hayhooks bind, no LLM ([E2-S05](../stories/epic-stories/06-story.md), [E2-S07](../stories/epic-stories/08-story.md)); combine with `--deploy` for production bundles |
 | `zaumzeug serve <harness> --verbose` | Enable SDK + Haystack debug logging ([E2-S06](../stories/epic-stories/07-story.md)); equivalent to `HARNESS_LOG_LEVEL=DEBUG` |
 | `zaumzeug compile <harness> --verbose` | Same structured logging for compile path ([E2-S06](../stories/epic-stories/07-story.md)) |
@@ -98,7 +99,7 @@ Product context: [PRD §5, §7](../prd.md#5-users-and-personas). Web UI choice: 
 | **MCP** | Host calls harness as tools | Capability plugin inside another agent | **Primary** | Rare | Internal tools |
 | **ACP** | IDE drives harness as agent | Full agent UX in editor | Limited¹ | No | **Primary** |
 | **OpenAI REST** | HTTP chat completions | Custom web, Chainlit, Open WebUI | No | **Primary** | No |
-| **A2A** | Agent ↔ agent delegation | Multi-agent fleets | Future | Via gateway | Via gateway |
+| **A2A** | Agent ↔ agent delegation | Multi-agent fleets | Optional ✅ | Via gateway | Via gateway |
 | **Direct REST** | `POST /{pipeline}/run` | Batch, webhooks | No | Yes | No |
 
 ¹ Cursor is primarily an ACP **server** for other editors — practical external harness path today is **MCP**.
@@ -109,7 +110,7 @@ Product context: [PRD §5, §7](../prd.md#5-users-and-personas). Web UI choice: 
 | Cursor, Claude Desktop | MCP | `zaumzeug mcp` (`--deploy` for production) | `{host}:{mcp_port}/mcp` |
 | Zed, JetBrains, Neovim | ACP | `zaumzeug acp` | stdio JSON-RPC |
 | Batch jobs | Direct REST | `zaumzeug serve` | `POST /{pipeline}/run` |
-| Agent fleets (Phase 4) | A2A | `serve.a2a: true` | Agent Card |
+| Agent fleets (Phase 4) | A2A | `zaumzeug a2a` (`serve.a2a: true`) | `/{harness}/.well-known/agent-card.json` |
 
 **Insight:** MCP and ACP sit on different sides — ACP = editor drives your harness; MCP = your harness as tools **or** harness calls external tools.
 
@@ -126,6 +127,8 @@ Use when harness is a **capability** invoked by Cursor's (or another host's) age
 Use when harness **is** the primary agent in Zed/JetBrains/Neovim. Harness may still use MCP internally for its own tools. Limitations: Cursor does not generically adopt third-party ACP agents; more implementation work than MCP expose.
 
 **Implementation (E7-S05, 2026-08-21):** `zaumzeug acp <name>` — Agent Client Protocol stdio JSON-RPC (`serve/acp.py`). Guide: [acp.md](../../user-docs/guides/acp.md) (Zed `agent_servers`, JetBrains `~/.jetbrains/acp.json`, ACP ≠ A2A, Cursor MCP-only). Tests: `tests/integration/acp/test_acp_stdio.py`.
+
+**Implementation (E8-S04, 2026-08-26):** Optional A2A — `serve.a2a: true` (or `{enabled, port}`) + `zaumzeug a2a <name>` hosts Hayhooks agent card at `/{harness}/.well-known/agent-card.json` (default port **1418**; requires `pip install "hayhooks[a2a]"`). Guide: [a2a.md](../../user-docs/guides/a2a.md) (separate from MCP/ACP; one harness per process / NG1). Tests: `tests/integration/a2a/`. PRD open #5 resolved (ship Phase 4).
 
 ### 9.4 Web deployment layouts
 
@@ -167,9 +170,11 @@ flowchart TB
     cursor[Cursor] -->|MCP| mcp_srv[MCP_Server]
     zed[Zed] -->|ACP| acp_srv[ACP_Process]
     web[Web_App] -->|HTTP| rest[REST_API]
+    fleet[Other_Agents] -->|A2A| a2a_srv[A2A_Server]
     mcp_srv --> core[Haystack_Agent]
     acp_srv --> core
     rest --> core
+    a2a_srv --> core
     core -->|MCP client| ext_tools[External_MCP_Tools]
 ```
 

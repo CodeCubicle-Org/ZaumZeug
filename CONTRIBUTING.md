@@ -82,6 +82,7 @@ Not required for mock serve:
 - **MCP in Cursor** — install `--cursor-mcp` writes live `.cursor/mcp.json`; `uv` only if the harness uses stdio `tools.mcp`. Production: `zaumzeug mcp <name> --deploy` (or `HARNESS_ROOT=deploy`). See [Cursor MCP setup](user-docs/guides/cursor-mcp.md).
 - **Builtin tools** — `tools.builtin` on `agent.yaml`: `web_fetch` (Phase 1), `calculator` and `read_file` (Phase 3; `read_file` sandboxed to the harness folder), `search_docs` (Phase 4 — needs a RAG pipeline in `serve.expose`; ✅ E8-S01). See [Custom tools — Builtin catalog](user-docs/guides/custom-tools.md#builtin-catalog) and [Pipelines and RAG](user-docs/guides/pipelines.md).
 - **ACP in Zed / JetBrains** — `zaumzeug acp <harness>` (Agent Client Protocol stdio JSON-RPC; not IBM ACP/A2A). Cursor uses MCP. See [ACP](user-docs/guides/acp.md).
+- **Optional A2A agent fleets** — `serve.a2a: true` + `zaumzeug a2a <harness>` (`pip install "hayhooks[a2a]"`). Agent card at `/{harness}/.well-known/agent-card.json` (default port **1418**). Separate from MCP/ACP; one harness per process. See [A2A](user-docs/guides/a2a.md).
 - **Web UIs** — optional Chainlit (`pip install "hayhooks[chainlit]"` then `serve.hayhooks.chainlit: true` for `/chat`); or Open WebUI two-container / SPA + Nginx / Next.js against the harness OpenAI `baseURL` (`http://127.0.0.1:1416/v1`, not `api.openai.com`). None is a product default. See [Web deployment](user-docs/guides/web-deployment.md).
 
 ---
@@ -136,6 +137,7 @@ Production targets are updated by **redeploying** a `deploy/<name>/` bundle and 
 | Full install / updates / troubleshooting | [user-docs/getting-started/installation.md](user-docs/getting-started/installation.md) |
 | Testing / CI expectations | [user-docs/guides/testing.md](user-docs/guides/testing.md) |
 | ACP in Zed / JetBrains | [user-docs/guides/acp.md](user-docs/guides/acp.md) |
+| Optional A2A agent card | [user-docs/guides/a2a.md](user-docs/guides/a2a.md) |
 | User guides hub | [user-docs/README.md](user-docs/README.md) |
 | Product overview (existing root README) | [README.md](README.md) |
 

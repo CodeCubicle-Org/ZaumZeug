@@ -21,7 +21,7 @@ PHASE_GATED_FIELDS: dict[tuple[str, ...], int] = {
     # ``eval`` unblocked by E6-S02 (``zaumzeug eval``); still Phase 2 in the PRD.
     # ``deploy`` unblocked by E6-S03 / E5-S06 (``deploy.eval_gate``); still Phase 2 in the PRD.
     ("parallelism",): 2,
-    ("serve", "a2a"): 4,
+    # ``serve.a2a`` unblocked by E8-S04 (optional A2A agent card).
     # ``serve.expose`` unblocked by E8-S01 (pipeline YAML → POST /{id}/run).
 }
 
@@ -92,6 +92,20 @@ class AcpConfig(BaseModel):
     enabled: bool = True
 
 
+class A2aConfig(BaseModel):
+    """Optional ``serve.a2a`` block (E8-S04).
+
+    Boolean shorthand ``serve.a2a: true`` coerces to ``enabled: true``.
+    ``zaumzeug a2a <name>`` requires ``enabled: true`` and hosts the Hayhooks
+    A2A agent card on ``port`` (default **1418**).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = False
+    port: int = 1418
+
+
 class ServeExposeEntry(BaseModel):
     """One ``serve.expose`` row — a Haystack YAML pipeline under ``pipelines/``.
 
@@ -140,6 +154,7 @@ class ServeConfig(BaseModel):
 
     hayhooks: HayhooksConfig | None = None
     acp: AcpConfig | None = None
+    a2a: A2aConfig | None = None
     expose: list[ServeExposeEntry] = Field(default_factory=list)
 
     @model_validator(mode="before")
@@ -150,6 +165,14 @@ class ServeConfig(BaseModel):
             path_prefix=("serve",),
             model_name=cls.__name__,
         )
+
+    @field_validator("a2a", mode="before")
+    @classmethod
+    def _coerce_a2a(cls, value: Any) -> Any:
+        """Accept ``serve.a2a: true`` / ``false`` as well as ``{enabled, port}``."""
+        if value is None or isinstance(value, bool):
+            return {"enabled": bool(value)} if value is not None else None
+        return value
 
     @field_validator("expose", mode="before")
     @classmethod

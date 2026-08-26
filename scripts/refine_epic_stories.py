@@ -926,7 +926,7 @@ def build_index() -> str:
         ("58-story.md", "E8-S01", "Pipeline exposure via `serve.expose`", "4", "E8", "08-epic.md"),
         ("59-story.md", "E8-S02", "Production auth", "4", "E8", "08-epic.md"),
         ("60-story.md", "E8-S03", "Trace → dataset ratchet", "4", "E8", "08-epic.md"),
-        ("61-story.md", "E8-S04", "Optional A2A agent card *(deferred)*", "4", "E8", "08-epic.md"),
+        ("61-story.md", "E8-S04", "Optional A2A agent card ✅", "4", "E8", "08-epic.md"),
         ("62-story.md", "E8-S05", "Dockerfile template", "4", "E8", "08-epic.md"),
         ("63-story.md", "E8-S06", "DeepEval production observe (opt-in)", "4", "E8", "08-epic.md"),
     ]

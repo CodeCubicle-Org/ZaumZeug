@@ -84,17 +84,17 @@ def test_e2_s01_ac3_unknown_key_phase_hint(tmp_path: Path) -> None:
     assert "compile" in message
     assert "Phase 2" in message
 
-    # Nested Phase 4 key under serve also gets a phase hint.
+    # Nested Phase 2+ key under a remaining gated path still gets a phase hint.
     nested = dict(PHASE1_MINIMAL)
-    nested["serve"] = {"hayhooks": {"port": 1416}, "a2a": {"enabled": True}}
-    nested_path = _write_yaml(tmp_path / "harness-a2a.yaml", nested)
+    nested["parallelism"] = {"max_workers": 2}
+    nested_path = _write_yaml(tmp_path / "harness-parallel.yaml", nested)
 
     with pytest.raises(ConfigValidationError) as nested_info:
         load_harness(nested_path)
 
     nested_msg = str(nested_info.value)
-    assert "a2a" in nested_msg
-    assert "Phase 4" in nested_msg
+    assert "parallelism" in nested_msg
+    assert "Phase 2" in nested_msg
 
 
 def test_e2_s01_ac4_error_includes_path_and_field(tmp_path: Path) -> None:
@@ -349,6 +349,52 @@ def test_e7_s05_acp_schema_unblocked(tmp_path: Path) -> None:
     assert enabled.serve.acp is not None
     assert isinstance(enabled.serve.acp, AcpConfig)
     assert enabled.serve.acp.enabled is True
+
+
+def test_e8_s04_a2a_schema_unblocked(tmp_path: Path) -> None:
+    """serve.a2a is unblocked (E8-S04); bool shorthand coerces to enabled."""
+    from zaumzeug.config.schemas import A2aConfig
+
+    default_path = _write_yaml(
+        tmp_path / "harness.yaml",
+        {"name": "example", "serve": {"hayhooks": {"port": 1416}}},
+    )
+    default = load_harness(default_path)
+    assert default.serve is not None
+    assert default.serve.a2a is None
+
+    bool_path = _write_yaml(
+        tmp_path / "harness-a2a-bool.yaml",
+        {
+            "name": "example",
+            "serve": {
+                "hayhooks": {"port": 1416},
+                "a2a": True,
+            },
+        },
+    )
+    bool_cfg = load_harness(bool_path)
+    assert bool_cfg.serve is not None
+    assert bool_cfg.serve.a2a is not None
+    assert isinstance(bool_cfg.serve.a2a, A2aConfig)
+    assert bool_cfg.serve.a2a.enabled is True
+    assert bool_cfg.serve.a2a.port == 1418
+
+    obj_path = _write_yaml(
+        tmp_path / "harness-a2a-obj.yaml",
+        {
+            "name": "example",
+            "serve": {
+                "hayhooks": {"port": 1416},
+                "a2a": {"enabled": True, "port": 2418},
+            },
+        },
+    )
+    obj_cfg = load_harness(obj_path)
+    assert obj_cfg.serve is not None
+    assert obj_cfg.serve.a2a is not None
+    assert obj_cfg.serve.a2a.enabled is True
+    assert obj_cfg.serve.a2a.port == 2418
 
 
 def test_e7_s02_custom_schema_allows_module_paths(tmp_path: Path) -> None:
