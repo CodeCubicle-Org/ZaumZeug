@@ -20,12 +20,15 @@ ZaumZeug is not trying to be the most flexible agent orchestrator or the deepest
 
 Building on Haystack, DSPy, and GEPA today means wiring compile-time optimization and runtime serving yourself — and it's easy to mix them incorrectly. ZaumZeug provides a single SDK with enforced golden rules, a CLI workflow, and a clear boundary between development and production.
 
+Most agent SDKs treat tracing, human feedback, and prompt tuning as separate tools or dashboards. ZaumZeug ships a **closed improvement loop** on the dev machine: run or serve → capture a trace → rate output and set gold with [`zaumzeug rate`](docs/stories/epic-stories/65-story.md) → merge into `val.jsonl` / `train.jsonl` → GEPA recompile → redeploy. The rate path uses stdlib only — no DeepEval required — which matters when you are building a new harness or switching LLM versions.
+
 | Problem | ZaumZeug approach |
 |---|---|
 | Complex Haystack + DSPy + GEPA integration | One SDK with compile/runtime separation built in |
 | Unclear dev vs production artifacts | `usr-harnesses/` for development, `deploy/` for shipping |
 | Model provider lock-in | Per-agent `agents-models.yaml` + stage-scoped model routing |
-| Different clients need different protocols | One Haystack core, multiple serve surfaces (REST, MCP, ACP) |
+| Different clients need different protocols | One Haystack core, multiple serve surfaces (REST, MCP, ACP, optional A2A) |
+| Prompt iteration is ad hoc | Journey C: trace → human rate → dataset merge → GEPA compile → redeploy ([E6-S08](docs/stories/epic-stories/65-story.md)) |
 
 ### How ZaumZeug is different
 
@@ -33,30 +36,36 @@ Building on Haystack, DSPy, and GEPA today means wiring compile-time optimizatio
 - **Compile ≠ runtime, enforced** — DSPy/GEPA offline; Haystack `Agent` on the hot path; never both loops in one request
 - **Workflow stages, not one mega-agent** — serial stages (parallel later), each running one agent loop, chained by `workflow.yaml`
 - **Guides + sensors** — GEPA-optimized prompts (guides) and metric feedback (sensors) baked into the lifecycle
+- **Human rating → compile** — [`zaumzeug rate`](docs/stories/epic-stories/65-story.md) / `run --rate` scores a captured turn, writes gold to `data/ratings/`, merges into val/train, and optionally recompiles — stdlib on the rate path; DeepEval optional for automated eval tiers
 - **Mock-first dev** — `zaumzeug doctor`, dry-run, and mock model profile for zero-API-key local dev and CI
 
 ### What we do better
 
+Shipped Phases 1–4 — not roadmap promises:
+
 | Area | ZaumZeug advantage |
 |---|---|
-| Compile → ship loop | DSPy/GEPA offline, Haystack online — enforced separation |
-| Production packaging | Explicit `deploy/` bundle; GEPA never on production servers |
-| Config-first multi-agent | YAML workflow + per-agent `agents-models.yaml` |
-| Ops clarity | Dev vs deploy is a product rule, not a team convention |
+| **Improvement loop** | Trace capture → human rate → val/train merge → GEPA recompile → redeploy; one CLI journey ([Journey C](user-docs/guides/testing.md#trace--test-case-journey-c), [E6-S08](docs/stories/epic-stories/65-story.md)) — most SDKs stop at tracing or eval dashboards |
+| **Compile → ship** | DSPy/GEPA offline, Haystack online — enforced separation; optimized artifacts ship inside `deploy/` |
+| **Production packaging** | Self-contained `deploy/` bundle; GEPA and DeepEval never required on production servers |
+| **Config-first multi-agent** | YAML workflow + per-agent models/tools; Mermaid `workflow-diagram.md` + `workflow-paths.md` regenerated at compile |
+| **Client surfaces** | REST (OpenAI-compatible), MCP, ACP, and optional A2A from one Haystack core — no rewrite per IDE or app |
+| **Quality gates** | Mock-first dev, `doctor`, optional DeepEval tiers, deploy eval gate before ship |
+| **Ops clarity** | `usr-harnesses/` vs `deploy/` is a product rule, not a team convention |
 
 ### What others do better today
 
 | Framework | Their strength | ZaumZeug gap (for now) |
 |---|---|---|
-| [LangGraph](https://langchain.com/langgraph) | Stateful graphs, checkpointing, human-in-the-loop, branching | Serial workflows only (parallel deferred) |
-| [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) / Claude Agent SDK | Provider-native tracing, guardrails, sandbox execution | Sandbox deferred; less provider magic |
+| [LangGraph](https://langchain.com/langgraph) | Stateful graphs, checkpointing, runtime human-in-the-loop, branching | Serial workflows only (parallel deferred); no graph checkpoint/resume |
+| [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) / Claude Agent SDK | Provider-native tracing, guardrails, sandbox execution | Sandbox deferred; less provider-native magic |
 | [CrewAI](https://www.crewai.com/) | Role-based crews, rapid prototyping, large community | Less persona ergonomics; more deploy discipline |
-| [Strands Compose](https://github.com/strands-compose/sdk-python) / AgentCore | YAML multi-agent, swarm/graph modes, managed hosting | Fewer orchestration modes (parallel/swarm deferred) |
+| [Strands Compose](https://github.com/strands-compose/sdk-python) / AgentCore | YAML multi-agent, swarm/graph modes, managed hosting | Fewer orchestration modes (parallel/swarm deferred); no managed microVM hosting |
 | [Raw Haystack](https://haystack.deepset.ai/) | RAG pipelines, retrieval integrations | ZaumZeug wraps Haystack — use raw Haystack for RAG-only |
 | [Pydantic AI](https://ai.pydantic.dev/) | Typed structured outputs, test models | Pydantic for config, not agent programming model |
 | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | Personal agent with memory, skills, messaging, cron | Factory for domain harnesses — not a personal assistant |
 
-> **Honest caveat:** LangGraph, OpenAI SDK, CrewAI, Strands, and Hermes have shipping code and large ecosystems. ZaumZeug has shipped Phases 1–4 (serial workflows, compile/deploy, MCP/ACP/A2A) — comparisons above reflect remaining gaps, not overall maturity.
+> **Honest caveat:** LangGraph, OpenAI SDK, CrewAI, Strands, and Hermes have large ecosystems and battle stories. ZaumZeug has shipped Phases 1–4 — compile/deploy, MCP/ACP/A2A, trace → rate → compile — but remains narrower by design (factory for domain harnesses, not a personal assistant or graph debugger). Comparisons above reflect remaining gaps, not overall usefulness.
 
 Full analysis: [Competitive landscape](docs/competitive-landscape.md)
 
@@ -71,6 +80,8 @@ Full analysis: [Competitive landscape](docs/competitive-landscape.md)
 **Agents** — Named, independently configured LLM agents. Each agent has its own `agents-models.yaml` for model selection and tool bindings.
 
 **Compile vs runtime** — DSPy and GEPA run at compile time to optimize prompts and modules. Haystack runs at runtime to serve requests. ZaumZeug enforces this separation so production servers never run optimization workloads.
+
+**Improvement loop (Journey C)** — Captured turns land in `data/traces/`; you rate output with `zaumzeug rate` or `run --rate`, set gold, merge into val/train, and optionally recompile ([E6-S08](docs/stories/epic-stories/65-story.md)). Automated eval (`zaumzeug eval`) and production trace capture (`eval.trace_capture`) feed the same loop.
 
 **Dev vs deploy** — You author and experiment in `usr-harnesses/<name>/`. `zaumzeug deploy` produces a self-contained `deploy/<name>/` bundle ready for any target host.
 
@@ -198,7 +209,7 @@ zaumzeug a2a <harness> --deploy       # Same A2A surface from deploy/<name>/ (E8
 
 ## Who is this for?
 
-- **Harness developers** — Scaffold a harness, configure models and tools, compile, deploy
+- **Harness developers** — Scaffold a harness, configure models and tools, run → rate → compile, deploy
 - **SDK maintainers** — Extend the framework, examples, CI, and docs; deploy git policy (ignore vs release commit vs CI artifact) in [CONTRIBUTING.md](CONTRIBUTING.md#deploy-git-policy-maintainers)
 - **Ops / platform** — Copy `deploy/<name>/` → `target_install` → `.env` → `zaumzeug serve --deploy` or `zaumzeug mcp --deploy` or `zaumzeug a2a --deploy` (or `HARNESS_ROOT=deploy`). Put Traefik in front for TLS + auth ([Production auth](user-docs/guides/production-auth.md)). Linux-first production (VM / bare metal / Docker/K8s); Win/macOS best-effort. Full guide: [Deploy and ship](user-docs/guides/deploy.md).
 - **Client integrators** — Call a harness via REST, MCP, or ACP from an app or IDE
