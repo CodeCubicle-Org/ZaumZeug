@@ -753,8 +753,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--workflow-diagram-only",
         action="store_true",
         help=(
-            "regenerate docs/workflow-diagram.md from workflow.yaml without "
-            "GEPA or LLM calls"
+            "regenerate docs/workflow-diagram.md and docs/workflow-paths.md from "
+            "workflow.yaml without GEPA or LLM calls"
         ),
     )
     compile_cmd.add_argument(

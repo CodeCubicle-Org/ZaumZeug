@@ -87,6 +87,8 @@ def _seed_dev_harness(
     diagram = harness_dir / "docs" / "workflow-diagram.md"
     diagram.parent.mkdir(parents=True, exist_ok=True)
     diagram.write_text("# Workflow diagram\n", encoding="utf-8")
+    paths = harness_dir / "docs" / "workflow-paths.md"
+    paths.write_text("# Workflow paths\n", encoding="utf-8")
 
     agent_dir = harness_dir / "agents" / "researcher"
     _write_yaml(

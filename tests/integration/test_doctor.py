@@ -248,6 +248,94 @@ def test_e4_s08_ac5_stale_diagram_warning(tmp_path: Path) -> None:
     test_e2_s04_ac11_stale_workflow_diagram_warn(tmp_path)
 
 
+def _scaffold_paths_doctor_harness(project_root: Path) -> tuple[Path, Path, Path, Path]:
+    harness_dir = project_root / "usr-harnesses" / "example"
+    _write_yaml(
+        harness_dir / "harness.yaml",
+        {"name": "example", "serve": {"hayhooks": {"port": 1416}}},
+    )
+    workflow_path = _write_yaml(
+        harness_dir / "workflow.yaml",
+        {"entry": "researcher", "stages": [{"agent": "researcher"}]},
+    )
+    agent_dir = harness_dir / "agents" / "researcher"
+    agent_yaml_path = _write_yaml(
+        agent_dir / "agent.yaml",
+        {
+            "name": "researcher",
+            "agent": {"system_prompt": "prompts/system.md"},
+            "tools": {"builtin": ["web_fetch"]},
+        },
+    )
+    prompt = agent_dir / "prompts" / "system.md"
+    prompt.parent.mkdir(parents=True, exist_ok=True)
+    prompt.write_text("prompt", encoding="utf-8")
+    _write_yaml(
+        agent_dir / "agents-models.yaml",
+        {
+            "default_model_id": "mock",
+            "models": {
+                "mock": {"provider": "mock", "model": "harness-fixture"},
+            },
+        },
+    )
+    docs_dir = harness_dir / "docs"
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    paths_path = docs_dir / "workflow-paths.md"
+    paths_path.write_text("# stale paths\n", encoding="utf-8")
+    return harness_dir, workflow_path, agent_yaml_path, paths_path
+
+
+def test_e4_s09_ac5_missing_paths_warning(tmp_path: Path) -> None:
+    project_root = tmp_path / "project"
+    harness_dir, _, _, paths_path = _scaffold_paths_doctor_harness(project_root)
+    paths_path.unlink()
+
+    report = run_doctor(harness_name="example", project_root=project_root)
+    warns = [c for c in report.checks if c.name == "workflow_paths" and c.severity == "warn"]
+    assert warns
+    assert "workflow-paths.md" in warns[0].message
+    assert report.exit_code == 0
+    assert harness_dir.is_dir()
+
+
+def test_e4_s09_ac5_stale_vs_workflow_yaml(tmp_path: Path) -> None:
+    project_root = tmp_path / "project"
+    _, workflow_path, _, paths_path = _scaffold_paths_doctor_harness(project_root)
+    stale_time = time.time() - 60
+    os.utime(paths_path, (stale_time, stale_time))
+    os.utime(workflow_path, (time.time(), time.time()))
+
+    report = run_doctor(harness_name="example", project_root=project_root)
+    warns = [c for c in report.checks if c.name == "workflow_paths" and c.severity == "warn"]
+    assert warns
+    assert report.exit_code == 0
+
+
+def test_e4_s09_ac5_stale_vs_agent_yaml(tmp_path: Path) -> None:
+    project_root = tmp_path / "project"
+    _, workflow_path, agent_yaml_path, paths_path = _scaffold_paths_doctor_harness(
+        project_root
+    )
+    stale_time = time.time() - 60
+    os.utime(paths_path, (stale_time, stale_time))
+    os.utime(workflow_path, (stale_time, stale_time))
+    os.utime(agent_yaml_path, (time.time(), time.time()))
+
+    report = run_doctor(harness_name="example", project_root=project_root)
+    warns = [c for c in report.checks if c.name == "workflow_paths" and c.severity == "warn"]
+    assert warns
+    assert "agent.yaml" in warns[0].message
+    assert report.exit_code == 0
+
+
+def test_e4_s09_ac5_skipped_in_deploy_mode(tmp_path: Path) -> None:
+    project_root = tmp_path / "project"
+    _scaffold_paths_doctor_harness(project_root)
+    report = run_doctor(harness_name="example", project_root=project_root, deploy=True)
+    assert "workflow_paths" not in {c.name for c in report.checks}
+
+
 def test_e2_s04c_ac1_deploy_root_resolution(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

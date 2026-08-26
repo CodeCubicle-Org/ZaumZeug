@@ -73,6 +73,11 @@ def _minimal_deploy_harness(
         "# Workflow diagram — test\n\n```mermaid\nflowchart LR\n  s0[researcher]\n```\n",
         encoding="utf-8",
     )
+    paths = harness_dir / "docs" / "workflow-paths.md"
+    paths.write_text(
+        "# Workflow paths — test\n\n```mermaid\nflowchart LR\n  s0[researcher]\n```\n",
+        encoding="utf-8",
+    )
     agent_dir = harness_dir / "agents" / "researcher"
     _write_yaml(
         agent_dir / "agent.yaml",

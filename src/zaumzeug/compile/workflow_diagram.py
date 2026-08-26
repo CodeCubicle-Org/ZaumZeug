@@ -11,15 +11,14 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-from zaumzeug.config import (
-    ConfigValidationError,
-    load_harness,
-    load_merged_agent_models,
-    load_workflow,
+from zaumzeug.compile.workflow_labels import (
+    escape_mermaid_label,
+    resolve_harness_models_path,
+    stage_label,
 )
+from zaumzeug.config import ConfigValidationError, load_harness, load_workflow
 from zaumzeug.config.harness_root import harness_dir as resolve_harness_dir
-from zaumzeug.config.resolver import AgentResolutionError, load_agent_yaml
-from zaumzeug.config.schemas import WorkflowConfig, WorkflowStage
+from zaumzeug.config.schemas import WorkflowConfig
 from zaumzeug.doctor.project import find_project_root
 
 __all__ = [
@@ -100,7 +99,7 @@ def write_workflow_diagram(
             suggestion=f"Fix workflow.yaml under {harness_path}",
         ) from exc
 
-    harness_models = _resolve_harness_models_path(harness_path, harness_config.models)
+    harness_models = resolve_harness_models_path(harness_path, harness_config.models)
     markdown = render_workflow_diagram(
         harness_name=harness_name,
         workflow=workflow,
@@ -138,13 +137,13 @@ def render_workflow_diagram(
     for index, stage in enumerate(workflow.stages):
         node_id = f"s{index}"
         node_ids.append(node_id)
-        label = _stage_label(
+        label = stage_label(
             stage,
             harness_dir=harness_dir,
             project_root=project_root,
             harness_models_path=harness_models_path,
         )
-        mermaid_lines.append(f'  {node_id}["{_escape_mermaid_label(label)}"]')
+        mermaid_lines.append(f'  {node_id}["{escape_mermaid_label(label)}"]')
 
     for left, right in zip(node_ids, node_ids[1:], strict=False):
         mermaid_lines.append(f"  {left} --> {right}")
@@ -175,80 +174,3 @@ def format_workflow_diagram_result(result: WorkflowDiagramResult) -> str:
     )
 
 
-def _stage_label(
-    stage: WorkflowStage,
-    *,
-    harness_dir: Path,
-    project_root: Path,
-    harness_models_path: Path | None,
-) -> str:
-    if stage.pipeline:
-        return stage.pipeline.strip()
-
-    agent_name = (stage.agent or "").strip()
-    model_id, provider = _resolve_agent_model_label(
-        agent_name,
-        harness_dir=harness_dir,
-        project_root=project_root,
-        harness_models_path=harness_models_path,
-    )
-    if model_id and provider:
-        return f"{agent_name}\n{model_id} ({provider})"
-    if model_id:
-        return f"{agent_name}\n{model_id}"
-    return agent_name
-
-
-def _resolve_agent_model_label(
-    agent_name: str,
-    *,
-    harness_dir: Path,
-    project_root: Path,
-    harness_models_path: Path | None,
-) -> tuple[str | None, str | None]:
-    """Return ``(default_model_id, provider)`` for an agent when resolvable."""
-    agent_default: str | None = None
-    try:
-        _path, data = load_agent_yaml(harness_dir, agent_name)
-    except AgentResolutionError:
-        data = {}
-    raw = data.get("default_model_id")
-    if isinstance(raw, str) and raw.strip():
-        agent_default = raw.strip()
-
-    try:
-        registry = load_merged_agent_models(
-            project_root=project_root,
-            harness_dir=harness_dir,
-            harness_models_path=harness_models_path,
-            agent_name=agent_name,
-        )
-    except ConfigValidationError:
-        return agent_default, None
-
-    model_id = agent_default or registry.default_model_id
-    entry = registry.models.get(model_id)
-    provider = entry.provider if entry is not None else None
-    return model_id, provider
-
-
-def _resolve_harness_models_path(
-    harness_dir: Path,
-    models_ref: str | None,
-) -> Path | None:
-    if models_ref is None or not str(models_ref).strip():
-        return None
-    path = Path(models_ref)
-    if not path.is_absolute():
-        path = harness_dir / path
-    return path
-
-
-def _escape_mermaid_label(label: str) -> str:
-    """Escape characters that break Mermaid flowchart node labels."""
-    return (
-        label.replace("\\", "\\\\")
-        .replace('"', "#quot;")
-        .replace("\r\n", "\\n")
-        .replace("\n", "\\n")
-    )

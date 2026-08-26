@@ -5,8 +5,8 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-26 (E4-S09 Ready — workflow path Mermaid docs) |
-| **Status** | Done (E4-S01–S08, 2026-07-28) · **E4-S09 Ready** (post–Phase 4 backlog) |
+| **Last modified** | 2026-08-26 (E4-S09 Done — workflow path Mermaid docs) |
+| **Status** | Done (E4-S01–S09, 2026-07-28 / 2026-08-26) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -15,7 +15,7 @@
 |---|---|
 | **Phase** | 2 |
 | **Epic** | E4 |
-| **Outcome** | Offline GEPA per agent; harness `docs/workflow-diagram.md` regenerated at every compile; **E4-S09 Ready** — `docs/workflow-paths.md` |
+| **Outcome** | Offline GEPA per agent; harness `docs/workflow-diagram.md` + `docs/workflow-paths.md` regenerated at every compile |
 | **Depends on** | [E2](01-epic.md) · [E3](02-epic.md) Phase 1 complete |
 | **Blocks** | [E6](05-epic.md) · [E5](06-epic.md) (deploy pins compile artifacts) |
 | **PRD** | [Epic E4](../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2) |
@@ -34,7 +34,7 @@
 6. **E4-S06** — Compile `--dry-run` ✅ (2026-07-28)
 7. **E4-S07** — Artifact rollback to pinned run ✅ (2026-07-28)
 8. **E4-S08** — Workflow diagram at compile ✅ (2026-07-28)
-9. **E4-S09** — Workflow path Mermaid docs (all paths) *(post–Phase 4; Ready)*
+9. **E4-S09** — Workflow path Mermaid docs (all paths) *(post–Phase 4; Done 2026-08-26)*
 
 ---
 
@@ -349,7 +349,7 @@ As a **harness developer**, I want a workflow diagram generated at compile time,
 ### References
 
 - [PRD E4.7](../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2)
-- [Architecture §5.4](../architecture/04-data-flows.md#54-workflow-diagram-compile)
+- [Architecture §5.4](../architecture/04-data-flows.md#54-workflow-diagram-and-paths-compile)
 
 ### Acceptance criteria
 
@@ -396,7 +396,7 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 | **Feature** | E4.8 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
-| **Status** | Ready |
+| **Status** | Done |
 | **Prerequisites** | [E4-S08](#e4-s08-workflow-diagram-at-compile) ✅ · [E2-S07](01-epic.md#e2-s07-workflowyaml-schema-serial) ✅ |
 | **Canonical** | [66-story.md](epic-stories/66-story.md) |
 
@@ -407,24 +407,24 @@ As a **harness developer**, I want an auto-generated Markdown file under my harn
 ### References
 
 - [PRD E4.8](../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2)
-- [Architecture §5.4](../architecture/04-data-flows.md#54-workflow-diagram-compile)
+- [Architecture §5.4](../architecture/04-data-flows.md#54-workflow-diagram-and-paths-compile)
 - Canonical story: [66-story.md](epic-stories/66-story.md)
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Every non–dry-run `zaumzeug compile` (incl. `--agent`) writes `docs/workflow-paths.md`; diagram unchanged
-- [ ] **AC-2** Index + serial stage-path Mermaid (`P1`); agent nodes include model ids; pipeline stages use pipeline id; serial `P1` may mirror overview
-- [ ] **AC-3** Per agent stage with tools: separate tool-branch Mermaid; MCP `tool_names` or `mcp:<server>`; no cross-product; no live MCP probe
-- [ ] **AC-4** `--workflow-diagram-only` refreshes diagram **and** paths; CLI help mentions both
-- [ ] **AC-5** Doctor warns when paths missing or stale vs `workflow.yaml` **or** workflow agent `agent.yaml` files
-- [ ] **AC-6** Deploy: `copy_rules` **and** packager explicit copy for `docs/workflow-paths.md`
-- [ ] **AC-7** User-docs + Architecture §5.4 + CLI; example + install templates stay in sync
+- [x] **AC-1** Every non–dry-run `zaumzeug compile` (incl. `--agent`) writes `docs/workflow-paths.md`; diagram unchanged
+- [x] **AC-2** Index + serial stage-path Mermaid (`P1`); agent nodes include model ids; pipeline stages use pipeline id; serial `P1` may mirror overview
+- [x] **AC-3** Per agent stage with tools: separate tool-branch Mermaid; MCP `tool_names` or `mcp:<server>`; no cross-product; no live MCP probe
+- [x] **AC-4** `--workflow-diagram-only` refreshes diagram **and** paths; CLI help mentions both
+- [x] **AC-5** Doctor warns when paths missing or stale vs `workflow.yaml` **or** workflow agent `agent.yaml` files
+- [x] **AC-6** Deploy: `copy_rules` **and** packager explicit copy for `docs/workflow-paths.md`
+- [x] **AC-7** User-docs + Architecture §5.4 + CLI; example + install templates stay in sync
 
 ### Implementation tasks (build)
 
-- [ ] `compile/workflow_paths.py` + wire into compile / `--workflow-diagram-only` / `--agent`
-- [ ] Doctor staleness (workflow + agent yaml); deploy copy_rules + packager; CLI help; regenerate example + templates
-- [ ] User-docs + Architecture §5.4
+- [x] `compile/workflow_paths.py` + wire into compile / `--workflow-diagram-only` / `--agent`
+- [x] Doctor staleness (workflow + agent yaml); deploy copy_rules + packager; CLI help; regenerate example + templates
+- [x] User-docs + Architecture §5.4
 
 ### Verification (after build)
 
@@ -440,9 +440,9 @@ Per [Story verification](00-README.md#story-verification-required). Full AC → 
 
 ### Definition of done
 
-- [ ] `docs/workflow-paths.md` enumerates stage routes + configured tool branches as Mermaid under the harness `docs/` dir
-- [ ] Compile / `--workflow-diagram-only` / doctor / deploy stay in sync with E4-S08 diagram
-- [ ] Verification checklist complete (see [66-story.md](epic-stories/66-story.md))
+- [x] `docs/workflow-paths.md` enumerates stage routes + configured tool branches as Mermaid under the harness `docs/` dir
+- [x] Compile / `--workflow-diagram-only` / doctor / deploy stay in sync with E4-S08 diagram
+- [x] Verification checklist complete (see [66-story.md](epic-stories/66-story.md))
 
 **PO decisions (2026-08-26):** Soft conflicts resolved in [66-story.md](epic-stories/66-story.md#po-decisions-2026-08-26).
 

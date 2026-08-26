@@ -34,14 +34,14 @@ As a **harness developer**, I want a workflow diagram generated at compile time,
 ### References
 
 - [PRD E4.7](../../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2)
-- [Architecture §5.4](../../architecture/04-data-flows.md#54-workflow-diagram-compile)
+- [Architecture §5.4](../../architecture/04-data-flows.md#54-workflow-diagram-and-paths-compile)
 
 
 ### Implementation resources
 
 **Internal spec**
 
-- [Architecture §5.4 — workflow diagram at compile](../../architecture/04-data-flows.md#54-workflow-diagram-compile)
+- [Architecture §5.4 — workflow diagram and paths at compile](../../architecture/04-data-flows.md#54-workflow-diagram-and-paths-compile)
 - [Mermaid flowchart syntax](https://mermaid.js.org/syntax/flowchart.html) (if diagram is Mermaid)
 
 ### Acceptance criteria

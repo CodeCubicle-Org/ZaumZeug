@@ -132,26 +132,32 @@ Deploy pins **each agent's** selected run under `deploy/<harness>/agents/<agent-
 
 Legacy alias: compile / serve accept `manifest.json` during migration (**implemented** E4-S03a via `find_artifact_manifest` / resolver); v1 canonical name is **`artifact-manifest.json`**.
 
-**Implementation (E5-S01, 2026-07-28):** `write_deploy_bundle` writes deploy `manifest.json` (and copies `docs/workflow-diagram.md` into the bundle). Tests: `tests/integration/deploy/test_deploy.py`. **E5-S02 (2026-07-28):** §10.1 include/exclude matrix via `resolve_deploy_copy_plan` / `assert_required_paths`; golden `tests/integration/deploy/test_deploy_golden.py`.
+**Implementation (E5-S01, 2026-07-28):** `write_deploy_bundle` writes deploy `manifest.json` (and copies `docs/workflow-diagram.md` and `docs/workflow-paths.md` into the bundle). Tests: `tests/integration/deploy/test_deploy.py`. **E5-S02 (2026-07-28):** §10.1 include/exclude matrix via `resolve_deploy_copy_plan` / `assert_required_paths`; golden `tests/integration/deploy/test_deploy_golden.py`.
 
-### 5.4 Workflow diagram (compile)
+### 5.4 Workflow diagram and paths (compile)
 
-At **`zaumzeug compile <harness>`**, the SDK **always** regenerates harness workflow documentation (even when no agent runs GEPA). Use **`zaumzeug compile <harness> --workflow-diagram-only`** to refresh the diagram without LLM or GEPA work.
+At **`zaumzeug compile <harness>`**, the SDK **always** regenerates harness workflow documentation (even when no agent runs GEPA). Use **`zaumzeug compile <harness> --workflow-diagram-only`** to refresh both files without LLM or GEPA work.
 
 | Output | Path |
 |---|---|
-| Workflow diagram (Markdown + Mermaid) | `usr-harnesses/<harness>/docs/workflow-diagram.md` |
+| Workflow diagram (Markdown + Mermaid overview) | `usr-harnesses/<harness>/docs/workflow-diagram.md` |
+| Workflow paths (stage routes + tool branches) | `usr-harnesses/<harness>/docs/workflow-paths.md` |
 
-**Generator inputs:** `workflow.yaml`, each `agents/<name>/agent.yaml`, merged `agents-models.yaml` (agent name + `default_model_id` + provider label), pipeline stages from `serve.expose`.
+**Generator inputs:** `workflow.yaml`, each workflow-listed `agents/<name>/agent.yaml` (including `tools:` for path docs), merged `agents-models.yaml` (agent name + `default_model_id` + provider label), pipeline stages from `serve.expose`.
 
 **Diagram (serial v1):** one node per workflow stage; directed edges in order; agent nodes labeled with role and resolved model id (no secrets).
 
+**Paths (serial v1, E4-S09):** index of stage paths (`P1` for serial); one stage-route Mermaid per path; separate tool-branch Mermaid per agent stage with configured tools (`tools.builtin` / `custom` / `mcp` labels only — no live MCP probe; `final answer (no tool)` branch; no cross-product across stages).
+
 **Operational rules:**
 
-- Do not hand-edit `docs/workflow-diagram.md` — compile overwrites ([§15](10-operations-and-reference.md#15-anti-patterns)).
+- Do not hand-edit `docs/workflow-diagram.md` or `docs/workflow-paths.md` — compile overwrites ([§15](10-operations-and-reference.md#15-anti-patterns)).
 - `zaumzeug doctor` **warns** when `workflow.yaml` is newer than `docs/workflow-diagram.md` (or diagram missing).
+- `zaumzeug doctor` **warns** (`workflow_paths`) when `docs/workflow-paths.md` is missing or older than the newest of `workflow.yaml` and workflow-listed `agents/*/agent.yaml` (skipped in `doctor --deploy`).
 
-**Implementation (E4-S08, 2026-07-28):** `compile/workflow_diagram.py` — `write_workflow_diagram()` / `render_workflow_diagram()`; invoked from `run_compile` after GEPA (and on `--workflow-diagram-only`). Doctor: `check_workflow_diagram_staleness()` (E2-S04b) compares file mtimes under each harness; missing diagram suggests `zaumzeug compile <harness> --workflow-diagram-only`.
+**Implementation (E4-S08, 2026-07-28):** `compile/workflow_diagram.py` — `write_workflow_diagram()` / `render_workflow_diagram()`; shared label helpers in `compile/workflow_labels.py`.
+
+**Implementation (E4-S09, 2026-08-26):** `compile/workflow_paths.py` — `write_workflow_paths()` / `render_workflow_paths()`; invoked from `run_compile` after GEPA (and on `--workflow-diagram-only`) immediately after the diagram. Doctor: `check_workflow_paths_staleness()`. Tests: `tests/unit/compile/test_workflow_paths.py`, `tests/integration/test_doctor.py::test_e4_s09_ac5_*`.
 - `zaumzeug deploy` copies `docs/` into `deploy/<harness>/docs/` ([§10.1](07-deploy-packaging.md#101-dev-vs-deploy)) — **Done** E5-S01; golden matrix **Done** E5-S02.
 - Per-agent GEPA (`zaumzeug compile <harness> --agent <name>`) still refreshes the harness-level diagram.
 
@@ -174,7 +180,36 @@ flowchart LR
 
 Agent nodes label `default_model_id (provider)`. For multi-stage harnesses, nodes chain left-to-right with edges in `workflow.yaml` order; pipeline stages use the pipeline id as the label.
 
-**Planned (E4-S09 / E4.8):** Sibling file `docs/workflow-paths.md` — Mermaid for every serial **stage path** plus per-agent **tool-branch** diagrams (tools + final answer; no 2ⁿ cross-product). Regenerated with compile / `--workflow-diagram-only`; doctor stale/missing warn; deploy copies. Story: [66-story.md](../stories/epic-stories/66-story.md).
+**Example paths output** (`example` harness) — file `docs/workflow-paths.md`:
+
+````text
+# Workflow paths — example
+
+> Auto-generated by `zaumzeug compile example`. Do not edit by hand.
+
+## Index
+
+| Path | Stages | Tool-branch diagrams |
+|---|---|---|
+| P1 | `agent:researcher` | 1 (`researcher`) |
+
+## Path P1 — full stage route
+
+```mermaid
+flowchart LR
+  s0["researcher\nmock (mock)"]
+```
+
+### P1 · agent `researcher` — tool branches
+
+```mermaid
+flowchart TD
+  start([Start]) --> agent["researcher"]
+  agent --> t0["tool: web_fetch"]
+  agent --> final["final answer (no tool)"]
+  ...
+```
+````
 
 ### 5.5 Continuous improvement loop
 

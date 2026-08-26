@@ -118,7 +118,7 @@ These headings preserve links from [PRD](../prd.md) and [stories](../stories/00-
 | [§4.5 Test dependencies](architecture/03-technology-stack.md#45-test-dependencies) | 03-technology-stack |
 | [§5.2 Runtime agent resolution](architecture/04-data-flows.md#52-runtime-agent-resolution) | 04-data-flows |
 | [§5.3 Artifact layout](architecture/04-data-flows.md#53-artifact-layout) | 04-data-flows |
-| [§5.4 Workflow diagram](architecture/04-data-flows.md#54-workflow-diagram-compile) | 04-data-flows |
+| [§5.4 Workflow diagram and paths](architecture/04-data-flows.md#54-workflow-diagram-and-paths-compile) | 04-data-flows |
 | [§6.1 Model registry merge](architecture/05-configuration.md#61-model-registry-merge) | 05-configuration |
 | [§6.3 Eval frameworks](architecture/05-configuration.md#63-zaumzeug-eval-frameworks) | 05-configuration |
 | [§6.4 Deploy eval gate](architecture/05-configuration.md#64-deploy-eval-gate) | 05-configuration |

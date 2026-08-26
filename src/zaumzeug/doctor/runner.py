@@ -28,6 +28,7 @@ from zaumzeug.doctor.checks import (
     check_runtime_paths,
     check_workflow_config,
     check_workflow_diagram_staleness,
+    check_workflow_paths_staleness,
     workflow_agent_names,
 )
 from zaumzeug.doctor.project import discover_harnesses, find_project_root, list_agent_names
@@ -146,6 +147,7 @@ def run_doctor(
         if not deploy_mode:
             checks.append(check_mcp_uv_presence(name, harness_dir))
             checks.append(check_workflow_diagram_staleness(name, harness_dir))
+            checks.append(check_workflow_paths_staleness(name, harness_dir))
 
     checks.extend(check_env_for_live_models(root, live_providers=_live_providers(all_merged)))
     return DoctorReport(checks=checks)

@@ -77,6 +77,11 @@ def _seed_matrix_harness(
             "# Workflow diagram — example\n\n```mermaid\nflowchart LR\n  s0[researcher]\n```\n",
             encoding="utf-8",
         )
+        paths = harness_dir / "docs" / "workflow-paths.md"
+        paths.write_text(
+            "# Workflow paths — example\n\n```mermaid\nflowchart LR\n  s0[researcher]\n```\n",
+            encoding="utf-8",
+        )
 
     # Dev-only top-level (must never copy).
     (harness_dir / "data").mkdir(parents=True, exist_ok=True)
@@ -207,6 +212,7 @@ def test_e5_s02_ac1_excludes_dev_only_dirs() -> None:
         "harness.yaml",
         "workflow.yaml",
         "docs/workflow-diagram.md",
+        "docs/workflow-paths.md",
         "agents/researcher/prompts/system.md",
         "agents/researcher/tools/search_docs.py",
         "agents/researcher/hooks.py",
@@ -334,6 +340,46 @@ def test_e5_s02_ac4_includes_workflow_and_diagram(tmp_path: Path) -> None:
     )
     assert (bundle / "workflow.yaml").is_file()
     assert (bundle / "docs" / "workflow-diagram.md").is_file()
+    assert (bundle / "docs" / "workflow-paths.md").is_file()
+
+
+def test_e4_s09_ac6_always_includes_workflow_paths(tmp_path: Path) -> None:
+    """AC-6: docs/workflow-paths.md is always included in the copy plan."""
+    harness_dir = _seed_matrix_harness(tmp_path, with_tools_hooks=False)
+    harness_raw = yaml.safe_load((harness_dir / "harness.yaml").read_text(encoding="utf-8"))
+    agent_data = yaml.safe_load(
+        (harness_dir / "agents" / "researcher" / "agent.yaml").read_text(encoding="utf-8")
+    )
+    plan = resolve_deploy_copy_plan(
+        harness_raw=harness_raw,
+        agents={"researcher": agent_data},
+    )
+    assert "docs/workflow-paths.md" in plan.paths()
+    assert plan.of_kind("paths")
+
+
+def test_e4_s09_ac6_missing_paths_fails_assert_required(tmp_path: Path) -> None:
+    """AC-6: missing workflow-paths.md fails assert_required_paths."""
+    harness_dir = _seed_matrix_harness(tmp_path, with_tools_hooks=False)
+    (harness_dir / "docs" / "workflow-paths.md").unlink()
+    harness_raw = yaml.safe_load((harness_dir / "harness.yaml").read_text(encoding="utf-8"))
+    agent_data = yaml.safe_load(
+        (harness_dir / "agents" / "researcher" / "agent.yaml").read_text(encoding="utf-8")
+    )
+    plan = resolve_deploy_copy_plan(
+        harness_raw=harness_raw,
+        agents={"researcher": agent_data},
+    )
+    with pytest.raises(CopyRulesError, match="workflow-paths"):
+        assert_required_paths(harness_dir, plan)
+
+    with pytest.raises(DeployError, match="workflow-paths|missing path"):
+        write_deploy_bundle(
+            "example",
+            project_root=tmp_path,
+            harness_dir=harness_dir,
+            harness_config=_harness_config(),
+        )
 
 
 def test_e5_s02_ac5_stripped_yaml_sections() -> None:

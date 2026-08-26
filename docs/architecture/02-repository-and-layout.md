@@ -78,7 +78,7 @@ usr-harnesses/<harness-name>/
 │       └── ...
 ├── pipelines/                # Haystack YAML — deterministic steps, orchestration (✅ E8-S01 via serve.expose)
 ├── data/                     # shared queue, context, train/val JSONL (dev); traces/ from E6-S05
-├── docs/                     # generated harness docs (workflow-diagram.md at compile)
+├── docs/                     # generated harness docs (workflow-diagram.md + workflow-paths.md at compile)
 └── eval/                     # harness-level optional DeepEval pytest (dev only; E6-S04 scaffold)
     ├── test_*.py
     └── metrics.py

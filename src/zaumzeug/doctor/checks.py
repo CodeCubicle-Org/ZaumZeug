@@ -618,6 +618,64 @@ def check_workflow_diagram_staleness(harness_name: str, harness_dir: Path) -> Ch
     )
 
 
+def check_workflow_paths_staleness(harness_name: str, harness_dir: Path) -> CheckResult:
+    """E4-S09: Warn when workflow paths doc is missing or older than workflow/agent yaml."""
+    workflow_yaml = harness_dir / "workflow.yaml"
+    paths_path = harness_dir / "docs" / "workflow-paths.md"
+
+    if not workflow_yaml.is_file():
+        return CheckResult(
+            name="workflow_paths",
+            severity="pass",
+            message="No workflow.yaml to compare",
+            harness=harness_name,
+        )
+
+    reference_mtime = workflow_yaml.stat().st_mtime
+    try:
+        workflow = load_workflow(harness_dir)
+    except ConfigValidationError:
+        workflow = None
+
+    if workflow is not None:
+        for stage in workflow.stages:
+            agent_name = (stage.agent or "").strip()
+            if not agent_name:
+                continue
+            agent_yaml = harness_dir / "agents" / agent_name / "agent.yaml"
+            if agent_yaml.is_file():
+                reference_mtime = max(reference_mtime, agent_yaml.stat().st_mtime)
+
+    if not paths_path.is_file():
+        return CheckResult(
+            name="workflow_paths",
+            severity="warn",
+            message=(
+                f"Missing {paths_path.relative_to(harness_dir)}; "
+                "run `zaumzeug compile <harness> --workflow-diagram-only`"
+            ),
+            harness=harness_name,
+        )
+
+    if reference_mtime > paths_path.stat().st_mtime:
+        return CheckResult(
+            name="workflow_paths",
+            severity="warn",
+            message=(
+                "workflow.yaml or a workflow agent agent.yaml is newer than "
+                f"{paths_path.relative_to(harness_dir)}; re-run compile to refresh"
+            ),
+            harness=harness_name,
+        )
+
+    return CheckResult(
+        name="workflow_paths",
+        severity="pass",
+        message="workflow-paths.md is up to date with workflow.yaml and agent yaml",
+        harness=harness_name,
+    )
+
+
 def check_pinned_artifact(
     harness_name: str,
     harness_dir: Path,

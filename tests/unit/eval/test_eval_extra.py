@@ -63,6 +63,14 @@ def test_e6_s01_ac3_user_docs_document_eval_extra() -> None:
         assert needle in text, f"{path} must document {needle}"
 
 
+def _purge_eval_package() -> None:
+    """Drop cached ``zaumzeug.eval`` package and submodules (test isolation)."""
+    prefix = "zaumzeug.eval"
+    for key in list(sys.modules):
+        if key == prefix or key.startswith(f"{prefix}."):
+            del sys.modules[key]
+
+
 def test_e6_s01_eval_package_import_does_not_load_deepeval(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -74,14 +82,23 @@ def test_e6_s01_eval_package_import_does_not_load_deepeval(
             raise ImportError("blocked for test")
         return real_import(name, globals, locals, fromlist, level)
 
-    monkeypatch.setattr(builtins, "__import__", _block_deepeval)
-    monkeypatch.delitem(sys.modules, "deepeval", raising=False)
-    sys.modules.pop("zaumzeug.eval", None)
+    saved = {
+        key: sys.modules[key]
+        for key in list(sys.modules)
+        if key == "zaumzeug.eval" or key.startswith("zaumzeug.eval.")
+    }
+    try:
+        monkeypatch.setattr(builtins, "__import__", _block_deepeval)
+        monkeypatch.delitem(sys.modules, "deepeval", raising=False)
+        _purge_eval_package()
 
-    module = importlib.import_module("zaumzeug.eval")
-    assert hasattr(module, "require_deepeval")
-    assert hasattr(module, "is_deepeval_available")
-    assert module.is_deepeval_available() is False
+        module = importlib.import_module("zaumzeug.eval")
+        assert hasattr(module, "require_deepeval")
+        assert hasattr(module, "is_deepeval_available")
+        assert module.is_deepeval_available() is False
+    finally:
+        _purge_eval_package()
+        sys.modules.update(saved)
 
 
 def test_e6_s01_require_deepeval_friendly_error(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -107,11 +124,15 @@ def test_e6_s01_require_deepeval_friendly_error(monkeypatch: pytest.MonkeyPatch)
 
 
 def test_e6_s01_doctor_does_not_require_deepeval() -> None:
-    """DoD: ``zaumzeug doctor`` does not import or require deepeval."""
+    """DoD: ``zaumzeug doctor`` does not eagerly import or call ``require_deepeval``.
+
+    E8-S06 may warn about missing DeepEval when ``eval.confident_ai.enabled`` — that
+    uses lazy ``is_deepeval_available()`` inside a check function, not startup import.
+    """
     import zaumzeug.doctor.checks as checks
     import zaumzeug.doctor.runner as runner
 
     for module in (checks, runner):
         source = inspect.getsource(module)
-        assert "deepeval" not in source.lower()
         assert "require_deepeval" not in source
+        assert "import deepeval" not in source

@@ -69,6 +69,12 @@ def _seed_deploy_harness(
         "```mermaid\nflowchart LR\n  s0[researcher]\n```\n",
         encoding="utf-8",
     )
+    paths = harness_dir / "docs" / "workflow-paths.md"
+    paths.write_text(
+        "# Workflow paths — example\n\n"
+        "```mermaid\nflowchart LR\n  s0[researcher]\n```\n",
+        encoding="utf-8",
+    )
     (harness_dir / "data").mkdir(parents=True, exist_ok=True)
     (harness_dir / "data" / "val.jsonl").write_text(
         json.dumps({"input": "hi", "expected_output": "ok"}) + "\n",
@@ -158,6 +164,7 @@ def test_e5_s01_ac1_writes_deploy_bundle(
     assert (bundle / "harness.yaml").is_file()
     assert (bundle / "workflow.yaml").is_file()
     assert (bundle / "docs" / "workflow-diagram.md").is_file()
+    assert (bundle / "docs" / "workflow-paths.md").is_file()
     assert (bundle / "models.yaml").is_file()
     assert (bundle / "agents" / "researcher" / "agent.yaml").is_file()
     assert (bundle / "agents" / "researcher" / "agents-models.yaml").is_file()

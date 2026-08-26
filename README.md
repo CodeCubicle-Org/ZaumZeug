@@ -136,7 +136,7 @@ zaumzeug doctor --verbose     # Include passing checks
 zaumzeug doctor --json        # Machine-readable report (exit 1 on fail; warns are non-blocking)
 ```
 
-Doctor validates `harness.yaml`, **`workflow.yaml`** (entry, stages, agent refs, agent folder names), merged model registries, and runtime paths. It warns (non-blocking) when: MCP tools are configured but `uv` is missing, or `workflow.yaml` is newer than `docs/workflow-diagram.md`. Optional `eval:` / `deploy:` sections are validated (no Phase warn after E6-S02 / E6-S03). In `--deploy` mode, doctor validates `manifest.json`, pinned artifact runs, and reuses core config/runtime checks against the deploy bundle (dev-only warnings are skipped).
+Doctor validates `harness.yaml`, **`workflow.yaml`** (entry, stages, agent refs, agent folder names), merged model registries, and runtime paths. It warns (non-blocking) when: MCP tools are configured but `uv` is missing; `workflow.yaml` is newer than `docs/workflow-diagram.md`; or `docs/workflow-paths.md` is missing or stale vs `workflow.yaml` / workflow-listed `agents/*/agent.yaml`. Optional `eval:` / `deploy:` sections are validated (no Phase warn after E6-S02 / E6-S03). In `--deploy` mode, doctor validates `manifest.json`, pinned artifact runs, and reuses core config/runtime checks against the deploy bundle (dev-only warnings are skipped).
 
 ```bash
 zaumzeug serve <harness> --dry-run    # Validate harness.yaml, workflow.yaml, and resolved paths (no Hayhooks, no LLM)
@@ -147,7 +147,7 @@ zaumzeug serve <harness> --dry-run --json     # Machine-readable summary
 zaumzeug serve <harness> --verbose    # SDK + Haystack debug logging (or HARNESS_LOG_LEVEL=DEBUG)
 # Optional GUI: pip install "hayhooks[chainlit]" + serve.hayhooks.chainlit: true → /chat (E7-S04)
 zaumzeug compile <harness> --verbose  # Same logging for compile (Phase 2+)
-zaumzeug compile <harness> --workflow-diagram-only  # Refresh docs/workflow-diagram.md without GEPA
+zaumzeug compile <harness> --workflow-diagram-only  # Refresh docs/workflow-diagram.md + workflow-paths.md without GEPA
 zaumzeug eval <harness>               # Builtin JSONL or DeepEval regression (E6-S02)
 zaumzeug eval <harness> --trace PATH  # Score a captured data/traces/ JSONL turn (E6-S05)
 zaumzeug eval <harness> --base-url    # Mode C HTTP black-box vs running serve (E6-S06; staging/debug)

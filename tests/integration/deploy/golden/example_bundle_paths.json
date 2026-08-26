@@ -6,6 +6,7 @@
   "agents/researcher/hooks.py",
   "agents/researcher/tools/search_docs.py",
   "docs/workflow-diagram.md",
+  "docs/workflow-paths.md",
   "harness.yaml",
   "pipelines/summarize.yaml",
   "workflow.yaml"

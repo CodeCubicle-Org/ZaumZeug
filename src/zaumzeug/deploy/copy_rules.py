@@ -48,12 +48,14 @@ ALWAYS_INCLUDED_HARNESS_FILES: tuple[str, ...] = (
     "harness.yaml",
     "workflow.yaml",
     "docs/workflow-diagram.md",
+    "docs/workflow-paths.md",
 )
 
 CopyKind = Literal[
     "harness_yaml",
     "workflow",
     "diagram",
+    "paths",
     "agents_models",
     "agent_yaml",
     "prompt",
@@ -226,6 +228,7 @@ def resolve_deploy_copy_plan(
         CopyEntry("harness.yaml", "harness_yaml"),
         CopyEntry("workflow.yaml", "workflow"),
         CopyEntry("docs/workflow-diagram.md", "diagram"),
+        CopyEntry("docs/workflow-paths.md", "paths"),
     ]
 
     for pipeline_id in _exposed_pipeline_ids(harness_raw):

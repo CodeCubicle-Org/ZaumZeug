@@ -380,7 +380,7 @@ noisy hunter output → data/val.jsonl
 |---|---|
 | E2 | `workflow.yaml` schema; per-agent `agents-models.yaml` merge |
 | E3 | `zaumzeug run` serial workflow; stage-scoped `ModelRouter` |
-| E4 | GEPA per agent; **`docs/workflow-diagram.md` at compile** ✅ (E4-S08, 2026-07-28) ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-compile)) |
+| E4 | GEPA per agent; **`docs/workflow-diagram.md` + `docs/workflow-paths.md` at compile** ✅ (E4-S08 / E4-S09, 2026-07-28 / 2026-08-26) ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-and-paths-compile)) |
 | E6 | Optional `[eval]` DeepEval extra ✅ (E6-S01, 2026-07-28); `zaumzeug eval` ✅ (E6-S02, 2026-07-28) |
 | E5 | Deploy bundle: all agents + workflow + diagram |
 | E7–E8 | Tools, MCP, pipelines in workflow stages |

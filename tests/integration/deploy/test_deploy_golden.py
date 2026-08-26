@@ -62,6 +62,11 @@ def _seed_golden_example(
         "# Workflow diagram — example\n\n```mermaid\nflowchart LR\n  s0[researcher]\n```\n",
         encoding="utf-8",
     )
+    paths = harness_dir / "docs" / "workflow-paths.md"
+    paths.write_text(
+        "# Workflow paths — example\n\n```mermaid\nflowchart LR\n  s0[researcher]\n```\n",
+        encoding="utf-8",
+    )
     _write_yaml(
         harness_dir / "pipelines" / "summarize.yaml",
         {"name": "summarize", "components": {}},
@@ -173,6 +178,7 @@ _EXPECTED_MATRIX_PATHS = [
     "agents/researcher/hooks.py",
     "agents/researcher/tools/search_docs.py",
     "docs/workflow-diagram.md",
+    "docs/workflow-paths.md",
     "harness.yaml",
     "pipelines/summarize.yaml",
     "workflow.yaml",

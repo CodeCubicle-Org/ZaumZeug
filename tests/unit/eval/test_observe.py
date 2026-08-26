@@ -8,6 +8,7 @@ from typing import Any
 
 import pytest
 
+import zaumzeug.eval.observe as observe_mod
 from zaumzeug.eval.observe import (
     ProductionObserveHook,
     install_production_observe_hook,
@@ -74,7 +75,8 @@ def test_e8_s06_ac2_observe_when_confident_ai_enabled(
             self.actual_output = actual_output
 
     monkeypatch.setattr(
-        "zaumzeug.eval.observe._load_observe_api",
+        observe_mod,
+        "_load_observe_api",
         lambda: (fake_observe, fake_update_current_span, _FakeLLMTestCase),
     )
 
@@ -106,7 +108,8 @@ def test_e8_s06_observe_hook_idempotent(monkeypatch: pytest.MonkeyPatch) -> None
         return decorator
 
     monkeypatch.setattr(
-        "zaumzeug.eval.observe._load_observe_api",
+        observe_mod,
+        "_load_observe_api",
         lambda: (fake_observe, lambda **_: None, object),
     )
 

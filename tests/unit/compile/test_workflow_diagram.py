@@ -257,8 +257,9 @@ def test_e4_s08_diagram_only_cli_prints_path(
     code = _compile_command(args)
     captured = capsys.readouterr()
     assert code == 0
-    assert "Workflow diagram refreshed" in captured.out
+    assert "Workflow docs refreshed" in captured.out
     assert "workflow-diagram.md" in captured.out
+    assert "workflow-paths.md" in captured.out
 
 
 def test_e4_s08_dry_run_and_diagram_only_conflict(tmp_path: Path) -> None:

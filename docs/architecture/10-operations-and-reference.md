@@ -30,6 +30,8 @@ Goals: [PRD G6](../prd.md#3-goals). Epics: [E2, E4, E6](../prd.md#8-functional-r
 
 **Implementation (E4-S08, 2026-07-28):** Diagram generator ships in `compile/workflow_diagram.py`; full compile and `--workflow-diagram-only` refresh `docs/workflow-diagram.md`. Doctor staleness check unchanged — suggests `zaumzeug compile <harness> --workflow-diagram-only` when missing/stale. Tests: `tests/unit/compile/test_workflow_diagram.py`, `tests/integration/test_doctor.py::test_e4_s08_ac5_stale_diagram_warning`.
 
+**Implementation (E4-S09, 2026-08-26):** Paths generator ships in `compile/workflow_paths.py`; compile refreshes `docs/workflow-paths.md` alongside the diagram. Doctor `workflow_paths` warns when missing/stale vs `workflow.yaml` + workflow-listed `agents/*/agent.yaml` (dev mode only). Tests: `tests/unit/compile/test_workflow_paths.py`, `tests/integration/test_doctor.py::test_e4_s09_ac5_*`.
+
 **Implementation (E2-S04c, 2026-07-08):** `--deploy` flag (or `HARNESS_ROOT=deploy`) validates production bundles under `deploy/<name>/`. Checks deploy `manifest.json`, pinned artifact runs (`deploy_manifest`, `deploy_artifact`), and reuses E2-S04a core checks; skips dev-only warnings. Tests: `tests/integration/test_doctor.py` (`-k e2_s04c`).
 
 **Implementation (E4-S05, 2026-07-28):** Warn-only `artifact_module` check — when a valid artifact is resolved and `compile.module` is set, compares current module `.py` SHA-256 to manifest `source_hash`. Drift suggests `zaumzeug compile <harness> --agent <name>` (exit code stays 0). Skipped in `--deploy` mode. Tests: `tests/integration/test_doctor.py::test_e4_s05_ac5_stale_artifact_warn`.
@@ -294,6 +296,7 @@ Complements [PRD §6](../prd.md#6-product-principles) and [§4 non-goals](../prd
 | DSPy `ReAct` + Haystack `Agent` same request | Double loops |
 | Hand-edit post-GEPA artifacts | Prompt drift |
 | Hand-edit `docs/workflow-diagram.md` | Overwritten on next `zaumzeug compile` |
+| Hand-edit `docs/workflow-paths.md` | Overwritten on next `zaumzeug compile` |
 | Scalar-only GEPA metrics | Loses reflection |
 | GEPA on live traffic | Cost/latency |
 | Train/serve tool mismatch | Skew |

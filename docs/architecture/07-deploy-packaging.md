@@ -32,6 +32,7 @@ Requirements: **[PRD E5](../prd.md#epic-e5--deploy-packaging-phase-2)**.
 | `agents/<name>/hooks.py` | `hooks.enabled: true` in that agent's `agent.yaml` |
 | `pipelines/*` | Pipeline id listed in `serve.expose` |
 | `docs/workflow-diagram.md` | Generated at compile (E4-S08) | **Included** in `deploy/<harness>/docs/` |
+| `docs/workflow-paths.md` | Generated at compile (E4-S09) | **Included** in `deploy/<harness>/docs/` |
 | `agents/<name>/modules/`, `skills/`, `data/`, `eval/` | Dev only | **Never** |
 
 Requirements: [PRD E5.2](../prd.md#epic-e5--deploy-packaging-phase-2). **Done** ([E5-S02](../stories/epic-stories/42-story.md), 2026-07-28) — `resolve_deploy_copy_plan` / `assert_required_paths` in `deploy/copy_rules.py`; golden `tests/integration/deploy/test_deploy_golden.py`.
@@ -43,7 +44,7 @@ Requirements: [PRD E5.2](../prd.md#epic-e5--deploy-packaging-phase-2). **Done** 
 1. Validate (`zaumzeug doctor`, resolvable runtime path).
 2. Apply **eval gate** per [§6.4](05-configuration.md#64-deploy-eval-gate).
 3. Write stripped `harness.yaml` (no `compile`/`eval`/`deploy`).
-4. Pin per-agent artifacts; copy `agents/*/agents-models.yaml`, tools, pipelines, hooks, `docs/workflow-diagram.md`.
+4. Pin per-agent artifacts; copy `agents/*/agents-models.yaml`, tools, pipelines, hooks, `docs/workflow-diagram.md`, `docs/workflow-paths.md`.
 5. Merge harness `models.yaml`; write `manifest.json` (per-agent `artifact_run_id` map), `README.deploy.md`.
 6. Copy `target_install.py`, `target-install.sh`, `target-install.ps1` into `deploy/<name>/` (from `install/templates/` or SDK `install/`).
 7. Copy optional secret-free `traefik/` snippets (static + dynamic YAML) from `install/templates/deploy/traefik/` (**E8-S02**).

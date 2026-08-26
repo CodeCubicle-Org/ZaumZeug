@@ -39,7 +39,9 @@ DSPy and GEPA never run in production. End-user chat is never a GEPA optimizatio
 
 **Implementation (E4-S07, 2026-07-28):** Immutable `artifacts/<run_id>/` (never overwritten); pin/rollback via `agent.artifact` or `current`; doctor validates pins. Docs: [user-docs/guides/compile.md](../user-docs/guides/compile.md#rollback-to-a-pinned-run).
 
-**Implementation (E4-S08, 2026-07-28):** Every full `zaumzeug compile` (and `--workflow-diagram-only`) regenerates harness `docs/workflow-diagram.md` (Mermaid) from `workflow.yaml` + resolved agent `default_model_id` / provider. Generator: `compile/workflow_diagram.py`. Doctor warns when the diagram is stale or missing ([§5.4](04-data-flows.md#54-workflow-diagram-compile)). Tests: `tests/unit/compile/test_workflow_diagram.py`.
+**Implementation (E4-S08, 2026-07-28):** Every full `zaumzeug compile` (and `--workflow-diagram-only`) regenerates harness `docs/workflow-diagram.md` (Mermaid) from `workflow.yaml` + resolved agent `default_model_id` / provider. Generator: `compile/workflow_diagram.py` + shared `compile/workflow_labels.py`. Doctor warns when the diagram is stale or missing ([§5.4](04-data-flows.md#54-workflow-diagram-and-paths-compile)). Tests: `tests/unit/compile/test_workflow_diagram.py`.
+
+**Implementation (E4-S09, 2026-08-26):** Same compile paths regenerate `docs/workflow-paths.md` (index, serial stage route, per-agent tool branches). Generator: `compile/workflow_paths.py`. Doctor `workflow_paths` check (dev only). Tests: `tests/unit/compile/test_workflow_paths.py`.
 
 ### Pattern B — `optimize_anything` *(deferred — Phase 4+)*
 

@@ -63,7 +63,7 @@ This bundle is **OS-neutral**: Python 3.11+ sources, YAML/JSON config, and pinne
 
 **Linux-first production:** The supported ops target in v1 is Linux (VM, bare metal, Docker/Kubernetes). Windows/macOS production serve is supported **best-effort** and is **not CI-gated** in v1 — report issues as best-effort. Phase 2+ CI requires `zaumzeug deploy` → `zaumzeug serve --deploy` smoke on Linux (`ubuntu-latest`).
 
-**Optional container path:** Generate a Dockerfile into this bundle with `zaumzeug deploy {{harness_name}} --dockerfile` or `deploy.dockerfile: true` in the **dev** `harness.yaml` (the flag is stripped from the shipped yaml). See [Container (Dockerfile)](#container-dockerfile) below.
+**Optional container path:** Generate a Dockerfile into this bundle with `zaumzeug deploy {{harness_name}} --dockerfile` or `deploy.dockerfile: true` in the **dev** `harness.yaml` (E8-S05; the flag is stripped from the shipped yaml). See [Container (Dockerfile)](#container-dockerfile) below.
 
 ---
 
@@ -226,6 +226,7 @@ One process = one harness (multi-tenant Hayhooks remains out of scope). Full gui
 | `workflow.yaml` | Serial workflow |
 | `manifest.json` | Build metadata + pinned `artifact_run_id` |
 | `docs/workflow-diagram.md` | Workflow diagram from compile |
+| `docs/workflow-paths.md` | Stage routes + tool branches from compile (E4-S09) |
 | `agents/<name>/` | Runtime agent files + pinned artifacts |
 | `target_install.py` (+ wrappers) | Target host bootstrap |
 | `README.deploy.md` | This ops guide |

@@ -68,15 +68,15 @@ zaumzeug compile <harness> [--agent NAME] [--dry-run | --workflow-diagram-only]
 
 Use `--dry-run` to validate Phase 2 compile config, resolve `compile.module` imports, and print task/reflection model ids **without** running GEPA or writing artifacts (mirrors `zaumzeug serve --dry-run`). Each compile load imports from the **current** agent folder; the same dotted name (for example `modules.researcher:ResearchModule`) in another agent is not reused from a previous import in the same process.
 
-Use `--workflow-diagram-only` to regenerate `docs/workflow-diagram.md` (Mermaid flowchart from `workflow.yaml` + resolved agent models) without GEPA or LLM calls. Every full compile also refreshes that diagram.
+Use `--workflow-diagram-only` to regenerate `docs/workflow-diagram.md` and `docs/workflow-paths.md` (Mermaid stage routes and configured tool branches from `workflow.yaml` + agent yaml) without GEPA or LLM calls. Every full compile also refreshes both files.
 
 Each full run writes immutable `agents/<name>/artifacts/<run_id>/` and updates `artifacts/current`. The canonical manifest name is **`artifact-manifest.json`** (not the deploy bundle’s `manifest.json`). During migration, a legacy `manifest.json` inside an artifact folder is still accepted when resolving.
 
 Live task/reflection models need API keys in `.env`. The shipped `example` harness uses `provider: mock` and a stub GEPA path for offline compile.
 
-## Workflow diagram
+## Workflow diagram and paths
 
-Every successful full compile writes **`docs/workflow-diagram.md`** under the harness (Markdown + Mermaid). Do not hand-edit it — compile overwrites.
+Every successful full compile writes **`docs/workflow-diagram.md`** (serial overview) and **`docs/workflow-paths.md`** (stage routes + per-agent tool-branch diagrams) under the harness. Do not hand-edit either file — compile overwrites.
 
 ```bash
 zaumzeug compile example --workflow-diagram-only
@@ -87,7 +87,7 @@ zaumzeug compile example --workflow-diagram-only
 | Agent stage | Agent id + resolved `default_model_id (provider)` |
 | Pipeline stage | Pipeline id |
 
-`zaumzeug doctor` warns (exit 0) when `workflow.yaml` is newer than the diagram, or the diagram is missing. Deploy packaging copies `docs/workflow-diagram.md` into `deploy/<harness>/docs/` (E5-S01 + E5-S02 golden matrix).
+`zaumzeug doctor` warns (exit 0) when `workflow.yaml` is newer than the diagram, when `workflow-paths.md` is missing or stale vs `workflow.yaml` / workflow-listed `agents/*/agent.yaml`, or when the diagram is missing. Deploy packaging copies both docs files into `deploy/<harness>/docs/` (E5-S01 + E5-S02 golden matrix).
 
 ## Serve after compile
 

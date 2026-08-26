@@ -25,6 +25,7 @@ usr-harnesses/<harness-name>/
 ├── pipelines/         # Haystack YAML — list ids in serve.expose (E8-S01)
 └── docs/
     └── workflow-diagram.md   # auto-generated at compile (E4-S08)
+    └── workflow-paths.md     # stage routes + tool branches (E4-S09)
 ```
 
 | File | Role |
@@ -80,7 +81,7 @@ stages:
   - agent: researcher
 ```
 
-After **`zaumzeug compile`**, each agent's GEPA run writes immutable **`artifacts/<run_id>/`** (and updates **`artifacts/current`**) with Haystack export files (`artifact-manifest.json`, `prompts/system.md`, optional `input_rewrite.md`). Pin a prior run via `agent.artifact` to rollback without re-GEPA — see [Compile and export — Rollback](compile.md#rollback-to-a-pinned-run). GEPA optimizes the **template**, not end-user chat — see [Compile and export](compile.md). When `input_rewrite` is listed, serve/`run` apply that fixed template before the agent loop. Every compile also regenerates harness **`docs/workflow-diagram.md`** (Mermaid); use **`zaumzeug compile <harness> --workflow-diagram-only`** to refresh without GEPA.
+After **`zaumzeug compile`**, each agent's GEPA run writes immutable **`artifacts/<run_id>/`** (and updates **`artifacts/current`**) with Haystack export files (`artifact-manifest.json`, `prompts/system.md`, optional `input_rewrite.md`). Pin a prior run via `agent.artifact` to rollback without re-GEPA — see [Compile and export — Rollback](compile.md#rollback-to-a-pinned-run). GEPA optimizes the **template**, not end-user chat — see [Compile and export](compile.md). When `input_rewrite` is listed, serve/`run` apply that fixed template before the agent loop. Every compile also regenerates harness **`docs/workflow-diagram.md`** and **`docs/workflow-paths.md`**; use **`zaumzeug compile <harness> --workflow-diagram-only`** to refresh both without GEPA.
 
 ---
 
@@ -218,10 +219,10 @@ Pipelines are also callable over HTTP as **`POST /{pipeline-id}/run`** when the 
 | **`zaumzeug serve <harness>`** | Runs the **`entry`** agent only (interactive) |
 | **`zaumzeug run <harness>`** | Runs all **`stages`** in order (agents + pipelines) |
 | **`zaumzeug run <harness> --from <stage>`** | Partial run from a given stage (debug) |
-| **`zaumzeug compile <harness>`** | Runs GEPA per agent with a `compile:` block; writes immutable `artifacts/<run_id>/` + `current` with Haystack export; regenerates `docs/workflow-diagram.md`. Pin a prior run to rollback without re-GEPA — see [Compile and export — Rollback](compile.md#rollback-to-a-pinned-run). Live models need API keys in `.env`. See [Compile and export](compile.md) |
+| **`zaumzeug compile <harness>`** | Runs GEPA per agent with a `compile:` block; writes immutable `artifacts/<run_id>/` + `current` with Haystack export; regenerates `docs/workflow-diagram.md` and `docs/workflow-paths.md`. Pin a prior run to rollback without re-GEPA — see [Compile and export — Rollback](compile.md#rollback-to-a-pinned-run). Live models need API keys in `.env`. See [Compile and export](compile.md) |
 | **`zaumzeug compile <harness> --dry-run`** | Validates Phase 2 compile config, module imports, and task/reflection models — no GEPA, no LLM calls, no artifacts |
-| **`zaumzeug compile <harness> --workflow-diagram-only`** | Regenerates `docs/workflow-diagram.md` from `workflow.yaml` without GEPA or LLM calls |
-| **`zaumzeug doctor <harness>`** | Validates `workflow.yaml` (schema + agent refs), `harness.yaml`, models, runtime paths; warns on stale diagram |
+| **`zaumzeug compile <harness> --workflow-diagram-only`** | Regenerates `docs/workflow-diagram.md` and `docs/workflow-paths.md` from `workflow.yaml` without GEPA or LLM calls |
+| **`zaumzeug doctor <harness>`** | Validates `workflow.yaml` (schema + agent refs), `harness.yaml`, models, runtime paths; warns on stale diagram or paths |
 | **`zaumzeug serve <harness> --dry-run`** | Same workflow validation path as doctor before resolving the entry agent |
 
 ---
@@ -325,4 +326,4 @@ These may appear in later releases; they are **not** required to build a Phase 1
 - [Getting started — first harness](../getting-started/first-harness.md)
 - [Custom tools](custom-tools.md) — `tools.custom` Python modules under `agents/<name>/tools/`
 - [CLI reference](../reference/cli.md) — `serve`, `run`, `compile`, `--verbose`, `HARNESS_LOG_LEVEL`
-- Generated diagram: **`usr-harnesses/<harness>/docs/workflow-diagram.md`** after compile (or `--workflow-diagram-only`)
+- Generated docs: **`usr-harnesses/<harness>/docs/workflow-diagram.md`** and **`workflow-paths.md`** after compile (or `--workflow-diagram-only`)

@@ -737,6 +737,10 @@ def write_deploy_bundle(
         harness_dir / "docs" / "workflow-diagram.md",
         dest / "docs" / "workflow-diagram.md",
     )
+    _copy_file(
+        harness_dir / "docs" / "workflow-paths.md",
+        dest / "docs" / "workflow-paths.md",
+    )
     _copy_exposed_pipelines(
         harness_dir=harness_dir,
         dest_dir=dest,

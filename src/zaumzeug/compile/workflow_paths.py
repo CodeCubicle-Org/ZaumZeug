@@ -1,0 +1,352 @@
+"""Generate harness ``docs/workflow-paths.md`` at compile time (E4-S09 / E4.8).
+
+Architecture §5.4: serial stage routes plus per-agent configured tool branches as
+Mermaid diagrams. Regenerated with full compile and ``--workflow-diagram-only``.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import date
+from pathlib import Path
+
+from zaumzeug.compile.workflow_labels import (
+    escape_mermaid_label,
+    resolve_harness_models_path,
+    stage_label,
+)
+from zaumzeug.config import (
+    ConfigValidationError,
+    load_agent_config,
+    load_harness,
+    load_workflow,
+)
+from zaumzeug.config.harness_root import harness_dir as resolve_harness_dir
+from zaumzeug.config.schemas import AgentToolsConfig, WorkflowConfig, WorkflowStage
+from zaumzeug.doctor.project import find_project_root
+
+__all__ = [
+    "WORKFLOW_PATHS_REL",
+    "WorkflowPathsError",
+    "WorkflowPathsResult",
+    "format_workflow_paths_result",
+    "render_workflow_paths",
+    "write_workflow_paths",
+]
+
+WORKFLOW_PATHS_REL = Path("docs") / "workflow-paths.md"
+
+
+class WorkflowPathsError(RuntimeError):
+    """Workflow paths generation failed with an actionable message."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        path: Path | None = None,
+        harness_name: str | None = None,
+        suggestion: str | None = None,
+    ) -> None:
+        self.path = Path(path) if path is not None else None
+        self.harness_name = harness_name
+        self.suggestion = suggestion
+        super().__init__(message)
+
+
+@dataclass(slots=True)
+class WorkflowPathsResult:
+    """Outcome of writing ``docs/workflow-paths.md``."""
+
+    harness_name: str
+    harness_dir: Path
+    paths_path: Path
+    markdown: str
+
+
+def write_workflow_paths(
+    harness_name: str,
+    *,
+    project_root: Path | str | None = None,
+    deploy: bool = False,
+    generated_on: date | None = None,
+) -> WorkflowPathsResult:
+    """Render and write ``docs/workflow-paths.md`` under the harness."""
+    root = Path(project_root) if project_root is not None else find_project_root()
+    harness_path = resolve_harness_dir(root, harness_name, deploy=deploy)
+    harness_yaml = harness_path / "harness.yaml"
+    if not harness_yaml.is_file():
+        raise WorkflowPathsError(
+            f"Harness '{harness_name}' not found at {harness_path} (missing harness.yaml)",
+            path=harness_path,
+            harness_name=harness_name,
+            suggestion=f"Create the harness with `zaumzeug init {harness_name}`",
+        )
+
+    try:
+        harness_config = load_harness(harness_yaml)
+    except ConfigValidationError as exc:
+        raise WorkflowPathsError(
+            str(exc),
+            path=exc.path,
+            harness_name=harness_name,
+            suggestion=f"Fix harness.yaml at {harness_yaml}",
+        ) from exc
+
+    try:
+        workflow = load_workflow(harness_path)
+    except ConfigValidationError as exc:
+        raise WorkflowPathsError(
+            str(exc),
+            path=exc.path,
+            harness_name=harness_name,
+            suggestion=f"Fix workflow.yaml under {harness_path}",
+        ) from exc
+
+    harness_models = resolve_harness_models_path(harness_path, harness_config.models)
+    markdown = render_workflow_paths(
+        harness_name=harness_name,
+        workflow=workflow,
+        harness_dir=harness_path,
+        project_root=root,
+        harness_models_path=harness_models,
+        generated_on=generated_on or date.today(),
+    )
+
+    paths_path = harness_path / WORKFLOW_PATHS_REL
+    paths_path.parent.mkdir(parents=True, exist_ok=True)
+    paths_path.write_text(markdown, encoding="utf-8", newline="\n")
+    return WorkflowPathsResult(
+        harness_name=harness_name,
+        harness_dir=harness_path,
+        paths_path=paths_path,
+        markdown=markdown,
+    )
+
+
+def render_workflow_paths(
+    *,
+    harness_name: str,
+    workflow: WorkflowConfig,
+    harness_dir: Path,
+    project_root: Path,
+    harness_models_path: Path | None = None,
+    generated_on: date | None = None,
+) -> str:
+    """Return Markdown + Mermaid for serial stage paths and tool branches."""
+    when = generated_on or date.today()
+    path_id = "P1"
+    stage_ids = [_stage_ref(stage) for stage in workflow.stages]
+    tool_agents = _agent_stages_with_tools(workflow, harness_dir=harness_dir)
+
+    index_rows = [
+        f"| {path_id} | {_format_stage_sequence(stage_ids)} | "
+        f"{len(tool_agents)} ({', '.join(f'`{name}`' for name in tool_agents) or '—'}) |"
+    ]
+
+    stage_mermaid = _render_stage_path_mermaid(
+        workflow.stages,
+        harness_dir=harness_dir,
+        project_root=project_root,
+        harness_models_path=harness_models_path,
+    )
+
+    sections: list[str] = [
+        f"# Workflow paths — {harness_name}",
+        "",
+        f"> Auto-generated by `zaumzeug compile {harness_name}`. Do not edit by hand.",
+        "",
+        "## Index",
+        "",
+        "| Path | Stages | Tool-branch diagrams |",
+        "|---|---|---|",
+        *index_rows,
+        "",
+        f"## Path {path_id} — full stage route",
+        "",
+        f"> Stage order matches `workflow-diagram.md`.",
+        "",
+        "```mermaid",
+        stage_mermaid,
+        "```",
+        "",
+    ]
+
+    for agent_name in tool_agents:
+        is_last = _is_last_agent_stage(workflow, agent_name)
+        tool_mermaid = _render_tool_branch_mermaid(
+            agent_name,
+            harness_dir=harness_dir,
+            exit_label="End" if is_last else "Continue",
+        )
+        sections.extend(
+            [
+                f"### {path_id} · agent `{agent_name}` — tool branches",
+                "",
+                "```mermaid",
+                tool_mermaid,
+                "```",
+                "",
+            ]
+        )
+
+    sections.append(f"**Stages:** {len(workflow.stages)} serial "
+                    f"{'stage' if len(workflow.stages) == 1 else 'stages'} · "
+                    f"**Entry:** `{workflow.entry}` · "
+                    f"**Generated:** {when.isoformat()}")
+    return "\n".join(sections) + "\n"
+
+
+def format_workflow_paths_result(result: WorkflowPathsResult) -> str:
+    """Human-readable summary for ``--workflow-diagram-only``."""
+    return (
+        f"Workflow paths refreshed for harness '{result.harness_name}'.\n"
+        f"  wrote: {result.paths_path}"
+    )
+
+
+def _stage_ref(stage: WorkflowStage) -> str:
+    if stage.pipeline:
+        return f"pipeline:{stage.pipeline.strip()}"
+    return f"agent:{(stage.agent or '').strip()}"
+
+
+def _format_stage_sequence(stage_ids: list[str]) -> str:
+    if not stage_ids:
+        return "—"
+    return ", ".join(f"`{stage_id}`" for stage_id in stage_ids)
+
+
+def _render_stage_path_mermaid(
+    stages: list[WorkflowStage],
+    *,
+    harness_dir: Path,
+    project_root: Path,
+    harness_models_path: Path | None,
+) -> str:
+    lines = ["flowchart LR"]
+    node_ids: list[str] = []
+
+    for index, stage in enumerate(stages):
+        node_id = f"s{index}"
+        node_ids.append(node_id)
+        label = stage_label(
+            stage,
+            harness_dir=harness_dir,
+            project_root=project_root,
+            harness_models_path=harness_models_path,
+        )
+        lines.append(f'  {node_id}["{escape_mermaid_label(label)}"]')
+
+    for left, right in zip(node_ids, node_ids[1:], strict=False):
+        lines.append(f"  {left} --> {right}")
+
+    return "\n".join(lines)
+
+
+def _agent_stages_with_tools(
+    workflow: WorkflowConfig,
+    *,
+    harness_dir: Path,
+) -> list[str]:
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for stage in workflow.stages:
+        agent_name = (stage.agent or "").strip()
+        if not agent_name or agent_name in seen:
+            continue
+        tools = _load_agent_tools(harness_dir, agent_name)
+        if tools is not None and _configured_tool_count(tools) > 0:
+            seen.add(agent_name)
+            ordered.append(agent_name)
+    return ordered
+
+
+def _load_agent_tools(harness_dir: Path, agent_name: str) -> AgentToolsConfig | None:
+    agent_yaml = harness_dir / "agents" / agent_name / "agent.yaml"
+    if not agent_yaml.is_file():
+        return None
+    try:
+        config = load_agent_config(agent_yaml)
+    except ConfigValidationError:
+        return None
+    return config.tools
+
+
+def _configured_tool_count(tools: AgentToolsConfig) -> int:
+    count = len(tools.builtin)
+    if tools.custom:
+        count += len(tools.custom)
+    if tools.mcp:
+        for server in tools.mcp:
+            if server.tool_names:
+                count += len(server.tool_names)
+            else:
+                count += 1
+    return count
+
+
+def _tool_branch_labels(tools: AgentToolsConfig) -> list[str]:
+    labels: list[str] = []
+    for tool_id in tools.builtin:
+        labels.append(f"tool: {tool_id}")
+    if tools.custom:
+        for ref in tools.custom:
+            labels.append(f"tool: {_custom_tool_stem(ref)}")
+    if tools.mcp:
+        for server in tools.mcp:
+            if server.tool_names:
+                for tool_name in server.tool_names:
+                    labels.append(f"mcp:{server.name}/{tool_name}")
+            else:
+                labels.append(f"mcp:{server.name}")
+    return labels
+
+
+def _custom_tool_stem(ref: str) -> str:
+    """Basename without ``.py``, or last dotted segment before optional ``:attr``."""
+    stripped = ref.strip()
+    module_part = stripped.rsplit(":", 1)[0] if ":" in stripped else stripped
+    name = Path(module_part).name
+    if name.endswith(".py"):
+        return name[:-3]
+    if "." in module_part:
+        return module_part.rsplit(".", 1)[-1]
+    return Path(module_part).stem or module_part
+
+
+def _is_last_agent_stage(workflow: WorkflowConfig, agent_name: str) -> bool:
+    last_agent: str | None = None
+    for stage in workflow.stages:
+        if stage.agent and stage.agent.strip():
+            last_agent = stage.agent.strip()
+    return last_agent == agent_name
+
+
+def _render_tool_branch_mermaid(
+    agent_name: str,
+    *,
+    harness_dir: Path,
+    exit_label: str,
+) -> str:
+    tools = _load_agent_tools(harness_dir, agent_name)
+    if tools is None:
+        raise WorkflowPathsError(
+            f"Agent '{agent_name}' has no readable agent.yaml for tool branches",
+            path=harness_dir / "agents" / agent_name / "agent.yaml",
+        )
+
+    branch_labels = _tool_branch_labels(tools)
+    exit_id = "exit"
+    lines = [
+        "flowchart TD",
+        f'  start([Start]) --> agent["{escape_mermaid_label(agent_name)}"]',
+    ]
+    for index, label in enumerate(branch_labels):
+        node_id = f"t{index}"
+        lines.append(f'  agent --> {node_id}["{escape_mermaid_label(label)}"]')
+        lines.append(f"  {node_id} --> {exit_id}")
+    lines.append(f'  agent --> final["final answer (no tool)"]')
+    lines.append(f"  final --> {exit_id}")
+    lines.append(f"  {exit_id}([{exit_label}])")
+    return "\n".join(lines)

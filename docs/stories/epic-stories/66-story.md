@@ -5,15 +5,15 @@
 | **Document** | User story |
 | **File** | `docs/stories/epic-stories/66-story.md` |
 | **Created** | 2026-08-26 |
-| **Last modified** | 2026-08-26 (Tester validation) |
-| **Status** | Ready |
+| **Last modified** | 2026-08-26 (implemented; verification complete) |
+| **Status** | Done |
 | **Story ID** | E4-S09 |
 | **Epic** | [E4 — Compile and GEPA Pipeline](../04-epic.md) |
 | **Phase** | 2+ *(post–Phase 4 backlog; extends E4-S08)* |
 | **Epic build order** | 4 of 8 |
 | **Story sequence** | 66 of 66 (global build order) |
 | **Source** | Developer request: enumerate all harness workflow paths as Mermaid in harness `docs/` (2026-08-26) |
-| **Related** | [Stories index](../00-README.md) · [Epic E4](../../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2) · [E4-S08](33-story.md) · [Architecture §5.4](../../architecture/04-data-flows.md#54-workflow-diagram-compile) |
+| **Related** | [Stories index](../00-README.md) · [Epic E4](../../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2) · [E4-S08](33-story.md) · [Architecture §5.4](../../architecture/04-data-flows.md#54-workflow-diagram-and-paths-compile) |
 
 ---
 
@@ -51,7 +51,7 @@ As a **harness developer**, I want an auto-generated Markdown file under my harn
 ### References
 
 - [PRD E4.8](../../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2) *(added with this story)*
-- [Architecture §5.4 — workflow diagram](../../architecture/04-data-flows.md#54-workflow-diagram-compile) *(extend for paths)*
+- [Architecture §5.4 — workflow diagram and paths](../../architecture/04-data-flows.md#54-workflow-diagram-and-paths-compile)
 - [E4-S08 — Workflow diagram at compile](33-story.md)
 - [Mermaid flowchart syntax](https://mermaid.js.org/syntax/flowchart.html)
 - [user-docs — compile](../../../user-docs/guides/compile.md) · [multi-agent-workflow](../../../user-docs/guides/multi-agent-workflow.md)
@@ -60,10 +60,10 @@ As a **harness developer**, I want an auto-generated Markdown file under my harn
 
 **Internal**
 
-- `src/zaumzeug/compile/workflow_diagram.py` — **required:** export shared stage-label / model-resolve / Mermaid-escape helpers (or a tiny shared private module under `compile/`) so paths and diagram cannot drift; do not copy-paste
-- `src/zaumzeug/compile/workflow_paths.py` — **new** `WORKFLOW_PATHS_REL`, `render_workflow_paths()` / `write_workflow_paths()` / `WorkflowPathsError`; signature parity with diagram (`project_root`, `deploy`, `generated_on`)
-- `src/zaumzeug/compile/runner.py` — extend `_write_diagram` (or rename to `_write_workflow_docs`) to write **diagram then paths**; map `WorkflowPathsError` → `CompileError` (same pattern as `WorkflowDiagramError`); `--workflow-diagram-only` and post-GEPA paths both use it
-- `CompileResult` — add `paths_path: Path | None`; `format_compile_result` lists both files on diagram-only and full compile
+- `src/zaumzeug/compile/workflow_labels.py` — **Done** shared stage-label / model-resolve / Mermaid-escape helpers (E4-S09)
+- `src/zaumzeug/compile/workflow_diagram.py` — uses shared helpers from `workflow_labels.py` (no duplicated logic)
+- `src/zaumzeug/compile/workflow_paths.py` — **Done** `WORKFLOW_PATHS_REL`, `render_workflow_paths()` / `write_workflow_paths()` / `WorkflowPathsError`
+- `src/zaumzeug/compile/runner.py` — **Done** `_write_workflow_docs()` writes diagram then paths; `CompileResult.paths_path`; `WorkflowPathsError` → `CompileError`
 - Agent tools: `load_agent_yaml` → `load_agent_config` → `AgentConfig.tools` (`AgentToolsConfig`) — **labels only**; never import custom/MCP tool modules
 - Pipeline stages: pipeline id as a single node (no tool branches)
 - `src/zaumzeug/doctor/checks.py` — `check_workflow_paths_staleness` (separate check name, e.g. `workflow_paths`); wire in `doctor/runner.py` **only when not `deploy_mode`** (parity with diagram)
@@ -142,7 +142,7 @@ zaumzeug compile <harness> --workflow-diagram-only
 
 | Path | Stages | Tool-branch diagrams |
 |---|---|---|
-| P1 | `researcher` | 1 (`researcher`) |
+| P1 | `agent:researcher` | 1 (`researcher`) |
 
 ## Path P1 — full stage route
 
@@ -157,9 +157,10 @@ flowchart LR
 flowchart TD
   start([Start]) --> agent["researcher"]
   agent --> t0["tool: web_fetch"]
+  t0 --> exit
   agent --> final["final answer (no tool)"]
-  t0 --> cont([Continue])
-  final --> cont
+  final --> exit
+  exit([End])
 ```
 
 **Generated:** 2026-08-26
@@ -167,22 +168,22 @@ flowchart TD
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Every `zaumzeug compile <harness>` (non–dry-run), including `--agent`, writes `usr-harnesses/<harness>/docs/workflow-paths.md` with an auto-generated header via `write_workflow_paths()`. `--dry-run` does **not** write. Diagram behavior unchanged. Runner wraps `WorkflowPathsError` → `CompileError`. `CompileResult.paths_path` set when written.
-- [ ] **AC-2** Paths file includes an **index** and **at least one** stage-path Mermaid (`P1` for serial) using `workflow.stages` order and **shared** label helpers with E4-S08. Pipeline stages use pipeline id. Serial `P1` may mirror the overview.
-- [ ] **AC-3** For each agent stage with ≥1 configured tool, a **separate** Mermaid tool-branch diagram (configured branches + `final answer (no tool)`). Labels: builtin `tool:<id>`; custom stem rules; MCP `tool_names` → `mcp:<server>/<tool>` else `mcp:<server>`. Tools read via `load_agent_config` / `AgentToolsConfig` only — no tool module / live MCP imports. No cross-product across stages.
-- [ ] **AC-4** `--workflow-diagram-only` refreshes **both** files without GEPA/LLM; CLI help mentions both; diagram-only CLI summary lists both paths.
-- [ ] **AC-5** Dev-mode doctor **warns** (`workflow_paths`) when paths missing or older than newest of `workflow.yaml` + workflow-listed `agents/*/agent.yaml`. **Skipped in `doctor --deploy`**. Suggest `--workflow-diagram-only`.
-- [ ] **AC-6** Deploy: `ALWAYS_INCLUDED` + copy plan `CopyKind` `paths` + packager explicit copy; required when packaging (missing → fail like diagram). Golden / copy-plan assert.
-- [ ] **AC-7** **Docs:** user-docs (compile + multi-agent-workflow + CLI) + Architecture §5.4 (sibling file, path model, staleness inputs, deploy include) + §10.1 / §11 SDK map + §15 anti-pattern. Example + install templates in sync.
+- [x] **AC-1** Every `zaumzeug compile <harness>` (non–dry-run), including `--agent`, writes `usr-harnesses/<harness>/docs/workflow-paths.md` with an auto-generated header via `write_workflow_paths()`. `--dry-run` does **not** write. Diagram behavior unchanged. Runner wraps `WorkflowPathsError` → `CompileError`. `CompileResult.paths_path` set when written.
+- [x] **AC-2** Paths file includes an **index** and **at least one** stage-path Mermaid (`P1` for serial) using `workflow.stages` order and **shared** label helpers with E4-S08. Pipeline stages use pipeline id. Serial `P1` may mirror the overview.
+- [x] **AC-3** For each agent stage with ≥1 configured tool, a **separate** Mermaid tool-branch diagram (configured branches + `final answer (no tool)`). Labels: builtin `tool:<id>`; custom stem rules; MCP `tool_names` → `mcp:<server>/<tool>` else `mcp:<server>`. Tools read via `load_agent_config` / `AgentToolsConfig` only — no tool module / live MCP imports. No cross-product across stages.
+- [x] **AC-4** `--workflow-diagram-only` refreshes **both** files without GEPA/LLM; CLI help mentions both; diagram-only CLI summary lists both paths.
+- [x] **AC-5** Dev-mode doctor **warns** (`workflow_paths`) when paths missing or older than newest of `workflow.yaml` + workflow-listed `agents/*/agent.yaml`. **Skipped in `doctor --deploy`**. Suggest `--workflow-diagram-only`.
+- [x] **AC-6** Deploy: `ALWAYS_INCLUDED` + copy plan `CopyKind` `paths` + packager explicit copy; required when packaging (missing → fail like diagram). Golden / copy-plan assert.
+- [x] **AC-7** **Docs:** user-docs (compile + multi-agent-workflow + CLI) + Architecture §5.4 (sibling file, path model, staleness inputs, deploy include) + §10.1 / §11 SDK map + §15 anti-pattern. Example + install templates in sync.
 
 ### Implementation tasks (build)
 
-- [ ] Extract/share Mermaid label helpers; add `compile/workflow_paths.py` (`render` / `write` / `WorkflowPathsError` / `WORKFLOW_PATHS_REL`)
-- [ ] Runner: write diagram+paths together; `CompileResult.paths_path`; `CompileError` wrap; format summary
-- [ ] Doctor `check_workflow_paths_staleness` (dev only); CLI help
-- [ ] Deploy: `ALWAYS_INCLUDED` + `CopyKind` `paths` + packager `_copy_file` + golden
-- [ ] Regenerate example + install-template paths md
-- [ ] User-docs + Architecture §5.4 / §10.1 / §11 / §15
+- [x] Extract/share Mermaid label helpers (`compile/workflow_labels.py`); add `compile/workflow_paths.py` (`render` / `write` / `WorkflowPathsError` / `WORKFLOW_PATHS_REL`)
+- [x] Runner: write diagram+paths together; `CompileResult.paths_path`; `CompileError` wrap; format summary
+- [x] Doctor `check_workflow_paths_staleness` (dev only); CLI help
+- [x] Deploy: `ALWAYS_INCLUDED` + `CopyKind` `paths` + packager `_copy_file` + golden
+- [x] Regenerate example + install-template paths md
+- [x] User-docs + Architecture §5.4 / §10.1 / §11 / §15
 
 ### Verification (after build)
 
@@ -221,17 +222,24 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 - Import guard: `tools.custom` points at a non-existent module; `write_workflow_paths` must not raise import errors.
 - Deploy seeds: harness fixtures used by deploy tests must create `docs/workflow-paths.md` (required file) or compile `--workflow-diagram-only` before package.
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/compile/test_workflow_paths.py tests/unit/docs/test_workflow_paths_docs.py tests/unit/deploy/test_copy_rules.py tests/integration/test_doctor.py tests/integration/deploy/test_deploy.py tests/integration/deploy/test_deploy_golden.py -k "e4_s09 or workflow_paths" -v` passes
-- [ ] `pytest tests/unit/compile/test_workflow_diagram.py -v` passes (E4-S08 regression)
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/compile/test_workflow_paths.py tests/unit/docs/test_workflow_paths_docs.py tests/unit/deploy/test_copy_rules.py tests/integration/test_doctor.py tests/integration/deploy/test_deploy.py tests/integration/deploy/test_deploy_golden.py -k "e4_s09 or workflow_paths" -v` passes (44 passed, 2026-08-26)
+- [x] `pytest tests/unit/compile/test_workflow_diagram.py -v` passes (E4-S08 regression; 7 passed)
+- [x] Full suite: `pytest` — 452 passed, 4 skipped (optional extras / live LLM / a2a), 2026-08-26
 
 ### Definition of done
 
-- [ ] `write_workflow_paths()` / shared labels / `CompileError` boundary locked; `CompileResult.paths_path` surfaced
-- [ ] Harness `docs/workflow-paths.md` has serial stage routes + configured tool branches as Mermaid
-- [ ] Compile (incl. `--agent`) + `--workflow-diagram-only` keep diagram and paths in sync; doctor warns in **dev only** (workflow + agent yaml)
-- [ ] Deploy requires + ships paths via copy_rules **and** packager; E4-S08 overview unchanged
-- [ ] Architecture §5.4 / §10.1 / §11 / §15 + user-docs + CLI help; verification complete (including AC-7 substring checklist + E4-S08 regression)
+- [x] `write_workflow_paths()` / shared labels / `CompileError` boundary locked; `CompileResult.paths_path` surfaced
+- [x] Harness `docs/workflow-paths.md` has serial stage routes + configured tool branches as Mermaid
+- [x] Compile (incl. `--agent`) + `--workflow-diagram-only` keep diagram and paths in sync; doctor warns in **dev only** (workflow + agent yaml)
+- [x] Deploy requires + ships paths via copy_rules **and** packager; E4-S08 overview unchanged
+- [x] Architecture §5.4 / §10.1 / §11 / §15 + user-docs + CLI help; verification complete (including AC-7 substring checklist + E4-S08 regression)
+
+### Implementation note (2026-08-26)
+
+Shipped: `compile/workflow_labels.py` (shared Mermaid labels), `compile/workflow_paths.py` (`render_workflow_paths` / `write_workflow_paths`), runner `_write_workflow_docs()`, doctor `check_workflow_paths_staleness` (`workflow_paths`), deploy `CopyKind` `paths` + packager copy, example + install-template `docs/workflow-paths.md`. Tests: 22 × `test_workflow_paths.py`, 8 × `test_workflow_paths_docs.py`, doctor/deploy AC-5/AC-6, E4-S08 regression green.
+
+**Follow-up (same day, test hygiene — not E4-S09 scope):** fixed full-suite failures unrelated to paths — `README.deploy.md` template `(E8-S05)` slug; relaxed E6-S01/E6-S02 DoD source scans for E8-S06 lazy observe; `test_eval_extra` restores `sys.modules` after eval-package purge; `test_observe` patches `observe_mod` directly (avoids pollution).
 
 ### PO decisions (2026-08-26)
 
