@@ -104,7 +104,7 @@ Then run story tests as usual, e.g.:
 
 | Project | Role |
 |---|---|
-| [Docker](https://docs.docker.com/) | Optional containerized production deploy |
+| [Docker](https://docs.docker.com/) | Optional containerized production deploy — generated `Dockerfile` via `zaumzeug deploy --dockerfile` / `deploy.dockerfile: true` (**Done** E8-S05) |
 | [Traefik](https://doc.traefik.io/traefik/) | Reference reverse proxy — TLS and auth at the edge (**Done** E8-S02, 2026-08-21). Guide: [production-auth.md](user-docs/guides/production-auth.md). |
 | [Chainlit](https://chainlit.io/) *(via `hayhooks[chainlit]`)* | Optional embedded `/chat` on `zaumzeug serve` (**Done** E7-S04, 2026-08-21). Extra is Hayhooks’, not `zaumzeug[…]`. See [web-deployment.md](user-docs/guides/web-deployment.md). |
 | [Open WebUI](https://github.com/open-webui/open-webui) | Optional two-container pattern with Hayhooks |

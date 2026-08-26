@@ -63,7 +63,7 @@ This bundle is **OS-neutral**: Python 3.11+ sources, YAML/JSON config, and pinne
 
 **Linux-first production:** The supported ops target in v1 is Linux (VM, bare metal, Docker/Kubernetes). Windows/macOS production serve is supported **best-effort** and is **not CI-gated** in v1 — report issues as best-effort. Phase 2+ CI requires `zaumzeug deploy` → `zaumzeug serve --deploy` smoke on Linux (`ubuntu-latest`).
 
-**Optional container path:** A generated Dockerfile inside the deploy bundle is planned for Phase 4 (E8-S05). Until then, run with `HARNESS_ROOT=deploy` inside your own Python 3.11+ image after `pip install zaumzeug`.
+**Optional container path:** Generate a Dockerfile into this bundle with `zaumzeug deploy {{harness_name}} --dockerfile` or `deploy.dockerfile: true` in the **dev** `harness.yaml` (the flag is stripped from the shipped yaml). See [Container (Dockerfile)](#container-dockerfile) below.
 
 ---
 
@@ -91,6 +91,30 @@ Python **3.11+** must already be on PATH. From this directory:
 1. Copy `.env.example` → `.env` if present (never commit secrets; never overwrite an existing `.env`).
 2. Put provider API keys in `.env` only — never in YAML or this bundle. **`.env` is never packaged into `deploy/`.**
 3. In container/systemd unit files, prefer `HARNESS_ROOT=deploy` so ops does not need `--deploy` on every command.
+
+---
+
+## Container (Dockerfile)
+
+When this bundle includes a `Dockerfile` (optional — `zaumzeug deploy {{harness_name}} --dockerfile` or `deploy.dockerfile: true` on the **dev** harness):
+
+```bash
+# Build from this folder (context = deploy/{{harness_name}}/)
+docker build -t zaumzeug-{{harness_name}} .
+
+# Run — inject .env at runtime (never bake secrets into the image)
+docker run --env-file /path/to/.env -p 1416:1416 zaumzeug-{{harness_name}}
+```
+
+| Detail | Value |
+|---|---|
+| **Base image** | `python:3.11-slim` |
+| **Install** | Bundled `target_install.py --skip-venv` (runtime `pip install zaumzeug` only) |
+| **CMD** | `zaumzeug serve {{harness_name}} --deploy` |
+| **Layout** | Bundle copied to `/app/deploy/{{harness_name}}/`; `HARNESS_ROOT=deploy` |
+| **Secrets** | `.dockerignore` excludes `.env`; pass `--env-file` / `-e` / orchestrator secrets at **run** time |
+
+Optional Open WebUI compose: `docker-compose.example.yml` in this folder (host networking — Phase 1 serve binds `127.0.0.1`). Full layout recipes: the project's `user-docs/guides/web-deployment.md`. Put Traefik in front for public TLS + auth: `user-docs/guides/production-auth.md`.
 
 ---
 
@@ -206,6 +230,7 @@ One process = one harness (multi-tenant Hayhooks remains out of scope). Full gui
 | `target_install.py` (+ wrappers) | Target host bootstrap |
 | `README.deploy.md` | This ops guide |
 | `traefik/` | Optional Traefik static/dynamic snippets (no secrets; fill host env on target) |
+| `Dockerfile` (+ `.dockerignore`, `docker-compose.example.yml`) | Optional — only when deploy used `--dockerfile` / `deploy.dockerfile: true` |
 
 **Never included:** `.env`, `modules/`, `skills/`, `data/`, `eval/`, DSPy/GEPA sources.
 

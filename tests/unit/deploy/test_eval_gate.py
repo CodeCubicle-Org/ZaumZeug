@@ -328,6 +328,7 @@ def test_e5_s06_ac4_warn_continues_after_failures(
         project_root: Path,
         harness_dir: Path,
         harness_config,
+        **_kwargs,
     ) -> Path:
         packs.append(harness_name)
         dest = project_root / "deploy" / harness_name

@@ -136,6 +136,6 @@ Requirements: **[PRD G4](../prd.md#3-goals)**, **[E1.7](../prd.md#epic-e1--onboa
 
 **Implementation (E1-S07, 2026-07-22):** Smoke matrix on three OS runners; mock-only (no `HARNESS_LIVE_LLM=1`); ephemeral serve via `install/ci_serve_smoke.py` + `zaumzeug serve --port`. Details: [§13.6](10-operations-and-reference.md#136-testing-playbook).
 
-**Implementation (E5-S08, 2026-07-29):** Linux-first production policy documented in `README.deploy.md` / [deploy.md](../../user-docs/guides/deploy.md#platforms); Win/macOS production serve best-effort (not CI-gated); optional Dockerfile → E8-S05.
+**Implementation (E5-S08, 2026-07-29):** Linux-first production policy documented in `README.deploy.md` / [deploy.md](../../user-docs/guides/deploy.md#platforms); Win/macOS production serve best-effort (not CI-gated); optional Dockerfile **Done** ([E8-S05](../stories/epic-stories/62-story.md), 2026-08-26).
 
 ---

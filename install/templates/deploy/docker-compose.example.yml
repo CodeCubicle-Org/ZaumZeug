@@ -1,0 +1,38 @@
+# Example: Open WebUI + harness (optional; E8-S05).
+# Build from this deploy bundle directory:
+#
+#   docker compose -f docker-compose.example.yml up --build
+#
+# Phase 1 serve binds 127.0.0.1 only — host networking lets Open WebUI reach
+# the harness. Bridge-network DNS (hayhooks:1416) needs a future non-loopback
+# bind; see user-docs/guides/web-deployment.md.
+#
+# Inject provider keys at runtime — never bake .env into the image:
+#   create .env beside this file (or pass --env-file), then compose up.
+
+services:
+  hayhooks:
+    build: .
+    image: zaumzeug-{{harness_name}}:latest
+    hostname: hayhooks
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      HARNESS_ROOT: deploy
+    network_mode: host
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    network_mode: host
+    environment:
+      OPENAI_API_BASE_URL: http://127.0.0.1:1416/v1
+      OPENAI_API_KEY: sk-not-used
+      ENABLE_OLLAMA_API: "false"
+    volumes:
+      - open-webui:/app/backend/data
+    depends_on:
+      - hayhooks
+
+volumes:
+  open-webui:

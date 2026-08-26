@@ -2,7 +2,7 @@
 
 Eval gate is E5-S06 / E6-S03. Full bundle assembly (strip, pin, manifest, README,
 target install scripts) is E5-S01. Copy-matrix resolve + required-path fail is
-E5-S02 (``deploy.copy_rules``).
+E5-S02 (``deploy.copy_rules``). Optional Dockerfile template is E8-S05.
 """
 
 from __future__ import annotations
@@ -53,6 +53,7 @@ from zaumzeug.runtime.tools.custom import CustomToolError, custom_tool_source_re
 
 __all__ = [
     "DEFAULT_EVAL_GATE",
+    "DOCKERFILE_TEMPLATE_FILES",
     "DeployError",
     "EvalGateResult",
     "PackageResult",
@@ -62,6 +63,7 @@ __all__ = [
     "discover_install_dir",
     "format_eval_gate_result",
     "package_harness",
+    "resolve_dockerfile",
     "resolve_eval_gate",
     "write_deploy_bundle",
 ]
@@ -77,6 +79,13 @@ TARGET_INSTALL_FILES: tuple[str, ...] = (
 # Optional Traefik snippets copied into every bundle (E8-S02). Secret-free YAML
 # only — credentials stay on the Traefik host env, never in these files.
 TRAEFIK_SNIPPET_DIR = "traefik"
+
+# Optional container files generated when deploy.dockerfile / --dockerfile (E8-S05).
+DOCKERFILE_TEMPLATE_FILES: tuple[str, ...] = (
+    "Dockerfile",
+    ".dockerignore",
+    "docker-compose.example.yml",
+)
 
 EvalRunner = Callable[..., EvalResult]
 BundleWriter = Callable[..., Path]
@@ -149,6 +158,22 @@ def resolve_eval_gate(
     if deploy is not None:
         return deploy.eval_gate
     return DEFAULT_EVAL_GATE
+
+
+def resolve_dockerfile(
+    harness_config: HarnessConfig,
+    *,
+    override: bool | None = None,
+) -> bool:
+    """Resolve whether to emit Dockerfile: CLI ``--dockerfile`` → ``deploy.dockerfile`` → False."""
+    if override is True:
+        return True
+    if override is False:
+        return False
+    deploy = harness_config.deploy
+    if deploy is not None:
+        return bool(deploy.dockerfile)
+    return False
 
 
 def apply_eval_gate(
@@ -562,6 +587,26 @@ def _copy_traefik_snippets(dest_dir: Path) -> None:
     shutil.copytree(src, dest, dirs_exist_ok=True)
 
 
+def _render_template_text(template_name: str, *, harness_name: str) -> str:
+    """Read a deploy template file and substitute ``{{harness_name}}``."""
+    template_dir = discover_deploy_template_dir()
+    path = template_dir / template_name
+    if not path.is_file():
+        raise DeployError(
+            f"Missing deploy template: {path}",
+            path=path,
+            suggestion=f"Restore install/templates/deploy/{template_name}",
+        )
+    return path.read_text(encoding="utf-8").replace("{{harness_name}}", harness_name)
+
+
+def _write_dockerfile_artifacts(dest_dir: Path, *, harness_name: str) -> None:
+    """Write optional Dockerfile, .dockerignore, and compose example (E8-S05)."""
+    for name in DOCKERFILE_TEMPLATE_FILES:
+        rendered = _render_template_text(name, harness_name=harness_name)
+        (dest_dir / name).write_text(rendered, encoding="utf-8")
+
+
 def _copy_target_install_scripts(dest_dir: Path) -> None:
     install_dir = discover_install_dir()
     missing = [
@@ -635,6 +680,7 @@ def write_deploy_bundle(
     project_root: Path,
     harness_dir: Path,
     harness_config: HarnessConfig,
+    dockerfile: bool = False,
 ) -> Path:
     """Assemble ``deploy/<name>/`` per Architecture §10.2 (idempotent overwrite)."""
     del harness_config  # validated upstream; we re-read raw yaml for strip/copy
@@ -770,6 +816,8 @@ def write_deploy_bundle(
     (dest / "README.deploy.md").write_text(readme, encoding="utf-8")
     _copy_target_install_scripts(dest)
     _copy_traefik_snippets(dest)
+    if dockerfile:
+        _write_dockerfile_artifacts(dest, harness_name=harness_name)
     return dest
 
 
@@ -807,6 +855,7 @@ def package_harness(
     harness_name: str,
     *,
     eval_gate: str | None = None,
+    dockerfile: bool | None = None,
     project_root: Path | str | None = None,
     run_eval_fn: EvalRunner | None = None,
     run_doctor_fn: DoctorRunner | None = None,
@@ -815,8 +864,10 @@ def package_harness(
 ) -> PackageResult:
     """Run deploy packager: doctor → eval gate (§6.4) → bundle write (E5-S01).
 
-    *eval_gate* is the CLI ``--eval-gate`` override. Inject *run_eval_fn* /
-    *run_doctor_fn* / *write_bundle* in unit tests.
+    *eval_gate* is the CLI ``--eval-gate`` override. *dockerfile* is the CLI
+    ``--dockerfile`` override (``True`` forces inclusion; ``None`` uses
+    ``deploy.dockerfile``). Inject *run_eval_fn* / *run_doctor_fn* /
+    *write_bundle* in unit tests.
     """
     root = Path(project_root) if project_root is not None else find_project_root()
     harness_path = resolve_harness_dir(root, harness_name, deploy=False)
@@ -863,12 +914,14 @@ def package_harness(
             bundle_dir=None,
         )
 
+    include_dockerfile = resolve_dockerfile(harness_config, override=dockerfile)
     writer = write_bundle or write_deploy_bundle
     bundle_dir = writer(
         harness_name,
         project_root=root,
         harness_dir=harness_path,
         harness_config=harness_config,
+        dockerfile=include_dockerfile,
     )
     return PackageResult(
         harness_name=harness_name,

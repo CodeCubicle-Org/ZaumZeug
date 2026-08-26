@@ -1,0 +1,10 @@
+# Keep secrets and local install state out of the image build context (E8-S05).
+.env
+.env.*
+!.env.example
+.venv
+**/__pycache__/
+*.pyc
+*.pyo
+.git
+.gitignore

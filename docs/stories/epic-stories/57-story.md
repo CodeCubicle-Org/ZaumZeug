@@ -85,7 +85,7 @@ Per [Story verification](../00-README.md#story-verification-required). **Docs-on
 ### Implementation notes (2026-08-21)
 
 - Guide: [web-deployment.md](../../../user-docs/guides/web-deployment.md) (mirrored in `install/templates/user-docs/guides/`).
-- Open WebUI two-container compose uses `OPENAI_API_BASE_URL=http://hayhooks:1416/v1`. Serve still binds **127.0.0.1**; the guide documents host-network / `host.docker.internal` reachability until a wide-open bind / [E8-S05](62-story.md) Dockerfile.
+- Open WebUI two-container compose uses `OPENAI_API_BASE_URL=http://hayhooks:1416/v1`. Serve still binds **127.0.0.1**; the guide documents host-network / `host.docker.internal` reachability (wide-open bind remains a future follow-up). Bundle Dockerfile template **Done** ([E8-S05](62-story.md), 2026-08-26) — `deploy.dockerfile` / `--dockerfile`.
 - SPA + Nginx: `/api/v1/` → `127.0.0.1:1416/v1/`; Next.js `:3000` server-side `OPENAI_BASE_URL=http://127.0.0.1:1416/v1`.
 - Every recipe sets OpenAI `baseURL` at the harness, not `api.openai.com`; probes include `GET /v1/models` and `GET /docs`.
 - Tests: `tests/unit/docs/test_web_deployment.py`.

@@ -174,10 +174,14 @@ def _deploy_command(args: argparse.Namespace) -> int:
     configure_logging(verbose=args.verbose)
     from zaumzeug.deploy.packager import DeployError, package_harness
 
+    # ``--dockerfile`` forces inclusion; otherwise honour ``deploy.dockerfile``.
+    dockerfile_override = True if args.dockerfile else None
+
     try:
         result = package_harness(
             args.harness_name,
             eval_gate=args.eval_gate,
+            dockerfile=dockerfile_override,
             output=sys.stdout,
         )
     except DeployError as exc:
@@ -426,6 +430,14 @@ def build_parser() -> argparse.ArgumentParser:
         choices=("skip", "warn", "block"),
         default=None,
         help="override deploy.eval_gate from harness.yaml for this run",
+    )
+    deploy_cmd.add_argument(
+        "--dockerfile",
+        action="store_true",
+        help=(
+            "include Dockerfile (+ .dockerignore, docker-compose.example.yml) "
+            "in the deploy bundle (or set deploy.dockerfile: true)"
+        ),
     )
     deploy_cmd.add_argument(
         "--verbose",

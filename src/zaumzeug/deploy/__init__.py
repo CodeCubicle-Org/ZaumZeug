@@ -17,6 +17,7 @@ from zaumzeug.deploy.copy_rules import (
 )
 from zaumzeug.deploy.packager import (
     DEFAULT_EVAL_GATE,
+    DOCKERFILE_TEMPLATE_FILES,
     TARGET_INSTALL_FILES,
     DeployError,
     EvalGateResult,
@@ -25,6 +26,7 @@ from zaumzeug.deploy.packager import (
     discover_install_dir,
     format_eval_gate_result,
     package_harness,
+    resolve_dockerfile,
     resolve_eval_gate,
     write_deploy_bundle,
 )
@@ -34,6 +36,7 @@ __all__ = [
     "DEFAULT_EVAL_GATE",
     "DEV_ONLY_AGENT_DIRS",
     "DEV_ONLY_TOP_LEVEL_DIRS",
+    "DOCKERFILE_TEMPLATE_FILES",
     "STRIPPED_AGENT_KEYS",
     "STRIPPED_HARNESS_KEYS",
     "TARGET_INSTALL_FILES",
@@ -50,6 +53,7 @@ __all__ = [
     "is_excluded_from_deploy",
     "package_harness",
     "resolve_deploy_copy_plan",
+    "resolve_dockerfile",
     "resolve_eval_gate",
     "strip_agent_yaml",
     "strip_harness_yaml",

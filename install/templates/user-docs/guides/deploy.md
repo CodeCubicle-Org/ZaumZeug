@@ -140,7 +140,7 @@ zaumzeug serve <name> --deploy --dry-run
 
 The `deploy/<name>/` bundle is **OS-neutral** (Python 3.11+ sources, YAML/JSON, pinned artifacts — no OS-specific binaries). Linux is the supported ops target in v1. Windows/macOS production serve is supported **best-effort** and is **not CI-gated** in v1.
 
-**Optional container path:** Generated Dockerfile in the bundle is Phase 4 ([E8-S05](../../docs/stories/epic-stories/62-story.md)). Until then, use `HARNESS_ROOT=deploy` in your own container image after `pip install zaumzeug`.
+**Optional container path:** Generate `deploy/<name>/Dockerfile` with `zaumzeug deploy <name> --dockerfile` or `deploy.dockerfile: true` in the **dev** `harness.yaml` (E8-S05). Base image `python:3.11-slim`; build runs `target_install.py --skip-venv`; CMD is `zaumzeug serve <name> --deploy`. Inject `.env` at **run** time (`--env-file` / `-e`) — never bake secrets into the image (`.dockerignore` excludes `.env`). Optional `docker-compose.example.yml` for Open WebUI: [Web deployment](web-deployment.md).
 
 See also [PRD §14 — Cross-platform support](../../docs/prd.md#cross-platform-support) and [Architecture §10.6](../../docs/architecture/07-deploy-packaging.md#106-deploy-platform-targets).
 

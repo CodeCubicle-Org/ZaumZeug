@@ -47,6 +47,7 @@ Requirements: [PRD E5.2](../prd.md#epic-e5--deploy-packaging-phase-2). **Done** 
 5. Merge harness `models.yaml`; write `manifest.json` (per-agent `artifact_run_id` map), `README.deploy.md`.
 6. Copy `target_install.py`, `target-install.sh`, `target-install.ps1` into `deploy/<name>/` (from `install/templates/` or SDK `install/`).
 7. Copy optional secret-free `traefik/` snippets (static + dynamic YAML) from `install/templates/deploy/traefik/` (**E8-S02**).
+8. Optionally write `Dockerfile`, `.dockerignore`, and `docker-compose.example.yml` when `deploy.dockerfile: true` or CLI `--dockerfile` (**E8-S05**).
 
 Idempotent — overwrites `deploy/<name>/`. Future: `zaumzeug export` tarball of bundle.
 
@@ -58,7 +59,7 @@ Idempotent — overwrites `deploy/<name>/`. Future: `zaumzeug export` tarball of
 
 **Implementation (E8-S01, 2026-08-21):** Packager copy of `serve.expose` pipelines (string ids or `{id, path}`) remains the E5-S02 path; serve now **registers** those YAML files as Hayhooks `POST /{id}/run`. Tests: `tests/unit/deploy/test_copy_rules.py::test_e8_s01_ac3_exposed_pipelines_in_deploy`, `tests/integration/pipelines/test_serve_expose.py`.
 
-**Implementation (E5-S01, 2026-07-28):** Steps 1 and 3–6 are live: doctor preflight → `write_deploy_bundle` (stripped yaml, pin/copy, merged harness `models.yaml`, `manifest.json`, `README.deploy.md` from `install/templates/deploy/`, target install scripts from `install/`). Tests: `tests/integration/deploy/test_deploy.py` (`e5_s01`). Target install **Done** ([E5-S09a](../stories/epic-stories/49.1-story.md)–[E5-S09c](../stories/epic-stories/49.3-story.md), 2026-07-29) — core, wrappers, `--verify`. Step 7 (Traefik snippets) **Done** ([E8-S02](../stories/epic-stories/59-story.md), 2026-08-21).
+**Implementation (E5-S01, 2026-07-28):** Steps 1 and 3–6 are live: doctor preflight → `write_deploy_bundle` (stripped yaml, pin/copy, merged harness `models.yaml`, `manifest.json`, `README.deploy.md` from `install/templates/deploy/`, target install scripts from `install/`). Tests: `tests/integration/deploy/test_deploy.py` (`e5_s01`). Target install **Done** ([E5-S09a](../stories/epic-stories/49.1-story.md)–[E5-S09c](../stories/epic-stories/49.3-story.md), 2026-07-29) — core, wrappers, `--verify`. Step 7 (Traefik snippets) **Done** ([E8-S02](../stories/epic-stories/59-story.md), 2026-08-21). Step 8 (optional Dockerfile) **Done** ([E8-S05](../stories/epic-stories/62-story.md), 2026-08-26).
 
 **Implementation (E6-S04, 2026-07-28):** `deploy/copy_rules.py` exports `is_excluded_from_deploy()` so `eval/` (and other §10.1 dev-only paths) are marked excluded. Strip helpers (`strip_harness_yaml` / `strip_agent_yaml`) landed with E5-S01. Shared test: `tests/unit/deploy/test_copy_rules.py::test_e5_s02_excludes_eval`.
 
@@ -141,9 +142,11 @@ Requirements: **[PRD E5.8](../prd.md#epic-e5--deploy-packaging-phase-2)**.
 | **CI — Phase 1** | Smoke | Smoke | Smoke | Install, doctor, dry-run, mock-model serve |
 | **CI — Phase 2+** | Optional | Optional | **Required** | `zaumzeug deploy` → `zaumzeug serve --deploy` smoke on `ubuntu-latest` |
 
-The `deploy/<name>/` bundle is **OS-neutral** (Python 3.11+, pinned yaml/artifacts, runtime tools only). Production docs (`README.deploy.md`) must state Linux as the supported ops target and reference optional Dockerfile (E8.5). Windows/macOS production serve is not CI-gated in v1 — report issues as best-effort.
+The `deploy/<name>/` bundle is **OS-neutral** (Python 3.11+, pinned yaml/artifacts, runtime tools only). Production docs (`README.deploy.md`) must state Linux as the supported ops target and document the optional Dockerfile (**Done** E8-S05 / E8.5). Windows/macOS production serve is not CI-gated in v1 — report issues as best-effort.
 
 **Implementation (E5-S08, 2026-07-29):** Platform matrix in `install/templates/deploy/README.deploy.md` + [user-docs/guides/deploy.md](../user-docs/guides/deploy.md#platforms). OS-neutral bundle test: `tests/integration/deploy/test_deploy_golden.py` (`test_e5_s08_ac2_os_neutral_bundle`). Phase 2+ Linux CI: `zaumzeug deploy example` → `install/ci_serve_smoke.py example --deploy` on `ubuntu-latest` ([ci-matrix.yml](../../.github/workflows/ci-matrix.yml)).
+
+**Implementation (E8-S05, 2026-08-26):** Optional `deploy/<name>/Dockerfile` when `deploy.dockerfile: true` or `zaumzeug deploy --dockerfile`. Templates in `install/templates/deploy/` (`Dockerfile`, `.dockerignore`, `docker-compose.example.yml`). Base `python:3.11-slim`; `target_install.py --skip-venv`; CMD `zaumzeug serve <name> --deploy`; `.env` excluded from build context / injected at runtime. Tests: `tests/integration/deploy/test_dockerfile.py`.
 
 ### 10.7 Target runtime install script
 

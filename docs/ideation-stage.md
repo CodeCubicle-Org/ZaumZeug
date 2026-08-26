@@ -729,7 +729,7 @@ scp my_agent-bundle.tgz user@server:/opt/harness/
 ssh user@server 'cd /opt/harness && tar xzf my_agent-bundle.tgz && harness serve my_agent --deploy'
 ```
 
-Optional Phase 4: `deploy/<name>/Dockerfile` generated from template.
+Optional Phase 4: `deploy/<name>/Dockerfile` generated from template. **Done** ([E8-S05](stories/epic-stories/62-story.md), 2026-08-26) — `deploy.dockerfile` / `zaumzeug deploy --dockerfile`.
 
 ### Git and `.gitignore`
 
@@ -1925,7 +1925,7 @@ Bridge Haystack agent runs to DeepEval `LLMTestCase` + metrics — only loaded w
 
 - Pipeline exposure from user `pipelines/`
 - Auth, remote deploy, trace → dataset ratchet loop
-- Optional `deploy/<name>/Dockerfile` template; CI artifact upload of `deploy/` bundles
+- Optional `deploy/<name>/Dockerfile` template (**Done** E8-S05, 2026-08-26); CI artifact upload of `deploy/` bundles
 - DeepEval `@observe` on production agent; optional Confident AI monitoring
 
 ---

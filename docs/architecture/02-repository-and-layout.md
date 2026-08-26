@@ -207,7 +207,7 @@ Install copies this tree from `install/templates/user-docs/` ([§3.4](02-reposit
 
 **Implementation (E5-S05, 2026-07-28):** [user-docs/guides/deploy.md](../../user-docs/guides/deploy.md) — target ship workflow (copy → `target_install` → `.env` → `zaumzeug serve --deploy`); Win/macOS/Linux table; runtime-only deps. Bundle mirror: `install/templates/deploy/README.deploy.md`. Tests: `tests/integration/deploy/test_target_install.py`.
 
-**Implementation (E5-S08, 2026-07-29):** Platform matrix (§10.6) in the same `deploy.md` / `README.deploy.md` — Linux-first production, OS-neutral bundle, Win/macOS best-effort not CI-gated, E8-S05 Dockerfile forward ref. Linux CI: `deploy` → `serve --deploy` smoke.
+**Implementation (E5-S08, 2026-07-29):** Platform matrix (§10.6) in the same `deploy.md` / `README.deploy.md` — Linux-first production, OS-neutral bundle, Win/macOS best-effort not CI-gated; optional Dockerfile **Done** ([E8-S05](../stories/epic-stories/62-story.md), 2026-08-26). Linux CI: `deploy` → `serve --deploy` smoke.
 
 **Implementation (E7-S03, 2026-08-21):** [user-docs/guides/cursor-mcp.md](../../user-docs/guides/cursor-mcp.md) — Cursor `mcp.json` → `http://localhost:{mcp_port}/mcp` (default 1417); install `--cursor-mcp` writes live `.cursor/mcp.json`; `uv` only for stdio `tools.mcp`. Tests: `tests/unit/install/test_scaffolding.py::test_e7_s03_ac2_mcp_json_example_scaffolded`, `tests/unit/install/test_client_install.py::test_e7_s03_ac3_cursor_mcp_flag_writes_json`.
 

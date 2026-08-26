@@ -85,7 +85,7 @@ Per [Story verification](../00-README.md#story-verification-required). Test file
 
 ### Implementation notes (2026-07-29)
 
-- Platform matrix authored in bundle `README.deploy.md` and [user-docs/guides/deploy.md](../../../user-docs/guides/deploy.md#platforms): Linux-first production (VM / bare metal / Docker/K8s), OS-neutral bundle, Win/macOS best-effort not CI-gated, E8-S05 Dockerfile forward reference.
+- Platform matrix authored in bundle `README.deploy.md` and [user-docs/guides/deploy.md](../../../user-docs/guides/deploy.md#platforms): Linux-first production (VM / bare metal / Docker/K8s), OS-neutral bundle, Win/macOS best-effort not CI-gated; optional Dockerfile **Done** ([E8-S05](62-story.md), 2026-08-26).
 - OS-neutral + pinned-artifact assertions in `test_e5_s08_ac2_os_neutral_bundle`; docs matrix in `test_e5_s08_platform_docs_matrix`.
 - Linux CI step: `zaumzeug deploy example` → `ci_serve_smoke.py example --deploy` (gated with `runner.os == 'Linux'`).
 ---

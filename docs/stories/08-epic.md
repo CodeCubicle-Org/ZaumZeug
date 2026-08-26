@@ -5,8 +5,8 @@
 | **Document** | Epic E8 user stories |
 | **File** | `docs/stories/08-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-26 (E8-S04 optional A2A agent card) |
-| **Status** | Active (E8-S07 / E8-S01 / E8-S02 / E8-S03 / E8-S04 Done) |
+| **Last modified** | 2026-08-26 (E8-S05 Dockerfile template) |
+| **Status** | Active (E8-S07 / E8-S01–S05 Done) |
 | **Build order** | **8 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -30,7 +30,7 @@
 3. **E8-S02** — Production auth ✅ *(2026-08-21; Traefik proxy-only)*
 4. **E8-S03** — Trace → dataset ratchet ✅ *(2026-08-26)*
 5. **E8-S04** — Optional A2A agent card ✅ *(2026-08-26; open #5 ship Phase 4)*
-6. **E8-S05** — Dockerfile template
+6. **E8-S05** — Dockerfile template ✅ *(2026-08-26)*
 7. **E8-S06** — DeepEval observe
 
 *(E4-S04 Pattern B evaluator ✅ 2026-07-28 — no longer queued under E8.)*
@@ -290,6 +290,7 @@ Apply [Story verification](00-README.md#story-verification-required). `tests/int
 | **Feature** | E8.5 |
 | **Persona** | Ops / platform |
 | **Priority** | P2 |
+| **Status** | Done (2026-08-26) |
 
 ### User story
 
@@ -304,16 +305,16 @@ As **ops**, I want an optional generated Dockerfile in the deploy bundle, so tha
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Optional generated `deploy/<name>/Dockerfile` (config flag or deploy flag)
-- [ ] **AC-2** Base image Python 3.11+; runs `target_install` pattern or pre-baked venv
-- [ ] **AC-3** Document `zaumzeug serve <name> --deploy` as container CMD
-- [ ] **AC-4** `.env` injected at runtime, not baked into image
+- [x] **AC-1** Optional generated `deploy/<name>/Dockerfile` (config flag or deploy flag)
+- [x] **AC-2** Base image Python 3.11+; runs `target_install` pattern or pre-baked venv
+- [x] **AC-3** Document `zaumzeug serve <name> --deploy` as container CMD
+- [x] **AC-4** `.env` injected at runtime, not baked into image
 
 ### Implementation tasks (build)
 
-- [ ] Add Dockerfile template to deploy packager
-- [ ] Document build/run in `README.deploy.md`
-- [ ] Example docker-compose for Open WebUI + harness (optional) — **layout recipe already in** [web-deployment.md](../../user-docs/guides/web-deployment.md) (E7-S08, 2026-08-21); this story still owns a generated bundle Dockerfile
+- [x] Add Dockerfile template to deploy packager
+- [x] Document build/run in `README.deploy.md`
+- [x] Example docker-compose for Open WebUI + harness (optional) — **layout recipe already in** [web-deployment.md](../../user-docs/guides/web-deployment.md) (E7-S08, 2026-08-21); bundle also ships `docker-compose.example.yml`
 
 ### Verification (after build)
 
@@ -323,17 +324,24 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 |---|---|
 | AC-1 | `tests/integration/deploy/test_dockerfile.py::test_e8_s05_ac1_dockerfile_generated_when_flagged` |
 | AC-2 | `tests/integration/deploy/test_dockerfile.py::test_e8_s05_ac2_python311_base_and_target_install` |
-| AC-3 | **manual:** README.deploy.md documents CMD |
+| AC-3 | `tests/integration/deploy/test_dockerfile.py::test_e8_s05_ac3_readme_documents_cmd` |
 | AC-4 | `tests/integration/deploy/test_dockerfile.py::test_e8_s05_ac4_no_env_baked_in_image` |
-| AC-1–4 | **optional CI:** Linux container smoke test |
+| AC-1–4 | **optional CI:** Linux container smoke test (deferred) |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/integration/deploy/test_dockerfile.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/integration/deploy/test_dockerfile.py -v` passes
 
 ### Definition of done
 
-- [ ] Linux container smoke test on CI (optional)
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Linux container smoke test on CI (optional — deferred)
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-26)
+
+- Config / CLI: `deploy.dockerfile: true` or `zaumzeug deploy --dockerfile`.
+- Templates: `install/templates/deploy/Dockerfile` (+ `.dockerignore`, `docker-compose.example.yml`).
+- Packager writes artifacts when flagged; CMD `zaumzeug serve <name> --deploy`; `.env` runtime-only.
+- Tests: `tests/integration/deploy/test_dockerfile.py`.
 
 ---
 

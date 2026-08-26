@@ -397,13 +397,14 @@ zaumzeug replay <name> --trace data/traces/run-001.jsonl
 Package a harness for production (Architecture §10.2). Runs **doctor** preflight, then the **eval gate** (Architecture §6.4 / E5-S06 / E6-S03), then writes `deploy/<name>/` (E5-S01 + copy matrix E5-S02): stripped yaml, workflow, pinned artifacts, `manifest.json`, `README.deploy.md`, and target install scripts.
 
 ```bash
-zaumzeug deploy <harness> [--eval-gate skip|warn|block] [--verbose]
+zaumzeug deploy <harness> [--eval-gate skip|warn|block] [--dockerfile] [--verbose]
 ```
 
 | Flag / arg | Description |
 |---|---|
 | `<harness>` | Harness name under `usr-harnesses/` |
 | `--eval-gate` | Override `deploy.eval_gate` from `harness.yaml` for this run |
+| `--dockerfile` | Include `Dockerfile`, `.dockerignore`, and `docker-compose.example.yml` in the bundle (or set `deploy.dockerfile: true`) |
 | `--verbose` | Enable SDK and Haystack structured debug logging |
 
 **Config** (`harness.yaml`):
@@ -411,6 +412,7 @@ zaumzeug deploy <harness> [--eval-gate skip|warn|block] [--verbose]
 ```yaml
 deploy:
   eval_gate: skip    # skip | warn | block (default: skip)
+  dockerfile: false  # optional: generate Dockerfile in deploy/<name>/ (E8-S05)
 ```
 
 | Mode | Behavior |
@@ -421,13 +423,14 @@ deploy:
 
 If `eval:` is absent, `warn` / `block` are a no-op. Gate logic lives only in `deploy/packager.py` (no duplicate path).
 
-**Bundle contents** (`deploy/<name>/`): stripped `harness.yaml` (no `eval`/`deploy`/`compile`), `workflow.yaml`, per-agent runtime files (`prompts/` / `tools/` / `hooks.py` / `agents-models.yaml` when referenced) + pinned `artifacts/<run_id>/`, `docs/workflow-diagram.md`, `manifest.json`, `README.deploy.md`, and `target_install.py` (+ `.sh` / `.ps1` wrappers). **Never** copies `modules/`, `skills/`, `data/`, or `eval/` (Architecture §10.1 / E5-S02). Missing required runtime paths abort deploy before writing. Idempotent — overwrites an existing bundle. Target install (**Done** E5-S09a/b/c): optional `.venv`, `pip install zaumzeug` (runtime only), seed `.env` from `.env.example` when missing, wrappers forward flags/exit codes, optional `--verify` runs `zaumzeug doctor <name> --deploy` then `zaumzeug serve <name> --deploy --dry-run`.
+**Bundle contents** (`deploy/<name>/`): stripped `harness.yaml` (no `eval`/`deploy`/`compile`), `workflow.yaml`, per-agent runtime files (`prompts/` / `tools/` / `hooks.py` / `agents-models.yaml` when referenced) + pinned `artifacts/<run_id>/`, `docs/workflow-diagram.md`, `manifest.json`, `README.deploy.md`, and `target_install.py` (+ `.sh` / `.ps1` wrappers). Optional **Dockerfile** (+ `.dockerignore`, `docker-compose.example.yml`) when `--dockerfile` / `deploy.dockerfile: true` (E8-S05) — base `python:3.11-slim`, `target_install --skip-venv`, CMD `zaumzeug serve <name> --deploy`; `.env` injected at run time only. **Never** copies `modules/`, `skills/`, `data/`, or `eval/` (Architecture §10.1 / E5-S02). Missing required runtime paths abort deploy before writing. Idempotent — overwrites an existing bundle. Target install (**Done** E5-S09a/b/c): optional `.venv`, `pip install zaumzeug` (runtime only), seed `.env` from `.env.example` when missing, wrappers forward flags/exit codes, optional `--verify` runs `zaumzeug doctor <name> --deploy` then `zaumzeug serve <name> --deploy --dry-run`.
 
-**After deploy:** copy `deploy/<name>/` to the target → run bundled `target_install` → create `.env` on the target → `zaumzeug serve <name> --deploy` (**Done** E5-S03) or `zaumzeug mcp <name> --deploy` (**Done** E7-S06) or `HARNESS_ROOT=deploy zaumzeug serve|mcp <name>` (**Done** E5-S04). Ship workflow docs **Done** E5-S05 — see [Deploy and ship](../guides/deploy.md) and the bundle `README.deploy.md`. Deploy git policy **Done** E5-S07 — default ignore `deploy/` / artifacts; optional release commit or CI upload ([Git policy](../guides/deploy.md#git-policy-for-deploy-bundles)). Platform policy **Done** E5-S08 — Linux-first ops target; OS-neutral bundle; Win/macOS best-effort not CI-gated; Linux CI deploy→serve smoke ([Platforms](../guides/deploy.md#platforms)). Target install **Done** E5-S09a/b/c (core / wrappers / `--verify`). Same OpenAI REST as dev serve; same MCP surface as `zaumzeug mcp` in development; `usr-harnesses/` is not required. See also [serve](#zaumzeug-serve), [mcp](#zaumzeug-mcp), and [Global environment](#global-environment).
+**After deploy:** copy `deploy/<name>/` to the target → run bundled `target_install` → create `.env` on the target → `zaumzeug serve <name> --deploy` (**Done** E5-S03) or `zaumzeug mcp <name> --deploy` (**Done** E7-S06) or `HARNESS_ROOT=deploy zaumzeug serve|mcp <name>` (**Done** E5-S04). Ship workflow docs **Done** E5-S05 — see [Deploy and ship](../guides/deploy.md) and the bundle `README.deploy.md`. Deploy git policy **Done** E5-S07 — default ignore `deploy/` / artifacts; optional release commit or CI upload ([Git policy](../guides/deploy.md#git-policy-for-deploy-bundles)). Platform policy **Done** E5-S08 — Linux-first ops target; OS-neutral bundle; Win/macOS best-effort not CI-gated; Linux CI deploy→serve smoke ([Platforms](../guides/deploy.md#platforms)). Optional Dockerfile **Done** E8-S05. Target install **Done** E5-S09a/b/c (core / wrappers / `--verify`). Same OpenAI REST as dev serve; same MCP surface as `zaumzeug mcp` in development; `usr-harnesses/` is not required. See also [serve](#zaumzeug-serve), [mcp](#zaumzeug-mcp), and [Global environment](#global-environment).
 
 ```bash
 zaumzeug deploy example
 zaumzeug deploy example --eval-gate block
+zaumzeug deploy example --dockerfile
 ```
 
 ---

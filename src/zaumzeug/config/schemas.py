@@ -555,11 +555,13 @@ class DeployConfig(BaseModel):
     """Optional ``deploy`` section of ``harness.yaml`` (Architecture §6.4 / E5-S06).
 
     Controls whether ``zaumzeug deploy`` runs eval first. Default gate is ``skip``.
+    Optional ``dockerfile`` includes a generated ``Dockerfile`` in the bundle (E8-S05).
     """
 
     model_config = ConfigDict(extra="forbid")
 
     eval_gate: EvalGateMode = "skip"
+    dockerfile: bool = False
 
 
 class RuntimeRetryConfig(BaseModel):

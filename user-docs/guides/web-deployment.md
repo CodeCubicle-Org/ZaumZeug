@@ -155,7 +155,7 @@ Ollama is **not** required. Disable it and point Open WebUI at the harness.
 
 ### Compose (canonical two-container)
 
-Service name `hayhooks` is the DNS name Open WebUI uses. A generated bundle Dockerfile is Phase 4 ([E8-S05](../../docs/stories/epic-stories/62-story.md)); until then, build (or `CMD`) an image that installs runtime `zaumzeug` and runs `zaumzeug serve <name> --deploy`.
+Service name `hayhooks` is the DNS name Open WebUI uses. When the deploy bundle includes a generated Dockerfile (`zaumzeug deploy <name> --dockerfile` / `deploy.dockerfile: true` — E8-S05), build from `deploy/<name>/` and set `image:` (or `build:`) accordingly. CMD is `zaumzeug serve <name> --deploy`. Inject `.env` at runtime — never bake secrets into the image.
 
 ```yaml
 services:
@@ -200,7 +200,7 @@ curl -s http://127.0.0.1:1416/docs | head
 
 ### Reachability (localhost bind)
 
-`zaumzeug serve` currently binds **127.0.0.1** only. On a Docker **bridge** network, Open WebUI cannot reach `hayhooks:1416` until the process listens on `0.0.0.0` (future explicit bind / [E8-S05](../../docs/stories/epic-stories/62-story.md)). Until then, use one of:
+`zaumzeug serve` currently binds **127.0.0.1** only. On a Docker **bridge** network, Open WebUI cannot reach `hayhooks:1416` until the process listens on `0.0.0.0` (future explicit bind). Until then, use one of:
 
 1. **Linux host network** — `network_mode: host` on both services, then set `OPENAI_API_BASE_URL=http://127.0.0.1:1416/v1` (the compose DNS name `hayhooks` is not used).
 2. **Open WebUI in Docker, serve on the host** (works today):
