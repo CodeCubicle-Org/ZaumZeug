@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-08-26 (E8-S06 DeepEval production observe)
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S08 **Done** (2026-08-21); E8-S01–S06 **Done** (2026-08-21 / 2026-08-26) — **Phase 4 / E8 complete**
+**Last updated:** 2026-08-26 (E4-S09 workflow path Mermaid docs — Ready)
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S08 **Done** (2026-08-21); E8-S01–S06 **Done** (2026-08-21 / 2026-08-26) — **Phase 4 / E8 complete**; post–Phase 4: **E6-S08 Ready** (human rate → compile); **E4-S09 Ready** (workflow path Mermaid docs)
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -104,8 +104,8 @@ zaumzeug init → edit harness.yaml → zaumzeug compile → zaumzeug deploy
 ### 7.3 Journey C — Improve after failure (Phase 2+)
 
 ```text
-production trace → add to valset → zaumzeug eval (optional) → zaumzeug compile
-→ zaumzeug deploy → redeploy
+production / local run → trace → [human rate / set gold] → add to valset / train
+→ zaumzeug eval (optional) → zaumzeug compile → zaumzeug deploy → redeploy
 ```
 
 **Implementation (E6-S05, 2026-07-28):** Manual/API export via `zaumzeug.eval.trace.export_haystack_trace` → `data/traces/`; score with `zaumzeug eval --trace`; append with `append_trace_to_valset`. Walkthrough: [user-docs/guides/testing.md](user-docs/guides/testing.md#trace--test-case-journey-c).
@@ -113,6 +113,8 @@ production trace → add to valset → zaumzeug eval (optional) → zaumzeug com
 **Implementation (E6-S07, 2026-07-28):** Failed eval → `data/train.jsonl` via `append_failed_eval_to_train`; shared val aliases; optional DeepEval GEPA metric in `modules/metrics.py`. Compile → eval → compile loop: [testing.md — GEPA ↔ DeepEval bridge](user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile).
 
 **Implementation (E8-S03, 2026-08-26):** Production auto-capture on serve (`eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1`) → `data/traces/`; `merge_traces_into_datasets` appends `data/val.jsonl` / `data/train.jsonl`; then eval → compile → deploy. `zaumzeug replay --trace` deferred (PRD §9). Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`.
+
+**Planned (E6-S08 / E6.8):** Human rating gate — `zaumzeug rate` and `zaumzeug run --rate` collect quality + feedback + gold answer, merge into val/train, optional `--compile` to recompile prompts. Story: [65-story.md](stories/epic-stories/65-story.md).
 
 ### 7.4 User installation guide (content for README — Phase 1)
 
@@ -308,7 +310,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 
 ### Epic E4 — Compile and GEPA pipeline (Phase 2)
 
-**Outcome:** Offline GEPA per agent; harness workflow diagram regenerated at every compile.
+**Outcome:** Offline GEPA per agent; harness workflow diagram regenerated at every compile; path Mermaid docs (E4.8 Ready).
 
 | ID | Feature | Acceptance criteria |
 |---|---|---|
@@ -319,10 +321,11 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E4.5 | Post-compile serve | **Done** (E4-S05, 2026-07-28) — After compile, serve/run prefer valid `agent.artifact` over hand-edited `system_prompt`; `compile.module` not imported at serve; optional `input_rewrite` preprocess; doctor warns on stale `source_hash`. Tests: 12 passed, 0 skipped (`test_compile_serve.py` + `test_e4_s05_ac5_stale_artifact_warn`). Docs: [guides/compile.md — Serve after compile](user-docs/guides/compile.md#serve-after-compile). |
 | E4.6 | `--dry-run` on compile | **Done** (E4-S06, 2026-07-28) — `zaumzeug compile --dry-run` validates Phase 2 schema, resolves module imports, prints task/reflection registry; no GEPA, no LLM calls, no artifacts. Tests: `tests/integration/compile/test_compile_dry_run.py` (5 passed). Docs: [CLI reference](user-docs/reference/cli.md#zaumzeug-compile). |
 | E4.7 | Workflow diagram | **Done** (E4-S08, 2026-07-28) — Every `zaumzeug compile` regenerates `docs/workflow-diagram.md` (Mermaid) from `workflow.yaml` + resolved agents/models; `--workflow-diagram-only` skips GEPA; doctor warns if stale; deploy copies to `deploy/<harness>/docs/` (**Done** E5-S01 + golden ✅ E5-S02). ([Architecture §5.4](architecture/04-data-flows.md#54-workflow-diagram-compile).) |
+| E4.8 | Workflow path Mermaid docs | **Ready** (E4-S09, 2026-08-26). **AC:** Every compile writes `docs/workflow-paths.md` with Mermaid for each serial stage path plus per-agent tool-branch diagrams; `--workflow-diagram-only` refreshes paths; doctor stale/missing warn; deploy copies the file. Story: [66-story.md](stories/epic-stories/66-story.md). |
 
 **Phase 2 compile scope (resolved):** **Pattern A** (`dspy.GEPA`) is the default `zaumzeug compile` path — optimize prompts/signatures via DSPy modules, export to Haystack artifacts. **Optional within Pattern A:** compile-time GEPA on **input rewrite/clarify templates** (how the harness preprocesses user messages — not optimization of end-user chat at runtime). **Pattern B** (`optimize_anything` / Haystack evaluator) **shipped early** (E4-S04, 2026-07-28) as a programmatic adapter + schema; not wired into the CLI compile path yet.
 
-**Story seeds:** DSPy module loader **Done** (E4-S01). Compile CLI + GEPA runner + artifacts **Done** (E4-S02a/b, 2026-07-28). Export contract **Done** (E4-S03a, 2026-07-28). Runtime `input_rewrite` preprocess **Done** (E4-S03b, 2026-07-28). Haystack GEPA evaluator / Pattern B **Done** (E4-S04, 2026-07-28). Post-compile serve uses artifact **Done** (E4-S05, 2026-07-28). Compile `--dry-run` **Done** (E4-S06, 2026-07-28). Rollback to pinned `artifacts/<run_id>` **Done** (E4-S07, 2026-07-28) — immutable runs, doctor pin check, [rollback guide](user-docs/guides/compile.md#rollback-to-a-pinned-run). Workflow diagram at compile **Done** (E4-S08, 2026-07-28) — Mermaid `docs/workflow-diagram.md`, `--workflow-diagram-only`, golden snapshot.
+**Story seeds:** DSPy module loader **Done** (E4-S01). Compile CLI + GEPA runner + artifacts **Done** (E4-S02a/b, 2026-07-28). Export contract **Done** (E4-S03a, 2026-07-28). Runtime `input_rewrite` preprocess **Done** (E4-S03b, 2026-07-28). Haystack GEPA evaluator / Pattern B **Done** (E4-S04, 2026-07-28). Post-compile serve uses artifact **Done** (E4-S05, 2026-07-28). Compile `--dry-run` **Done** (E4-S06, 2026-07-28). Rollback to pinned `artifacts/<run_id>` **Done** (E4-S07, 2026-07-28) — immutable runs, doctor pin check, [rollback guide](user-docs/guides/compile.md#rollback-to-a-pinned-run). Workflow diagram at compile **Done** (E4-S08, 2026-07-28) — Mermaid `docs/workflow-diagram.md`, `--workflow-diagram-only`, golden snapshot. Workflow path Mermaid docs **Ready** (E4-S09, 2026-08-26) — `docs/workflow-paths.md` with all stage paths + per-agent tool branches.
 
 ---
 
@@ -359,8 +362,9 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 | E6.5 | Trace → test case | **Done** (E6-S05, 2026-07-28). **AC:** Haystack trace export to JSONL (`data/traces/`); score single trace with `zaumzeug eval --trace`; schema documented for valset append. |
 | E6.6 | HTTP black-box eval | **Done** (E6-S06, 2026-07-28). **AC:** Optional Mode C — eval against running `zaumzeug serve` via `/v1/chat/completions` (staging/debug); `--base-url` / `eval.base_url`. |
 | E6.7 | GEPA ↔ DeepEval bridge | **Done** (E6-S07, 2026-07-28). **AC:** Failed eval rows can append to `data/train.jsonl`; shared `data/val.jsonl`; GEPA custom metric may delegate to DeepEval `.measure()`. |
+| E6.8 | Human quality rating → compile | **Ready** (E6-S08, 2026-08-26). **AC:** `zaumzeug rate` / `run --rate` collect quality + notes + `expected_output` + decision; merge `keep_val` / `keep_train` into datasets; optional `--compile` recompiles prompts; no DeepEval required; ratings dev-only. Story: [65-story.md](stories/epic-stories/65-story.md). |
 
-**Story seeds:** Eval without deepeval shows install hint ✅ (E6-S01 `require_deepeval()`); Mode C `--base-url` vs running serve ✅ (E6-S06); GEPA metric delegates to DeepEval `.measure()` optionally ✅ (E6-S07).
+**Story seeds:** Eval without deepeval shows install hint ✅ (E6-S01 `require_deepeval()`); Mode C `--base-url` vs running serve ✅ (E6-S06); GEPA metric delegates to DeepEval `.measure()` optionally ✅ (E6-S07); human rate → train/val → compile ✅ planned (E6-S08).
 
 ---
 
@@ -412,11 +416,12 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 | `zaumzeug compile [--workflow-diagram-only]` | 2 | E4 |
 | `zaumzeug deploy` | 2–4 | E5; **E8.5 Done** (E8-S05, 2026-08-26) — optional `--dockerfile` / `deploy.dockerfile` |
 | `zaumzeug eval` | 2–4 | E6 (optional); **E8.3 Done** (E8-S03) — production traces feed val/train via `merge_traces_into_datasets` |
+| `zaumzeug rate` | 2+ | E6 **Ready** E6-S08 — human quality + feedback → val/train; optional `--compile`; also `zaumzeug run --rate` |
 | `zaumzeug mcp` | 3 | E7 **Done** E7-S01 (2026-08-14); deploy bundle **Done** E7-S06 (2026-08-21) — `--deploy` / `HARNESS_ROOT=deploy` same root as serve |
 | `zaumzeug acp` | 3 | E7 **Done** E7-S05 (2026-08-21); `HARNESS_ROOT=deploy` / `--deploy` honour E5-S04 |
 | `zaumzeug a2a` | 4 | E8 **Done** E8-S04 (2026-08-26) — requires `serve.a2a: true`; agent card on port **1418** |
 
-**Future commands (not Phase 1–4 v1):** `zaumzeug export <name>` (tarball of `deploy/`); `zaumzeug replay <name> --trace` (trace replay); `zaumzeug install-project` (PyPI consumer scaffold — [E1-S08](stories/epic-stories/25-story.md); deferred until package publish).
+**Future commands (not Phase 1–4 v1):** `zaumzeug rate <name>` (human quality rating → compile — [E6-S08](stories/epic-stories/65-story.md), Ready); `zaumzeug export <name>` (tarball of `deploy/`); `zaumzeug replay <name> --trace` (trace replay); `zaumzeug install-project` (PyPI consumer scaffold — [E1-S08](stories/epic-stories/25-story.md); deferred until package publish).
 
 ---
 

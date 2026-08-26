@@ -174,13 +174,15 @@ flowchart LR
 
 Agent nodes label `default_model_id (provider)`. For multi-stage harnesses, nodes chain left-to-right with edges in `workflow.yaml` order; pipeline stages use the pipeline id as the label.
 
+**Planned (E4-S09 / E4.8):** Sibling file `docs/workflow-paths.md` — Mermaid for every serial **stage path** plus per-agent **tool-branch** diagrams (tools + final answer; no 2ⁿ cross-product). Regenerated with compile / `--workflow-diagram-only`; doctor stale/missing warn; deploy copies. Story: [66-story.md](../stories/epic-stories/66-story.md).
+
 ### 5.5 Continuous improvement loop
 
 See [PRD Journey C](../prd.md#73-journey-c--improve-after-failure-phase-2) and [Epic E8.3](../prd.md#epic-e8--rag-and-production-hardening-phase-4).
 
 ```text
-production failure → trace → dataset row → zaumzeug eval (optional) → GEPA compile
-→ zaumzeug deploy → zaumzeug serve --deploy
+run / production failure → trace → [human rate / set gold] → dataset row
+→ zaumzeug eval (optional) → GEPA compile → zaumzeug deploy → zaumzeug serve --deploy
 ```
 
 **Implementation (E6-S05, 2026-07-28):** Trace export + `zaumzeug eval --trace` land in `eval/trace.py` / `eval/runner.py`. End-to-end Journey C walkthrough: [user-docs/guides/testing.md](../user-docs/guides/testing.md#trace--test-case-journey-c).
@@ -188,6 +190,8 @@ production failure → trace → dataset row → zaumzeug eval (optional) → GE
 **Implementation (E6-S07, 2026-07-28):** Failed eval → train via `eval/gepa_bridge.append_failed_eval_to_train`; shared val aliases; optional DeepEval GEPA metric. Docs: [testing.md — GEPA ↔ DeepEval bridge](../user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile).
 
 **Implementation (E8-S03, 2026-08-26):** Production trace → dataset ratchet — serve wraps `Agent.run` when `eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1`; JSONL under `data/traces/`; `merge_traces_into_datasets` appends `data/val.jsonl` / `data/train.jsonl`; Journey C: eval → compile → deploy. `zaumzeug replay --trace` deferred (PRD §9). Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`. Docs: [testing.md — Journey C](../user-docs/guides/testing.md#trace--test-case-journey-c).
+
+**Planned (E6-S08 / E6.8, Ready):** Human rating gate — `zaumzeug rate` / `zaumzeug run --rate` collect quality + feedback + gold; merge into val/train; optional `--compile`. Story: [65-story.md](../stories/epic-stories/65-story.md).
 
 **Implementation (E5-S03, 2026-07-28):** `zaumzeug serve --deploy` runs production bundles under `deploy/<name>/` (same OpenAI REST as dev). Tests: `tests/integration/deploy/test_serve_deploy.py`.
 

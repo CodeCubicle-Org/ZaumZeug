@@ -5,8 +5,8 @@
 | **Document** | Epic E4 user stories |
 | **File** | `docs/stories/04-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-14 (E4-S01 module import isolation)
-| **Status** | Done (E4-S01–S08, 2026-07-28) |
+| **Last modified** | 2026-08-26 (E4-S09 Ready — workflow path Mermaid docs) |
+| **Status** | Done (E4-S01–S08, 2026-07-28) · **E4-S09 Ready** (post–Phase 4 backlog) |
 | **Build order** | **4 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -15,7 +15,7 @@
 |---|---|
 | **Phase** | 2 |
 | **Epic** | E4 |
-| **Outcome** | Offline GEPA per agent; harness `docs/workflow-diagram.md` regenerated at every compile |
+| **Outcome** | Offline GEPA per agent; harness `docs/workflow-diagram.md` regenerated at every compile; **E4-S09 Ready** — `docs/workflow-paths.md` |
 | **Depends on** | [E2](01-epic.md) · [E3](02-epic.md) Phase 1 complete |
 | **Blocks** | [E6](05-epic.md) · [E5](06-epic.md) (deploy pins compile artifacts) |
 | **PRD** | [Epic E4](../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2) |
@@ -34,6 +34,7 @@
 6. **E4-S06** — Compile `--dry-run` ✅ (2026-07-28)
 7. **E4-S07** — Artifact rollback to pinned run ✅ (2026-07-28)
 8. **E4-S08** — Workflow diagram at compile ✅ (2026-07-28)
+9. **E4-S09** — Workflow path Mermaid docs (all paths) *(post–Phase 4; Ready)*
 
 ---
 
@@ -385,5 +386,68 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 
 - [x] Deploy copies diagram per E5-S02 *(packager copy ✅ E5-S01; golden matrix ✅ E5-S02, 2026-07-28)*
 - [x] Verification checklist complete; all ACs traced to tests
+
+---
+
+## E4-S09 — Workflow path Mermaid docs (all paths)
+
+| Field | Value |
+|---|---|
+| **Feature** | E4.8 |
+| **Persona** | Harness developer |
+| **Priority** | P1 |
+| **Status** | Ready |
+| **Prerequisites** | [E4-S08](#e4-s08-workflow-diagram-at-compile) ✅ · [E2-S07](01-epic.md#e2-s07-workflowyaml-schema-serial) ✅ |
+| **Canonical** | [66-story.md](epic-stories/66-story.md) |
+
+### User story
+
+As a **harness developer**, I want an auto-generated Markdown file under my harness `docs/` that shows every possible path through that harness's workflow as Mermaid diagrams, so that I can review and share how a run can flow through stages (and per-agent tool branches) without reading YAML by hand.
+
+### References
+
+- [PRD E4.8](../prd.md#epic-e4--compile-and-gepa-pipeline-phase-2)
+- [Architecture §5.4](../architecture/04-data-flows.md#54-workflow-diagram-compile)
+- Canonical story: [66-story.md](epic-stories/66-story.md)
+
+### Acceptance criteria
+
+- [ ] **AC-1** Every non–dry-run `zaumzeug compile` (incl. `--agent`) writes `docs/workflow-paths.md`; diagram unchanged
+- [ ] **AC-2** Index + serial stage-path Mermaid (`P1`); agent nodes include model ids; pipeline stages use pipeline id; serial `P1` may mirror overview
+- [ ] **AC-3** Per agent stage with tools: separate tool-branch Mermaid; MCP `tool_names` or `mcp:<server>`; no cross-product; no live MCP probe
+- [ ] **AC-4** `--workflow-diagram-only` refreshes diagram **and** paths; CLI help mentions both
+- [ ] **AC-5** Doctor warns when paths missing or stale vs `workflow.yaml` **or** workflow agent `agent.yaml` files
+- [ ] **AC-6** Deploy: `copy_rules` **and** packager explicit copy for `docs/workflow-paths.md`
+- [ ] **AC-7** User-docs + Architecture §5.4 + CLI; example + install templates stay in sync
+
+### Implementation tasks (build)
+
+- [ ] `compile/workflow_paths.py` + wire into compile / `--workflow-diagram-only` / `--agent`
+- [ ] Doctor staleness (workflow + agent yaml); deploy copy_rules + packager; CLI help; regenerate example + templates
+- [ ] User-docs + Architecture §5.4
+
+### Verification (after build)
+
+Per [Story verification](00-README.md#story-verification-required). Full AC → test map: [66-story.md](epic-stories/66-story.md#verification-after-build). Test file header: `# Story: E4-S09 / E4.8`.
+
+| AC | Test |
+|---|---|
+| AC-1–AC-4 | `tests/unit/compile/test_workflow_paths.py` (`-k e4_s09`; diagram-only / no live LLM) |
+| AC-5 | `tests/integration/test_doctor.py::test_e4_s09_ac5_*` |
+| AC-6 | `tests/unit/deploy/test_copy_rules.py::test_e4_s09_ac6_*` + packager/golden |
+| AC-7 | `tests/unit/docs/test_workflow_paths_docs.py` (substring checklist) |
+| Regression | `tests/unit/compile/test_workflow_diagram.py` (E4-S08) |
+
+### Definition of done
+
+- [ ] `docs/workflow-paths.md` enumerates stage routes + configured tool branches as Mermaid under the harness `docs/` dir
+- [ ] Compile / `--workflow-diagram-only` / doctor / deploy stay in sync with E4-S08 diagram
+- [ ] Verification checklist complete (see [66-story.md](epic-stories/66-story.md))
+
+**PO decisions (2026-08-26):** Soft conflicts resolved in [66-story.md](epic-stories/66-story.md#po-decisions-2026-08-26).
+
+**Architect decisions (2026-08-26):** Approve-with-changes applied — [66-story.md](epic-stories/66-story.md#architect-decisions-2026-08-26).
+
+**Tester decisions (2026-08-26):** Approve-with-changes applied — [66-story.md](epic-stories/66-story.md#tester-decisions-2026-08-26).
 
 ---

@@ -5,8 +5,8 @@
 | **Document** | Epic E6 user stories |
 | **File** | `docs/stories/05-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-07-28 (E6-S07 done) |
-| **Status** | Done (E6-S01–S07, 2026-07-28) |
+| **Last modified** | 2026-08-26 (E6-S08 human quality rating — Ready) |
+| **Status** | Done (E6-S01–S07, 2026-07-28) · **E6-S08 Ready** (post–Phase 4 backlog) |
 | **Build order** | **5 of 8** (before E5 — deploy eval gate needs `zaumzeug eval`) |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -31,6 +31,7 @@
 4. **E6-S04** — `eval/` pytest scaffold ✅ (2026-07-28)
 5. **E6-S05** — Trace → test case ✅ (2026-07-28)
 6. **E6-S06** → **E6-S07** — HTTP mode, GEPA bridge
+7. **E6-S08** — Human quality rating → compile feedback loop *(post–Phase 4; Ready)*
 
 ---
 
@@ -388,3 +389,65 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 - [x] Verification checklist complete; all ACs traced to tests
 
 **E6-S07 Done (2026-07-28):** `eval/gepa_bridge.py` — failed→train, shared val aliases, optional DeepEval GEPA metric; example `modules/metrics.py`; docs in testing.md.
+
+---
+
+## E6-S08 — Human quality rating → compile feedback loop
+
+| Field | Value |
+|---|---|
+| **Feature** | E6.8 |
+| **Persona** | Harness developer |
+| **Priority** | P1 |
+| **Status** | Ready |
+| **Prerequisites** | [E6-S05](epic-stories/38-story.md#e6-s05-trace-test-case) ✅ · [E6-S07](epic-stories/40-story.md#e6-s07-gepa--deepeval-bridge) ✅ · [E8-S03](epic-stories/60-story.md#e8-s03-trace--dataset-ratchet) ✅ · [E4-S02b](epic-stories/27.2-story.md#e4-s02b-gepa-runner-and-artifacts) ✅ |
+| **Canonical** | [65-story.md](epic-stories/65-story.md) |
+
+### User story
+
+As a **harness developer**, I want a fast way to rate harness output and leave short feedback (especially when developing a new harness or feature, or switching LLM / model version), so that my ratings and corrected answers flow into val/train and I can recompile prompts with GEPA without hand-editing JSONL.
+
+### References
+
+- [PRD E6.8](../prd.md#epic-e6--evaluation-and-quality-phase-2-optional)
+- [Journey C](../prd.md#73-journey-c--improve-after-failure-phase-2)
+- [Architecture §5.5](../architecture/04-data-flows.md#55-continuous-improvement-loop)
+- Canonical story: [65-story.md](epic-stories/65-story.md)
+
+### Acceptance criteria
+
+- [ ] **AC-1** `zaumzeug rate` over `--trace` / `--unrated` (one stem); writes `data/ratings/<stem>.jsonl`; `--force` to overwrite; `RateError`; no DeepEval
+- [ ] **AC-2** `zaumzeug run --rate` rates last `kind == "agent"` stage; synthetic Haystack export (`source: run`); pipeline-only → error
+- [ ] **AC-3** `--apply` resolves val/train from config; **dedup** resolved paths; gold required in `rate.py`; `discard` skips merge
+- [ ] **AC-4** `--compile` defaults to **rated agent**; `--all-agents` for full harness
+- [ ] **AC-5** Non-interactive flags (`--force` included); non-zero on missing required fields
+- [ ] **AC-6** Store `model_id` / optional `artifact`
+- [ ] **AC-7** User workflow docs: Journey C Workflows A/B/C + decision table + loop; CLI `rate` / `run --rate`; compile + README cross-links; Architecture §5.5 / §6.3 / §9; deploy exclude test for `data/ratings/`
+
+### Implementation tasks (build)
+
+- [ ] `eval/rate.py` (`RateError`, `run_rate`) + `zaumzeug rate` in `cli.py` + `run --rate`
+- [ ] Wire decisions to ratchet / train append; `--compile` → `run_compile` (rated agent default)
+- [ ] User workflow docs (testing.md A/B/C, CLI, compile/README links, templates) + Architecture + copy-rules test
+
+### Verification (after build)
+
+Per [Story verification](00-README.md#story-verification-required). Full AC → test map: [65-story.md](epic-stories/65-story.md#verification-after-build). Test file header: `# Story: E6-S08 / E6.8`.
+
+| AC | Test |
+|---|---|
+| AC-1–AC-6 | `tests/unit/eval/test_rate.py` · `tests/unit/cli/test_rate_cli.py` · `tests/integration/eval/test_rate_compile.py` (`StubGEPA`; `-k e6_s08`) |
+| AC-7 | `tests/unit/docs/test_rate_docs.py` (Workflows A/B/C, template sync, CLI, README, architecture) · `tests/unit/deploy/test_copy_rules.py::test_e6_s08_ac7_excludes_data_ratings` |
+
+### Definition of done
+
+- [ ] One interactive flow rates a run and can `--compile` (rated agent) without hand-editing JSONL
+- [ ] Core rate path has no DeepEval dependency; `run_rate()` + last-agent-stage + dedup + `--force` locked; ratings stay off deploy
+- [ ] Harness-developer workflow documented (rate → gold → recompile) per [65-story.md](epic-stories/65-story.md#user-workflow-document-for-harness-developers)
+- [ ] Verification checklist complete (see [65-story.md](epic-stories/65-story.md))
+
+**PO decisions (2026-08-26):** Soft conflicts resolved in [65-story.md](epic-stories/65-story.md#po-decisions-2026-08-26).
+
+**Architect decisions (2026-08-26):** Approve-with-changes applied — [65-story.md](epic-stories/65-story.md#architect-decisions-2026-08-26).
+
+**Tester decisions (2026-08-26):** Approve-with-changes applied — [65-story.md](epic-stories/65-story.md#tester-decisions-2026-08-26).
