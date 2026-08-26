@@ -8,7 +8,7 @@
 
 ZaumZeug helps developers scaffold, configure, compile, and deploy **multi-agent harnesses** — not a single chatbot relabeled as an agent, but a **workflow** plus a **collection of named agents**, each with its own model and tool configuration. You edit YAML, add Python only where custom logic is needed, and ship a production-ready bundle to any host without touching Haystack, DSPy, or GEPA internals.
 
-> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 complete for **E4** / **E6** / **E5** (2026-07-28 / 2026-07-29). Phase 4 pull-forward: **[E8-S07](docs/stories/epic-stories/64-story.md)** (workflow run reliability — `runtime.retry`, stage INFO logs, `output.format: json`) **done** (2026-08-01). Phase 3: **[E7-S01](docs/stories/epic-stories/50-story.md)** (MCP) through **[E7-S08](docs/stories/epic-stories/57-story.md)** (web client deployment layouts) **done** (2026-08-21). Phase 4: **[E8-S01](docs/stories/epic-stories/58-story.md)**–**[E8-S06](docs/stories/epic-stories/63-story.md)** (pipeline exposure, production auth, trace ratchet, optional A2A, Dockerfile template, DeepEval Mode B observe) **done** (2026-08-21 / 2026-08-26) — **E8 complete**. Post–Phase 4: **[E6-S08](docs/stories/epic-stories/65-story.md)** (human quality rating → compile — `zaumzeug rate` / `run --rate`) **done** (2026-08-26). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
+> **Status:** Phase 1 complete — epics **E2** (config/validation), **E3** (runtime/serve/run), and **E1** onboarding through **E1-S07** (three-OS CI matrix) are **done**. **E1-S08** (`zaumzeug install-project`) is **deferred** until PyPI package publish (open #3 resolved: clone+`install/` for v1; CLI after publish). Phase 2 complete for **E4** / **E6** / **E5** (2026-07-28 / 2026-07-29). Phase 4 pull-forward: **[E8-S07](docs/stories/epic-stories/64-story.md)** (workflow run reliability — `runtime.retry`, stage INFO logs, `output.format: json`) **done** (2026-08-01). Phase 3: **[E7-S01](docs/stories/epic-stories/50-story.md)** (MCP) through **[E7-S08](docs/stories/epic-stories/57-story.md)** (web client deployment layouts) **done** (2026-08-21). Phase 4: **[E8-S01](docs/stories/epic-stories/58-story.md)**–**[E8-S06](docs/stories/epic-stories/63-story.md)** (pipeline exposure, production auth, trace ratchet, optional A2A, Dockerfile template, DeepEval Mode B observe) **done** (2026-08-21 / 2026-08-26) — **E8 complete**. Post–Phase 4: **[E6-S08](docs/stories/epic-stories/65-story.md)** (human quality rating → compile — `zaumzeug rate` / `run --rate`) **done** (2026-08-26); **[E4-S09](docs/stories/epic-stories/66-story.md)** (workflow path Mermaid docs — `docs/workflow-paths.md` on compile) **done** (2026-08-26). Cross-platform CI: [`.github/workflows/ci-matrix.yml`](.github/workflows/ci-matrix.yml). Track progress in [docs/stories/](docs/stories/00-README.md).
 
 **Formula:** `Harness = Workflow + Agents + Machinery`
 
@@ -48,15 +48,15 @@ Building on Haystack, DSPy, and GEPA today means wiring compile-time optimizatio
 
 | Framework | Their strength | ZaumZeug gap (for now) |
 |---|---|---|
-| [LangGraph](https://langchain.com/langgraph) | Stateful graphs, checkpointing, human-in-the-loop, branching | Serial workflows only in Phase 1 |
+| [LangGraph](https://langchain.com/langgraph) | Stateful graphs, checkpointing, human-in-the-loop, branching | Serial workflows only (parallel deferred) |
 | [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) / Claude Agent SDK | Provider-native tracing, guardrails, sandbox execution | Sandbox deferred; less provider magic |
 | [CrewAI](https://www.crewai.com/) | Role-based crews, rapid prototyping, large community | Less persona ergonomics; more deploy discipline |
-| [Strands Compose](https://github.com/strands-compose/sdk-python) / AgentCore | YAML multi-agent, swarm/graph modes, managed hosting | Fewer orchestration modes until Phase 3+ |
+| [Strands Compose](https://github.com/strands-compose/sdk-python) / AgentCore | YAML multi-agent, swarm/graph modes, managed hosting | Fewer orchestration modes (parallel/swarm deferred) |
 | [Raw Haystack](https://haystack.deepset.ai/) | RAG pipelines, retrieval integrations | ZaumZeug wraps Haystack — use raw Haystack for RAG-only |
 | [Pydantic AI](https://ai.pydantic.dev/) | Typed structured outputs, test models | Pydantic for config, not agent programming model |
 | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | Personal agent with memory, skills, messaging, cron | Factory for domain harnesses — not a personal assistant |
 
-> **Honest caveat:** LangGraph, OpenAI SDK, CrewAI, Strands, and Hermes have shipping code and large ecosystems. ZaumZeug is early Phase 1 — comparisons above reflect architectural intent as the SDK lands story by story.
+> **Honest caveat:** LangGraph, OpenAI SDK, CrewAI, Strands, and Hermes have shipping code and large ecosystems. ZaumZeug has shipped Phases 1–4 (serial workflows, compile/deploy, MCP/ACP/A2A) — comparisons above reflect remaining gaps, not overall maturity.
 
 Full analysis: [Competitive landscape](docs/competitive-landscape.md)
 
@@ -101,9 +101,9 @@ Once scaffolded, you iterate in `usr-harnesses/<name>/`:
 
 1. **Edit** — change workflow, agent prompts, tools, or models in YAML; touch Python only for custom logic.
 2. **Validate** — `zaumzeug doctor <name>` after each meaningful change.
-3. **Run locally** — `zaumzeug run <name>` executes all workflow stages in order; `zaumzeug serve <name>` opens interactive chat with the entry agent.
-4. **Compile** *(Phase 2+)* — `zaumzeug compile <name>` runs DSPy/GEPA offline and writes optimized artifacts under each agent.
-5. **Test** — `pytest` for SDK contributors; harness developers can add optional `eval/` tests with DeepEval (`pip install "zaumzeug[eval]"` — E6-S01; scaffold via `zaumzeug init --with-eval` or the example harness — E6-S04; run `deepeval test run usr-harnesses/<name>/eval/`). Score a captured failure with `zaumzeug eval --trace` (E6-S05). Rate output and set gold with `zaumzeug rate` / `run --rate` (E6-S08). Black-box a running serve with `zaumzeug eval --base-url` (E6-S06, staging/debug). Default dev uses the **mock** model profile — no API keys required.
+3. **Run locally** — `zaumzeug run <name>` executes all workflow stages in order (`--json` for machine-readable output — E8-S07); `zaumzeug serve <name>` opens interactive chat with the entry agent.
+4. **Compile** — `zaumzeug compile <name>` runs DSPy/GEPA offline, writes optimized artifacts under each agent, and regenerates `docs/workflow-diagram.md` + `docs/workflow-paths.md` (E4-S08 / E4-S09).
+5. **Test** — `pytest` for SDK contributors; harness developers can add optional `eval/` tests with DeepEval (`pip install "zaumzeug[eval]"` — E6-S01; scaffold via `zaumzeug init --with-eval` or the example harness — E6-S04; run `deepeval test run usr-harnesses/<name>/eval/`). Score a captured failure with `zaumzeug eval --trace` (E6-S05). Capture serve traces into datasets with `eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE` (E8-S03). Merge failed eval rows into train via the GEPA ↔ DeepEval bridge (E6-S07). Rate output and set gold with `zaumzeug rate` / `run --rate` (E6-S08). Black-box a running serve with `zaumzeug eval --base-url` (E6-S06, staging/debug). Default dev uses the **mock** model profile — no API keys required.
 6. **Deploy** — `zaumzeug deploy <name>` packages `usr-harnesses/<name>/` into `deploy/<name>/` for production. Ops **ships** that folder: copy → `target_install` → create `.env` on the target → `zaumzeug serve <name> --deploy` (or `HARNESS_ROOT=deploy` in containers / systemd). Optional container image: `zaumzeug deploy <name> --dockerfile` (or `deploy.dockerfile: true`) writes a `Dockerfile` into the bundle (E8-S05). Linux is the primary production target (E5-S08); see [Deploy and ship](user-docs/guides/deploy.md).
 
 **Production note:** Runtime deps on the target are updated by **redeploying** (`zaumzeug deploy` → copy bundle → `target_install`), not by upgrading packages in place. Target installs **`pip install zaumzeug` only** — no DSPy, GEPA, or DeepEval by default. Python **3.11+** must already be on the host. `.env` is created on the target and is **never** inside the bundle. By default `deploy/` is gitignored (local-only bundles); teams may force-add `deploy/<name>/` for audited release tags or upload the bundle as a CI artifact — see [Git policy](user-docs/guides/deploy.md#git-policy-for-deploy-bundles).
@@ -119,7 +119,7 @@ Never edit `deploy/` by hand — it is regenerated on each deploy. See [Testing]
 | Runtime | [Haystack](https://github.com/deepset-ai/haystack) + Hayhooks | Agent loop, tools, RAG, REST/MCP serve |
 | Specification | [DSPy](https://dspy.ai/) | Signatures and modules (compile-time only) |
 | Optimization | [GEPA](https://github.com/gepa-ai/gepa) | Offline prompt and module optimization |
-| Evaluation | [DeepEval](https://github.com/confident-ai/deepeval) *(optional `[eval]` extra)* | Dev regression — install with `pip install "zaumzeug[eval]"` (E6-S01); `zaumzeug eval` **Done** (E6-S02); deploy eval gate **Done** (E6-S03 / E5-S06); `eval/` pytest scaffold **Done** (E6-S04); trace → test case **Done** (E6-S05); Mode C HTTP `--base-url` **Done** (E6-S06); human rate → compile **Done** (E6-S08 — `zaumzeug rate` / `run --rate`, no DeepEval required); Mode B `@observe` / Confident AI **Done** (E8-S06 — opt-in `eval.confident_ai.enabled`) |
+| Evaluation | [DeepEval](https://github.com/confident-ai/deepeval) *(optional `[eval]` extra)* | Dev regression — install with `pip install "zaumzeug[eval]"` (E6-S01); `zaumzeug eval` **Done** (E6-S02); deploy eval gate **Done** (E6-S03 / E5-S06); `eval/` pytest scaffold **Done** (E6-S04); trace → test case **Done** (E6-S05); Mode C HTTP `--base-url` **Done** (E6-S06); GEPA ↔ DeepEval bridge **Done** (E6-S07 — failed eval → train, shared val aliases); human rate → compile **Done** (E6-S08 — `zaumzeug rate` / `run --rate`, no DeepEval required); production trace → dataset ratchet **Done** (E8-S03 — `eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE`); Mode B `@observe` / Confident AI **Done** (E8-S06 — opt-in `eval.confident_ai.enabled`) |
 
 Model routing is configuration-driven via `models.yaml` — swap providers without changing agent code. See [dependencies.md](dependencies.md) for the full list of external tools and libraries, including [Python version notes](dependencies.md#python-version-and-local-install).
 
@@ -127,7 +127,7 @@ Model routing is configuration-driven via `models.yaml` — swap providers witho
 
 ## CLI
 
-**Implemented (Phase 1):**
+**Implemented:**
 
 ```bash
 zaumzeug doctor [harness]     # Preflight env + config (scan all harnesses if name omitted)
@@ -146,8 +146,10 @@ HARNESS_ROOT=deploy zaumzeug serve <harness>  # Same without --deploy (E5-S04; c
 zaumzeug serve <harness> --dry-run --json     # Machine-readable summary
 zaumzeug serve <harness> --verbose    # SDK + Haystack debug logging (or HARNESS_LOG_LEVEL=DEBUG)
 # Optional GUI: pip install "hayhooks[chainlit]" + serve.hayhooks.chainlit: true → /chat (E7-S04)
-zaumzeug compile <harness> --verbose  # Same logging for compile (Phase 2+)
-zaumzeug compile <harness> --workflow-diagram-only  # Refresh docs/workflow-diagram.md + workflow-paths.md without GEPA
+zaumzeug run <harness> --input "…" --json   # Machine-readable stage output (E8-S07)
+zaumzeug compile <harness>                  # GEPA compile + docs/workflow-diagram.md + workflow-paths.md (E4-S08/S09)
+zaumzeug compile <harness> --verbose        # Same logging for compile
+zaumzeug compile <harness> --workflow-diagram-only  # Refresh diagram + paths without GEPA
 zaumzeug eval <harness>               # Builtin JSONL or DeepEval regression (E6-S02)
 zaumzeug eval <harness> --trace PATH  # Score a captured data/traces/ JSONL turn (E6-S05)
 zaumzeug eval <harness> --base-url    # Mode C HTTP black-box vs running serve (E6-S06; staging/debug)
@@ -162,6 +164,7 @@ zaumzeug mcp <harness> --deploy       # Same MCP surface from deploy/<name>/ (E7
 # Cursor: .cursor/mcp.json → that URL (install --cursor-mcp or copy the example; E7-S03)
 zaumzeug acp <harness>                # Agent Client Protocol stdio JSON-RPC (E7-S05; Zed / JetBrains)
 zaumzeug a2a <harness>                # Optional A2A agent card (E8-S04; needs serve.a2a: true + hayhooks[a2a])
+zaumzeug a2a <harness> --deploy       # Same A2A surface from deploy/<name>/ (E8-S04)
 ```
 
 ---
