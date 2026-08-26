@@ -11,6 +11,7 @@ ZaumZeug command-line interface reference for harness developers.
 | `HARNESS_LOG_LEVEL` | `DEBUG`, `INFO`, `WARNING`, `ERROR` | Sets SDK and Haystack log verbosity (`DEBUG` ≈ `--verbose`). Use **`INFO`** with `zaumzeug run` to see stage lifecycle (`stage=…`); default `WARNING` hides those INFO lines |
 | `HARNESS_ROOT` | `deploy` | Force production root (`deploy/<name>/`) for **serve**, **mcp**, **acp**, and other root-aware commands (`doctor`, `run`) instead of `usr-harnesses/`. Equivalent to `--deploy`. Use in containers / systemd so the flag is not required on every invocation. Default when unset: `usr-harnesses/` |
 | `HARNESS_LIVE_LLM` | `1` | Opt-in live provider e2e (`pytest tests/e2e`). Unset in default CI — mock profile only |
+| `ZAUMZEUG_TRACE_CAPTURE` | `1` / `0` | Opt-in production trace export on `zaumzeug serve` (`data/traces/*.jsonl`). Overrides `eval.trace_capture.enabled`. Default off. See [Testing — Trace → test case](../guides/testing.md#trace--test-case-journey-c) |
 
 ---
 
@@ -340,7 +341,19 @@ zaumzeug eval example --framework builtin --base-url
 zaumzeug eval example --framework builtin --base-url http://127.0.0.1:1416
 ```
 
-See [Testing — Trace → test case](../guides/testing.md#trace--test-case-journey-c) for the JSONL schema and valset append, [Mode C](../guides/testing.md#mode-c--http-black-box-stagingdebug) for HTTP black-box eval, and [GEPA ↔ DeepEval bridge](../guides/testing.md#gepa--deepeval-bridge-compile--eval--compile) for failed-eval → train / shared valset.
+See [Testing — Trace → test case](../guides/testing.md#trace--test-case-journey-c) for the JSONL schema, production capture (`eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE`), and valset/train merge; [Mode C](../guides/testing.md#mode-c--http-black-box-stagingdebug) for HTTP black-box eval; and [GEPA ↔ DeepEval bridge](../guides/testing.md#gepa--deepeval-bridge-compile--eval--compile) for failed-eval → train / shared valset.
+
+---
+
+## `zaumzeug replay` (deferred)
+
+Re-run a captured tool loop with recorded tool outputs:
+
+```bash
+zaumzeug replay <name> --trace data/traces/run-001.jsonl
+```
+
+**Not available in v1** — deferred (PRD §9). Score a captured turn with `zaumzeug eval --trace` instead; merge rows into `data/val.jsonl` / `data/train.jsonl` with `merge_traces_into_datasets` ([Journey C](../guides/testing.md#trace--test-case-journey-c)).
 
 ---
 
@@ -406,7 +419,7 @@ Note: `doctor --verbose` controls report detail, not log level. For SDK/Haystack
 
 ## Related
 
-- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, `--trace` / Journey C, Mode C `--base-url`, GEPA ↔ DeepEval bridge, deploy eval gates
+- [Testing guide](../guides/testing.md) — mock profile, CI tiers, `HARNESS_LIVE_LLM`, debugpy, `zaumzeug eval`, `--trace` / Journey C ratchet, Mode C `--base-url`, GEPA ↔ DeepEval bridge, deploy eval gates; `zaumzeug replay` deferred
 - [Custom tools](../guides/custom-tools.md) — `tools.custom` Python modules, `ComponentTool` / `Tool`, doctor import errors
 - [Cursor MCP setup](../guides/cursor-mcp.md) — `.cursor/mcp.json` → `http://localhost:{mcp_port}/mcp`; `--cursor-mcp`; `uv` for stdio `tools.mcp`
 - [ACP (Zed / JetBrains)](../guides/acp.md) — `zaumzeug acp` stdio JSON-RPC; Agent Client Protocol ≠ A2A; Cursor uses MCP

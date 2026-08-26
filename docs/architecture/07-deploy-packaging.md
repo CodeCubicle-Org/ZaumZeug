@@ -19,7 +19,7 @@ Requirements: **[PRD E5](../prd.md#epic-e5--deploy-packaging-phase-2)**.
 | `agents/<agent-name>/modules/`, `skills/` | Present | **Excluded** |
 | `agents/<agent-name>/artifacts/` | Working / `current` | **Pinned copy** per agent |
 | `agents/<agent-name>/agents-models.yaml` | Dev | **Included** — merged at packager |
-| `data/`, `eval/` | Present | **Excluded** |
+| `data/`, `eval/` | Present | **Excluded** (runtime may create `data/traces/` on the target when `eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE` is enabled — **E8-S03**; never shipped in the bundle) |
 | `pipelines/` | Haystack YAML | **Included** — ids in `serve.expose` only ✅ (E8-S01) |
 
 **Runtime-reference rules (packager v1):**
@@ -61,6 +61,8 @@ Idempotent — overwrites `deploy/<name>/`. Future: `zaumzeug export` tarball of
 **Implementation (E5-S01, 2026-07-28):** Steps 1 and 3–6 are live: doctor preflight → `write_deploy_bundle` (stripped yaml, pin/copy, merged harness `models.yaml`, `manifest.json`, `README.deploy.md` from `install/templates/deploy/`, target install scripts from `install/`). Tests: `tests/integration/deploy/test_deploy.py` (`e5_s01`). Target install **Done** ([E5-S09a](../stories/epic-stories/49.1-story.md)–[E5-S09c](../stories/epic-stories/49.3-story.md), 2026-07-29) — core, wrappers, `--verify`. Step 7 (Traefik snippets) **Done** ([E8-S02](../stories/epic-stories/59-story.md), 2026-08-21).
 
 **Implementation (E6-S04, 2026-07-28):** `deploy/copy_rules.py` exports `is_excluded_from_deploy()` so `eval/` (and other §10.1 dev-only paths) are marked excluded. Strip helpers (`strip_harness_yaml` / `strip_agent_yaml`) landed with E5-S01. Shared test: `tests/unit/deploy/test_copy_rules.py::test_e5_s02_excludes_eval`.
+
+**Implementation (E8-S03, 2026-08-26):** `data/` stays excluded from the bundle. When production serve enables `eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE`, the target may create `data/traces/` at runtime under `deploy/<name>/`. Copy those files back to the dev tree for Journey C. Docs: [testing.md — Journey C](../../user-docs/guides/testing.md#trace--test-case-journey-c).
 
 ### 10.3 Deploy `manifest.json`
 

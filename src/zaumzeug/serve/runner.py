@@ -66,11 +66,15 @@ class AgentPipelineWrapper(BasePipelineWrapper):
         *,
         router: ModelRouter,
         input_rewrite_template: str | None = None,
+        trace_hook: Any | None = None,
     ) -> None:
         super().__init__()
         self._agent = agent
         self._router = router
         self._input_rewrite_template = input_rewrite_template
+        self._trace_hook = trace_hook
+        if trace_hook is not None:
+            trace_hook.install(self._agent)
 
     def setup(self) -> None:
         self.pipeline = self._agent
@@ -172,6 +176,7 @@ def _register_agent_pipeline(
     router: ModelRouter,
     input_rewrite_template: str | None = None,
     skip_mcp: bool = True,
+    trace_hook: Any | None = None,
 ) -> AgentPipelineWrapper:
     """Register a factory-built agent as a Hayhooks pipeline (OpenAI + /run)."""
     if registry.get(pipeline_name) is not None:
@@ -181,6 +186,7 @@ def _register_agent_pipeline(
         agent,
         router=router,
         input_rewrite_template=input_rewrite_template,
+        trace_hook=trace_hook,
     )
     wrapper.setup()
     wrapper._is_run_api_implemented = True
@@ -283,6 +289,18 @@ def prepare_serve(
         router=router,
     )
 
+    eval_config = (
+        validation.harness_config.eval if validation.harness_config is not None else None
+    )
+    from zaumzeug.eval.ratchet import ProductionTraceHook, trace_capture_enabled
+
+    trace_hook = None
+    if trace_capture_enabled(eval_config):
+        trace_hook = ProductionTraceHook(
+            validation.harness_dir,
+            agent=validation.entry.agent_name,
+        )
+
     chainlit = _chainlit_requested(validation.harness_config)
     if chainlit:
         require_chainlit()
@@ -302,6 +320,7 @@ def prepare_serve(
         agent=built.agent,
         router=router,
         input_rewrite_template=built.input_rewrite_template,
+        trace_hook=trace_hook,
     )
     try:
         exposed_ids = _register_exposed_pipelines(

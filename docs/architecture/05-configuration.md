@@ -99,6 +99,8 @@ Or set eval.framework: builtin for JSONL checks without DeepEval.
 
 **Implementation (E6-S07, 2026-07-28):** GEPA ↔ DeepEval bridge — `eval/gepa_bridge.py` (`append_failed_eval_to_train`, shared val aliases, `deepeval_gepa_metric`); compile loads optional `agents/<agent>/modules/metrics.py`; train/val JSONL schemas documented in user-docs. Tests: `tests/unit/eval/test_gepa_bridge.py`.
 
+**Implementation (E8-S03, 2026-08-26):** Production trace ratchet — `eval.trace_capture.enabled` (or `ZAUMZEUG_TRACE_CAPTURE=1`) wraps serve `Agent.run`; `eval/ratchet.py` merges traces into `data/val.jsonl` / `data/train.jsonl`. Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`. Docs: [testing.md — Journey C](../user-docs/guides/testing.md#trace--test-case-journey-c).
+
 CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 `zaumzeug eval <name> --trace data/traces/run-001.jsonl` scores a captured turn (E6-S05).
 `zaumzeug eval <name> --base-url` (or `--base-url http://host:port`) black-boxes a running serve (E6-S06).
@@ -113,6 +115,7 @@ CLI: `zaumzeug eval <name> --framework builtin` overrides yaml for one run.
 | `eval.judge_model_id` | `models.yaml` key for LLM-as-judge |
 | `eval.confident_ai` | Optional cloud sync (`enabled`, `sync_test_results`); requires `deepeval login` |
 | `eval.base_url` | Optional Mode C — HTTP black-box against running serve (empty = localhost + harness port); staging/debug only |
+| `eval.trace_capture.enabled` | Optional production capture on serve (E8-S03); default off; env `ZAUMZEUG_TRACE_CAPTURE` overrides |
 
 **Suggested metrics by harness type:**
 
@@ -258,6 +261,8 @@ compile:
 **Implementation (E8-S01, 2026-08-21):** `ServeExposeEntry` on `ServeConfig.expose` (string ids or `{id, path}`); removed from `PHASE_GATED_FIELDS`. Serve registers YAML as `POST /{id}/run`; `search_docs` catalog phase **4**. Docs: [pipelines.md](../../user-docs/guides/pipelines.md). Tests: `tests/integration/pipelines/test_serve_expose.py`. `CURRENT_SDK_PHASE` stays **1**.
 
 **Implementation (E8-S02, 2026-08-21):** No `serve.auth` field — `ServeConfig` extra-forbid rejects it. Production auth is Traefik proxy-only. Docs: [production-auth.md](../../user-docs/guides/production-auth.md). Tests: `tests/unit/config/test_schemas.py::test_e8_s02_no_serve_auth_in_schema`.
+
+**Implementation (E8-S03, 2026-08-26):** `EvalTraceCaptureConfig` on `eval.trace_capture` (default off). Serve wraps `Agent.run` when enabled or `ZAUMZEUG_TRACE_CAPTURE=1`. Tests: `tests/unit/config/test_schemas.py::test_e8_s03_eval_trace_capture_schema`, `tests/unit/eval/test_trace_ratchet.py`.
 
 **Implementation (E3-S07, 2026-07-21):** OpenAI REST contract — `AgentPipelineWrapper.run_chat_completion` reads optional request `model_id` and swaps the agent `chat_generator` via stage-scoped `ModelRouter`. Ephemeral-port fixture `tests/integration/conftest.py::ephemeral_serve_url`; tests `tests/integration/test_openai_contract.py` (`-k e3_s07`); `web_fetch` stubbed with `respx` for offline CI. Cross-OS green closed by [E1-S07](../stories/epic-stories/24-story.md) (2026-07-22).
 

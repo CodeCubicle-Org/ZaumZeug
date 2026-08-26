@@ -187,4 +187,6 @@ Override the port with `--port N` or `serve.hayhooks.mcp_port` in the shipped `h
 
 **Never included:** `.env`, `modules/`, `skills/`, `data/`, `eval/`, DSPy/GEPA sources.
 
+Opt-in production capture (`ZAUMZEUG_TRACE_CAPTURE=1`) may create `data/traces/` at runtime beside this bundle; copy those files back to the dev machine for Journey C (`zaumzeug eval --trace` → val/train merge → compile → deploy).
+
 Do **not** edit this folder by hand for releases — re-run `zaumzeug deploy {{harness_name}}` after compile.

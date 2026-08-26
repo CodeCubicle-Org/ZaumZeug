@@ -324,10 +324,14 @@ def test_e6_s02_ac5_default_deepeval_when_omitted(
 
 
 def test_e6_s02_dod_serve_does_not_import_eval() -> None:
-    """DoD: Eval never runs on production serve path."""
+    """DoD: ``zaumzeug eval`` / DeepEval never run on the production serve path.
+
+    E8-S03 may wrap ``Agent.run`` for opt-in JSONL capture (``eval.ratchet``);
+    that is not ``run_eval`` and does not import DeepEval.
+    """
     import zaumzeug.serve.runner as serve_runner
 
     source = inspect.getsource(serve_runner)
-    assert "zaumzeug.eval" not in source
     assert "run_eval" not in source
     assert "require_deepeval" not in source
+    assert "deepeval" not in source.lower()

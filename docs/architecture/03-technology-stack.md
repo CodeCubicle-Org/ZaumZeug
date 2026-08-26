@@ -88,6 +88,8 @@ Canonical package layout. Root `pyproject.toml` exists as of E2-S00 (2026-07-08)
 
 **Implementation (E6-S05, 2026-07-28):** Trace export helper `eval/trace.py` → `data/traces/*.jsonl`; CLI `zaumzeug eval --trace` scores captured turns without re-running the agent. Tests: `tests/unit/eval/test_trace.py`. Journey C: [user-docs/guides/testing.md](../user-docs/guides/testing.md#trace--test-case-journey-c).
 
+**Implementation (E8-S03, 2026-08-26):** Production trace ratchet — `eval/ratchet.py` (`ProductionTraceHook`, Haystack `track_stats` metadata, OTel stub, `merge_traces_into_datasets`). Serve wraps `Agent.run` when `eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1`. Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`.
+
 **Implementation (E6-S06, 2026-07-28):** Mode C HTTP black-box — `zaumzeug eval --base-url` / `eval.base_url` against running serve `/v1/chat/completions` (staging/debug). Tests: `tests/integration/eval/test_http_eval.py`. Docs: [user-docs/guides/testing.md](../user-docs/guides/testing.md#mode-c--http-black-box-stagingdebug).
 
 **Implementation (E6-S07, 2026-07-28):** GEPA ↔ DeepEval bridge — `eval/gepa_bridge.py` (`append_failed_eval_to_train`, shared val aliases, `deepeval_gepa_metric`); compile auto-loads optional `agents/<agent>/modules/metrics.py`. Tests: `tests/unit/eval/test_gepa_bridge.py`. Docs: [testing.md — GEPA ↔ DeepEval bridge](../user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile).

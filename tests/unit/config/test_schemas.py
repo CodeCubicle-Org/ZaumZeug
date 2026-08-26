@@ -395,3 +395,25 @@ def test_e8_s02_no_serve_auth_in_schema(tmp_path: Path) -> None:
     message = str(exc_info.value).lower()
     assert "auth" in message
     assert "extra" in message or "forbidden" in message or "not permitted" in message
+
+
+def test_e8_s03_eval_trace_capture_schema(tmp_path: Path) -> None:
+    """E8-S03: ``eval.trace_capture.enabled`` is a valid optional field (default off)."""
+    data = dict(PHASE1_MINIMAL)
+    data["eval"] = {
+        "framework": "builtin",
+        "valset": "data/val.jsonl",
+        "trace_capture": {"enabled": True},
+    }
+    path = _write_yaml(tmp_path / "harness.yaml", data)
+    config = load_harness(path)
+    assert config.eval is not None
+    assert config.eval.trace_capture is not None
+    assert config.eval.trace_capture.enabled is True
+
+    data_off = dict(PHASE1_MINIMAL)
+    data_off["eval"] = {"framework": "builtin", "valset": "data/val.jsonl"}
+    off_path = _write_yaml(tmp_path / "harness-off.yaml", data_off)
+    off = load_harness(off_path)
+    assert off.eval is not None
+    assert off.eval.trace_capture is None

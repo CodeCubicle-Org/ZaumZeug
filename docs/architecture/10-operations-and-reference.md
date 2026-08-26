@@ -162,9 +162,13 @@ Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace da
 |---|---|
 | Trace export | Haystack run → JSONL in `data/traces/` — **Done** (E6-S05, 2026-07-28) via `zaumzeug.eval.trace.export_haystack_trace` |
 | `zaumzeug eval --trace` | Score captured trace — **Done** (E6-S05) |
-| `zaumzeug replay` (future) | Re-run tool loop with recorded outputs |
+| Production capture | Serve `Agent.run` wrap when `eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1` — **Done** (E8-S03, 2026-08-26) |
+| Dataset merge | `merge_traces_into_datasets` → `data/val.jsonl` / `data/train.jsonl` — **Done** (E8-S03) |
+| `zaumzeug replay` (future) | Re-run tool loop with recorded outputs — **deferred** (PRD §9) |
 
-**Implementation (E6-S05, 2026-07-28):** `eval/trace.py` writes valset-compatible JSONL (`input`, `actual_output`, optional `expected_output` / `retrieval_context`) under `usr-harnesses/<name>/data/traces/`. CLI `zaumzeug eval <name> --trace <path>` scores without re-running the agent. Docs: [user-docs/guides/testing.md](../user-docs/guides/testing.md#trace--test-case-journey-c). Tests: `tests/unit/eval/test_trace.py`. Production auto-append remains [E8-S03](../stories/epic-stories/60-story.md).
+**Implementation (E6-S05, 2026-07-28):** `eval/trace.py` writes valset-compatible JSONL (`input`, `actual_output`, optional `expected_output` / `retrieval_context`) under `usr-harnesses/<name>/data/traces/`. CLI `zaumzeug eval <name> --trace <path>` scores without re-running the agent. Docs: [user-docs/guides/testing.md](../user-docs/guides/testing.md#trace--test-case-journey-c). Tests: `tests/unit/eval/test_trace.py`.
+
+**Implementation (E8-S03, 2026-08-26):** Production auto-capture + dataset ratchet — `eval/ratchet.py`; serve hook; merge into val/train JSONL; Journey C eval → compile → deploy. `zaumzeug replay --trace` deferred. Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`.
 
 ### 13.5 Phase mapping
 
@@ -173,7 +177,7 @@ Run harness eval: `zaumzeug eval <harness>`, `zaumzeug eval <harness> --trace da
 | 1 | doctor, config unit tests, serve `--dry-run` ✅ (E2-S05), structured logging ✅ (E2-S06), mock profile ✅ (E3-S05), ModelRouter ✅ (E3-S01), fixture harness + localhost security ✅ (E3-S06), OpenAI REST contract ✅ (E3-S07) |
 | 2 | compile `--dry-run` (**E4-S06 Done** — `tests/integration/compile/test_compile_dry_run.py`), export golden tests (**E4-S03a Done** — `tests/compile/`), Pattern B adapter (**E4-S04 Done** — `tests/unit/compile/test_gepa_adapter.py`), `zaumzeug eval` (**E6-S02 Done** — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**E6-S04 Done** — `tests/integration/eval/test_deepeval_scaffold.py`), trace → `LLMTestCase` (**E6-S05 Done** — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**E6-S06 Done** — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**E6-S07 Done** — `tests/unit/eval/test_gepa_bridge.py`) |
 | 3 | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`, Starlette `TestClient`); MCP from deploy ✅ (**E7-S06** — `tests/integration/mcp/test_mcp_deploy.py`); custom tool loader ✅ (**E7-S02** — `tests/unit/runtime/tools/test_custom_loader.py`, doctor `custom_tools`); Cursor MCP setup ✅ (**E7-S03**); Chainlit `/chat` ✅ (**E7-S04** — `tests/integration/serve/test_chainlit.py`); ACP stdio ✅ (**E7-S05** — `tests/integration/acp/test_acp_stdio.py`); extended builtins ✅ (**E7-S07** — `test_extended_builtins.py`, `test_read_file.py`); web layouts ✅ (**E7-S08** — `tests/unit/docs/test_web_deployment.py`); tool correctness eval when DeepEval present |
-| 4 | Pipeline exposure / RAG ✅ (**E8-S01** — `serve.expose`, `POST /{id}/run`, `search_docs`; `tests/integration/pipelines/test_serve_expose.py`); Run reliability ✅ (**E8-S07** — retry / JSON / stage logs / `phase_gated_tools`; serve path follow-up); `@observe` on runtime; Confident AI sync; trace → dataset → GEPA ratchet |
+| 4 | Pipeline exposure / RAG ✅ (**E8-S01** — `serve.expose`, `POST /{id}/run`, `search_docs`; `tests/integration/pipelines/test_serve_expose.py`); Run reliability ✅ (**E8-S07** — retry / JSON / stage logs / `phase_gated_tools`; serve path follow-up); production trace → dataset ratchet ✅ (**E8-S03** — `eval/ratchet.py`, `test_trace_ratchet.py`, `test_journey_c.py`); `@observe` on runtime; Confident AI sync |
 
 Also compatible: Promptfoo, Ragas, custom pytest — no DeepEval lock-in.
 
@@ -253,7 +257,7 @@ HARNESS_LIVE_LLM=1 pytest tests/e2e -v
 
 #### Starting eval cases
 
-Begin with **20–50 cases from real failures** (production bugs, doctor errors, bad compile exports) — not synthetic thousand-case suites on day one. Append rows from traces (`data/traces/` → `zaumzeug eval --trace`) as the ratchet matures ([§13.4](#134-trace-capture-phase-2), [E8-S03](../stories/08-epic.md#e8-s03-trace-dataset-ratchet)).
+Begin with **20–50 cases from real failures** (production bugs, doctor errors, bad compile exports) — not synthetic thousand-case suites on day one. Append rows from traces (`data/traces/` → `zaumzeug eval --trace` / `merge_traces_into_datasets`) as the ratchet matures ([§13.4](#134-trace-capture-phase-2), [E8-S03](../stories/epic-stories/60-story.md) ✅).
 
 ---
 

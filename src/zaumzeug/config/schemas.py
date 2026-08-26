@@ -475,6 +475,18 @@ class EvalConfidentAiConfig(BaseModel):
     sync_test_results: bool = True
 
 
+class EvalTraceCaptureConfig(BaseModel):
+    """Optional production trace capture under ``eval.trace_capture`` (E8-S03).
+
+    Off by default. When enabled (or ``ZAUMZEUG_TRACE_CAPTURE=1``), serve wraps
+    ``Agent.run`` and writes JSONL under ``data/traces/``.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool = False
+
+
 class EvalConfig(BaseModel):
     """Optional ``eval`` section of ``harness.yaml`` (Architecture §6.3 / E6-S02).
 
@@ -483,6 +495,9 @@ class EvalConfig(BaseModel):
     Optional ``base_url`` enables Mode C (HTTP black-box against a running
     ``zaumzeug serve``) — staging/debug only (E6-S06). Empty string uses
     ``http://127.0.0.1:<serve.hayhooks.port>``.
+
+    Optional ``trace_capture`` enables the production trace → dataset ratchet
+    (E8-S03). Default off (privacy). Env ``ZAUMZEUG_TRACE_CAPTURE`` overrides.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -493,6 +508,7 @@ class EvalConfig(BaseModel):
     judge_model_id: str | None = None
     confident_ai: EvalConfidentAiConfig | None = None
     base_url: str | None = None
+    trace_capture: EvalTraceCaptureConfig | None = None
 
     @field_validator("valset")
     @classmethod

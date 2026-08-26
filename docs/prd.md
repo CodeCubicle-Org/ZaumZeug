@@ -1,7 +1,7 @@
 # ZaumZeug — Product Requirements Document
 
-**Last updated:** 2026-08-21 (E8-S02 production auth — Traefik proxy-only)
-**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S08 **Done** (2026-08-21); E8-S01 **Done** (2026-08-21); E8-S02 **Done** (2026-08-21); next E8-S03
+**Last updated:** 2026-08-26 (E8-S03 trace → dataset ratchet)
+**Status:** Phase 1 complete (E2 + E3 + E1-S01–S07); E1-S08 deferred (post–PyPI publish); Phase 2 complete (E4 / E6 / E5 **Done**); E8-S07 **Done** (2026-08-01); E7-S01–S08 **Done** (2026-08-21); E8-S01 **Done** (2026-08-21); E8-S02 **Done** (2026-08-21); E8-S03 **Done** (2026-08-26); next E8-S05
 
 **Related:** [Architecture](architecture.md) · [Ideation archive](ideation-stage.md) · [Stories](stories/00-README.md)
 
@@ -110,7 +110,9 @@ production trace → add to valset → zaumzeug eval (optional) → zaumzeug com
 
 **Implementation (E6-S05, 2026-07-28):** Manual/API export via `zaumzeug.eval.trace.export_haystack_trace` → `data/traces/`; score with `zaumzeug eval --trace`; append with `append_trace_to_valset`. Walkthrough: [user-docs/guides/testing.md](user-docs/guides/testing.md#trace--test-case-journey-c).
 
-**Implementation (E6-S07, 2026-07-28):** Failed eval → `data/train.jsonl` via `append_failed_eval_to_train`; shared val aliases; optional DeepEval GEPA metric in `modules/metrics.py`. Compile → eval → compile loop: [testing.md — GEPA ↔ DeepEval bridge](user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile). Production auto-capture remains [E8-S03](stories/epic-stories/60-story.md).
+**Implementation (E6-S07, 2026-07-28):** Failed eval → `data/train.jsonl` via `append_failed_eval_to_train`; shared val aliases; optional DeepEval GEPA metric in `modules/metrics.py`. Compile → eval → compile loop: [testing.md — GEPA ↔ DeepEval bridge](user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile).
+
+**Implementation (E8-S03, 2026-08-26):** Production auto-capture on serve (`eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1`) → `data/traces/`; `merge_traces_into_datasets` appends `data/val.jsonl` / `data/train.jsonl`; then eval → compile → deploy. `zaumzeug replay --trace` deferred (PRD §9). Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`.
 
 ### 7.4 User installation guide (content for README — Phase 1)
 
@@ -389,7 +391,7 @@ Epic IDs map to phases. Features use `E#.#` IDs for story parent links.
 |---|---|---|
 | E8.1 | Pipeline exposure | **Done** (E8-S01, 2026-08-21). User `pipelines/` exposed via `serve.expose`; RAG retriever → prompt → generator documented; `POST /{id}/run`; `search_docs` attaches when a RAG pipeline is listed. Tests: `tests/integration/pipelines/test_serve_expose.py`. Docs: [pipelines.md](user-docs/guides/pipelines.md). |
 | E8.2 | Production auth | **Done** (E8-S02, 2026-08-21). Documented **Traefik proxy-only** pattern for production serve (TLS termination, bearer/API-key or ForwardAuth middleware in front of Hayhooks); ZaumZeug does **not** implement in-process auth in v1; ops guide in `README.deploy.md` + [production-auth.md](user-docs/guides/production-auth.md). Tests: `tests/unit/docs/test_production_auth.py`, `test_e8_s02_ac6_no_secrets_in_bundle`. |
-| E8.3 | Trace → dataset ratchet | **AC:** Production traces append to dataset; feed compile loop. Future: `zaumzeug replay <name> --trace` (recorded tool outputs). |
+| E8.3 | Trace → dataset ratchet | **Done** (E8-S03, 2026-08-26). Production traces append to JSONL under `data/` (`eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE`); merge into `data/val.jsonl` / `data/train.jsonl`; feed eval → compile → deploy. `zaumzeug replay <name> --trace` remains **deferred** (PRD §9). Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`. Docs: [testing.md — Journey C](user-docs/guides/testing.md#trace--test-case-journey-c). |
 | E8.4 | Optional A2A | **AC:** `serve.a2a: true` hosts agent card (if prioritized). |
 | E8.5 | Dockerfile template | **AC:** Optional generated `deploy/<name>/Dockerfile`. |
 | E8.6 | DeepEval production observe | **AC:** Optional `@observe` + Confident AI sync (opt-in). |
@@ -405,11 +407,11 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 |---|---|---|
 | `zaumzeug init` | 1 | E1 |
 | `zaumzeug doctor` | 1 | E2 |
-| `zaumzeug serve [--deploy]` | 1–4 | E3, E5 (**E5-S03 Done** 2026-07-28 — production root; **E5-S04 Done** — `HARNESS_ROOT=deploy`); **E8.1 Done** (E8-S01, 2026-08-21) — `serve.expose` → `POST /{id}/run` |
+| `zaumzeug serve [--deploy]` | 1–4 | E3, E5 (**E5-S03 Done** 2026-07-28 — production root; **E5-S04 Done** — `HARNESS_ROOT=deploy`); **E8.1 Done** (E8-S01, 2026-08-21) — `serve.expose` → `POST /{id}/run`; **E8.3 Done** (E8-S03, 2026-08-26) — opt-in `eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE` |
 | `zaumzeug run [--deploy]` | 1–4 | E3, E5 (`HARNESS_ROOT=deploy` via E5-S04); **E8.7 Done** (E8-S07, 2026-08-01) — retry / JSON / stage logs on run path; **E8.1 Done** (E8-S01, 2026-08-21) — `pipeline:` stages + `serve.expose` |
 | `zaumzeug compile [--workflow-diagram-only]` | 2 | E4 |
 | `zaumzeug deploy` | 2 | E5 |
-| `zaumzeug eval` | 2 | E6 (optional) |
+| `zaumzeug eval` | 2–4 | E6 (optional); **E8.3 Done** (E8-S03) — production traces feed val/train via `merge_traces_into_datasets` |
 | `zaumzeug mcp` | 3 | E7 **Done** E7-S01 (2026-08-14); deploy bundle **Done** E7-S06 (2026-08-21) — `--deploy` / `HARNESS_ROOT=deploy` same root as serve |
 | `zaumzeug acp` | 3 | E7 **Done** E7-S05 (2026-08-21); `HARNESS_ROOT=deploy` / `--deploy` honour E5-S04 |
 
@@ -425,7 +427,7 @@ Command semantics, source roots (`usr-harnesses/` vs `deploy/`), Hayhooks layeri
 | **1** | SDK skeleton, install, multi-agent serve + serial `run`, example harness | E1, E2, E3 — [Architecture topics](architecture/00-README.md#architecture-topics) |
 | **2** | Compile, deploy, optional eval | E4, E5, E6 — **E4** **Done** 2026-07-28; **E6** **Done** 2026-07-28 ([E5-S06](stories/epic-stories/46-story.md) early with E6-S03); **E5** **Done** 2026-07-29 ([E5-S01](stories/epic-stories/41-story.md)–[E5-S09c](stories/epic-stories/49.3-story.md)). Phase 2 remaining work is Phase 3+ (E7/E8) only from this epic set. |
 | **3** | MCP, ACP, custom tools, Chainlit | E7 |
-| **4** | RAG, auth, production ratchet, A2A | E8 — **E8.7 Done** (E8-S07, 2026-08-01; pull-forward after E5); **E8.1 Done** (E8-S01, 2026-08-21; pipeline exposure / RAG); **E8.2 Done** (E8-S02, 2026-08-21; Traefik proxy-only auth) |
+| **4** | RAG, auth, production ratchet, A2A | E8 — **E8.7 Done** (E8-S07, 2026-08-01; pull-forward after E5); **E8.1 Done** (E8-S01, 2026-08-21; pipeline exposure / RAG); **E8.2 Done** (E8-S02, 2026-08-21; Traefik proxy-only auth); **E8.3 Done** (E8-S03, 2026-08-26; trace → dataset ratchet) |
 
 ---
 

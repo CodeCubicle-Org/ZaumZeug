@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Audience** | Harness developers |
-| **Last updated** | 2026-08-21 (E7-S06 MCP `--deploy`) |
+| **Last updated** | 2026-08-26 (E8-S03 production trace capture) |
 
 After [installation](installation.md), use this guide to add harnesses beyond the shipped `example` and to understand the project layout.
 
@@ -44,7 +44,7 @@ This creates `usr-harnesses/my-agent/` from the Phase 1 template:
 | **`agents/agent/`** | Runtime via `system_prompt`, mock `agents-models.yaml` |
 | **`models.yaml`** | Optional harness-wide aliases (comments by default) |
 | **`eval/`** *(with `--with-eval`)* | Optional DeepEval `metrics.py` + `test_*.py` (dev-only; not shipped in deploy) |
-| **`data/traces/`** | Captured Haystack turns (JSONL) for `zaumzeug eval --trace` — see [Testing — Journey C](../guides/testing.md#trace--test-case-journey-c) |
+| **`data/traces/`** | Captured Haystack turns (JSONL) for `zaumzeug eval --trace`; opt-in auto-capture on serve via `eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE` (E8-S03) — see [Testing — Journey C](../guides/testing.md#trace--test-case-journey-c) |
 
 The harness name must be a single safe path segment (letters, digits, `_`, `-`; no `..` or separators). If the folder already exists, init fails unless you pass `--force` (overwrites the folder).
 

@@ -88,6 +88,8 @@ usr-harnesses/<harness-name>/
 
 **Implementation (E6-S05, 2026-07-28):** Haystack runs export to `data/traces/*.jsonl` via `zaumzeug.eval.trace.export_haystack_trace`; score with `zaumzeug eval --trace`. See [user-docs/guides/testing.md](../user-docs/guides/testing.md#trace--test-case-journey-c).
 
+**Implementation (E8-S03, 2026-08-26):** Production capture on serve (`eval.trace_capture` / `ZAUMZEUG_TRACE_CAPTURE`); `merge_traces_into_datasets` appends val + train JSONL. Tests: `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`.
+
 **Implementation (E6-S06, 2026-07-28):** Mode C HTTP black-box — `zaumzeug eval --base-url` / `eval.base_url` against a running serve `/v1/chat/completions` (staging/debug). See [user-docs/guides/testing.md](../user-docs/guides/testing.md#mode-c--http-black-box-stagingdebug).
 
 **Implementation (E6-S07, 2026-07-28):** GEPA ↔ DeepEval bridge — failed eval → `data/train.jsonl` via `eval/gepa_bridge.append_failed_eval_to_train`; shared val aliases; optional DeepEval GEPA metric in `agents/<agent>/modules/metrics.py` (compile auto-loads `metric`). Example researcher ships the template. See [testing.md — GEPA ↔ DeepEval bridge](../user-docs/guides/testing.md#gepa--deepeval-bridge-compile--eval--compile).
@@ -106,9 +108,10 @@ usr-harnesses/<harness-name>/
 | Custom pipelines | `pipelines/` | YAML or `PipelineWrapper`; `serve.expose` in `harness.yaml` |
 | GEPA metrics | `agents/<agent-name>/modules/metrics.py` | Textual feedback per agent; optional DeepEval `.measure()` via `deepeval_gepa_metric` (E6-S07) |
 | DeepEval tests | `eval/test_*.py` | Harness-level; may target specific agents |
-| Captured traces | `data/traces/*.jsonl` | Export Haystack runs; score with `zaumzeug eval --trace` (E6-S05) |
+| Captured traces | `data/traces/*.jsonl` | Export Haystack runs; score with `zaumzeug eval --trace` (E6-S05); production capture + dataset merge (E8-S03) |
 | Mode C HTTP eval | `zaumzeug eval --base-url` | Black-box a running serve `/v1/chat/completions` (E6-S06; staging/debug) |
 | Failed eval → train | `zaumzeug.eval.gepa_bridge.append_failed_eval_to_train` | Append failing cases to `data/train.jsonl` for next compile (E6-S07) |
+| Trace → dataset ratchet | `zaumzeug.eval.ratchet.merge_traces_into_datasets` | Production traces → `data/val.jsonl` / `data/train.jsonl` (E8-S03) |
 | Prompts / skills | `agents/<agent-name>/prompts/`, `skills/` | Per-agent; GEPA-optimized |
 | Lifecycle hooks | `agents/<agent-name>/hooks.py` | Per-agent sensors |
 

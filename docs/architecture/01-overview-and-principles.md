@@ -107,9 +107,9 @@ Each workflow stage runs **one Haystack `Agent` loop** for that step. The harnes
 | Tool interfaces | Haystack | `ComponentTool`, `MCPToolset`, Hayhooks MCP server |
 | **Guides** (feedforward) | DSPy → GEPA → Haystack | Optimized instructions/demos exported to `system_prompt`, Jinja templates, tool descriptions; **optional** `prompts/input_rewrite.md` for compile-time-optimized user-input preprocessing (**export** E4-S03a ✅ · **runtime preprocess** E4-S03b ✅) |
 | **Sensors** (feedback) | GEPA metric (+ optional DeepEval in `modules/metrics.py`) ✅ (E6-S07) | Score + **textual feedback** for compile |
-| Regression testing | Optional DeepEval (or Promptfoo / custom pytest) | `[eval]` extra ✅ (E6-S01); `zaumzeug eval` ✅ (E6-S02); `eval/test_*.py` ✅ (E6-S04); trace → test case ✅ (E6-S05); Mode C HTTP `--base-url` ✅ (E6-S06) |
+| Regression testing | Optional DeepEval (or Promptfoo / custom pytest) | `[eval]` extra ✅ (E6-S01); `zaumzeug eval` ✅ (E6-S02); `eval/test_*.py` ✅ (E6-S04); trace → test case ✅ (E6-S05); Mode C HTTP `--base-url` ✅ (E6-S06); production dataset ratchet ✅ (E8-S03) |
 | Serving | Haystack + Hayhooks | REST, MCP, optional ACP/A2A; production HTTP **proxy-only** (Traefik ✅ E8-S02) |
-| Observability | Haystack `track_stats`; optional OTel (Phase 4); DeepEval `@observe` if opted in | Trace export ✅ (E6-S05); production dataset ratchet → E8-S03 |
+| Observability | Haystack `track_stats`; optional OTel (Phase 4); DeepEval `@observe` if opted in | Trace export ✅ (E6-S05); production dataset ratchet ✅ (E8-S03, 2026-08-26) |
 
 ### 2.4 Industry patterns
 

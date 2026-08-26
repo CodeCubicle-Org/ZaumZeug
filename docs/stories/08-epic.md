@@ -5,8 +5,8 @@
 | **Document** | Epic E8 user stories |
 | **File** | `docs/stories/08-epic.md` |
 | **Created** | 2026-07-04 |
-| **Last modified** | 2026-08-21 (E8-S02 production auth) |
-| **Status** | Active (E8-S07 / E8-S01 / E8-S02 Done) |
+| **Last modified** | 2026-08-26 (E8-S03 trace → dataset ratchet) |
+| **Status** | Active (E8-S07 / E8-S01 / E8-S02 / E8-S03 Done) |
 | **Build order** | **8 of 8** |
 | **Related** | [PRD](../prd.md) · [Architecture](../architecture.md) · [Index](00-README.md) |
 
@@ -28,7 +28,7 @@
 1. **E8-S07** — Workflow run reliability and stage transparency ✅ *(2026-08-01; P0 pull-forward)*
 2. **E8-S01** — Pipeline exposure / RAG ✅ *(2026-08-21)*
 3. **E8-S02** — Production auth ✅ *(2026-08-21; Traefik proxy-only)*
-4. **E8-S03** — Trace → dataset ratchet
+4. **E8-S03** — Trace → dataset ratchet ✅ *(2026-08-26)*
 5. **E8-S05** — Dockerfile template
 6. **E8-S06** — DeepEval observe
 7. **E8-S04** — A2A *(if open #5 resolves to Phase 4)*
@@ -177,6 +177,7 @@ Per [Story verification](00-README.md#story-verification-required). **Docs-only*
 | **Feature** | E8.3 |
 | **Persona** | Harness developer |
 | **Priority** | P1 |
+| **Status** | Done (2026-08-26) |
 
 ### User story
 
@@ -190,15 +191,15 @@ As a **harness developer**, I want production traces to feed back into datasets,
 
 ### Acceptance criteria
 
-- [ ] **AC-1** Production traces append to dataset (JSONL under `data/`)
-- [ ] **AC-2** Feeds compile loop: trace → valset → eval → compile → deploy
-- [ ] **AC-3** Future: `harness replay <name> --trace` documented as deferred ([PRD §9](../prd.md#9-cli-surface-epic-mapping))
+- [x] **AC-1** Production traces append to dataset (JSONL under `data/`)
+- [x] **AC-2** Feeds compile loop: trace → valset → eval → compile → deploy
+- [x] **AC-3** Future: `harness replay <name> --trace` documented as deferred ([PRD §9](../prd.md#9-cli-surface-epic-mapping))
 
 ### Implementation tasks (build)
 
-- [ ] Production trace export hook (Haystack `track_stats` or OTel stub)
-- [ ] Helper to merge traces into `data/val.jsonl` / `data/train.jsonl`
-- [ ] Document ratchet workflow in user-docs
+- [x] Production trace export hook (Haystack `track_stats` or OTel stub)
+- [x] Helper to merge traces into `data/val.jsonl` / `data/train.jsonl`
+- [x] Document ratchet workflow in user-docs
 
 ### Verification (after build)
 
@@ -208,15 +209,19 @@ Per [Story verification](00-README.md#story-verification-required). Test file he
 |---|---|
 | AC-1 | `tests/unit/eval/test_trace_ratchet.py::test_e8_s03_ac1_production_trace_appends_jsonl` |
 | AC-2 | `tests/integration/eval/test_journey_c.py::test_e8_s03_ac2_trace_to_compile_loop` |
-| AC-3 | **manual:** user-docs notes replay as deferred |
+| AC-3 | `tests/unit/eval/test_trace_ratchet.py::test_e8_s03_ac3_replay_deferred_documented` |
 
-- [ ] Every AC row above has a passing test or documented manual exception
-- [ ] `pytest tests/unit/eval/test_trace_ratchet.py -v` passes
+- [x] Every AC row above has a passing test or documented manual exception
+- [x] `pytest tests/unit/eval/test_trace_ratchet.py tests/integration/eval/test_journey_c.py -v` passes
 
 ### Definition of done
 
-- [ ] Journey C complete with production trace source
-- [ ] Verification checklist complete; all ACs traced to tests
+- [x] Journey C complete with production trace source
+- [x] Verification checklist complete; all ACs traced to tests
+
+### Implementation notes (2026-08-26)
+
+- `eval/ratchet.py`: production `Agent.run` hook + `merge_traces_into_datasets`. Opt-in via `eval.trace_capture.enabled` / `ZAUMZEUG_TRACE_CAPTURE=1`. `zaumzeug replay --trace` deferred. Full suite 2026-08-26: **365 passed, 2 skipped**.
 
 ---
 

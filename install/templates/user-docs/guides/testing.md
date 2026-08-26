@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | **Audience** | Harness developers · SDK contributors |
-| **Last updated** | 2026-08-21 (E8-S02 production auth docs tests) |
+| **Last updated** | 2026-08-26 (E8-S03 production trace → dataset ratchet) |
 
 ZaumZeug separates **fast deterministic tests** (config, serve wiring, REST shape) from **optional quality evals** (LLM output regression). Default CI uses the **`mock`** model profile — no API keys required.
 
-DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra. Optional harness `eval/` pytest files (`zaumzeug init --with-eval` or the example harness) run with `deepeval test run` (**Done** E6-S04). Captured Haystack turns export to `data/traces/` and score with `zaumzeug eval --trace` (**Done** E6-S05). Mode C black-boxes a running serve with `zaumzeug eval --base-url` (**Done** E6-S06) — staging/debug only. Failed eval rows feed GEPA training via `append_failed_eval_to_train`; shared `val.jsonl` and optional DeepEval GEPA metrics close the loop (**Done** E6-S07). Production bundles from `zaumzeug deploy` are served with `zaumzeug serve <name> --deploy` (**Done** E5-S03 — `tests/integration/deploy/test_serve_deploy.py`) or as MCP with `zaumzeug mcp <name> --deploy` (**Done** E7-S06 — `tests/integration/mcp/test_mcp_deploy.py`).
+DeepEval is an **optional** package via `pip install "zaumzeug[eval]"` (**Done** E6-S01) — not part of the core or `[dev]` install. Importing `zaumzeug.eval` never requires DeepEval; calling DeepEval APIs without the extra raises an install hint. The `zaumzeug eval` CLI is available (**Done** E6-S02): builtin JSONL checks need no extra; `eval.framework: deepeval` (the default when `framework` is omitted) requires the `[eval]` extra. Optional harness `eval/` pytest files (`zaumzeug init --with-eval` or the example harness) run with `deepeval test run` (**Done** E6-S04). Captured Haystack turns export to `data/traces/` and score with `zaumzeug eval --trace` (**Done** E6-S05). Mode C black-boxes a running serve with `zaumzeug eval --base-url` (**Done** E6-S06) — staging/debug only. Failed eval rows feed GEPA training via `append_failed_eval_to_train`; shared `val.jsonl` and optional DeepEval GEPA metrics close the loop (**Done** E6-S07). Production serve can capture Haystack turns to `data/traces/` (`eval.trace_capture.enabled` or `ZAUMZEUG_TRACE_CAPTURE=1`); merge those JSONL rows into `data/val.jsonl` / `data/train.jsonl` and run eval → compile → deploy (**Done** E8-S03). Production bundles from `zaumzeug deploy` are served with `zaumzeug serve <name> --deploy` (**Done** E5-S03 — `tests/integration/deploy/test_serve_deploy.py`) or as MCP with `zaumzeug mcp <name> --deploy` (**Done** E7-S06 — `tests/integration/mcp/test_mcp_deploy.py`).
 
 For SDK design detail, see internal `docs/architecture/10-operations-and-reference.md` §13 and `docs/architecture/03-technology-stack.md` §4.5.
 
@@ -245,7 +245,20 @@ production failure → data/traces/*.jsonl → zaumzeug eval --trace → append 
 → zaumzeug eval (optional) → zaumzeug compile → zaumzeug deploy → redeploy
 ```
 
-**Export** (from Python after `Agent.run`):
+**Enable production capture** (opt-in; off by default so live traffic is not written to disk unless you ask):
+
+```yaml
+# harness.yaml
+eval:
+  framework: builtin
+  valset: data/val.jsonl
+  trace_capture:
+    enabled: true
+```
+
+Or set `ZAUMZEUG_TRACE_CAPTURE=1` on the serve process (overrides yaml). Serve wraps Haystack `Agent.run`, records lightweight `track_stats` (message count, tools) plus an in-memory OpenTelemetry stub (no `opentelemetry` package), and writes one JSONL file per turn under `usr-harnesses/<name>/data/traces/` (or `deploy/<name>/data/traces/` when serving `--deploy` — created at runtime; `data/` is never in the bundle). A failed export is logged and **never** fails the user request.
+
+**Export** (from Python after `Agent.run`, or automatically when capture is on):
 
 ```python
 from zaumzeug.eval.trace import export_haystack_trace, append_trace_to_valset
@@ -286,7 +299,31 @@ zaumzeug eval example --framework builtin --trace data/traces/run-001.jsonl
 append_trace_to_valset(path, harness_dir / "data" / "val.jsonl")
 ```
 
-Automatic production capture hooks land in Phase 4 ([E8-S03](../../docs/stories/epic-stories/60-story.md)). Until then, call `export_haystack_trace` from a failing session or a small debug script.
+**Merge into val + train** (ratchet helper — overlay the gold answer, then append both JSONL files):
+
+```python
+from zaumzeug.eval.ratchet import merge_traces_into_datasets
+
+merge_traces_into_datasets(
+    path,
+    valset_path=harness_dir / "data" / "val.jsonl",
+    train_path=harness_dir / "agents" / "researcher" / "data" / "train.jsonl",
+    expected_output="cite the failing stage",
+)
+```
+
+Then close Journey C on the **dev** machine (copy production `data/traces/` back if the capture ran on a target host):
+
+```bash
+zaumzeug eval example --framework builtin
+zaumzeug compile example
+zaumzeug deploy example
+zaumzeug serve example --deploy
+```
+
+`zaumzeug replay <name> --trace` (re-run the tool loop with recorded tool outputs) is **deferred** — not in v1 (PRD §9). Score captured turns with `zaumzeug eval --trace` instead.
+
+SDK tests: `pytest tests/unit/eval/test_trace_ratchet.py tests/integration/eval/test_journey_c.py -v`.
 
 ### GEPA ↔ DeepEval bridge (compile → eval → compile)
 
@@ -507,7 +544,7 @@ zaumzeug compile example --dry-run
 | **1** | `doctor`, mock profile, unit + integration pyramid, REST contract, cross-platform CI |
 | **2** | Compile `--dry-run` (**Done** E4-S06 — `tests/integration/compile/test_compile_dry_run.py`), export golden snapshots (**Done** E4-S03a — `tests/compile/`), runtime `input_rewrite` preprocess (**Done** E4-S03b — `tests/integration/compile/test_compile_serve.py`), Pattern B adapter (**Done** E4-S04 — `tests/unit/compile/test_gepa_adapter.py`), artifact rollback / pin (**Done** E4-S07 — `tests/integration/compile/test_rollback.py`, `test_e4_s07_ac2_*`, `tests/integration/deploy/test_deploy_pin.py`), workflow diagram (**Done** E4-S08 — `tests/unit/compile/test_workflow_diagram.py`), `zaumzeug eval` (**Done** E6-S02 — `tests/unit/eval/test_runner.py`), `eval/` pytest scaffold (**Done** E6-S04 — `tests/integration/eval/test_deepeval_scaffold.py`), trace → eval case (**Done** E6-S05 — `tests/unit/eval/test_trace.py`), Mode C HTTP eval (**Done** E6-S06 — `tests/integration/eval/test_http_eval.py`), GEPA ↔ DeepEval bridge (**Done** E6-S07 — `tests/unit/eval/test_gepa_bridge.py`), `zaumzeug deploy` packager (**Done** E5-S01 — `tests/integration/deploy/test_deploy.py`), deploy copy matrix (**Done** E5-S02 — `tests/unit/deploy/test_copy_rules.py`, `tests/integration/deploy/test_deploy_golden.py`), serve `--deploy` (**Done** E5-S03 — `tests/integration/deploy/test_serve_deploy.py`, 4 passed / 0 skipped), `HARNESS_ROOT=deploy` (**Done** E5-S04 — `tests/unit/deploy/test_harness_root.py`, 2 passed / 0 skipped), target ship workflow docs (**Done** E5-S05 — `tests/integration/deploy/test_target_install.py` + `test_e5_s05_ac5_no_env_in_bundle`, 5 passed / 0 skipped), deploy git policy (**Done** E5-S07 — `tests/unit/install/test_scaffolding.py::test_e5_s07_ac1_gitignore_deploy_and_artifacts`, 6 passed / 0 skipped in file), deploy platform policy (**Done** E5-S08 — `tests/integration/deploy/test_deploy_golden.py::test_e5_s08_*`, 3 passed / 0 skipped in file; Linux CI `deploy` → `serve --deploy` smoke), target install core (**Done** E5-S09a — `tests/integration/deploy/test_target_install.py` `e5_s09_*`, 5 passed / 0 skipped), target install wrappers (**Done** E5-S09b — `test_e5_s09b_*` + `test_e5_s09_ac7_scripts_in_bundle`, 3 passed / 0 skipped) |
 | **3** | MCP integration tests ✅ (**E7-S01** — `tests/integration/mcp/`); custom tool loader ✅ (**E7-S02** — `tests/unit/runtime/tools/test_custom_loader.py`, doctor `custom_tools`); Cursor MCP setup ✅ (**E7-S03** — `test_e7_s03_ac2_*`, `test_e7_s03_ac3_*`); Chainlit `/chat` ✅ (**E7-S04** — `tests/integration/serve/test_chainlit.py`); ACP stdio ✅ (**E7-S05** — `tests/integration/acp/test_acp_stdio.py`); MCP from deploy ✅ (**E7-S06** — `tests/integration/mcp/test_mcp_deploy.py`); extended builtins ✅ (**E7-S07** — `test_extended_builtins.py`, `test_read_file.py`); web layouts ✅ (**E7-S08** — `tests/unit/docs/test_web_deployment.py`); tool-correctness eval |
-| **4** | Pipeline exposure ✅ (**E8-S01** — `tests/integration/pipelines/test_serve_expose.py`); run reliability ✅ (**E8-S07**); production trace ratchet ([E8-S03](../../docs/stories/epic-stories/60-story.md)); `@observe` / Confident AI sync |
+| **4** | Pipeline exposure ✅ (**E8-S01** — `tests/integration/pipelines/test_serve_expose.py`); run reliability ✅ (**E8-S07**); production trace ratchet ✅ (**E8-S03** — `tests/unit/eval/test_trace_ratchet.py`, `tests/integration/eval/test_journey_c.py`); `@observe` / Confident AI sync |
 
 ---
 

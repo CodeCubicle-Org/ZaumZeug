@@ -4,8 +4,9 @@ Traces land under ``usr-harnesses/<name>/data/traces/`` and share the valset
 field names (``input``, ``actual_output``, optional ``expected_output`` /
 ``retrieval_context``) so a scored failure can be appended to ``eval.valset``.
 
-Production auto-capture hooks land later ([E8-S03](../../docs/stories/epic-stories/60-story.md));
-this module is the export/load contract used by ``zaumzeug eval --trace``.
+Production auto-capture (serve ``Agent.run`` wrap + dataset merge) lives in
+:mod:`zaumzeug.eval.ratchet` (E8-S03). This module is the export/load contract
+used by ``zaumzeug eval --trace``.
 """
 
 from __future__ import annotations
@@ -183,6 +184,7 @@ def export_haystack_trace(
     traces_dir: Path | str | None = None,
     filename: str | None = None,
     captured_at: datetime | None = None,
+    extra: Mapping[str, Any] | None = None,
 ) -> Path:
     """Write one Haystack run as JSONL under ``data/traces/`` (AC-1).
 
@@ -210,6 +212,7 @@ def export_haystack_trace(
         retrieval_context=retrieval_context,
         agent=agent,
         captured_at=stamp,
+        extra=extra,
     )
     try:
         out_path.write_text(
